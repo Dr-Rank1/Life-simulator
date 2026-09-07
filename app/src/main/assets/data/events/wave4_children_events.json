@@ -6,23 +6,37 @@
       "maxAge": 60,
       "text": "Your toddler has a tantrum that tests your patience. One wrong move, and the day feels ruined; one good move, and everything resets.",
       "weight": 4,
-      "tags": ["requires_child_toddler", "negative"],
+      "tags": [
+        "requires_child_toddler",
+        "negative"
+      ],
       "choices": [
         {
           "label": "Stay calm and comfort them",
-          "statEffects": { "happiness": 4, "health": 0 },
+          "statEffects": {
+            "happiness": 4,
+            "health": 0
+          },
           "childRelationshipEffect": 10,
           "resultText": "They calm down quickly. Your bond feels stronger, not weaker."
         },
         {
           "label": "Set firm boundaries and distract",
-          "statEffects": { "happiness": 0, "health": -1, "karma": 1 },
+          "statEffects": {
+            "happiness": 0,
+            "health": -1,
+            "karma": 1
+          },
           "childRelationshipEffect": -2,
           "resultText": "The tantrum fades. There is still friction, but you feel in control."
         },
         {
           "label": "Lose patience and rush them",
-          "statEffects": { "happiness": -4, "health": -2, "karma": -2 },
+          "statEffects": {
+            "happiness": -4,
+            "health": -2,
+            "karma": -2
+          },
           "childRelationshipEffect": -10,
           "resultText": "Afterwards, everyone feels tense. You regret it more than you want to admit."
         }
@@ -34,17 +48,25 @@
       "maxAge": 60,
       "text": "You are not 'just the parent' today. Your toddler reaches for you first. It is small, but it hits deep.",
       "weight": 3,
-      "tags": ["requires_child_toddler", "positive"],
+      "tags": [
+        "requires_child_toddler",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Play together and laugh",
-          "statEffects": { "happiness": 6, "health": 1 },
+          "statEffects": {
+            "happiness": 6,
+            "health": 1
+          },
           "childRelationshipEffect": 12,
           "resultText": "Your home feels warmer. The memory becomes a little anchor for the next tough day."
         },
         {
           "label": "Show up but stay quiet",
-          "statEffects": { "happiness": 2 },
+          "statEffects": {
+            "happiness": 2
+          },
           "childRelationshipEffect": 6,
           "resultText": "You do not turn it into a big moment, but you still show love."
         }
@@ -56,23 +78,37 @@
       "maxAge": 60,
       "text": "Homework time becomes a negotiation. Your child either wants help, or wants to prove they do not need it.",
       "weight": 4,
-      "tags": ["requires_child_primary", "positive"],
+      "tags": [
+        "requires_child_primary",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Help with their toughest problem",
-          "statEffects": { "smarts": 2, "happiness": 3 },
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 3
+          },
           "childRelationshipEffect": 14,
           "resultText": "They learn faster because you make it feel safe to struggle."
         },
         {
           "label": "Give tips but let them try",
-          "statEffects": { "smarts": 1, "happiness": 1, "health": 0 },
+          "statEffects": {
+            "smarts": 1,
+            "happiness": 1,
+            "health": 0
+          },
           "childRelationshipEffect": 8,
           "resultText": "You respect their independence. They rise to the challenge."
         },
         {
           "label": "Take over completely",
-          "statEffects": { "happiness": 0, "health": -1, "karma": -1 },
+          "statEffects": {
+            "happiness": 0,
+            "health": -1,
+            "karma": -1
+          },
           "childRelationshipEffect": -6,
           "resultText": "The work finishes, but confidence drops. Next week will cost you more time."
         }
@@ -84,23 +120,39 @@
       "maxAge": 60,
       "text": "A teacher sends a note: distracted, careless mistakes, and a reputation that might be forming early.",
       "weight": 3,
-      "tags": ["requires_child_primary", "negative"],
+      "tags": [
+        "requires_child_primary",
+        "negative"
+      ],
       "choices": [
         {
           "label": "Adjust routine and check in daily",
-          "statEffects": { "happiness": 1, "smarts": 1, "health": 0, "money": -500 },
+          "statEffects": {
+            "happiness": 1,
+            "smarts": 1,
+            "health": 0,
+            "money": -500
+          },
           "childRelationshipEffect": 10,
           "resultText": "Small consistency beats big promises. The grades slowly follow."
         },
         {
           "label": "Punish quickly and hope fear works",
-          "statEffects": { "happiness": -3, "health": -1, "karma": -2 },
+          "statEffects": {
+            "happiness": -3,
+            "health": -1,
+            "karma": -2
+          },
           "childRelationshipEffect": -12,
           "resultText": "They comply for a week, then hide the problem instead."
         },
         {
           "label": "Talk gently and ask what is wrong",
-          "statEffects": { "happiness": 2, "health": 0, "karma": 1 },
+          "statEffects": {
+            "happiness": 2,
+            "health": 0,
+            "karma": 1
+          },
           "childRelationshipEffect": 6,
           "resultText": "You discover it was stress. Once named, it gets easier."
         }
@@ -112,28 +164,168 @@
       "maxAge": 60,
       "text": "Your teenager pushes back. They want freedom now, but freedom without boundaries turns into mistakes fast.",
       "weight": 4,
-      "tags": ["requires_child_teen", "negative"],
+      "tags": [
+        "requires_child_teen",
+        "negative"
+      ],
       "choices": [
         {
           "label": "Listen first, then set clear rules",
-          "statEffects": { "happiness": 1, "health": 0, "karma": 1 },
+          "statEffects": {
+            "happiness": 1,
+            "health": 0,
+            "karma": 1
+          },
           "childRelationshipEffect": 12,
           "resultText": "You keep the peace and earn respect. They test you less next time."
         },
         {
           "label": "Punish harshly to prove you are serious",
-          "statEffects": { "happiness": -5, "health": -2, "karma": -3 },
+          "statEffects": {
+            "happiness": -5,
+            "health": -2,
+            "karma": -3
+          },
           "childRelationshipEffect": -14,
           "resultText": "They resent you. If something goes wrong later, they will hide it."
         },
         {
           "label": "Ignore it and hope they grow out of it",
-          "statEffects": { "happiness": -3, "health": -1 },
+          "statEffects": {
+            "happiness": -3,
+            "health": -1
+          },
           "childRelationshipEffect": -8,
           "resultText": "The rebellion fades in the short term, but trust weakens in the long run."
+        }
+      ]
+    },
+    {
+      "id": "wave4_child_sick_night",
+      "minAge": 18,
+      "maxAge": 60,
+      "weight": 4,
+      "tags": [
+        "requires_child_toddler",
+        "negative"
+      ],
+      "text": "Your child spikes a fever after midnight. The house is quiet except for crying, and you have to decide how seriously to take it.",
+      "choices": [
+        {
+          "label": "Go to a clinic now",
+          "statEffects": {
+            "health": 1,
+            "happiness": -2,
+            "money": -2500
+          },
+          "childRelationshipEffect": 8,
+          "doctorCareTier": "private",
+          "resultText": "The wait is long. You leave with medicine and a calmer child."
+        },
+        {
+          "label": "Cool them down and watch until morning",
+          "statEffects": {
+            "happiness": -1,
+            "health": -1,
+            "smarts": 1
+          },
+          "childRelationshipEffect": 4,
+          "resultText": "The fever breaks before dawn. You do not sleep, but you did not panic-spend either."
+        },
+        {
+          "label": "Hope it passes and try to rest",
+          "statEffects": {
+            "happiness": -4,
+            "karma": -2,
+            "health": -1
+          },
+          "childRelationshipEffect": -6,
+          "triggersIllnessRoll": true,
+          "resultText": "Morning is worse. You regret bargaining with a thermometer."
+        }
+      ]
+    },
+    {
+      "id": "wave4_child_school_play",
+      "minAge": 18,
+      "maxAge": 60,
+      "weight": 3,
+      "tags": [
+        "requires_child_primary",
+        "positive"
+      ],
+      "text": "Your child has two lines in the school play and wants you in the front row. It clashes with a long workday.",
+      "choices": [
+        {
+          "label": "Leave work early and go",
+          "statEffects": {
+            "happiness": 6,
+            "money": -200
+          },
+          "childRelationshipEffect": 14,
+          "performanceEffect": -4,
+          "resultText": "They scan the seats until they find you. The lines are shaky. The grin is not."
+        },
+        {
+          "label": "Send a relative with a camera",
+          "statEffects": {
+            "happiness": 2,
+            "karma": 1
+          },
+          "childRelationshipEffect": 4,
+          "resultText": "You see the video later. It is not the same as being there."
+        },
+        {
+          "label": "Promise the next one",
+          "statEffects": {
+            "happiness": -2,
+            "karma": -1
+          },
+          "childRelationshipEffect": -8,
+          "performanceEffect": 3,
+          "resultText": "Work notices your dedication. Your child notices the empty chair."
+        }
+      ]
+    },
+    {
+      "id": "wave4_child_teen_phone",
+      "minAge": 18,
+      "maxAge": 60,
+      "weight": 3,
+      "tags": [
+        "requires_child_teen",
+        "negative"
+      ],
+      "text": "You find your teenager still on their phone at 2 a.m. Grades have been slipping in small, deniable ways.",
+      "choices": [
+        {
+          "label": "Set a charging station outside the bedroom",
+          "statEffects": {
+            "happiness": 1,
+            "smarts": 1,
+            "karma": 1
+          },
+          "childRelationshipEffect": 6,
+          "resultText": "They hate it for a week. Sleep returns. So do some marks."
+        },
+        {
+          "label": "Take the phone until the weekend",
+          "statEffects": {
+            "happiness": -2
+          },
+          "childRelationshipEffect": -10,
+          "resultText": "The house gets louder. The phone becomes a hostage negotiation."
+        },
+        {
+          "label": "Pretend you did not see",
+          "statEffects": {
+            "happiness": -1,
+            "karma": -1
+          },
+          "childRelationshipEffect": -3,
+          "resultText": "Peace tonight. Dark circles tomorrow."
         }
       ]
     }
   ]
 }
-

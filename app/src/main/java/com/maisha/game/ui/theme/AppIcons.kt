@@ -13,8 +13,7 @@ import com.maisha.game.ui.components.MainTab
 import com.maisha.game.ui.components.StatType
 
 /**
- * Maisha custom icon set — simple geometric placeholders using theme-aligned line art.
- * Swap path data or replace with @drawable vectors later; keep these names stable.
+ * Maisha custom icon set — theme-aligned line art for stats, tabs, and actions.
  *
  * Icon-to-concept mapping (for commissioning final art):
  * - Stats: health=heart, happiness=sun, smarts=book, looks=sparkle, money=coin

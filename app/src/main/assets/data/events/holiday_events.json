@@ -94,80 +94,114 @@
       "id": "holiday_season_2",
       "minAge": 6,
       "maxAge": 85,
-      "text": "Holiday season moment #2.",
       "weight": 3,
       "tags": [
         "holiday"
       ],
+      "text": "Street vendors set up early for {holidayName}. The smell of grilled food and sugar pulls you toward the stalls.",
       "choices": [
         {
-          "label": "Celebrate",
+          "label": "Buy treats and share them",
           "statEffects": {
-            "happiness": 6
+            "happiness": 6,
+            "money": -1500
           },
-          "resultText": "The season lifted your mood."
+          "familyRelationshipEffect": 3,
+          "resultText": "Sticky fingers, loud music, and a full belly. {holidayName} feels like it belongs to you."
         },
         {
-          "label": "Reflect quietly",
+          "label": "Help a stall pack up at dusk",
           "statEffects": {
-            "happiness": 2,
+            "happiness": 4,
+            "karma": 2,
+            "money": 400
+          },
+          "resultText": "The vendor slips you leftovers. Kindness travels farther than fireworks."
+        },
+        {
+          "label": "Go home before the crowds peak",
+          "statEffects": {
+            "happiness": 1,
             "health": 1
           },
-          "resultText": "You found peace."
+          "resultText": "You miss the noise. You also miss the headache."
         }
       ]
     },
     {
       "id": "holiday_season_3",
-      "minAge": 6,
-      "maxAge": 85,
-      "text": "Holiday season moment #3.",
+      "minAge": 8,
+      "maxAge": 90,
       "weight": 3,
       "tags": [
         "holiday"
       ],
+      "text": "A neighbour asks if you will help hang decorations for {holidayName}. The ladder looks older than the tradition.",
       "choices": [
         {
-          "label": "Celebrate",
+          "label": "Climb up and hang the lights",
           "statEffects": {
-            "happiness": 6
+            "happiness": 5,
+            "health": -1,
+            "karma": 2
           },
-          "resultText": "The season lifted your mood."
+          "resultText": "The street glows by nightfall. People stop to take photos."
         },
         {
-          "label": "Reflect quietly",
+          "label": "Hold the ladder and pass tape",
           "statEffects": {
-            "happiness": 2,
-            "health": 1
+            "happiness": 3,
+            "karma": 1
           },
-          "resultText": "You found peace."
+          "resultText": "You stay useful without the risk. The neighbour still invites you to tea."
+        },
+        {
+          "label": "Make an excuse and walk on",
+          "statEffects": {
+            "happiness": -1,
+            "karma": -1
+          },
+          "resultText": "The block still celebrates. You just are not in the picture."
         }
       ]
     },
     {
       "id": "holiday_season_4",
-      "minAge": 6,
-      "maxAge": 85,
-      "text": "Holiday season moment #4.",
+      "minAge": 12,
+      "maxAge": 90,
       "weight": 3,
       "tags": [
         "holiday"
       ],
+      "text": "{holidayDescription} A family group chat explodes with travel plans, recipes, and old arguments.",
       "choices": [
         {
-          "label": "Celebrate",
+          "label": "Offer to host and cook",
           "statEffects": {
-            "happiness": 6
+            "happiness": 4,
+            "health": -2,
+            "money": -4000
           },
-          "resultText": "The season lifted your mood."
+          "familyRelationshipEffect": 8,
+          "resultText": "The house is loud and messy. People linger after dessert."
         },
         {
-          "label": "Reflect quietly",
+          "label": "Show up with a dish and leave early",
           "statEffects": {
-            "happiness": 2,
-            "health": 1
+            "happiness": 3,
+            "money": -800
           },
-          "resultText": "You found peace."
+          "familyRelationshipEffect": 3,
+          "resultText": "You did your part. Peace and a full plate."
+        },
+        {
+          "label": "Mute the chat until it is over",
+          "statEffects": {
+            "happiness": -2,
+            "karma": -1
+          },
+          "familyRelationshipEffect": -4,
+          "resultText": "Quiet. Also a few cold messages the next morning."
         }
       ]
     },
@@ -175,188 +209,265 @@
       "id": "holiday_season_5",
       "minAge": 6,
       "maxAge": 85,
-      "text": "Holiday season moment #5.",
       "weight": 3,
       "tags": [
         "holiday"
       ],
+      "text": "Children on your street practice a {holidayName} performance. They are missing a drummer — or at least someone who can keep time.",
       "choices": [
         {
-          "label": "Celebrate",
+          "label": "Join the rehearsal",
           "statEffects": {
-            "happiness": 6
+            "happiness": 7,
+            "looks": 1
           },
-          "resultText": "The season lifted your mood."
+          "resultText": "You clap off-beat and they still cheer. The performance is chaotic and perfect."
         },
         {
-          "label": "Reflect quietly",
+          "label": "Film it and share with family",
           "statEffects": {
-            "happiness": 2,
-            "health": 1
+            "happiness": 4,
+            "karma": 1
           },
-          "resultText": "You found peace."
+          "familyRelationshipEffect": 2,
+          "resultText": "Relatives reply with heart emojis. You become the unofficial historian."
+        },
+        {
+          "label": "Watch from a doorway",
+          "statEffects": {
+            "happiness": 2
+          },
+          "resultText": "A small smile is enough. The song follows you home."
         }
       ]
     },
     {
       "id": "holiday_season_6",
-      "minAge": 6,
-      "maxAge": 85,
-      "text": "Holiday season moment #6.",
+      "minAge": 16,
+      "maxAge": 90,
       "weight": 3,
       "tags": [
         "holiday"
       ],
+      "text": "Tickets for a {holidayName} concert sell out in minutes. A friend knows someone selling extras at a markup.",
       "choices": [
         {
-          "label": "Celebrate",
+          "label": "Pay the markup and go",
           "statEffects": {
-            "happiness": 6
+            "happiness": 8,
+            "money": -6000
           },
-          "resultText": "The season lifted your mood."
+          "resultText": "The night is huge. Your budget is not. Worth it, mostly."
         },
         {
-          "label": "Reflect quietly",
+          "label": "Stream it at home with snacks",
           "statEffects": {
-            "happiness": 2,
-            "health": 1
+            "happiness": 4,
+            "money": -400
           },
-          "resultText": "You found peace."
+          "resultText": "Not the same as being there. Also no queues, and the fridge is close."
+        },
+        {
+          "label": "Skip it and save the money",
+          "statEffects": {
+            "happiness": 1,
+            "smarts": 1
+          },
+          "resultText": "You hear the bass from two streets over. Your savings stay intact."
         }
       ]
     },
     {
       "id": "holiday_season_7",
-      "minAge": 6,
-      "maxAge": 85,
-      "text": "Holiday season moment #7.",
+      "minAge": 10,
+      "maxAge": 90,
       "weight": 3,
       "tags": [
         "holiday"
       ],
+      "text": "An elder asks you to visit a grave or memorial during {holidayName}. The request is quiet and serious.",
       "choices": [
         {
-          "label": "Celebrate",
+          "label": "Go and listen to the stories",
           "statEffects": {
-            "happiness": 6
+            "happiness": 3,
+            "karma": 3,
+            "health": -1
           },
-          "resultText": "The season lifted your mood."
+          "familyRelationshipEffect": 6,
+          "resultText": "Names become people. You leave slower than you arrived."
         },
         {
-          "label": "Reflect quietly",
+          "label": "Send flowers and a message",
           "statEffects": {
             "happiness": 2,
-            "health": 1
+            "karma": 1,
+            "money": -700
           },
-          "resultText": "You found peace."
+          "familyRelationshipEffect": 2,
+          "resultText": "Respect from a distance. They notice you tried."
+        },
+        {
+          "label": "Promise to go next year",
+          "statEffects": {
+            "happiness": -1,
+            "karma": -1
+          },
+          "familyRelationshipEffect": -3,
+          "resultText": "Next year is a long time. The elder does not argue."
         }
       ]
     },
     {
       "id": "holiday_season_8",
-      "minAge": 6,
+      "minAge": 7,
       "maxAge": 85,
-      "text": "Holiday season moment #8.",
       "weight": 3,
       "tags": [
         "holiday"
       ],
+      "text": "A sudden downpour hits the {holidayName} parade. Costumes bleed colour onto the asphalt.",
       "choices": [
         {
-          "label": "Celebrate",
+          "label": "Dance in the rain anyway",
           "statEffects": {
-            "happiness": 6
+            "happiness": 7,
+            "health": -2
           },
-          "resultText": "The season lifted your mood."
+          "resultText": "You are soaked and laughing. Photos of you go around the family group."
         },
         {
-          "label": "Reflect quietly",
+          "label": "Share your umbrella with strangers",
+          "statEffects": {
+            "happiness": 5,
+            "karma": 3
+          },
+          "resultText": "Three people squeeze under one canopy. Someone buys you a drink after."
+        },
+        {
+          "label": "Duck into a café until it passes",
           "statEffects": {
             "happiness": 2,
-            "health": 1
+            "money": -600
           },
-          "resultText": "You found peace."
+          "resultText": "Warm, dry, slightly guilty. The parade moves on without you."
         }
       ]
     },
     {
       "id": "holiday_season_9",
-      "minAge": 6,
-      "maxAge": 85,
-      "text": "Holiday season moment #9.",
+      "minAge": 18,
+      "maxAge": 90,
       "weight": 3,
       "tags": [
         "holiday"
       ],
+      "text": "Work still expects you on {holidayName}. A manager hints that covering the shift is 'noticed'.",
       "choices": [
         {
-          "label": "Celebrate",
+          "label": "Work the shift for the extra pay",
           "statEffects": {
-            "happiness": 6
+            "happiness": -2,
+            "money": 3500,
+            "health": -2
           },
-          "resultText": "The season lifted your mood."
+          "performanceEffect": 6,
+          "resultText": "The office is empty and echoey. Your account looks healthier."
         },
         {
-          "label": "Reflect quietly",
+          "label": "Swap with a coworker who needs the money",
           "statEffects": {
-            "happiness": 2,
-            "health": 1
+            "happiness": 3,
+            "karma": 2
           },
-          "resultText": "You found peace."
+          "performanceEffect": 2,
+          "resultText": "They owe you one. You spend {holidayName} where you actually wanted to be."
+        },
+        {
+          "label": "Call in and take the day",
+          "statEffects": {
+            "happiness": 5,
+            "karma": -1
+          },
+          "performanceEffect": -4,
+          "resultText": "Family notices you. Your manager notices too."
         }
       ]
     },
     {
       "id": "holiday_season_10",
-      "minAge": 6,
-      "maxAge": 85,
-      "text": "Holiday season moment #10.",
+      "minAge": 5,
+      "maxAge": 90,
       "weight": 3,
       "tags": [
         "holiday"
       ],
+      "text": "Someone suggests a new {holidayName} tradition this year — a walk at dawn instead of the usual feast.",
       "choices": [
         {
-          "label": "Celebrate",
+          "label": "Wake up and walk with them",
           "statEffects": {
-            "happiness": 6
+            "happiness": 6,
+            "health": 3
           },
-          "resultText": "The season lifted your mood."
+          "familyRelationshipEffect": 5,
+          "resultText": "The streets are empty. Conversation is easier when nobody is performing."
         },
         {
-          "label": "Reflect quietly",
+          "label": "Sleep in and join the meal later",
           "statEffects": {
-            "happiness": 2,
+            "happiness": 3,
             "health": 1
           },
-          "resultText": "You found peace."
+          "resultText": "You catch the best part: food and leftover stories."
+        },
+        {
+          "label": "Insist on doing it the old way",
+          "statEffects": {
+            "happiness": 1,
+            "karma": -1
+          },
+          "familyRelationshipEffect": -2,
+          "resultText": "The feast happens. The mood is a little tighter than last year."
         }
       ]
     },
     {
       "id": "holiday_season_11",
-      "minAge": 6,
-      "maxAge": 85,
-      "text": "Holiday season moment #11.",
+      "minAge": 14,
+      "maxAge": 90,
       "weight": 3,
       "tags": [
         "holiday"
       ],
+      "text": "A charity drive for {holidayName} needs volunteers to pack boxes. The warehouse is cold and the list is long.",
       "choices": [
         {
-          "label": "Celebrate",
+          "label": "Stay until the last box is sealed",
           "statEffects": {
-            "happiness": 6
+            "happiness": 5,
+            "karma": 4,
+            "health": -2
           },
-          "resultText": "The season lifted your mood."
+          "resultText": "Your back aches. The organiser remembers your name."
         },
         {
-          "label": "Reflect quietly",
+          "label": "Give a donation and leave",
           "statEffects": {
             "happiness": 2,
-            "health": 1
+            "karma": 2,
+            "money": -2000
           },
-          "resultText": "You found peace."
+          "resultText": "Money helps. Time would have helped more, and you know it."
+        },
+        {
+          "label": "Drop in for an hour of photos",
+          "statEffects": {
+            "happiness": 1,
+            "karma": -2,
+            "looks": 1
+          },
+          "resultText": "You look generous online. The people still packing boxes do not comment."
         }
       ]
     }

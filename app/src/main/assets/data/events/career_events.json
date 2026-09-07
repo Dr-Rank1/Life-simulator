@@ -6,16 +6,23 @@
       "maxAge": 25,
       "text": "You have your first real job interview. Your palms are sweaty in a small office downtown.",
       "weight": 8,
-      "tags": ["one_time", "career"],
+      "tags": [
+        "one_time",
+        "career"
+      ],
       "choices": [
         {
           "label": "Take a deep breath and smile",
-          "statEffects": { "happiness": 3 },
+          "statEffects": {
+            "happiness": 3
+          },
           "resultText": "You calmed your nerves and made a decent impression."
         },
         {
           "label": "Panic and stumble over answers",
-          "statEffects": { "happiness": -4 },
+          "statEffects": {
+            "happiness": -4
+          },
           "resultText": "The interview was awkward. You hope for better luck next time."
         }
       ]
@@ -26,23 +33,32 @@
       "maxAge": 45,
       "text": "A coworker takes credit for your work during a team meeting. The room goes quiet.",
       "weight": 6,
-      "tags": ["career"],
+      "tags": [
+        "career"
+      ],
       "choices": [
         {
           "label": "Call them out politely",
-          "statEffects": { "happiness": -2, "smarts": 2 },
+          "statEffects": {
+            "happiness": -2,
+            "smarts": 2
+          },
           "performanceEffect": 5,
           "resultText": "Your boss noted your contribution. Tension remains."
         },
         {
           "label": "Let it slide",
-          "statEffects": { "happiness": -5 },
+          "statEffects": {
+            "happiness": -5
+          },
           "performanceEffect": -8,
           "resultText": "You swallowed your frustration. It ate at you all week."
         },
         {
           "label": "Confront them privately",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "performanceEffect": 2,
           "resultText": "They apologised. A fragile truce was reached."
         }
@@ -54,17 +70,24 @@
       "maxAge": 45,
       "text": "A struggling colleague asks for help on a deadline. You are already tired from your own workload.",
       "weight": 5,
-      "tags": ["career"],
+      "tags": [
+        "career"
+      ],
       "choices": [
         {
           "label": "Slack off and ignore them",
-          "statEffects": { "happiness": 3 },
+          "statEffects": {
+            "happiness": 3
+          },
           "performanceEffect": -10,
           "resultText": "You scrolled on your phone. Your manager noticed."
         },
         {
           "label": "Help them after hours",
-          "statEffects": { "happiness": -2, "health": -2 },
+          "statEffects": {
+            "happiness": -2,
+            "health": -2
+          },
           "performanceEffect": 10,
           "resultText": "You stayed late. The team respects you more now."
         }
@@ -76,16 +99,24 @@
       "maxAge": 50,
       "text": "Your employer announces an unexpected performance bonus this quarter.",
       "weight": 2,
-      "tags": ["career"],
+      "tags": [
+        "career"
+      ],
       "choices": [
         {
           "label": "Save the bonus",
-          "statEffects": { "money": 80000, "happiness": 3 },
+          "statEffects": {
+            "money": 80000,
+            "happiness": 3
+          },
           "resultText": "You transferred it straight to your account. Smart move."
         },
         {
           "label": "Treat the family",
-          "statEffects": { "money": 30000, "happiness": 8 },
+          "statEffects": {
+            "money": 30000,
+            "happiness": 8
+          },
           "resultText": "A big meal out for everyone. Worth every penny."
         }
       ]
@@ -96,17 +127,26 @@
       "maxAge": 45,
       "text": "Your supervisor asks if you can work overtime this weekend. Extra pay is on the table.",
       "weight": 5,
-      "tags": ["career"],
+      "tags": [
+        "career"
+      ],
       "choices": [
         {
           "label": "Accept the overtime",
-          "statEffects": { "money": 15000, "happiness": -4, "health": -3 },
+          "statEffects": {
+            "money": 15000,
+            "happiness": -4,
+            "health": -3
+          },
           "performanceEffect": 6,
           "resultText": "You worked Saturday and Sunday. Exhausting but lucrative."
         },
         {
           "label": "Decline and rest",
-          "statEffects": { "happiness": 4, "health": 3 },
+          "statEffects": {
+            "happiness": 4,
+            "health": 3
+          },
           "performanceEffect": -3,
           "resultText": "You slept in and watched football. Your body thanked you."
         }
@@ -118,23 +158,33 @@
       "maxAge": 55,
       "text": "A new work year begins. How are you approaching your job this year?",
       "weight": 7,
-      "tags": ["career", "work_effort"],
+      "tags": [
+        "career",
+        "work_effort"
+      ],
       "choices": [
         {
           "label": "Coast and do the minimum",
-          "statEffects": { "happiness": 4 },
+          "statEffects": {
+            "happiness": 4
+          },
           "performanceEffect": -5,
           "resultText": "You clocked in, clocked out, and avoided extra effort."
         },
         {
           "label": "Keep a steady pace",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "performanceEffect": 3,
           "resultText": "Reliable and consistent. Nothing flashy."
         },
         {
           "label": "Grind for a promotion",
-          "statEffects": { "smarts": 2, "happiness": -2 },
+          "statEffects": {
+            "smarts": 2,
+            "happiness": -2
+          },
           "performanceEffect": 8,
           "resultText": "You arrived early and left late. Management took note."
         }
@@ -147,21 +197,32 @@
       "restrictedToCountry": "KE",
       "text": "A cousin offers you a chance to invest in a matatu route. It could pay off — or flop.",
       "weight": 3,
-      "tags": ["one_time", "career"],
+      "tags": [
+        "one_time",
+        "career"
+      ],
       "choices": [
         {
           "label": "Invest heavily",
-          "statEffects": { "money": 120000, "happiness": 5 },
+          "statEffects": {
+            "money": 120000,
+            "happiness": 5
+          },
           "resultText": "The route was profitable. Your phone buzzes with M-Pesa alerts."
         },
         {
           "label": "Invest cautiously",
-          "statEffects": { "money": 15000, "happiness": 1 },
+          "statEffects": {
+            "money": 15000,
+            "happiness": 1
+          },
           "resultText": "Modest returns, but you kept most of your savings safe."
         },
         {
           "label": "Pass on the opportunity",
-          "statEffects": { "happiness": -1 },
+          "statEffects": {
+            "happiness": -1
+          },
           "resultText": "You heard later the route struggled. Dodged a bullet, maybe."
         }
       ]
@@ -172,21 +233,32 @@
       "maxAge": 40,
       "text": "A friend offers you a chance to invest in a {transportMode} route. It could pay off — or flop.",
       "weight": 3,
-      "tags": ["one_time", "career"],
+      "tags": [
+        "one_time",
+        "career"
+      ],
       "choices": [
         {
           "label": "Invest heavily",
-          "statEffects": { "money": 120000, "happiness": 5 },
+          "statEffects": {
+            "money": 120000,
+            "happiness": 5
+          },
           "resultText": "The route was profitable. {moneyApp} alerts kept buzzing on your phone."
         },
         {
           "label": "Invest cautiously",
-          "statEffects": { "money": 15000, "happiness": 1 },
+          "statEffects": {
+            "money": 15000,
+            "happiness": 1
+          },
           "resultText": "Modest returns, but you kept most of your savings safe."
         },
         {
           "label": "Pass on the opportunity",
-          "statEffects": { "happiness": -1 },
+          "statEffects": {
+            "happiness": -1
+          },
           "resultText": "You heard later the route struggled. Dodged a bullet, maybe."
         }
       ]
@@ -197,22 +269,32 @@
       "maxAge": 45,
       "text": "You spot a chance to run a small corner shop selling {moneyApp} credit and snacks near your neighbourhood.",
       "weight": 4,
-      "tags": ["career"],
+      "tags": [
+        "career"
+      ],
       "choices": [
         {
           "label": "Rent the kiosk space",
-          "statEffects": { "money": 40000, "happiness": 3 },
+          "statEffects": {
+            "money": 40000,
+            "happiness": 3
+          },
           "performanceEffect": -2,
           "resultText": "Weekend sales boosted your income. Juggling two ventures is tiring."
         },
         {
           "label": "Partner with a friend",
-          "statEffects": { "money": 25000, "happiness": 4 },
+          "statEffects": {
+            "money": 25000,
+            "happiness": 4
+          },
           "resultText": "You split profits but shared the workload. Fair deal."
         },
         {
           "label": "Focus on your main job",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "performanceEffect": 3,
           "resultText": "You gave your employer full attention. Steady progress."
         }
@@ -224,17 +306,23 @@
       "maxAge": 40,
       "text": "Office gossip spreads about layoffs. Colleagues whisper in the stairwell.",
       "weight": 4,
-      "tags": ["career"],
+      "tags": [
+        "career"
+      ],
       "choices": [
         {
           "label": "Work harder to stand out",
-          "statEffects": { "happiness": -2 },
+          "statEffects": {
+            "happiness": -2
+          },
           "performanceEffect": 8,
           "resultText": "You doubled your output. Hopefully it is enough."
         },
         {
           "label": "Join the gossip circle",
-          "statEffects": { "happiness": 2 },
+          "statEffects": {
+            "happiness": 2
+          },
           "performanceEffect": -5,
           "resultText": "You learned rumours, not facts. Productivity dipped."
         }
@@ -246,10 +334,26 @@
       "maxAge": 55,
       "text": "A coworker volunteers for the same promotion track and starts copying your ideas in meetings.",
       "weight": 4,
-      "tags": ["career"],
+      "tags": [
+        "career"
+      ],
       "choices": [
-        { "label": "Document your work and speak up", "statEffects": { "happiness": -2 }, "performanceEffect": 6, "resultText": "Your manager noticed who delivered first. The rivalry sharpened." },
-        { "label": "Confront them in the break room", "statEffects": { "happiness": -4 }, "performanceEffect": -4, "resultText": "Voices rose. HR asked you both to cool off." }
+        {
+          "label": "Document your work and speak up",
+          "statEffects": {
+            "happiness": -2
+          },
+          "performanceEffect": 6,
+          "resultText": "Your manager noticed who delivered first. The rivalry sharpened."
+        },
+        {
+          "label": "Confront them in the break room",
+          "statEffects": {
+            "happiness": -4
+          },
+          "performanceEffect": -4,
+          "resultText": "Voices rose. HR asked you both to cool off."
+        }
       ]
     },
     {
@@ -258,10 +362,27 @@
       "maxAge": 58,
       "text": "Your boss emails late Friday demanding a finished report by Monday — unpaid weekend hours implied.",
       "weight": 5,
-      "tags": ["career"],
+      "tags": [
+        "career"
+      ],
       "choices": [
-        { "label": "Grind through the weekend", "statEffects": { "happiness": -5, "health": -3 }, "performanceEffect": 10, "resultText": "The report landed on their desk at dawn. Exhaustion followed." },
-        { "label": "Push back politely", "statEffects": { "happiness": 2 }, "performanceEffect": -3, "resultText": "You delivered Monday noon. They frowned but accepted it." }
+        {
+          "label": "Grind through the weekend",
+          "statEffects": {
+            "happiness": -5,
+            "health": -3
+          },
+          "performanceEffect": 10,
+          "resultText": "The report landed on their desk at dawn. Exhaustion followed."
+        },
+        {
+          "label": "Push back politely",
+          "statEffects": {
+            "happiness": 2
+          },
+          "performanceEffect": -3,
+          "resultText": "You delivered Monday noon. They frowned but accepted it."
+        }
       ]
     },
     {
@@ -270,10 +391,27 @@
       "maxAge": 60,
       "text": "Rumours swirl that a larger firm wants to buy your company. Desks empty early as people refresh job boards.",
       "weight": 4,
-      "tags": ["career"],
+      "tags": [
+        "career"
+      ],
       "choices": [
-        { "label": "Update your CV quietly", "statEffects": { "happiness": -3, "smarts": 2 }, "performanceEffect": -2, "resultText": "You prepared for the worst while still showing up." },
-        { "label": "Stay loyal and focus on work", "statEffects": { "happiness": -1 }, "performanceEffect": 5, "resultText": "Leadership noticed who kept their head down." }
+        {
+          "label": "Update your CV quietly",
+          "statEffects": {
+            "happiness": -3,
+            "smarts": 2
+          },
+          "performanceEffect": -2,
+          "resultText": "You prepared for the worst while still showing up."
+        },
+        {
+          "label": "Stay loyal and focus on work",
+          "statEffects": {
+            "happiness": -1
+          },
+          "performanceEffect": 5,
+          "resultText": "Leadership noticed who kept their head down."
+        }
       ]
     },
     {
@@ -282,10 +420,26 @@
       "maxAge": 55,
       "text": "In a team presentation your colleague claims credit for research you stayed late to finish.",
       "weight": 4,
-      "tags": ["career"],
+      "tags": [
+        "career"
+      ],
       "choices": [
-        { "label": "Correct the record in the meeting", "statEffects": { "happiness": -2 }, "performanceEffect": 4, "resultText": "Awkward silence, then nods from the director." },
-        { "label": "Let it slide this once", "statEffects": { "happiness": -5 }, "performanceEffect": -6, "resultText": "They smiled at the applause. You simmered at your desk." }
+        {
+          "label": "Correct the record in the meeting",
+          "statEffects": {
+            "happiness": -2
+          },
+          "performanceEffect": 4,
+          "resultText": "Awkward silence, then nods from the director."
+        },
+        {
+          "label": "Let it slide this once",
+          "statEffects": {
+            "happiness": -5
+          },
+          "performanceEffect": -6,
+          "resultText": "They smiled at the applause. You simmered at your desk."
+        }
       ]
     },
     {
@@ -294,10 +448,26 @@
       "maxAge": 50,
       "text": "Coworkers trade cruel gossip about a quiet teammate in the break room. They look at you expecting a reaction.",
       "weight": 3,
-      "tags": ["career"],
+      "tags": [
+        "career"
+      ],
       "choices": [
-        { "label": "Change the subject", "statEffects": { "happiness": 1 }, "performanceEffect": 2, "resultText": "You steered talk back to weekend plans. Tension eased." },
-        { "label": "Join in with a joke", "statEffects": { "happiness": 2 }, "performanceEffect": -5, "resultText": "Laughs rippled, but you felt smaller afterward." }
+        {
+          "label": "Change the subject",
+          "statEffects": {
+            "happiness": 1
+          },
+          "performanceEffect": 2,
+          "resultText": "You steered talk back to weekend plans. Tension eased."
+        },
+        {
+          "label": "Join in with a joke",
+          "statEffects": {
+            "happiness": 2
+          },
+          "performanceEffect": -5,
+          "resultText": "Laughs rippled, but you felt smaller afterward."
+        }
       ]
     },
     {
@@ -306,10 +476,27 @@
       "maxAge": 55,
       "text": "A freelance client keeps changing the brief at midnight and refuses to pay the agreed rate.",
       "weight": 4,
-      "tags": ["career", "gig"],
+      "tags": [
+        "career",
+        "gig"
+      ],
       "choices": [
-        { "label": "Finish the work anyway", "statEffects": { "money": 12000, "happiness": -6 }, "resultText": "They paid late — less than promised." },
-        { "label": "Walk away from the contract", "statEffects": { "happiness": 2 }, "performanceEffect": -3, "resultText": "You protected your sanity but lost the gig." }
+        {
+          "label": "Finish the work anyway",
+          "statEffects": {
+            "money": 12000,
+            "happiness": -6
+          },
+          "resultText": "They paid late — less than promised."
+        },
+        {
+          "label": "Walk away from the contract",
+          "statEffects": {
+            "happiness": 2
+          },
+          "performanceEffect": -3,
+          "resultText": "You protected your sanity but lost the gig."
+        }
       ]
     },
     {
@@ -318,10 +505,27 @@
       "maxAge": 60,
       "text": "Ride-share surge pricing kicks in during a rainy evening rush. Your phone buzzes nonstop.",
       "weight": 3,
-      "tags": ["career", "gig"],
+      "tags": [
+        "career",
+        "gig"
+      ],
       "choices": [
-        { "label": "Drive through the surge", "statEffects": { "money": 18000, "happiness": -3, "health": -2 }, "resultText": "You earned well but arrived home exhausted." },
-        { "label": "Stay home tonight", "statEffects": { "happiness": 3 }, "resultText": "You watched the rain from your couch." }
+        {
+          "label": "Drive through the surge",
+          "statEffects": {
+            "money": 18000,
+            "happiness": -3,
+            "health": -2
+          },
+          "resultText": "You earned well but arrived home exhausted."
+        },
+        {
+          "label": "Stay home tonight",
+          "statEffects": {
+            "happiness": 3
+          },
+          "resultText": "You watched the rain from your couch."
+        }
       ]
     },
     {
@@ -330,10 +534,27 @@
       "maxAge": 50,
       "text": "A freelance platform flags your account after a dispute and temporarily bans you from new jobs.",
       "weight": 3,
-      "tags": ["career", "gig"],
+      "tags": [
+        "career",
+        "gig"
+      ],
       "choices": [
-        { "label": "Appeal the decision", "statEffects": { "happiness": -4, "smarts": 2 }, "resultText": "Support reinstated you after a week." },
-        { "label": "Switch to a different platform", "statEffects": { "happiness": -2, "money": -5000 }, "resultText": "Starting over cost time and profile fees." }
+        {
+          "label": "Appeal the decision",
+          "statEffects": {
+            "happiness": -4,
+            "smarts": 2
+          },
+          "resultText": "Support reinstated you after a week."
+        },
+        {
+          "label": "Switch to a different platform",
+          "statEffects": {
+            "happiness": -2,
+            "money": -5000
+          },
+          "resultText": "Starting over cost time and profile fees."
+        }
       ]
     },
     {
@@ -342,10 +563,27 @@
       "maxAge": 55,
       "text": "A happy tutoring client posts a glowing review online. New messages flood your inbox.",
       "weight": 3,
-      "tags": ["career", "gig"],
+      "tags": [
+        "career",
+        "gig"
+      ],
       "choices": [
-        { "label": "Take on more students", "statEffects": { "money": 15000, "happiness": 5, "health": -2 }, "resultText": "Word of mouth filled your evenings." },
-        { "label": "Keep your current load", "statEffects": { "happiness": 4 }, "resultText": "Steady work without burning out." }
+        {
+          "label": "Take on more students",
+          "statEffects": {
+            "money": 15000,
+            "happiness": 5,
+            "health": -2
+          },
+          "resultText": "Word of mouth filled your evenings."
+        },
+        {
+          "label": "Keep your current load",
+          "statEffects": {
+            "happiness": 4
+          },
+          "resultText": "Steady work without burning out."
+        }
       ]
     },
     {
@@ -354,10 +592,27 @@
       "maxAge": 58,
       "text": "A repeat freelance client asks whether you would run their operations full-time as a small business.",
       "weight": 2,
-      "tags": ["career", "gig"],
+      "tags": [
+        "career",
+        "gig"
+      ],
       "choices": [
-        { "label": "Accept the offer", "statEffects": { "happiness": 8, "money": 25000 }, "performanceEffect": 8, "resultText": "Your side hustle may become your main career." },
-        { "label": "Decline and stay independent", "statEffects": { "happiness": 3 }, "resultText": "Freedom won over stability — for now." }
+        {
+          "label": "Accept the offer",
+          "statEffects": {
+            "happiness": 8,
+            "money": 25000
+          },
+          "performanceEffect": 8,
+          "resultText": "Your side hustle may become your main career."
+        },
+        {
+          "label": "Decline and stay independent",
+          "statEffects": {
+            "happiness": 3
+          },
+          "resultText": "Freedom won over stability — for now."
+        }
       ]
     },
     {
@@ -366,10 +621,28 @@
       "maxAge": 60,
       "text": "Tax authorities send a notice about undeclared side income from your gig work.",
       "weight": 3,
-      "tags": ["career", "gig"],
+      "tags": [
+        "career",
+        "gig"
+      ],
       "choices": [
-        { "label": "Pay the back taxes", "statEffects": { "money": -20000, "happiness": -5 }, "resultText": "Painful, but you are square with the law." },
-        { "label": "Hire an accountant to negotiate", "statEffects": { "money": -12000, "happiness": -2, "smarts": 1 }, "resultText": "The bill shrank after a tense meeting." }
+        {
+          "label": "Pay the back taxes",
+          "statEffects": {
+            "money": -20000,
+            "happiness": -5
+          },
+          "resultText": "Painful, but you are square with the law."
+        },
+        {
+          "label": "Hire an accountant to negotiate",
+          "statEffects": {
+            "money": -12000,
+            "happiness": -2,
+            "smarts": 1
+          },
+          "resultText": "The bill shrank after a tense meeting."
+        }
       ]
     },
     {
@@ -378,10 +651,27 @@
       "maxAge": 70,
       "text": "A newspaper alleges you accepted a bribe from a contractor. Cameras wait outside your office.",
       "weight": 4,
-      "tags": ["career", "politics", "requires_office"],
+      "tags": [
+        "career",
+        "politics",
+        "requires_office"
+      ],
       "choices": [
-        { "label": "Hold a press conference", "statEffects": { "happiness": -3, "smarts": 1 }, "resultText": "You deny everything. Polls wobble but hold." },
-        { "label": "Ignore the story", "statEffects": { "happiness": -6 }, "resultText": "Silence looks like guilt. Approval slides." }
+        {
+          "label": "Hold a press conference",
+          "statEffects": {
+            "happiness": -3,
+            "smarts": 1
+          },
+          "resultText": "You deny everything. Polls wobble but hold."
+        },
+        {
+          "label": "Ignore the story",
+          "statEffects": {
+            "happiness": -6
+          },
+          "resultText": "Silence looks like guilt. Approval slides."
+        }
       ]
     },
     {
@@ -390,10 +680,28 @@
       "maxAge": 70,
       "text": "You are invited to a televised debate against a rising rival.",
       "weight": 4,
-      "tags": ["career", "politics", "requires_office"],
+      "tags": [
+        "career",
+        "politics",
+        "requires_office"
+      ],
       "choices": [
-        { "label": "Prepare rigorously", "statEffects": { "smarts": 3, "happiness": -1 }, "resultText": "You land sharp lines. Clips go viral." },
-        { "label": "Wing it on charm", "statEffects": { "looks": 2, "happiness": 2 }, "resultText": "The crowd laughs — analysts are less kind." }
+        {
+          "label": "Prepare rigorously",
+          "statEffects": {
+            "smarts": 3,
+            "happiness": -1
+          },
+          "resultText": "You land sharp lines. Clips go viral."
+        },
+        {
+          "label": "Wing it on charm",
+          "statEffects": {
+            "looks": 2,
+            "happiness": 2
+          },
+          "resultText": "The crowd laughs — analysts are less kind."
+        }
       ]
     },
     {
@@ -402,10 +710,27 @@
       "maxAge": 70,
       "text": "A natural disaster hits your region. Citizens expect leadership and relief funds.",
       "weight": 3,
-      "tags": ["career", "politics", "requires_office"],
+      "tags": [
+        "career",
+        "politics",
+        "requires_office"
+      ],
       "choices": [
-        { "label": "Visit the site and fund relief", "statEffects": { "money": -25000, "happiness": 4 }, "resultText": "Photos of you in the mud boost approval." },
-        { "label": "Delegate from the capital", "statEffects": { "happiness": -4 }, "resultText": "Critics call you out of touch." }
+        {
+          "label": "Visit the site and fund relief",
+          "statEffects": {
+            "money": -25000,
+            "happiness": 4
+          },
+          "resultText": "Photos of you in the mud boost approval."
+        },
+        {
+          "label": "Delegate from the capital",
+          "statEffects": {
+            "happiness": -4
+          },
+          "resultText": "Critics call you out of touch."
+        }
       ]
     },
     {
@@ -414,10 +739,28 @@
       "maxAge": 70,
       "text": "Supporters pack a stadium for a late-night rally. The energy is electric.",
       "weight": 3,
-      "tags": ["career", "politics", "requires_office"],
+      "tags": [
+        "career",
+        "politics",
+        "requires_office"
+      ],
       "choices": [
-        { "label": "Deliver a fiery speech", "statEffects": { "happiness": 6, "looks": 1 }, "resultText": "Chants of your name echo for hours." },
-        { "label": "Keep it short and policy-focused", "statEffects": { "smarts": 2, "happiness": 2 }, "resultText": "Less spectacle, more substance." }
+        {
+          "label": "Deliver a fiery speech",
+          "statEffects": {
+            "happiness": 6,
+            "looks": 1
+          },
+          "resultText": "Chants of your name echo for hours."
+        },
+        {
+          "label": "Keep it short and policy-focused",
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 2
+          },
+          "resultText": "Less spectacle, more substance."
+        }
       ]
     },
     {
@@ -426,10 +769,29 @@
       "maxAge": 70,
       "text": "The opposition launches a formal probe into your campaign finances.",
       "weight": 3,
-      "tags": ["career", "politics", "requires_office"],
+      "tags": [
+        "career",
+        "politics",
+        "requires_office"
+      ],
       "choices": [
-        { "label": "Open the books fully", "statEffects": { "money": -8000, "happiness": -2, "smarts": 1 }, "resultText": "Transparency costs time and lawyers — but clears your name." },
-        { "label": "Fight it in court", "statEffects": { "money": -15000, "happiness": -5 }, "resultText": "The case drags on. Headlines do not help." }
+        {
+          "label": "Open the books fully",
+          "statEffects": {
+            "money": -8000,
+            "happiness": -2,
+            "smarts": 1
+          },
+          "resultText": "Transparency costs time and lawyers — but clears your name."
+        },
+        {
+          "label": "Fight it in court",
+          "statEffects": {
+            "money": -15000,
+            "happiness": -5
+          },
+          "resultText": "The case drags on. Headlines do not help."
+        }
       ]
     },
     {
@@ -438,10 +800,28 @@
       "maxAge": 70,
       "text": "A new road project is ready for a ribbon-cutting ceremony.",
       "weight": 3,
-      "tags": ["career", "politics", "requires_office"],
+      "tags": [
+        "career",
+        "politics",
+        "requires_office"
+      ],
       "choices": [
-        { "label": "Attend and claim credit", "statEffects": { "happiness": 5, "looks": 1 }, "resultText": "Voters see progress with your face on it." },
-        { "label": "Let engineers take the spotlight", "statEffects": { "happiness": 2, "smarts": 1 }, "resultText": "Quiet competence — some notice, some do not." }
+        {
+          "label": "Attend and claim credit",
+          "statEffects": {
+            "happiness": 5,
+            "looks": 1
+          },
+          "resultText": "Voters see progress with your face on it."
+        },
+        {
+          "label": "Let engineers take the spotlight",
+          "statEffects": {
+            "happiness": 2,
+            "smarts": 1
+          },
+          "resultText": "Quiet competence — some notice, some do not."
+        }
       ]
     },
     {
@@ -450,10 +830,27 @@
       "maxAge": 70,
       "text": "Students invite you to a town hall on jobs and education.",
       "weight": 3,
-      "tags": ["career", "politics", "requires_office"],
+      "tags": [
+        "career",
+        "politics",
+        "requires_office"
+      ],
       "choices": [
-        { "label": "Promise bold reforms", "statEffects": { "happiness": 4 }, "resultText": "Applause now; delivery later is the hard part." },
-        { "label": "Be honest about limits", "statEffects": { "smarts": 2, "happiness": 1 }, "resultText": "Some boo. Others respect the candor." }
+        {
+          "label": "Promise bold reforms",
+          "statEffects": {
+            "happiness": 4
+          },
+          "resultText": "Applause now; delivery later is the hard part."
+        },
+        {
+          "label": "Be honest about limits",
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 1
+          },
+          "resultText": "Some boo. Others respect the candor."
+        }
       ]
     },
     {
@@ -462,11 +859,37 @@
       "maxAge": 55,
       "text": "Your patrol is ambushed. Gunfire erupts from the treeline.",
       "weight": 4,
-      "tags": ["career", "requires_military"],
+      "tags": [
+        "career",
+        "requires_military"
+      ],
       "choices": [
-        { "label": "Take cover and return fire", "statEffects": { "health": -8, "smarts": 2, "happiness": -4 }, "resultText": "You survive, shaken but intact." },
-        { "label": "Lead a flanking maneuver", "statEffects": { "health": -4, "smarts": 4, "happiness": -2 }, "resultText": "Quick thinking breaks the ambush." },
-        { "label": "Freeze", "statEffects": { "health": -15, "happiness": -8 }, "resultText": "A medic pulls you out. The scars will last." }
+        {
+          "label": "Take cover and return fire",
+          "statEffects": {
+            "health": -8,
+            "smarts": 2,
+            "happiness": -4
+          },
+          "resultText": "You survive, shaken but intact."
+        },
+        {
+          "label": "Lead a flanking maneuver",
+          "statEffects": {
+            "health": -4,
+            "smarts": 4,
+            "happiness": -2
+          },
+          "resultText": "Quick thinking breaks the ambush."
+        },
+        {
+          "label": "Freeze",
+          "statEffects": {
+            "health": -15,
+            "happiness": -8
+          },
+          "resultText": "A medic pulls you out. The scars will last."
+        }
       ]
     },
     {
@@ -475,10 +898,28 @@
       "maxAge": 55,
       "text": "A surprise base inspection is announced. Your unit scrambles to look sharp.",
       "weight": 3,
-      "tags": ["career", "requires_military"],
+      "tags": [
+        "career",
+        "requires_military"
+      ],
       "choices": [
-        { "label": "Drill the squad hard", "statEffects": { "happiness": -2, "smarts": 1 }, "performanceEffect": 8, "resultText": "The inspector nods. Your unit passes." },
-        { "label": "Cut corners", "statEffects": { "happiness": 1 }, "performanceEffect": -10, "resultText": "They notice. Extra duty follows." }
+        {
+          "label": "Drill the squad hard",
+          "statEffects": {
+            "happiness": -2,
+            "smarts": 1
+          },
+          "performanceEffect": 8,
+          "resultText": "The inspector nods. Your unit passes."
+        },
+        {
+          "label": "Cut corners",
+          "statEffects": {
+            "happiness": 1
+          },
+          "performanceEffect": -10,
+          "resultText": "They notice. Extra duty follows."
+        }
       ]
     },
     {
@@ -487,10 +928,29 @@
       "maxAge": 50,
       "text": "Command offers an honorable discharge with a modest severance package.",
       "weight": 3,
-      "tags": ["career", "requires_military"],
+      "tags": [
+        "career",
+        "requires_military"
+      ],
       "choices": [
-        { "label": "Accept and leave service", "statEffects": { "money": 40000, "happiness": 4, "health": 3 }, "resultText": "You hang up the uniform. Civilian life awaits." },
-        { "label": "Re-enlist", "statEffects": { "happiness": 2, "health": -1 }, "performanceEffect": 5, "resultText": "You stay in. The mission continues." }
+        {
+          "label": "Accept and leave service",
+          "statEffects": {
+            "money": 40000,
+            "happiness": 4,
+            "health": 3
+          },
+          "resultText": "You hang up the uniform. Civilian life awaits."
+        },
+        {
+          "label": "Re-enlist",
+          "statEffects": {
+            "happiness": 2,
+            "health": -1
+          },
+          "performanceEffect": 5,
+          "resultText": "You stay in. The mission continues."
+        }
       ]
     },
     {
@@ -499,10 +959,27 @@
       "maxAge": 50,
       "text": "Mail call brings a letter from home. The words hit harder than you expected.",
       "weight": 3,
-      "tags": ["career", "requires_military", "family"],
+      "tags": [
+        "career",
+        "requires_military",
+        "family"
+      ],
       "choices": [
-        { "label": "Write back immediately", "statEffects": { "happiness": 6 }, "familyRelationshipEffect": 5, "resultText": "Connection across the miles steadies you." },
-        { "label": "Keep it in your pocket", "statEffects": { "happiness": 2 }, "resultText": "You read it again at night." }
+        {
+          "label": "Write back immediately",
+          "statEffects": {
+            "happiness": 6
+          },
+          "familyRelationshipEffect": 5,
+          "resultText": "Connection across the miles steadies you."
+        },
+        {
+          "label": "Keep it in your pocket",
+          "statEffects": {
+            "happiness": 2
+          },
+          "resultText": "You read it again at night."
+        }
       ]
     },
     {
@@ -511,10 +988,28 @@
       "maxAge": 55,
       "text": "Your unit is nominated for a commendation after a successful operation.",
       "weight": 3,
-      "tags": ["career", "requires_military"],
+      "tags": [
+        "career",
+        "requires_military"
+      ],
       "choices": [
-        { "label": "Accept the honor", "statEffects": { "happiness": 8, "looks": 1 }, "performanceEffect": 6, "resultText": "The medal weighs more than metal." },
-        { "label": "Credit the whole squad", "statEffects": { "happiness": 5 }, "performanceEffect": 4, "resultText": "Loyalty earns quiet respect." }
+        {
+          "label": "Accept the honor",
+          "statEffects": {
+            "happiness": 8,
+            "looks": 1
+          },
+          "performanceEffect": 6,
+          "resultText": "The medal weighs more than metal."
+        },
+        {
+          "label": "Credit the whole squad",
+          "statEffects": {
+            "happiness": 5
+          },
+          "performanceEffect": 4,
+          "resultText": "Loyalty earns quiet respect."
+        }
       ]
     },
     {
@@ -523,10 +1018,27 @@
       "maxAge": 50,
       "text": "You draw night watch on a cold perimeter. Every sound could be nothing — or everything.",
       "weight": 3,
-      "tags": ["career", "requires_military"],
+      "tags": [
+        "career",
+        "requires_military"
+      ],
       "choices": [
-        { "label": "Stay razor-focused", "statEffects": { "health": -2, "smarts": 2 }, "resultText": "Dawn arrives without incident." },
-        { "label": "Fight the fatigue", "statEffects": { "health": -4, "happiness": -2 }, "resultText": "You nod off once. A sergeant notices." }
+        {
+          "label": "Stay razor-focused",
+          "statEffects": {
+            "health": -2,
+            "smarts": 2
+          },
+          "resultText": "Dawn arrives without incident."
+        },
+        {
+          "label": "Fight the fatigue",
+          "statEffects": {
+            "health": -4,
+            "happiness": -2
+          },
+          "resultText": "You nod off once. A sergeant notices."
+        }
       ]
     },
     {
@@ -535,10 +1047,197 @@
       "maxAge": 45,
       "text": "Live-fire training goes wrong. Shrapnel and chaos fill the range.",
       "weight": 3,
-      "tags": ["career", "requires_military"],
+      "tags": [
+        "career",
+        "requires_military"
+      ],
       "choices": [
-        { "label": "Pull a wounded comrade clear", "statEffects": { "health": -10, "happiness": 3 }, "resultText": "You save a life. Your shoulder will never be the same." },
-        { "label": "Follow evacuation protocol", "statEffects": { "health": -3, "smarts": 1 }, "resultText": "Discipline keeps casualties lower." }
+        {
+          "label": "Pull a wounded comrade clear",
+          "statEffects": {
+            "health": -10,
+            "happiness": 3
+          },
+          "resultText": "You save a life. Your shoulder will never be the same."
+        },
+        {
+          "label": "Follow evacuation protocol",
+          "statEffects": {
+            "health": -3,
+            "smarts": 1
+          },
+          "resultText": "Discipline keeps casualties lower."
+        }
+      ]
+    },
+    {
+      "id": "career_first_paycheck_choices",
+      "minAge": 18,
+      "maxAge": 30,
+      "weight": 5,
+      "tags": [
+        "career",
+        "requires_job",
+        "one_time"
+      ],
+      "text": "Your first real paycheck hits {moneyApp}. It looks huge until rent, food, and everyone who 'just needs a small loan' appear.",
+      "choices": [
+        {
+          "label": "Bank most of it and budget the rest",
+          "statEffects": {
+            "smarts": 3,
+            "happiness": 1,
+            "money": 800
+          },
+          "resultText": "Boring on day one. Powerful by month three."
+        },
+        {
+          "label": "Celebrate with friends",
+          "statEffects": {
+            "happiness": 6,
+            "money": -2000,
+            "health": -1
+          },
+          "resultText": "The night is loud. The balance is quieter in the morning."
+        },
+        {
+          "label": "Lend a relative what they ask",
+          "statEffects": {
+            "karma": 3,
+            "happiness": 2,
+            "money": -2500
+          },
+          "familyRelationshipEffect": 5,
+          "resultText": "They thank you twice. Repayment is a rumour."
+        }
+      ]
+    },
+    {
+      "id": "career_commute_breakdown",
+      "minAge": 18,
+      "maxAge": 60,
+      "weight": 4,
+      "tags": [
+        "career",
+        "requires_job"
+      ],
+      "text": "Your {transportMode} breaks down on the way to a shift. You will be late unless you spend money you did not plan to spend.",
+      "choices": [
+        {
+          "label": "Pay for a faster ride",
+          "statEffects": {
+            "money": -1800,
+            "happiness": -1,
+            "health": -1
+          },
+          "performanceEffect": 4,
+          "resultText": "You clock in sweating but on time. The receipt hurts more than the run."
+        },
+        {
+          "label": "Call your manager before they call you",
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 0
+          },
+          "performanceEffect": 2,
+          "resultText": "Honesty buys you twenty minutes. You still owe the lost hour."
+        },
+        {
+          "label": "Show up late and hope nobody notices",
+          "statEffects": {
+            "happiness": -3,
+            "karma": -1
+          },
+          "performanceEffect": -8,
+          "resultText": "Somebody notices. The look is worse than a warning letter."
+        }
+      ]
+    },
+    {
+      "id": "career_mentor_offer",
+      "minAge": 20,
+      "maxAge": 45,
+      "weight": 3,
+      "tags": [
+        "career",
+        "requires_job",
+        "positive"
+      ],
+      "text": "A senior colleague offers to mentor you — if you can handle blunt feedback and extra work after hours.",
+      "choices": [
+        {
+          "label": "Accept and do the extra work",
+          "statEffects": {
+            "smarts": 4,
+            "health": -2,
+            "happiness": 1
+          },
+          "performanceEffect": 12,
+          "resultText": "They tear your drafts apart. Your next one survives the meeting."
+        },
+        {
+          "label": "Accept but protect your evenings",
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 2,
+            "health": 1
+          },
+          "performanceEffect": 5,
+          "resultText": "You learn at a human pace. They notice you still have a life."
+        },
+        {
+          "label": "Decline politely",
+          "statEffects": {
+            "happiness": 2,
+            "health": 1
+          },
+          "performanceEffect": -1,
+          "resultText": "You keep your nights. The fast track goes to someone hungrier."
+        }
+      ]
+    },
+    {
+      "id": "career_office_birthday",
+      "minAge": 18,
+      "maxAge": 65,
+      "weight": 3,
+      "tags": [
+        "career",
+        "requires_job"
+      ],
+      "text": "It is someone's birthday in the office. The collection envelope is already half full and heading toward you.",
+      "choices": [
+        {
+          "label": "Give a fair amount and sign the card",
+          "statEffects": {
+            "happiness": 2,
+            "karma": 1,
+            "money": -600
+          },
+          "performanceEffect": 2,
+          "resultText": "You are in the photo. Cake is cake."
+        },
+        {
+          "label": "Organise the whole thing",
+          "statEffects": {
+            "happiness": 3,
+            "karma": 2,
+            "money": -900,
+            "health": -1
+          },
+          "performanceEffect": 3,
+          "resultText": "You become the person who 'makes the culture'. Also the person who buys candles."
+        },
+        {
+          "label": "Skip it and keep working",
+          "statEffects": {
+            "happiness": -1,
+            "karma": -1,
+            "smarts": 1
+          },
+          "performanceEffect": 1,
+          "resultText": "You finish a task. You also look like you do not live here."
+        }
       ]
     }
   ]

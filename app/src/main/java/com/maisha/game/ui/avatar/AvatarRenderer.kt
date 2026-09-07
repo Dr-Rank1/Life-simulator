@@ -147,7 +147,7 @@ fun AvatarImage(
     forPlayerCharacter: Boolean = false,
     hideFromAccessibility: Boolean = false,
     seed: String? = null,
-    useDiceBear: Boolean = true
+    useDiceBear: Boolean = false
 ) {
     val expressionLabel = expressionAccessibilityLabel(expression)
     val accessibilityDescription = when {

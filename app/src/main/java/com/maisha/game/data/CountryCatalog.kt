@@ -106,7 +106,7 @@ object CountryCatalog {
                 HolidayFlavor("Thanksgiving", "November gatherings centre on gratitude, turkey, and family tables."),
                 HolidayFlavor("Independence Day", "July fourth fireworks and barbecues mark the nation's founding.")
             ),
-            privateHospitalName = "City Medical Center",
+            privateHospitalName = "Mayo Clinic",
             secondaryGradeLabel = "Grade",
             guardianHonorific = "Mom"
         ),
@@ -121,7 +121,7 @@ object CountryCatalog {
                 HolidayFlavor("Canada Day", "July first fireworks and maple flags mark confederation."),
                 HolidayFlavor("Thanksgiving", "October long-weekend feasts gather families before winter sets in.")
             ),
-            privateHospitalName = "Private Clinic",
+            privateHospitalName = "Toronto General Hospital",
             secondaryGradeLabel = "Grade",
             guardianHonorific = "Mom"
         ),
@@ -136,7 +136,7 @@ object CountryCatalog {
                 HolidayFlavor("Guy Fawkes Night", "November bonfires and fireworks light up neighbourhoods."),
                 HolidayFlavor("Remembrance Day", "November eleventh silences honour those who served in wartime.")
             ),
-            privateHospitalName = "Private Hospital",
+            privateHospitalName = "The London Clinic",
             secondaryGradeLabel = "Year",
             guardianHonorific = "Mum"
         ),
@@ -151,7 +151,7 @@ object CountryCatalog {
                 HolidayFlavor("Bastille Day", "July fourteenth parades and fireworks celebrate the republic."),
                 HolidayFlavor("Labour Day", "May first marches and spring outings mark workers' solidarity.")
             ),
-            privateHospitalName = "Clinique Privée",
+            privateHospitalName = "Hôpital Américain de Paris",
             secondaryGradeLabel = "Year",
             guardianHonorific = "Maman"
         ),
@@ -166,7 +166,7 @@ object CountryCatalog {
                 HolidayFlavor("Unity Day", "October third marks German reunification with civic events."),
                 HolidayFlavor("Labour Day", "May first rallies and street festivals celebrate workers across Germany.")
             ),
-            privateHospitalName = "Privatklinik",
+            privateHospitalName = "Helios Klinikum Berlin",
             secondaryGradeLabel = "Year",
             guardianHonorific = "Mama"
         ),
@@ -196,7 +196,7 @@ object CountryCatalog {
                 HolidayFlavor("Obon", "Mid-August dances and lanterns honour ancestors and homecomings."),
                 HolidayFlavor("New Year's Day", "January shrine visits and family meals open the year with hope.")
             ),
-            privateHospitalName = "University Hospital",
+            privateHospitalName = "St. Luke's International Hospital",
             secondaryGradeLabel = "Year",
             guardianHonorific = "Okaa-san"
         ),
@@ -241,7 +241,7 @@ object CountryCatalog {
                 HolidayFlavor("Carnival", "Pre-Lent samba, costumes, and street parties sweep the cities."),
                 HolidayFlavor("Independence Day", "September seventh parades and green-yellow flags mark nationhood.")
             ),
-            privateHospitalName = "Hospital Particular",
+            privateHospitalName = "Hospital Albert Einstein",
             secondaryGradeLabel = "Year",
             guardianHonorific = "Mãe"
         ),
@@ -256,7 +256,7 @@ object CountryCatalog {
                 HolidayFlavor("Independence Day", "September sixteenth el grito re-enactments and plaza festivities."),
                 HolidayFlavor("Día de los Muertos", "November altars of marigolds and pan de muerto welcome returning souls.")
             ),
-            privateHospitalName = "Hospital Privado",
+            privateHospitalName = "Centro Médico ABC",
             secondaryGradeLabel = "Year",
             guardianHonorific = "Mamá"
         )

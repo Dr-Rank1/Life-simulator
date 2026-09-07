@@ -186,7 +186,12 @@
     <string name="content_desc_illustration">Ilustración</string>
     <string name="second_wind_bonus_active">Bono Second Wind activo: %s en tu nueva vida.</string>
     <string name="label_your_name">Su nombre</string>
+    <string name="label_whats_your_name">¿Cómo te llamas?</string>
+    <string name="hint_enter_name">Escribe tu nombre…</string>
     <string name="label_gender">Género</string>
+    <string name="label_where_born">¿Dónde naciste?</string>
+    <string name="hint_search_countries">Buscar países…</string>
+    <string name="birth_stats_random_note">Las estadísticas se asignan al azar al nacer</string>
     <string name="gender_male">Masculino</string>
     <string name="gender_female">Femenino</string>
     <string name="error_name_required">Por favor ingresa un nombre</string>

@@ -26,7 +26,7 @@ fun AdaptiveBannerAd(
         (displayMetrics.widthPixels / displayMetrics.density).toInt()
     }
 
-    if (activity == null) return
+    if (activity == null || adUnitId.isBlank()) return
 
     // `AdView.adUnitId` can only be set once. If Compose recomposes, we must NOT set it again.
     key(adUnitId) {

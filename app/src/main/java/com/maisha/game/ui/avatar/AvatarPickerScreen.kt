@@ -121,7 +121,7 @@ fun AvatarPickerScreen(
                     config = avatarConfig,
                     size = 160.dp,
                     age = previewAge,
-                    useDiceBear = true,
+                    useDiceBear = false,
                     seed = diceSeed
                 )
             }
@@ -208,7 +208,7 @@ private fun HairStyleRow(
                         size = 34.dp,
                         age = previewAge.coerceAtLeast(8),
                         expression = Expression.NEUTRAL,
-                        useDiceBear = true
+                        useDiceBear = false
                     )
                 }
             }

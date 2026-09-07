@@ -382,19 +382,21 @@ fun LifeSummaryScreen(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        Text(
-            text = stringResource(R.string.label_sponsored),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 4.dp),
-            textAlign = TextAlign.Center
-        )
-        AdaptiveBannerAd(
-            adUnitId = AdUnitConfig.BANNER,
-            modifier = Modifier.padding(bottom = 10.dp)
-        )
+        if (AdUnitConfig.adsEnabled) {
+            Text(
+                text = stringResource(R.string.label_sponsored),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp),
+                textAlign = TextAlign.Center
+            )
+            AdaptiveBannerAd(
+                adUnitId = AdUnitConfig.BANNER,
+                modifier = Modifier.padding(bottom = 10.dp)
+            )
+        }
     }
 }
 

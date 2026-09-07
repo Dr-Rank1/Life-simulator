@@ -101,7 +101,7 @@
       "minAge": 14,
       "maxAge": 15,
       "restrictedToCountry": "KE",
-      "text": "After KCPE, your family debates where you should attend secondary school \u2014 a nearby day school or a boarding school upcountry.",
+      "text": "After KCPE, your family debates where you should attend secondary school — a nearby day school or a boarding school upcountry.",
       "weight": 9,
       "tags": [
         "one_time",
@@ -132,7 +132,7 @@
       "id": "choose_secondary_school_world",
       "minAge": 14,
       "maxAge": 15,
-      "text": "After your {secondaryExam} results, your family debates where you should attend secondary school \u2014 a nearby day school or a boarding school farther away.",
+      "text": "After your {secondaryExam} results, your family debates where you should attend secondary school — a nearby day school or a boarding school farther away.",
       "weight": 9,
       "tags": [
         "one_time",
@@ -431,7 +431,7 @@
             "smarts": -3
           },
           "triggersExpulsion": true,
-          "resultText": "The school expelled you. Your parents were called in \u2014 it was a long, painful day."
+          "resultText": "The school expelled you. Your parents were called in — it was a long, painful day."
         },
         {
           "label": "Beg for one more chance",
@@ -489,7 +489,7 @@
             "money": -15000,
             "happiness": -4
           },
-          "resultText": "You drained your savings to fix what you broke. You kept your place \u2014 barely."
+          "resultText": "You drained your savings to fix what you broke. You kept your place — barely."
         },
         {
           "label": "Deny everything",
@@ -658,27 +658,37 @@
       "id": "teen_school_beat_2",
       "minAge": 14,
       "maxAge": 17,
-      "text": "A school year moment #2: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "The {secondaryExam} timetable is posted. Your name sits next to a subject you have been avoiding all year.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Build a revision plan tonight",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
-          },
-          "resultText": "You grew from the experience."
-        },
-        {
-          "label": "Play it safe",
-          "statEffects": {
+            "smarts": 3,
             "happiness": -1
           },
-          "resultText": "You kept a low profile."
+          "gpaEffect": 0.1,
+          "resultText": "The panic turns into a list. Lists you can fight."
+        },
+        {
+          "label": "Form a study group",
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 2
+          },
+          "resultText": "Someone else actually understands the hard chapter. You take notes like they are gold."
+        },
+        {
+          "label": "Convince yourself it will be fine",
+          "statEffects": {
+            "happiness": 1,
+            "smarts": -1
+          },
+          "resultText": "It is not fine. But that is a problem for future-you."
         }
       ]
     },
@@ -686,27 +696,37 @@
       "id": "teen_school_beat_3",
       "minAge": 15,
       "maxAge": 17,
-      "text": "A school year moment #3: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "A club you half-joined needs bodies for a weekend showcase. Practice starts at dawn.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Show up and take a real part",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
+            "happiness": 5,
+            "looks": 1,
+            "health": -1
           },
-          "resultText": "You grew from the experience."
+          "resultText": "You sweat, miss a cue, and still get applause. School feels less like a waiting room."
         },
         {
-          "label": "Play it safe",
+          "label": "Help with props instead",
           "statEffects": {
-            "happiness": -1
+            "happiness": 3,
+            "karma": 1
           },
-          "resultText": "You kept a low profile."
+          "resultText": "Backstage is calmer. The club still needs you."
+        },
+        {
+          "label": "Sleep through it",
+          "statEffects": {
+            "happiness": 1,
+            "karma": -1
+          },
+          "resultText": "Your weekend is restful. The group chat is not."
         }
       ]
     },
@@ -714,27 +734,39 @@
       "id": "teen_school_beat_4",
       "minAge": 16,
       "maxAge": 17,
-      "text": "A school year moment #4: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "Friends want to skip last period and ride the {transportMode} into town. A teacher is already at the gate.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Stay and sit the class",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
+            "smarts": 2,
+            "karma": 1
           },
-          "resultText": "You grew from the experience."
+          "gpaEffect": 0.05,
+          "resultText": "Boring. Also the lesson actually shows up on the quiz."
         },
         {
-          "label": "Play it safe",
+          "label": "Go but keep it small",
           "statEffects": {
-            "happiness": -1
+            "happiness": 3,
+            "smarts": -1,
+            "karma": -1
           },
-          "resultText": "You kept a low profile."
+          "resultText": "Chips, gossip, and a slightly faster heartbeat at roll call."
+        },
+        {
+          "label": "Talk them into staying",
+          "statEffects": {
+            "happiness": 1,
+            "karma": 2,
+            "smarts": 1
+          },
+          "resultText": "Nobody loves you for it. Tomorrow they copy your notes anyway."
         }
       ]
     },
@@ -742,27 +774,38 @@
       "id": "teen_school_beat_5",
       "minAge": 12,
       "maxAge": 17,
-      "text": "A school year moment #5: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "You are picked to present in front of the class. Your slides are fine. Your voice is not sure.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Rehearse out loud in the bathroom",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
+            "smarts": 2,
+            "happiness": 2,
+            "looks": 1
           },
-          "resultText": "You grew from the experience."
+          "resultText": "You still shake. You also finish. A few people clap for real."
         },
         {
-          "label": "Play it safe",
+          "label": "Read straight off the board",
           "statEffects": {
+            "smarts": 1,
             "happiness": -1
           },
-          "resultText": "You kept a low profile."
+          "resultText": "You survive. Nobody remembers the content, including you."
+        },
+        {
+          "label": "Pretend you lost your notes",
+          "statEffects": {
+            "happiness": -2,
+            "karma": -1,
+            "smarts": -1
+          },
+          "resultText": "The teacher reschedules you. The class smells the lie."
         }
       ]
     },
@@ -770,27 +813,38 @@
       "id": "teen_school_beat_6",
       "minAge": 13,
       "maxAge": 17,
-      "text": "A school year moment #6: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "A rumour says the {primaryExam} paper leaked. A classmate offers you a photo 'just in case'.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Refuse and report it",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
-          },
-          "resultText": "You grew from the experience."
-        },
-        {
-          "label": "Play it safe",
-          "statEffects": {
+            "karma": 3,
+            "smarts": 1,
             "happiness": -1
           },
-          "resultText": "You kept a low profile."
+          "resultText": "Staff take it seriously. You sleep badly and wake with a cleaner conscience."
+        },
+        {
+          "label": "Don't look, don't tell",
+          "statEffects": {
+            "happiness": 0,
+            "karma": 1
+          },
+          "resultText": "You stay out of it. The rumour dies or it doesn't — without your fingerprints."
+        },
+        {
+          "label": "Look at the photo",
+          "statEffects": {
+            "smarts": 1,
+            "karma": -3,
+            "happiness": -2
+          },
+          "resultText": "You cannot unread it. Every question on the real paper feels like a trap."
         }
       ]
     },
@@ -798,27 +852,37 @@
       "id": "teen_school_beat_7",
       "minAge": 14,
       "maxAge": 17,
-      "text": "A school year moment #7: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "Sports day. You are either in the relay or holding bottles on the sideline.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Run like it matters",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
+            "health": 2,
+            "happiness": 4,
+            "looks": 1
           },
-          "resultText": "You grew from the experience."
+          "resultText": "Lungs on fire, house points on the board. Someone chants your name once."
         },
         {
-          "label": "Play it safe",
+          "label": "Cheer loudly and manage water",
           "statEffects": {
-            "happiness": -1
+            "happiness": 3,
+            "karma": 1
           },
-          "resultText": "You kept a low profile."
+          "resultText": "You are the reason nobody cramps. Not glamorous. Necessary."
+        },
+        {
+          "label": "Hide in the shade with your phone",
+          "statEffects": {
+            "happiness": 1,
+            "health": -1
+          },
+          "resultText": "You miss the photo. You also miss the sunburn."
         }
       ]
     },
@@ -826,27 +890,37 @@
       "id": "teen_school_beat_8",
       "minAge": 15,
       "maxAge": 17,
-      "text": "A school year moment #8: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "A teacher keeps you after class. Not for trouble — they think you should apply for a competitive programme.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Ask what the application needs",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
+            "smarts": 3,
+            "happiness": 3
           },
-          "resultText": "You grew from the experience."
+          "gpaEffect": 0.1,
+          "resultText": "You leave with a deadline and a slightly bigger idea of yourself."
         },
         {
-          "label": "Play it safe",
+          "label": "Say you will think about it",
           "statEffects": {
-            "happiness": -1
+            "happiness": 1,
+            "smarts": 1
           },
-          "resultText": "You kept a low profile."
+          "resultText": "The form sits in your bag. Thinking is not the same as sending."
+        },
+        {
+          "label": "Laugh it off as not for people like you",
+          "statEffects": {
+            "happiness": -2,
+            "smarts": -1
+          },
+          "resultText": "The teacher looks tired. You replay the conversation on the {transportMode} home."
         }
       ]
     },
@@ -854,27 +928,37 @@
       "id": "teen_school_beat_9",
       "minAge": 16,
       "maxAge": 17,
-      "text": "A school year moment #9: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "Group chat drama spills into school. Two friends want you to pick a side before lunch.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Refuse to take a side",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
-          },
-          "resultText": "You grew from the experience."
-        },
-        {
-          "label": "Play it safe",
-          "statEffects": {
+            "karma": 2,
             "happiness": -1
           },
-          "resultText": "You kept a low profile."
+          "resultText": "Both of them sulk. You keep the option of still having both later."
+        },
+        {
+          "label": "Listen to each privately",
+          "statEffects": {
+            "happiness": 2,
+            "smarts": 1,
+            "karma": 1
+          },
+          "resultText": "The fight was mostly pride. You accidentally become the diplomat."
+        },
+        {
+          "label": "Forward the screenshots",
+          "statEffects": {
+            "happiness": 1,
+            "karma": -4
+          },
+          "resultText": "It explodes. You are entertaining and untrustworthy in equal measure."
         }
       ]
     },
@@ -882,27 +966,39 @@
       "id": "teen_school_beat_10",
       "minAge": 12,
       "maxAge": 17,
-      "text": "A school year moment #10: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "The canteen runs out of the good option. You can queue again, share, or skip lunch.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Share what you have",
           "statEffects": {
             "happiness": 3,
-            "smarts": 1
+            "karma": 2,
+            "health": -1
           },
-          "resultText": "You grew from the experience."
+          "resultText": "Half a meal, twice the company. You do not faint in maths."
         },
         {
-          "label": "Play it safe",
+          "label": "Buy something off campus",
           "statEffects": {
+            "happiness": 2,
+            "money": -400,
+            "health": 1
+          },
+          "resultText": "Tastier. Also you are late back through the gate."
+        },
+        {
+          "label": "Skip it and power through",
+          "statEffects": {
+            "health": -2,
+            "smarts": -1,
             "happiness": -1
           },
-          "resultText": "You kept a low profile."
+          "resultText": "The headache arrives during the last lesson. Surprise."
         }
       ]
     },
@@ -910,27 +1006,37 @@
       "id": "teen_school_beat_11",
       "minAge": 13,
       "maxAge": 17,
-      "text": "A school year moment #11: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "You catch a classmate copying your homework in the corridor. They mouth 'please' like it is a joke and a prayer.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Let them copy this once",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
+            "karma": -1,
+            "happiness": 1
           },
-          "resultText": "You grew from the experience."
+          "resultText": "They owe you. You also taught them nothing."
         },
         {
-          "label": "Play it safe",
+          "label": "Explain the method instead",
           "statEffects": {
+            "smarts": 2,
+            "karma": 2,
+            "happiness": 1
+          },
+          "resultText": "It takes longer. They might actually pass the next quiz."
+        },
+        {
+          "label": "Shut your book and walk",
+          "statEffects": {
+            "karma": 1,
             "happiness": -1
           },
-          "resultText": "You kept a low profile."
+          "resultText": "Boundaries. Ice in the group chat. Your answers stay yours."
         }
       ]
     },
@@ -938,27 +1044,36 @@
       "id": "teen_school_beat_12",
       "minAge": 14,
       "maxAge": 17,
-      "text": "A school year moment #12: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "Career day. Alumni in slightly too-nice clothes talk about jobs you have only seen in ads.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Ask a specific question",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
+            "smarts": 3,
+            "happiness": 2
           },
-          "resultText": "You grew from the experience."
+          "resultText": "One of them actually answers. You write their email on your hand."
         },
         {
-          "label": "Play it safe",
+          "label": "Collect every brochure",
           "statEffects": {
-            "happiness": -1
+            "smarts": 1,
+            "happiness": 1
           },
-          "resultText": "You kept a low profile."
+          "resultText": "Your bag is heavier. Your plan is not, yet."
+        },
+        {
+          "label": "Sit at the back and scroll",
+          "statEffects": {
+            "happiness": 0,
+            "smarts": -1
+          },
+          "resultText": "You miss the one talk that would have mattered. You do not know that yet."
         }
       ]
     },
@@ -966,27 +1081,37 @@
       "id": "teen_school_beat_13",
       "minAge": 15,
       "maxAge": 17,
-      "text": "A school year moment #13: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "A power cut hits during a practical lesson. The teacher says to 'use the time wisely'.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Quiz each other in the dark",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
+            "smarts": 3,
+            "happiness": 2
           },
-          "resultText": "You grew from the experience."
+          "gpaEffect": 0.05,
+          "resultText": "You remember more by saying it out loud. The lights return to a class that actually studied."
         },
         {
-          "label": "Play it safe",
+          "label": "Tell stories and wait",
           "statEffects": {
-            "happiness": -1
+            "happiness": 4
           },
-          "resultText": "You kept a low profile."
+          "resultText": "The period becomes a memory instead of a lesson. Not the worst trade."
+        },
+        {
+          "label": "Sneak out while staff are busy",
+          "statEffects": {
+            "happiness": 2,
+            "karma": -2,
+            "smarts": -1
+          },
+          "resultText": "You make it to the gate. The register still has your name."
         }
       ]
     },
@@ -994,27 +1119,37 @@
       "id": "teen_school_beat_14",
       "minAge": 16,
       "maxAge": 17,
-      "text": "A school year moment #14: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "Results day for a mock {secondaryExam}. Your friends compare numbers in the corridor like it is a sport.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Look at yours and make a plan",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
+            "smarts": 3,
+            "happiness": 1
           },
-          "resultText": "You grew from the experience."
+          "gpaEffect": 0.1,
+          "resultText": "The grade is a map, not a verdict. You book extra sessions."
         },
         {
-          "label": "Play it safe",
+          "label": "Celebrate or mourn together",
           "statEffects": {
-            "happiness": -1
+            "happiness": 3,
+            "health": -1
           },
-          "resultText": "You kept a low profile."
+          "resultText": "Bonding first. The retake timetable can wait until evening."
+        },
+        {
+          "label": "Hide the paper and change the subject",
+          "statEffects": {
+            "happiness": -2,
+            "smarts": -1
+          },
+          "resultText": "Nobody pushes. The number still exists in your bag."
         }
       ]
     },
@@ -1022,27 +1157,37 @@
       "id": "teen_school_beat_15",
       "minAge": 12,
       "maxAge": 17,
-      "text": "A school year moment #15: clubs, exams, or friends pull you in different directions.",
       "weight": 3,
       "tags": [
         "education",
         "teen"
       ],
+      "text": "A younger student is getting shoved near the lockers. Teachers are around the corner, not here yet.",
       "choices": [
         {
-          "label": "Lean in",
+          "label": "Step in and get them out",
           "statEffects": {
-            "happiness": 3,
-            "smarts": 1
+            "happiness": 2,
+            "health": -2,
+            "karma": 4
           },
-          "resultText": "You grew from the experience."
+          "resultText": "It is messy. The younger kid remembers your face. So do the shoves."
         },
         {
-          "label": "Play it safe",
+          "label": "Get a teacher immediately",
           "statEffects": {
-            "happiness": -1
+            "smarts": 2,
+            "karma": 2
           },
-          "resultText": "You kept a low profile."
+          "resultText": "Adults arrive fast. You did the least heroic useful thing."
+        },
+        {
+          "label": "Keep walking",
+          "statEffects": {
+            "happiness": -3,
+            "karma": -3
+          },
+          "resultText": "The sound follows you to class. You tell yourself it was not your business."
         }
       ]
     }

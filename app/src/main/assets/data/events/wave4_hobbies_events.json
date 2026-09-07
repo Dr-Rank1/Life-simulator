@@ -6,22 +6,33 @@
       "maxAge": 70,
       "text": "You get invited to an open-mic night. If you do well, people start asking for your number instead of your name.",
       "weight": 4,
-      "tags": ["requires_skill_guitar_30", "positive"],
+      "tags": [
+        "requires_skill_guitar_30",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Play the piece you practiced most",
-          "statEffects": { "happiness": 4, "money": 900 },
+          "statEffects": {
+            "happiness": 4,
+            "money": 900
+          },
           "resultText": "You nail the rhythm and earn small tips. Someone nearby says, 'You should really be charging for this.'"
         },
         {
           "label": "Try something risky and new",
-          "statEffects": { "happiness": 2, "smarts": 2 },
-          "money": 0,
+          "statEffects": {
+            "happiness": 2,
+            "smarts": 2
+          },
           "resultText": "It is not perfect, but it is memorable. Your confidence grows even if the crowd is split."
         },
         {
           "label": "Back out at the last second",
-          "statEffects": { "happiness": -2, "karma": 1 },
+          "statEffects": {
+            "happiness": -2,
+            "karma": 1
+          },
           "resultText": "You escape embarrassment, but you lose momentum. You still have the 'what if' in your head."
         }
       ]
@@ -32,21 +43,36 @@
       "maxAge": 70,
       "text": "A local market stall asks if you can help with a 'taster' batch. They want something bold, not safe.",
       "weight": 3,
-      "tags": ["requires_skill_cooking_30", "positive"],
+      "tags": [
+        "requires_skill_cooking_30",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Offer your signature dish",
-          "statEffects": { "happiness": 3, "looks": 2, "money": 700 },
+          "statEffects": {
+            "happiness": 3,
+            "looks": 2,
+            "money": 700
+          },
           "resultText": "People line up for seconds. One regular tells the stall owner you 'cook like you care about flavor.'"
         },
         {
           "label": "Go cheaper and faster to avoid risk",
-          "statEffects": { "happiness": 1, "money": 350, "smarts": 1 },
+          "statEffects": {
+            "happiness": 1,
+            "money": 350,
+            "smarts": 1
+          },
           "resultText": "The batch sells out, but it is forgettable. Still, steady work is steady progress."
         },
         {
           "label": "Over-season and ignore feedback",
-          "statEffects": { "happiness": -3, "health": -2, "karma": -1 },
+          "statEffects": {
+            "happiness": -3,
+            "health": -2,
+            "karma": -1
+          },
           "resultText": "You get a polite complaint. The stall asks for a refund, and you feel the lesson settle in."
         }
       ]
@@ -57,21 +83,35 @@
       "maxAge": 70,
       "text": "A sparring day turns into more than drills. Someone challenges you to a 'friendly' match that feels anything but friendly.",
       "weight": 4,
-      "tags": ["requires_skill_martial_arts_30", "positive"],
+      "tags": [
+        "requires_skill_martial_arts_30",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Match their intensity and learn fast",
-          "statEffects": { "health": -1, "happiness": 3, "smarts": 2 },
+          "statEffects": {
+            "health": -1,
+            "happiness": 3,
+            "smarts": 2
+          },
           "resultText": "You survive the hard rounds and leave with new timing. The coach looks impressed."
         },
         {
           "label": "Focus on defense and outlast them",
-          "statEffects": { "happiness": 2, "looks": 1 },
+          "statEffects": {
+            "happiness": 2,
+            "looks": 1
+          },
           "resultText": "You avoid unnecessary damage. People respect your discipline, and your confidence stays clean."
         },
         {
           "label": "Showboat for approval",
-          "statEffects": { "happiness": -1, "health": -3, "karma": -2 },
+          "statEffects": {
+            "happiness": -1,
+            "health": -3,
+            "karma": -2
+          },
           "resultText": "You win the moment and lose the lesson. The hype ends the second you get hurt."
         }
       ]
@@ -82,21 +122,35 @@
       "maxAge": 70,
       "text": "At a community 'fix it' night, someone brings a broken app and expects miracles in one afternoon.",
       "weight": 4,
-      "tags": ["requires_skill_programming_30", "positive"],
+      "tags": [
+        "requires_skill_programming_30",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Debug patiently and explain your steps",
-          "statEffects": { "smarts": 3, "happiness": 2, "money": 500 },
+          "statEffects": {
+            "smarts": 3,
+            "happiness": 2,
+            "money": 500
+          },
           "resultText": "They do not just leave impressed - they remember you for future work."
         },
         {
           "label": "Rush the solution and hope it holds",
-          "statEffects": { "smarts": 1, "happiness": -2, "money": 800 },
+          "statEffects": {
+            "smarts": 1,
+            "happiness": -2,
+            "money": 800
+          },
           "resultText": "It works for a week. Then the same user comes back angry, and you learn what 'quality' costs."
         },
         {
           "label": "Refuse the request to avoid drama",
-          "statEffects": { "happiness": 1, "karma": 1 },
+          "statEffects": {
+            "happiness": 1,
+            "karma": 1
+          },
           "resultText": "You protect your time. The right people later notice you didn't fold under pressure."
         }
       ]
@@ -107,25 +161,114 @@
       "maxAge": 70,
       "text": "You submit a short piece to a small publication. The wait is where your nerves start writing their own story.",
       "weight": 3,
-      "tags": ["requires_skill_writing_30", "positive"],
+      "tags": [
+        "requires_skill_writing_30",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Revise once more before sending",
-          "statEffects": { "smarts": 2, "happiness": 2, "money": 650 },
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 2,
+            "money": 650
+          },
           "resultText": "The editor responds fast. They want another draft next month."
         },
         {
           "label": "Send it as-is and accept the risk",
-          "statEffects": { "happiness": 1, "karma": 1 },
+          "statEffects": {
+            "happiness": 1,
+            "karma": 1
+          },
           "resultText": "The piece is 'good' rather than perfect. You still feel proud because you shipped it."
         },
         {
           "label": "Delete it and pretend you never wrote",
-          "statEffects": { "happiness": -4 },
+          "statEffects": {
+            "happiness": -4
+          },
           "resultText": "You protect your ego, but you also starve your ambition."
+        }
+      ]
+    },
+    {
+      "id": "wave4_hobby_guitar_lesson_trade",
+      "minAge": 16,
+      "maxAge": 70,
+      "weight": 3,
+      "tags": [
+        "requires_skill_guitar_30",
+        "positive"
+      ],
+      "text": "A neighbour's kid wants guitar lessons. They can pay a little, or you can teach for free and build a reputation.",
+      "choices": [
+        {
+          "label": "Charge a fair weekly rate",
+          "statEffects": {
+            "happiness": 2,
+            "money": 1800,
+            "smarts": 1
+          },
+          "resultText": "You show up prepared. They actually practice."
+        },
+        {
+          "label": "Teach for free this month",
+          "statEffects": {
+            "happiness": 4,
+            "karma": 3
+          },
+          "resultText": "The family talks about you at dinner. More messages arrive."
+        },
+        {
+          "label": "Recommend someone else",
+          "statEffects": {
+            "happiness": 1,
+            "karma": 1
+          },
+          "resultText": "You protect your evenings. The kid still finds a teacher."
+        }
+      ]
+    },
+    {
+      "id": "wave4_hobby_cooking_family_recipe",
+      "minAge": 16,
+      "maxAge": 70,
+      "weight": 3,
+      "tags": [
+        "requires_skill_cooking_30"
+      ],
+      "text": "An elder finally offers the family recipe — with the warning that you will 'do it wrong the first three times'.",
+      "choices": [
+        {
+          "label": "Cook it with them watching",
+          "statEffects": {
+            "happiness": 5,
+            "smarts": 2,
+            "health": 1
+          },
+          "familyRelationshipEffect": 8,
+          "resultText": "The kitchen fills with arguments and steam. The third attempt tastes like home."
+        },
+        {
+          "label": "Write every step down",
+          "statEffects": {
+            "smarts": 3,
+            "happiness": 2
+          },
+          "familyRelationshipEffect": 4,
+          "resultText": "You save more than a recipe. You save the timing they never wrote."
+        },
+        {
+          "label": "Say you will try later",
+          "statEffects": {
+            "happiness": -1,
+            "karma": -1
+          },
+          "familyRelationshipEffect": -3,
+          "resultText": "Later is a polite no. They do not offer twice."
         }
       ]
     }
   ]
 }
-

@@ -214,7 +214,7 @@ fun CharacterCreationScreen(
             }
 
             // ── Name field ────────────────────────────────────────────────
-            SectionLabel(text = "What's your name?")
+            SectionLabel(text = stringResource(R.string.label_whats_your_name))
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -224,7 +224,7 @@ fun CharacterCreationScreen(
                 OutlinedTextField(
                     value = uiState.name,
                     onValueChange = onNameChange,
-                    placeholder = { Text("Enter name…", color = Color.White.copy(alpha = 0.45f)) },
+                    placeholder = { Text(stringResource(R.string.hint_enter_name), color = Color.White.copy(alpha = 0.45f)) },
                     singleLine = true,
                     isError = uiState.nameError != null,
                     supportingText = uiState.nameError?.let { err -> { Text(err, color = Color(0xFFFF8A80)) } },
@@ -263,7 +263,7 @@ fun CharacterCreationScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // ── Gender selector ───────────────────────────────────────────
-            SectionLabel(text = "Gender")
+            SectionLabel(text = stringResource(R.string.label_gender))
             Spacer(modifier = Modifier.height(8.dp))
             GenderToggle(
                 selected = uiState.selectedGender,
@@ -273,7 +273,7 @@ fun CharacterCreationScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // ── Country strip ─────────────────────────────────────────────
-            SectionLabel(text = "Where are you born?")
+            SectionLabel(text = stringResource(R.string.label_where_born))
             Spacer(modifier = Modifier.height(8.dp))
 
             // Selected country hero card
@@ -285,7 +285,7 @@ fun CharacterCreationScreen(
             OutlinedTextField(
                 value = uiState.countrySearchQuery,
                 onValueChange = onCountrySearchChange,
-                placeholder = { Text("Search countries…", color = Color.White.copy(alpha = 0.45f)) },
+                placeholder = { Text(stringResource(R.string.hint_search_countries), color = Color.White.copy(alpha = 0.45f)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
@@ -551,10 +551,10 @@ private fun CountryChip(
 @Composable
 private fun BirthStatPreviewRow() {
     val stats = listOf(
-        Triple("❤️", "Health", StatHealth),
-        Triple("😊", "Happiness", StatHappiness),
-        Triple("🧠", "Smarts", StatSmarts),
-        Triple("✨", "Looks", StatLooks)
+        Triple("❤️", stringResource(R.string.stat_health), StatHealth),
+        Triple("😊", stringResource(R.string.stat_happiness), StatHappiness),
+        Triple("🧠", stringResource(R.string.stat_smarts), StatSmarts),
+        Triple("✨", stringResource(R.string.stat_looks), StatLooks)
     )
     val barProgress by animateFloatAsState(
         targetValue = 1f,
@@ -604,7 +604,7 @@ private fun BirthStatPreviewRow() {
     }
     Spacer(modifier = Modifier.height(4.dp))
     Text(
-        text = "Stats are randomly assigned at birth",
+        text = stringResource(R.string.birth_stats_random_note),
         style = MaterialTheme.typography.labelSmall,
         color = Color.White.copy(alpha = 0.4f),
         textAlign = TextAlign.Center,

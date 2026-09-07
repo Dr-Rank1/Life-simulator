@@ -157,7 +157,12 @@
     <string name="format_died_at_age">Alifariki akiwa na %s</string>
     <string name="second_wind_bonus_active">Bonasi ya Second Wind imewashwa: %s kwenye maisha yako mapya!</string>
     <string name="label_your_name">Jina lako</string>
+    <string name="label_whats_your_name">Jina lako ni nani?</string>
+    <string name="hint_enter_name">Andika jina…</string>
     <string name="label_gender">Jinsia</string>
+    <string name="label_where_born">Ulizaliwa wapi?</string>
+    <string name="hint_search_countries">Tafuta nchi…</string>
+    <string name="birth_stats_random_note">Takwimu zinapewa nasibu wakati wa kuzaliwa</string>
     <string name="gender_male">Mwanaume</string>
     <string name="gender_female">Mwanamke</string>
     <string name="error_name_required">Tafadhali weka jina</string>

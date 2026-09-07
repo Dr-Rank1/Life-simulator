@@ -186,7 +186,12 @@
     <string name="content_desc_illustration">चित्रण</string>
     <string name="second_wind_bonus_active">दूसरा पवन बोनस सक्रिय: %s आपके नए जीवन पर!</string>
     <string name="label_your_name">आपका नाम</string>
+    <string name="label_whats_your_name">आपका नाम क्या है?</string>
+    <string name="hint_enter_name">नाम लिखें…</string>
     <string name="label_gender">लिंग</string>
+    <string name="label_where_born">आपका जन्म कहाँ हुआ?</string>
+    <string name="hint_search_countries">देश खोजें…</string>
+    <string name="birth_stats_random_note">जन्म के समय आँकड़े यादृच्छिक रूप से तय होते हैं</string>
     <string name="gender_male">पुरुष</string>
     <string name="gender_female">महिला</string>
     <string name="error_name_required">कृपया एक नाम दर्ज करें</string>

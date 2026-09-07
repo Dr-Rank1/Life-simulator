@@ -17,11 +17,11 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-        // Replace with hosted HTTPS URL before Play Store submission (see docs/PRIVACY_POLICY.md).
+        // Hosted policy for Play Store and in-app Settings (see docs/PRIVACY_POLICY.md).
         buildConfigField(
             "String",
             "PRIVACY_POLICY_URL",
-            "\"https://REPLACE-WITH-HOSTED-PRIVACY-POLICY-URL\""
+            "\"https://github.com/stewiriffin/Life-simulator/blob/main/docs/PRIVACY_POLICY.md\""
         )
     }
 
@@ -51,14 +51,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Override via gradle.properties: ADMOB_INTERSTITIAL / ADMOB_REWARDED / ADMOB_BANNER.
-            // Falls back to Google test units until real IDs are provided (never ship that mix).
-            val interstitial = (project.findProperty("ADMOB_INTERSTITIAL") as String?)
-                ?: "ca-app-pub-3940256099942544/1033173712"
-            val rewarded = (project.findProperty("ADMOB_REWARDED") as String?)
-                ?: "ca-app-pub-3940256099942544/5224354917"
-            val banner = (project.findProperty("ADMOB_BANNER") as String?)
-                ?: "ca-app-pub-3940256099942544/6300978111"
+            // Real units from gradle.properties. Empty means ads stay off — never ship Google test units.
+            val interstitial = (project.findProperty("ADMOB_INTERSTITIAL") as String?) ?: ""
+            val rewarded = (project.findProperty("ADMOB_REWARDED") as String?) ?: ""
+            val banner = (project.findProperty("ADMOB_BANNER") as String?) ?: ""
             buildConfigField("Boolean", "USE_TEST_ADS", "false")
             buildConfigField("String", "AD_INTERSTITIAL", "\"$interstitial\"")
             buildConfigField("String", "AD_REWARDED", "\"$rewarded\"")

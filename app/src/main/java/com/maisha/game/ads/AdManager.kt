@@ -23,6 +23,7 @@ class AdManager @Inject constructor() {
     private var isLoadingRewarded = false
 
     fun preloadInterstitial(context: Context) {
+        if (!AdUnitConfig.adsEnabled) return
         if (interstitialAd != null || isLoadingInterstitial) return
         isLoadingInterstitial = true
         InterstitialAd.load(
@@ -66,6 +67,7 @@ class AdManager @Inject constructor() {
     }
 
     fun preloadRewarded(context: Context) {
+        if (!AdUnitConfig.adsEnabled) return
         if (rewardedAd != null || isLoadingRewarded) return
         isLoadingRewarded = true
         RewardedAd.load(

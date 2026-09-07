@@ -4,7 +4,7 @@
       "id": "prison_gang_recruitment",
       "minAge": 16,
       "maxAge": 70,
-      "text": "A hardened inmate approaches you in the yard and asks whether you want protection \u2014 at a price.",
+      "text": "A hardened inmate approaches you in the yard and asks whether you want protection — at a price.",
       "weight": 5,
       "tags": [
         "prison",
@@ -26,7 +26,7 @@
             "happiness": -2
           },
           "paroleEffect": 1,
-          "resultText": "They backed off \u2014 for now."
+          "resultText": "They backed off — for now."
         },
         {
           "label": "Report it to a guard",
@@ -55,7 +55,7 @@
             "happiness": -3
           },
           "paroleEffect": -1,
-          "resultText": "The search passed without incident \u2014 this time."
+          "resultText": "The search passed without incident — this time."
         },
         {
           "label": "Speak up honestly",
@@ -203,28 +203,38 @@
       "id": "prison_routine_2",
       "minAge": 16,
       "maxAge": 80,
-      "text": "Prison routine event #2.",
       "weight": 3,
       "tags": [
         "prison",
         "requires_incarcerated"
       ],
+      "text": "A new arrival looks lost at mealtime. Older inmates are already watching who sits where.",
       "choices": [
         {
-          "label": "Keep calm",
+          "label": "Make space at your table",
+          "statEffects": {
+            "happiness": 2,
+            "karma": 3
+          },
+          "paroleEffect": 1,
+          "resultText": "You gain a cautious ally. The room notices you did not pick on the weak."
+        },
+        {
+          "label": "Stay out of it",
           "statEffects": {
             "happiness": -1
           },
           "paroleEffect": 1,
-          "resultText": "Another day survived."
+          "resultText": "You eat in peace. The new arrival finds another way, or does not."
         },
         {
-          "label": "Lash out",
+          "label": "Join the mockery",
           "statEffects": {
-            "happiness": -6
+            "happiness": -3,
+            "karma": -3
           },
-          "paroleEffect": -1,
-          "resultText": "Solitary reflection followed."
+          "paroleEffect": -2,
+          "resultText": "Cheap laughs. Staff write it down anyway."
         }
       ]
     },
@@ -232,28 +242,36 @@
       "id": "prison_routine_3",
       "minAge": 16,
       "maxAge": 80,
-      "text": "Prison routine event #3.",
       "weight": 3,
       "tags": [
         "prison",
         "requires_incarcerated"
       ],
+      "text": "The library cart stops at your block. Most books are falling apart. One title still looks unread.",
       "choices": [
         {
-          "label": "Keep calm",
+          "label": "Take the book and actually finish it",
+          "statEffects": {
+            "smarts": 3,
+            "happiness": 2
+          },
+          "paroleEffect": 2,
+          "resultText": "The story lasts longer than the day. A counsellor later asks what you thought."
+        },
+        {
+          "label": "Trade it for extra snacks",
+          "statEffects": {
+            "happiness": 1,
+            "money": 200
+          },
+          "resultText": "Calories now. The pages go to someone else."
+        },
+        {
+          "label": "Ignore the cart",
           "statEffects": {
             "happiness": -1
           },
-          "paroleEffect": 1,
-          "resultText": "Another day survived."
-        },
-        {
-          "label": "Lash out",
-          "statEffects": {
-            "happiness": -6
-          },
-          "paroleEffect": -1,
-          "resultText": "Solitary reflection followed."
+          "resultText": "Another afternoon of staring at paint."
         }
       ]
     },
@@ -261,28 +279,41 @@
       "id": "prison_routine_4",
       "minAge": 16,
       "maxAge": 80,
-      "text": "Prison routine event #4.",
       "weight": 3,
       "tags": [
         "prison",
         "requires_incarcerated"
       ],
+      "text": "Yard time. A pickup game starts, then a foul turns into shoving.",
       "choices": [
         {
-          "label": "Keep calm",
+          "label": "Break it up before officers arrive",
           "statEffects": {
-            "happiness": -1
+            "health": -1,
+            "karma": 2,
+            "happiness": 1
           },
-          "paroleEffect": 1,
-          "resultText": "Another day survived."
+          "paroleEffect": 2,
+          "resultText": "Nobody thanks you loudly. The count stays clean."
         },
         {
-          "label": "Lash out",
+          "label": "Back your side and swing",
           "statEffects": {
-            "happiness": -6
+            "health": -6,
+            "happiness": -3,
+            "karma": -2
           },
-          "paroleEffect": -1,
-          "resultText": "Solitary reflection followed."
+          "paroleEffect": -3,
+          "resultText": "Adrenaline, bruises, and a write-up."
+        },
+        {
+          "label": "Walk the fence until it ends",
+          "statEffects": {
+            "happiness": -1,
+            "health": 1
+          },
+          "paroleEffect": 1,
+          "resultText": "Coward to some. Free to others. You still have yard tomorrow."
         }
       ]
     },
@@ -290,28 +321,39 @@
       "id": "prison_routine_5",
       "minAge": 16,
       "maxAge": 80,
-      "text": "Prison routine event #5.",
       "weight": 3,
       "tags": [
         "prison",
         "requires_incarcerated"
       ],
+      "text": "A job supervisor offers you kitchen duty — early mornings, extra food, and closer eyes on you.",
       "choices": [
         {
-          "label": "Keep calm",
+          "label": "Take the kitchen job",
           "statEffects": {
-            "happiness": -1
+            "happiness": 2,
+            "health": 1,
+            "smarts": 1
           },
-          "paroleEffect": 1,
-          "resultText": "Another day survived."
+          "paroleEffect": 2,
+          "resultText": "Burnt wrists and better meals. You look employable on paper."
         },
         {
-          "label": "Lash out",
+          "label": "Stay on laundry and keep your head down",
           "statEffects": {
-            "happiness": -6
+            "happiness": 1
           },
-          "paroleEffect": -1,
-          "resultText": "Solitary reflection followed."
+          "paroleEffect": 1,
+          "resultText": "Predictable. Safe. The days blur."
+        },
+        {
+          "label": "Refuse work and sleep in",
+          "statEffects": {
+            "happiness": -2,
+            "karma": -1
+          },
+          "paroleEffect": -2,
+          "resultText": "Idle time is not rest here. Staff mark you uncooperative."
         }
       ]
     },
@@ -319,28 +361,39 @@
       "id": "prison_routine_6",
       "minAge": 16,
       "maxAge": 80,
-      "text": "Prison routine event #6.",
       "weight": 3,
       "tags": [
         "prison",
         "requires_incarcerated"
       ],
+      "text": "Lights-out is late because of a count discrepancy. Everyone is tired and rumour fills the dark.",
       "choices": [
         {
-          "label": "Keep calm",
+          "label": "Tell people to stay quiet",
           "statEffects": {
+            "karma": 1,
             "happiness": -1
           },
           "paroleEffect": 1,
-          "resultText": "Another day survived."
+          "resultText": "The block settles. Officers finish faster."
         },
         {
-          "label": "Lash out",
+          "label": "Start a whispered card game",
           "statEffects": {
-            "happiness": -6
+            "happiness": 3,
+            "karma": -1
           },
           "paroleEffect": -1,
-          "resultText": "Solitary reflection followed."
+          "resultText": "You win a few extra commissary IOUs. Someone still snores through it."
+        },
+        {
+          "label": "Lie awake and replay your case",
+          "statEffects": {
+            "happiness": -4,
+            "smarts": 1,
+            "health": -1
+          },
+          "resultText": "No new answers. Dawn still arrives."
         }
       ]
     },
@@ -348,28 +401,40 @@
       "id": "prison_routine_7",
       "minAge": 16,
       "maxAge": 80,
-      "text": "Prison routine event #7.",
       "weight": 3,
       "tags": [
         "prison",
         "requires_incarcerated"
       ],
+      "text": "A counsellor schedules a short session. They ask if you have a plan for the first month after release.",
       "choices": [
         {
-          "label": "Keep calm",
+          "label": "Talk honestly about work and housing",
           "statEffects": {
-            "happiness": -1
+            "smarts": 2,
+            "happiness": 2,
+            "karma": 1
           },
-          "paroleEffect": 1,
-          "resultText": "Another day survived."
+          "paroleEffect": 3,
+          "resultText": "They write something useful in your file. It feels like a door, not a lecture."
         },
         {
-          "label": "Lash out",
+          "label": "Give the answers they want to hear",
           "statEffects": {
-            "happiness": -6
+            "happiness": 1,
+            "smarts": 1
+          },
+          "paroleEffect": 1,
+          "resultText": "The session is smooth and empty. Paperwork likes you anyway."
+        },
+        {
+          "label": "Shut down and stare at the clock",
+          "statEffects": {
+            "happiness": -2,
+            "karma": -1
           },
           "paroleEffect": -1,
-          "resultText": "Solitary reflection followed."
+          "resultText": "They mark you as unengaged. The hour still counts against you."
         }
       ]
     },
@@ -377,28 +442,41 @@
       "id": "prison_routine_8",
       "minAge": 16,
       "maxAge": 80,
-      "text": "Prison routine event #8.",
       "weight": 3,
       "tags": [
         "prison",
         "requires_incarcerated"
       ],
+      "text": "A package from outside is delayed. Someone offers to 'speed it up' for a favour.",
       "choices": [
         {
-          "label": "Keep calm",
+          "label": "Wait for official channels",
           "statEffects": {
-            "happiness": -1
+            "happiness": -1,
+            "karma": 2
           },
-          "paroleEffect": 1,
-          "resultText": "Another day survived."
+          "paroleEffect": 2,
+          "resultText": "It arrives late and intact. You keep your record clean."
         },
         {
-          "label": "Lash out",
+          "label": "Pay the favour",
           "statEffects": {
-            "happiness": -6
+            "happiness": 2,
+            "karma": -2,
+            "money": -400
           },
           "paroleEffect": -1,
-          "resultText": "Solitary reflection followed."
+          "resultText": "You get your things. You also owe a person you should not owe."
+        },
+        {
+          "label": "Report the offer",
+          "statEffects": {
+            "happiness": -2,
+            "karma": 1,
+            "health": -1
+          },
+          "paroleEffect": 1,
+          "resultText": "Staff listen. The wing gets colder toward you for a week."
         }
       ]
     }
