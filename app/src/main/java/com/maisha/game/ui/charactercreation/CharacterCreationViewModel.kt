@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maisha.game.R
 import com.maisha.game.data.CountryCatalog
-import com.maisha.game.data.NamePool
 import com.maisha.game.data.local.CharacterRepository
 import com.maisha.game.data.local.MAX_SLOTS
 import com.maisha.game.data.local.MetaBonusRepository
@@ -15,6 +14,7 @@ import com.maisha.game.data.model.AvatarConfig
 import com.maisha.game.data.model.Character
 import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.Stats
+import com.maisha.game.data.remote.RandomNameService
 import com.maisha.game.domain.FamilyGenerator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -56,7 +56,8 @@ class CharacterCreationViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val characterRepository: CharacterRepository,
     private val familyGenerator: FamilyGenerator,
-    private val metaBonusRepository: MetaBonusRepository
+    private val metaBonusRepository: MetaBonusRepository,
+    private val randomNameService: RandomNameService
 ) : ViewModel() {
 
     private val slotId: Int = savedStateHandle.get<Int>("slotId")
@@ -70,6 +71,8 @@ class CharacterCreationViewModel @Inject constructor(
         )
     )
     val uiState: StateFlow<CharacterCreationUiState> = _uiState.asStateFlow()
+
+    private var randomNameGeneration = 0
 
     init {
         viewModelScope.launch {
@@ -117,12 +120,20 @@ class CharacterCreationViewModel @Inject constructor(
     }
 
     fun onRandomName() {
+        val requestId = ++randomNameGeneration
         val state = _uiState.value
-        _uiState.update {
-            it.copy(
-                name = NamePool.randomFullName(state.selectedGender, state.selectedCountryCode),
-                nameError = null
+        viewModelScope.launch {
+            val generated = randomNameService.fetchName(
+                gender = state.selectedGender,
+                countryCode = state.selectedCountryCode
             )
+            if (requestId != randomNameGeneration) return@launch
+            _uiState.update {
+                it.copy(
+                    name = generated.fullName.take(MAX_NAME_LENGTH),
+                    nameError = null
+                )
+            }
         }
     }
 

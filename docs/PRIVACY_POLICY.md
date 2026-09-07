@@ -13,6 +13,10 @@ Maisha saves gameplay on your device only:
 
 This data stays on the device unless you share a life card, reset data in Settings, or uninstall the app.
 
+## Optional name suggestions
+
+If you tap Random Name during character creation, Maisha may request a first and last name from the [Random User Generator](https://randomuser.me/). The request includes only optional gender and nationality filters. No account is created and no other profile data is sent. If the request fails or the country is not supported by that service, Maisha uses a name list stored in the app.
+
 ## Ads
 
 The app may show ads through Google AdMob. Google may collect advertising identifiers and approximate location or device information as described in [Google’s advertising privacy policy](https://policies.google.com/privacy).

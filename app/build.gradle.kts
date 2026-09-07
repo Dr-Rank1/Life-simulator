@@ -112,6 +112,7 @@ dependencies {
     ksp(libs.room.compiler)
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.okhttp)
 
     implementation(libs.play.services.ads)
     implementation(libs.androidx.datastore.preferences)
@@ -124,6 +125,7 @@ dependencies {
     implementation(libs.coil.compose)
 
     testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.okhttp.mockwebserver)
     testImplementation("org.robolectric:robolectric:${libs.versions.robolectric.get()}")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:${libs.versions.coroutinesTest.get()}")
     testImplementation("androidx.test:core:1.6.1")

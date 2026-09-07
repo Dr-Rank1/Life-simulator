@@ -51,7 +51,13 @@ class FamilyGeneratorTest {
         val siblings = family.filter {
             it.relation == com.maisha.game.data.model.RelationType.SIBLING
         }
+        val surname = sharedTrailingWords(mother.name, father.name)
+        assertTrue(surname.isNotBlank())
         siblings.forEach { sibling ->
+            assertTrue(
+                "${sibling.name} should keep family surname $surname",
+                sibling.name.endsWith(" $surname")
+            )
             val skin = sibling.avatarConfig.skinTone
             val hair = sibling.avatarConfig.hairColor
             val midSkin = (mother.avatarConfig.skinTone + father.avatarConfig.skinTone) / 2
@@ -67,5 +73,34 @@ class FamilyGeneratorTest {
                     hair == midHair
             )
         }
+    }
+
+    @Test
+    fun generateFamily_keepsCompoundSurnamesOnEveryRelative() {
+        repeat(400) {
+            val family = FamilyGenerator().generateFamily(characterAge = 3, countryCode = "PH")
+            val mother = family.first { it.relation == com.maisha.game.data.model.RelationType.MOTHER }
+            val father = family.first { it.relation == com.maisha.game.data.model.RelationType.FATHER }
+            val surname = sharedTrailingWords(mother.name, father.name)
+            assertTrue(surname.isNotBlank())
+            family.forEach { person ->
+                assertTrue(
+                    "${person.name} should end with $surname",
+                    person.name.endsWith(" $surname")
+                )
+            }
+        }
+    }
+
+    private fun sharedTrailingWords(a: String, b: String): String {
+        val left = a.split(" ")
+        val right = b.split(" ")
+        val suffix = ArrayDeque<String>()
+        var i = 1
+        while (i <= minOf(left.size, right.size) && left[left.size - i] == right[right.size - i]) {
+            suffix.addFirst(left[left.size - i])
+            i++
+        }
+        return suffix.joinToString(" ")
     }
 }

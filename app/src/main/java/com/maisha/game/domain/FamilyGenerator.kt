@@ -47,7 +47,7 @@ class FamilyGenerator @Inject constructor() {
                     PersonGenerator.SIBLING_AGE_OFFSET_MAX
                 )
                 family += PersonGenerator.buildPerson(
-                    name = "${pool.randomSiblingName().substringBeforeLast(" ")} $surname",
+                    name = "${pool.randomGivenName()} $surname",
                     relation = RelationType.SIBLING,
                     countryCode = countryCode,
                     age = (characterAge + ageOffset).coerceAtLeast(0),

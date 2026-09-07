@@ -39,20 +39,20 @@ class GlobalContentCoverageTest {
     )
 
     @Test
-    fun `every roster country has name pool with at least 10 names per gender`() {
+    fun `every roster country has name pool with at least 40 names per gender`() {
         CountryCatalog.all().forEach { country ->
             val pool = NamePool.getNamePool(country.code)
             assertTrue(
                 "${country.code} male names: ${pool.maleFirstNames.size}",
-                pool.maleFirstNames.size >= 10
+                pool.maleFirstNames.size >= 40
             )
             assertTrue(
                 "${country.code} female names: ${pool.femaleFirstNames.size}",
-                pool.femaleFirstNames.size >= 10
+                pool.femaleFirstNames.size >= 40
             )
             assertTrue(
                 "${country.code} surnames: ${pool.surnames.size}",
-                pool.surnames.size >= 10
+                pool.surnames.size >= 40
             )
         }
     }

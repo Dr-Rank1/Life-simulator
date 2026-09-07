@@ -137,12 +137,46 @@ object IllustrationCatalog {
         "world" to raster("achievement_globe", "img_achievement_worldly")
     )
 
-    private val defaultJob = jobCategoryRaster.getValue("service")
     private val defaultAsset = raster("asset_default", "img_asset_car_sedan")
     private val defaultAchievement = achievementIllustrations.getValue(AchievementCategory.CAREER)
 
-    fun getIllustrationForJob(jobId: String): IllustrationRef =
-        jobIllustrations[jobId] ?: defaultJob
+    fun getIllustrationForJob(jobId: String): IllustrationRef {
+        val id = jobId.substringBefore('@').lowercase()
+        return jobIllustrations[id] ?: jobCategoryRaster.getValue(jobCategoryForId(id))
+    }
+
+    private fun jobCategoryForId(id: String): String = when {
+        containsAny(
+            id,
+            "driver", "conductor", "trucker", "taxi", "boda", "jeepney", "angkot",
+            "rickshaw", "mototaxi", "microbus", "matatu", "danfo", "seafarer",
+            "okada", "ice_road", "metro", "train_conductor", "shinkansen"
+        ) -> "transport"
+        containsAny(id, "shop", "retail", "sales", "cashier", "market", "mpesa", "fast_food") -> "retail"
+        containsAny(id, "guard", "security", "police") -> "security"
+        containsAny(id, "teacher", "professor", "librarian", "coach") -> "teacher"
+        containsAny(id, "software", "developer", "it_support", "bpo", "programmer") -> "tech"
+        containsAny(
+            id,
+            "nurse", "doctor", "paramedic", "pharmacist", "dentist", "nhs"
+        ) -> "medical"
+        containsAny(id, "accountant", "bank", "finance") -> "finance"
+        containsAny(
+            id,
+            "journalist", "media", "streamer", "content", "ambassador", "musician",
+            "mariachi", "nollywood", "broadway", "photographer"
+        ) -> "media"
+        containsAny(
+            id,
+            "engineer", "architect", "mechanic", "electric", "plumber", "construction",
+            "autoworker", "oil", "mine"
+        ) -> "engineering"
+        containsAny(id, "civil_servant", "diplomat", "government") -> "government"
+        else -> "service"
+    }
+
+    private fun containsAny(id: String, vararg needles: String): Boolean =
+        needles.any { it in id }
 
     fun getIllustrationForAsset(assetType: AssetType): IllustrationRef =
         assetTypeIllustrations[assetType] ?: defaultAsset

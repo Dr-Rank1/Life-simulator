@@ -38,10 +38,11 @@ class CountryCatalogContentTest {
     }
 
     @Test
-    fun `US job pool is universal only`() {
+    fun `US job pool includes local flavor and not Kenya transport`() {
         val jobs = JobPool.getJobsForCountry("US")
-        assertFalse(JobPool.hasCountryFlavorJobs("US"))
+        assertTrue(JobPool.hasCountryFlavorJobs("US"))
         assertTrue(jobs.any { it.id == "driver" })
+        assertTrue(jobs.any { it.id == "ranch_hand" })
         assertFalse(jobs.any { it.id == "matatu_conductor" })
     }
 

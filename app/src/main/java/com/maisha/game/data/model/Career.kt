@@ -321,7 +321,11 @@ object JobLadder {
             id.contains("journalist") || id.contains("reporter") || id.contains("editor") -> MEDIA
             id.contains("soldier") || id.contains("military") || id.contains("army") -> MILITARY
             id.contains("shop") || id.contains("guard") || id.contains("driver") ||
-                id.contains("chef") || id.contains("delivery") || id.contains("trucker") -> SERVICE
+                id.contains("chef") || id.contains("delivery") || id.contains("trucker") ||
+                id.contains("waiter") || id.contains("bartender") || id.contains("mechanic") ||
+                id.contains("farmer") || id.contains("police") || id.contains("fire") ||
+                id.contains("warehouse") || id.contains("plumber") || id.contains("electric") ||
+                id.contains("cleaner") || id.contains("construction") || id.contains("cashier") -> SERVICE
             else -> GENERAL
         }
     }
