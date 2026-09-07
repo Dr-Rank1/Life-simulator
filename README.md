@@ -1,200 +1,140 @@
-# Maisha — Life Simulator
+# Maisha
 
-**Maisha** (Swahili for *life*) is a single-player life-simulation game for Android. Players create a character, age year-by-year through school, career, relationships, crime, health, and finance, and either die naturally or continue their family line across generations. The app targets mid-range Android phones (360dp width, API 26+) with a Compose-first UI and offline-first local saves.
+**Live your story. One year at a time.**
 
-The project is a **worldwide life simulator** across a roster of **15 countries** (KE, NG, ZA, EG, US, CA, GB, FR, DE, IN, JP, PH, ID, BR, MX). It began as a Kenya-focused prototype; Kenya-specific events remain behind `restrictedToCountry: "KE"` while universal content uses `{placeholder}` flavor (transport, exams, money apps) and per-country hospitals, school names, and grade labels so non-Kenya lives feel local.
+Maisha (Swahili for *life*) is a single-player **life simulator** for Android. Create a character, tap **Age Up**, and watch a whole life unfold — school, work, love, money, trouble, and the family you leave behind.
 
----
+It plays in the same space as BitLife and Age Sim, built for **mid-range phones** and designed to feel **local** in **15 countries**, not like a US template with flags stuck on.
 
-## Tech stack
-
-| Technology | Role |
-|------------|------|
-| **Kotlin 2.0** | Primary language |
-| **Jetpack Compose** | UI — declarative screens, Material 3, bottom-nav main loop |
-| **MVVM + Hilt** | ViewModels are `@HiltViewModel` with constructor injection; UI reads `StateFlow` only |
-| **Room** | Structured per-slot character saves (stats, JSON blobs for family/education/career/assets) |
-| **DataStore** | Lightweight app preferences (sound, haptics, language, onboarding, tips) |
-| **Kotlinx Serialization** | JSON event content + Room field serialization |
-| **WorkManager + Hilt** | Daily reminders and contextual nudge notifications |
-| **Google Mobile Ads** | Banner, interstitial, rewarded (Second Wind) — **test IDs in dev** |
-| **JUnit 4** | Domain engine unit tests (pure functions, no emulator) |
-
-Room holds durable game state; DataStore holds user settings that should survive character resets without a schema migration.
+<p>
+  <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white">
+  <img alt="Android" src="https://img.shields.io/badge/Android-API%2026%2B-3DDC84?logo=android&logoColor=white">
+  <img alt="Jetpack Compose" src="https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?logo=jetpackcompose&logoColor=white">
+  <img alt="License" src="https://img.shields.io/badge/license-unlicensed-lightgrey">
+</p>
 
 ---
 
-## Architecture (summary)
+## Play a life
+
+You start with a name, a country, a face, and a handful of stats. Then every year is a choice.
+
+| You live | What that means in Maisha |
+|----------|---------------------------|
+| **Childhood & school** | Classmates, crushes, bullies, clubs, exams with local names, detention, university majors and loans |
+| **Work** | Country job pools, performance and office politics, part-time gigs, side hustles, career ladders, fame and talent tracks |
+| **People** | Parents, siblings, dating, marriage, children, pets, friends, enemies |
+| **Money** | Cash, homes and cars, upkeep, investments, businesses, a will |
+| **Risk** | Crime, arrest, prison, illness, doctors, relocation and citizenship |
+| **Time** | Yearly quests, achievements, death, then **legacy** — continue as a child and keep the family line going |
+
+Three save slots. Offline-first. Your lives stay on the device.
+
+### A year on the phone
+
+1. Open **Life** and tap **Age Up**.
+2. Face an event — or several — with real trade-offs.
+3. Spend the year on **Actions**, **Relationships**, **Career**, or **Assets**.
+4. Repeat until the story ends. Share a life card if you want bragging rights.
+
+```mermaid
+flowchart LR
+  Create[Create a life] --> Age[Age Up]
+  Age --> Event[Choices and consequences]
+  Event --> Act[School, work, family, money]
+  Act --> Age
+  Age --> End{Death}
+  End --> Summary[Life summary]
+  Summary --> Legacy[Continue as an heir]
+  Legacy --> Age
+```
+
+---
+
+## 15 countries, local flavor
+
+Kenya, Nigeria, South Africa, Egypt, the United States, Canada, the United Kingdom, France, Germany, India, Japan, the Philippines, Indonesia, Brazil, and Mexico.
+
+Each country has its own **names**, **jobs**, **housing**, **exam names**, **holidays**, **hospitals**, **money apps**, and **economy scale**. Event text uses placeholders like `{transportMode}`, `{secondaryExam}`, and `{moneyApp}` so a matatu in Nairobi and a jeepney in Manila are not the same sentence with the flag swapped.
+
+UI strings ship in English plus Swahili, Spanish, French, Portuguese, and Hindi. Narrative events are authored in English.
+
+---
+
+## Built like a game, not a prototype
+
+| Layer | What it does |
+|-------|----------------|
+| **Compose + Material 3** | Screens, tabs, event dialogs |
+| **MVVM + Hilt** | ViewModels own state; UI reads `StateFlow` |
+| **Domain engines** | Pure Kotlin rules — no `Context`, no Room, no Compose |
+| **Room** | Three character slots and durable saves |
+| **DataStore** | Sound, language, tips, and other preferences |
+| **JSON events** | Hundreds of authored life events in `app/src/main/assets/data/events/` |
+| **WorkManager** | Optional local reminders |
+| **AdMob** | Optional ads (debug uses Google sample units) |
 
 ```
-Compose Screens  →  ViewModels (StateFlow)  →  Domain Engines (pure Kotlin)
-                              ↓
-                    Repositories (Room / DataStore)
+Compose screens  →  ViewModels  →  GameEngine  →  feature engines
+                                      ↓
+                         Room / DataStore / event JSON
 ```
 
-**Domain engines** (`GameEngine`, `EducationEngine`, `CareerEngine`, etc.) contain all game rules. They take immutable `Character` (and related) inputs and return new copies — no `Context`, no Room, no Android APIs. This was an intentional constraint from day one so the core loop is unit-testable without an emulator (see `app/src/test/.../domain/` and Prompt 38's test suite).
-
-`GameEngine` orchestrates the yearly tick; feature-specific engines own their rules. `EventRepository` loads JSON from assets and filters eligible events; it lives in the data layer because it needs `AssetManager`.
-
-Full walkthroughs: **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
+`GameEngine` runs the yearly tick. Feature engines own their slice of life: education, career, relationships, finance, crime, health, politics, relocation, skills, social media, achievements, mortality, and legacy.
 
 ---
 
-## Feature inventory
+## Run it
 
-### Core loop
-- Yearly **Age Up** with random/system events, stat changes, and event log
-- **Event choice** dialogs with stat, GPA, career, relationship, crime, health, and relocation effects
-- **Multi-slot saves** (3 slots) with overwrite confirmation
-- **Life summary** on death; share card export
-- **Onboarding** + contextual tips
+**Needs:** Android Studio (Ladybug or newer), JDK 17, Android SDK 35. `minSdk` is 26.
 
-### Family & relationships
-- Generated family (parents, siblings); dating, marriage, children, divorce
-- **10 interaction types** (spend time, gift, travel, compliment, argue, etc.)
-- Relationship tiers, annual decay, milestones
-- **Friends** (annual opportunity during school/work years)
-- **Mixed-heritage children** when parents are from different countries
-
-### Education
-- Primary → secondary → university pipeline with exams (country-flavored names)
-- Study/work effort from event choices
-- University course selection from exam results
-
-### Career
-- Country-specific job pools; education-gated eligibility
-- Hire chance (smarts, GPA, criminal record penalty with **clean-streak reduction**)
-- Annual salary, performance, promotion, firing, downsizing events
-
-### Assets & finance
-- Cash-only purchases (no loans); asset upkeep and degradation
-- Net worth; multi-asset upkeep discount
-
-### Crime & health
-- Pickpocket / shoplift / fraud with arrest and incarceration
-- Illness rolls, untreated drain, doctor visits (public vs private care)
-
-### Achievements
-- ~30 achievements across categories; global progress (not per-slot)
-- Unlock dialogs + celebration overlay; persist across lives
-
-### Legacy & ancestry
-- **Continue legacy** as an adult child heir (same slot, new generation)
-- **Ancestry timeline** (deceased generations + current character)
-- `generationNumber` increments; `ancestryHistory` appended on legacy continuation
-- Money split among living children on legacy handoff
-
-### Worldwide / localization
-- 15-country roster: names, jobs, assets, exams, holidays, economy scaling
-- `{transportMode}`, `{secondaryExam}`, `{moneyApp}`, etc. in event JSON
-- UI strings: EN + SW (`values-sw`); event text remains English in JSON
-- Relocation between countries; holiday events with cooldown
-
-### Avatars
-- Procedural Canvas avatar (`AvatarRenderer`); 8 skin tones, 8 hair styles
-- Age-stage rendering; expression flash on events
-- Placeholder art architecture ready for final sprites
-
-### Monetization
-- Banner ad on slot picker; interstitial every N age-ups (deferred during celebrations)
-- **Second Wind** rewarded ad → stat bonus on next new life
-- Session ad tracker
-
-### Feedback & polish
-- Sound + haptics via `FeedbackManager` (placeholder silent `.wav` files)
-- Celebration overlays (graduation, marriage, milestones)
-- Floating stat deltas; tab crossfade; empty-state illustrations
-
-### Retention
-- Daily reminder + contextual nudges (WorkManager)
-- Notification permission flow
-
----
-
-## Setup & running
-
-### Requirements
-- **Android Studio** Ladybug or newer (AGP 8.7.3)
-- **JDK 17**
-- **compileSdk / targetSdk 35**, **minSdk 26**
-- Gradle wrapper included — open project root in Android Studio
-
-### Build & test
 ```bash
 ./gradlew assembleDebug
+./gradlew :app:installDebug
 ./gradlew testDebugUnitTest
 ```
 
-### Run on device / emulator
-1. Open **Life Simulator** in Android Studio → Sync Gradle.
-2. Create or select a device:
-   - **Physical:** itel A665L (or similar **360dp × ~640dp**, Android 13) — primary design target.
-   - **Emulator:** Pixel 4a or custom AVD, **360×640 dp**, API 33+.
-3. Run the `app` configuration.
+Open the project root in Android Studio, sync Gradle, and run `app` on a **360dp-class** phone or emulator (Pixel 4a, or similar). Primary QA devices during development were budget Android 13 phones in that size class.
 
-Splash → onboarding (first launch) → slot picker → character creation → avatar picker → main life screen.
+First launch: splash → onboarding → slot picker → character creation → avatar → stats → the life screen.
+
+Release ads stay off until you set real AdMob unit IDs in `gradle.properties` (`ADMOB_INTERSTITIAL`, `ADMOB_REWARDED`, `ADMOB_BANNER`).
 
 ---
 
-## Project layout (high level)
+## Repo map
 
 ```
 app/src/main/java/com/maisha/game/
-  domain/          # Pure game engines
-  data/            # Repositories, catalogs, EventRepository
-  data/model/      # Character, Person, LifeEvent, etc.
-  ui/              # Compose screens + ViewModels
-  di/              # Hilt modules (DatabaseModule)
-  notifications/   # WorkManager workers
-  feedback/        # Sound/haptics
-  ads/             # AdMob wrappers
-app/src/main/assets/data/events/   # Life event JSON
-app/src/test/                      # Domain unit tests
-docs/ARCHITECTURE.md               # Deep architecture notes
+  domain/          Game rules (pure Kotlin)
+  data/            Catalogs, Room, EventRepository
+  ui/              Compose screens and ViewModels
+  ads/             AdMob wrappers
+  notifications/   WorkManager
+  feedback/        Sound and haptics
+app/src/main/assets/data/events/   Life event packs
+app/src/test/                      Domain and content tests
+docs/PRIVACY_POLICY.md
+docs/AI_CONTINUITY_PROMPT.md       Maintainer / agent handoff
 ```
 
----
+### Adding a life event
 
-## Known gaps / deferred work (pre-ship checklist)
+1. Put it in the right JSON pack under `assets/data/events/`.
+2. Give it a unique `id`, an age range, `text`, and `choices`.
+3. Gate it with tags (`one_time`, `requires_job`, `education`, `requires_spouse`, …).
+4. If you add a new file, load it in `EventRepository` and list it in `GlobalContentCoverageTest`.
 
-Consolidated from Prompt 36 and subsequent audits. **Not blockers for development**; required before store release.
-
-| Item | Status | Notes |
-|------|--------|-------|
-| **Production AdMob IDs** | Open | `AdUnitConfig.kt` uses Google test units |
-| **Real sound assets** | Open | `res/raw/*.wav` are silent placeholders |
-| **Avatar / icon / illustration art** | Open | Canvas placeholders; vector launcher icons |
-| **Firebase / Analytics** | Skipped | Explicitly deprioritized (Prompt 19) |
-| **Play Store signing & ProGuard** | Open | Release build has `minifyEnabled = false` |
-| **Production prep pass** | Open | Swap ad IDs, real audio, final art, signing |
-| **Voluntary dropout / expulsion events** | Open | `EducationState.expelled` never set by gameplay |
-| **Prompt 30 event content audit** | Partial | P20 tagging done; full decade audit not delivered |
-| **Prompt 27 formal UI audit** | Partial | Many fixes landed; no formal report |
-
-Unit tests (Prompt 38) and edge-case hardening (Prompt 39) are in place for domain logic.
+Schema notes live in [`app/src/main/assets/data/events/README.md`](app/src/main/assets/data/events/README.md).
 
 ---
 
-## Documentation index
+## Privacy
 
-| Document | Contents |
-|----------|----------|
-| [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md) | **External AI onboarding** — full project state, architecture, gaps, prompt history |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Age-up flow, slots/legacy, country cascade, engine API |
-| [docs/MANUAL_QA_TEST_PLAN.md](docs/MANUAL_QA_TEST_PLAN.md) | Device QA checklist (Sections A–I, 73 steps) |
-| [docs/PERFORMANCE_AUDIT.md](docs/PERFORMANCE_AUDIT.md) | Prompt 43 profiling baseline, optimizations, pass/fail thresholds |
-| [docs/UI_COPY_AUDIT.md](docs/UI_COPY_AUDIT.md) | Prompt 44 microcopy before/after table and voice standard |
-| [docs/SAVE_DATA_INTEGRITY.md](docs/SAVE_DATA_INTEGRITY.md) | Prompt 45 corruption resilience and recovery UX |
-| [docs/KNOWN_PLATFORM_LIMITATIONS.md](docs/KNOWN_PLATFORM_LIMITATIONS.md) | OEM battery/Doze limits, notification delivery expectations |
-| [docs/PRIVACY_POLICY.md](docs/PRIVACY_POLICY.md) | Privacy policy source text (host at public URL for Play Store) |
-| [docs/PLAY_STORE_DATA_SAFETY_NOTES.md](docs/PLAY_STORE_DATA_SAFETY_NOTES.md) | Data Safety form draft answers for AdMob disclosure |
-| [docs/PLAY_STORE_LISTING.md](docs/PLAY_STORE_LISTING.md) | Play Store title, descriptions, screenshot shot list (Prompt 48) |
-| [docs/REFACTORING_AUDIT.md](docs/REFACTORING_AUDIT.md) | Prompt 41 duplication consolidation notes |
-| [app/src/main/assets/data/events/README.md](app/src/main/assets/data/events/README.md) | Event JSON schema & authoring |
-| KDoc in `domain/` and `data/model/` | Per-class and per-function reference |
+Saves stay on the device. See [docs/PRIVACY_POLICY.md](docs/PRIVACY_POLICY.md).
 
 ---
 
 ## License
 
-Private project — see repository owner for terms.
+Unlicensed. All rights reserved unless the owner says otherwise.
