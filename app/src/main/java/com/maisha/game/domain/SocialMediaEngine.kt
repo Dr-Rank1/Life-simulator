@@ -31,7 +31,9 @@ enum class SocialMediaFailure {
 
 @Singleton
 class SocialMediaEngine @Inject constructor(
-    private val financeEngine: FinanceEngine
+    private val financeEngine: FinanceEngine,
+    private val quoteCatalog: com.maisha.game.data.content.QuoteCatalog =
+        com.maisha.game.data.content.FallbackQuoteCatalog
 ) {
 
     fun createAccount(character: Character): SocialMediaResult {
@@ -84,10 +86,11 @@ class SocialMediaEngine @Inject constructor(
         val growth = calculateFollowerGrowth(character, wentViral)
         val newFollowers = (character.socialMedia.followers + growth).coerceAtLeast(0)
         val isVerified = character.socialMedia.isVerified || newFollowers >= VERIFIED_FOLLOWER_THRESHOLD
+        val caption = quoteCatalog.nextQuote()
         val logLine = if (wentViral) {
-            "A post went viral! Gained $growth followers."
+            "A post went viral! Gained $growth followers. \"$caption\""
         } else {
-            "Posted an update. Gained $growth followers."
+            "Posted an update. Gained $growth followers. \"$caption\""
         }
         val withFollowers = character.copy(
             socialMedia = character.socialMedia.copy(

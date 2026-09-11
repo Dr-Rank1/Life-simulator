@@ -11,7 +11,14 @@ object AdUnitConfig {
     val INTERSTITIAL: String = BuildConfig.AD_INTERSTITIAL
     val REWARDED: String = BuildConfig.AD_REWARDED
     val BANNER: String = BuildConfig.AD_BANNER
+    
     val usingTestAds: Boolean = BuildConfig.USE_TEST_ADS
-    val adsEnabled: Boolean =
-        INTERSTITIAL.isNotBlank() && REWARDED.isNotBlank() && BANNER.isNotBlank()
+
+    val isInterstitialEnabled: Boolean get() = INTERSTITIAL.isNotBlank()
+    val isRewardedEnabled: Boolean get() = REWARDED.isNotBlank()
+    val isBannerEnabled: Boolean get() = BANNER.isNotBlank()
+    
+    // Global fallback
+    val areAdsGloballyEnabled: Boolean 
+        get() = isInterstitialEnabled || isRewardedEnabled || isBannerEnabled
 }

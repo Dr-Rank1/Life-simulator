@@ -191,6 +191,7 @@ class GameEngine @Inject constructor(
         } else {
             resolveStatPressureEvent(updatedCharacter)
                 ?: resolveCareerEvent(updatedCharacter)
+                ?: resolveNewsEvent(updatedCharacter)
                 ?: resolveFameEvent(updatedCharacter)
                 ?: resolveExpulsionHearingEvent(updatedCharacter)
                 ?: resolveGraduationCareerEvent(updatedCharacter)
@@ -792,6 +793,14 @@ class GameEngine @Inject constructor(
         return financeEngine.purchaseAsset(character, catalogId)
     }
 
+    /** Delegates to [FinanceEngine.purchaseWithMortgage]. */
+    fun purchaseWithMortgage(
+        character: Character,
+        catalogId: String,
+        downPaymentPercent: Int = 20
+    ): FinanceEngine.MortgagePurchaseResult =
+        financeEngine.purchaseWithMortgage(character, catalogId, downPaymentPercent)
+
     /** Delegates to [FinanceEngine.sellAsset]. */
     fun investFunds(character: Character, amount: Int): FinanceEngine.InvestmentResult =
         financeEngine.investFunds(character, amount)
@@ -1237,6 +1246,7 @@ class GameEngine @Inject constructor(
         if (updated.assets.isNotEmpty()) {
             updated = financeEngine.applyUpkeep(updated)
             updated = financeEngine.collectRent(updated)
+            updated = financeEngine.payMortgages(updated)
             updated = financeEngine.degradeAssets(updated)
         }
         updated = financeEngine.applyCostOfLiving(updated)
@@ -1375,11 +1385,20 @@ class GameEngine @Inject constructor(
             return afterPromotion to AgeUpResult.SingleEvent(event)
         }
 
+        careerEngine.buildJobFlavorEvent(character)?.let { event ->
+            return character to AgeUpResult.SingleEvent(event)
+        }
+
         careerEngine.buildOfficePoliticsEvent(character)?.let { event ->
             return character to AgeUpResult.SingleEvent(event)
         }
 
         return null
+    }
+
+    private fun resolveNewsEvent(character: Character): Pair<Character, AgeUpResult>? {
+        val event = careerEngine.buildNewsEvent(character) ?: return null
+        return character to AgeUpResult.SingleEvent(event)
     }
 
     private fun resolveUniversityEnrollmentEvent(character: Character): Pair<Character, AgeUpResult>? {

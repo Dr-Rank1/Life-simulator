@@ -321,6 +321,22 @@ internal object DatabaseMigrations {
         }
     }
 
+    private val MIGRATION_27_28 = object : Migration(27, 28) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS procedural_cache (
+                    kind TEXT NOT NULL,
+                    id TEXT NOT NULL,
+                    payloadJson TEXT NOT NULL,
+                    fetchedAt INTEGER NOT NULL,
+                    PRIMARY KEY(kind, id)
+                )
+                """.trimIndent()
+            )
+        }
+    }
+
     val ALL: Array<Migration> = arrayOf(
         MIGRATION_1_2,
         MIGRATION_2_3,
@@ -347,6 +363,7 @@ internal object DatabaseMigrations {
         MIGRATION_23_24,
         MIGRATION_24_25,
         MIGRATION_25_26,
-        MIGRATION_26_27
+        MIGRATION_26_27,
+        MIGRATION_27_28
     )
 }

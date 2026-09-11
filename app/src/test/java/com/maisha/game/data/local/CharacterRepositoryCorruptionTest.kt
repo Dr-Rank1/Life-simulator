@@ -28,5 +28,6 @@ class CharacterRepositoryCorruptionTest {
         override val isAvailable: Boolean = false
         override val characterDao: CharacterDao? = null
         override val achievementDao: AchievementDao? = null
+        override val proceduralCacheDao: ProceduralCacheDao? = null
     }
 }

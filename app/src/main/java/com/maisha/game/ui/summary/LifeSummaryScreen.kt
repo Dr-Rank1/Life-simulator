@@ -382,7 +382,7 @@ fun LifeSummaryScreen(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        if (AdUnitConfig.adsEnabled) {
+        if (AdUnitConfig.areAdsGloballyEnabled) {
             Text(
                 text = stringResource(R.string.label_sponsored),
                 style = MaterialTheme.typography.labelSmall,

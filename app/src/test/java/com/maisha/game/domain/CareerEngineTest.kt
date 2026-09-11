@@ -131,6 +131,61 @@ class CareerEngineTest {
     }
 
     @Test
+    fun buildFiringEvent_includesInsultFlavor() {
+        val insults = object : com.maisha.game.data.content.InsultCatalog {
+            override fun nextInsult() = "Pack your desk."
+        }
+        val career = CareerEngine(HealthEngine(), RelocationEngine(), insults)
+        val event = career.buildFiringEvent(TestFixtures.character(), "Clerk")
+        assertTrue(event.text.contains("Pack your desk."))
+    }
+
+    @Test
+    fun policeBulletin_usesWantedCatalog() {
+        val wanted = object : com.maisha.game.data.content.WantedCatalog {
+            override fun nextBulletin() = "Jordan Hale · Financial fraud"
+        }
+        val space = object : com.maisha.game.data.content.SpaceNewsCatalog {
+            override fun nextHeadline() = "unused"
+        }
+        val career = CareerEngine(
+            HealthEngine(),
+            RelocationEngine(),
+            com.maisha.game.data.content.FallbackInsultCatalog,
+            wanted,
+            space
+        )
+        val officer = TestFixtures.character(
+            career = CareerState(currentJob = TestFixtures.job(id = "police_officer", title = "Police Officer"))
+        )
+        val event = career.buildPoliceBulletinEvent(officer)
+        assertTrue(event.text.contains("Jordan Hale"))
+        assertTrue(event.text.contains("Financial fraud"))
+    }
+
+    @Test
+    fun stemBriefing_usesSpaceNewsCatalog() {
+        val wanted = object : com.maisha.game.data.content.WantedCatalog {
+            override fun nextBulletin() = "unused"
+        }
+        val space = object : com.maisha.game.data.content.SpaceNewsCatalog {
+            override fun nextHeadline() = "Telescope captures first images — NASA"
+        }
+        val career = CareerEngine(
+            HealthEngine(),
+            RelocationEngine(),
+            com.maisha.game.data.content.FallbackInsultCatalog,
+            wanted,
+            space
+        )
+        val scientist = TestFixtures.character(
+            career = CareerState(currentJob = TestFixtures.job(id = "scientist", title = "Scientist"))
+        )
+        val event = career.buildStemBriefingEvent(scientist)
+        assertTrue(event.text.contains("Telescope captures first images"))
+    }
+
+    @Test
     fun shouldTriggerDownsizing_falseWhenUnemployed() {
         val unemployed = TestFixtures.character(age = 30)
         assertFalse(engine.shouldTriggerDownsizing(unemployed))

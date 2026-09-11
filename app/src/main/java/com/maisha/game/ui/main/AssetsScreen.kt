@@ -114,6 +114,10 @@ fun AssetsScreen(
     onSetPortfolioStrategy: (com.maisha.game.data.model.PortfolioStrategy) -> Unit,
     onAssetsMessageDismissed: () -> Unit,
     onDismissAssetsMarketsTip: () -> Unit = {},
+    carMakeCatalog: com.maisha.game.data.content.CarMakeCatalog =
+        com.maisha.game.data.content.FallbackCarMakeCatalog,
+    streetCatalog: com.maisha.game.data.content.StreetCatalog =
+        com.maisha.game.data.content.FallbackStreetCatalog,
     modifier: Modifier = Modifier
 ) {
     val pendingPurchase = rememberConfirmableAction<CatalogAsset>()
@@ -145,7 +149,11 @@ fun AssetsScreen(
         stringResource(R.string.chip_assets_markets),
         stringResource(R.string.chip_assets_estate)
     )
-    val shopCatalog = AssetCatalog.getAssetsForCountry(character.countryCode).filter { item ->
+    val shopCatalog = AssetCatalog.withPropertyListings(
+        character.countryCode,
+        carMakeCatalog,
+        streetCatalog
+    ).filter { item ->
         when (shopTypeFilter) {
             "HOUSE" -> item.type == AssetType.HOUSE
             "CAR" -> item.type == AssetType.CAR

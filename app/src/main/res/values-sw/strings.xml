@@ -935,6 +935,7 @@
     <string name="msg_child_cannot_afford">You can\'t cover the hospital fees yet.</string>
     <string name="msg_date_cannot_afford">You can\'t afford a first date right now.</string>
     <string name="msg_date_ineligible">You can\'t start dating right now.</string>
+    <string name="msg_date_rejected">%1$s turned you down: \"%2$s\"</string>
     <string name="confirm_first_date_body">Ask %1$s out? First date costs %2$s.</string>
     <string name="sheet_dating_prospects_subtitle_fee">Pick someone to date. A first date costs %1$s.</string>
     <string name="btn_start_dating_fee">Start dating · %1$s</string>
@@ -1162,11 +1163,11 @@
     <string name="msg_gift_cannot_afford">You can\'t afford that gift (%1$s).</string>
     <string name="msg_gift_success">You gave %1$s a gift. They loved it!</string>
     <string name="msg_compliment_success">You complimented %1$s. They smiled.</string>
-    <string name="msg_insult_success">You threw a petty insult at %1$s. You felt a little satisfied — they did not.</string>
+    <string name="msg_insult_success">You threw a petty insult at %1$s: \"%2$s\"</string>
     <string name="msg_travel_requires_quality_time">Spend quality time with %1$s before planning a trip together.</string>
     <string name="msg_travel_cannot_afford">You can\'t afford a trip (%1$s).</string>
     <string name="msg_travel_success">You and %1$s took a trip together. Great memories!</string>
-    <string name="msg_advice_success">%1$s shared some wisdom. You feel a bit smarter.</string>
+    <string name="msg_advice_success">%1$s alitoa ushauri: \"%2$s\"</string>
     <string name="msg_prank_success">Your prank on %1$s landed perfectly. You both laughed.</string>
     <string name="msg_prank_backfired">Your prank on %1$s backfired. Oops.</string>
     <string name="msg_set_up_date_ineligible">You can only set up siblings or friends on dates.</string>
@@ -1305,8 +1306,8 @@
     <string name="leisure_effect_library">+Happy · +Smarts</string>
     <string name="leisure_effect_meditation">+Happy · +Health</string>
     <string name="leisure_effect_checkup">+Health</string>
-    <string name="msg_leisure_library">You read at the library.</string>
-    <string name="msg_leisure_meditation">You meditated and feel clearer.</string>
+    <string name="msg_leisure_library">You read %1$s at the library.</string>
+    <string name="msg_leisure_meditation">You meditated: \"%1$s\"</string>
     <string name="msg_leisure_checkup">The checkup went well.</string>
     <string name="section_prison">Prison life</string>
     <string name="prison_work_title">Work detail</string>
@@ -1330,4 +1331,8 @@
     <string name="archetype_model_citizen">The Model Citizen</string>
     <string name="archetype_elder">The Elder</string>
     <string name="archetype_everyday">The Everyday Life</string>
+    <string name="leisure_museum_title">Visit Museum</string>
+    <string name="leisure_museum_desc">Explore art, history, and science.</string>
+    <string name="leisure_effect_museum">Small boost to smarts and happiness.</string>
+    <string name="msg_leisure_museum">You visited a museum and saw %1$s.</string>
 </resources>

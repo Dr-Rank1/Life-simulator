@@ -34,6 +34,20 @@ class SocialMediaEngineTest {
     }
 
     @Test
+    fun postContent_appendsQuoteToLog() {
+        val quotes = object : com.maisha.game.data.content.QuoteCatalog {
+            override fun nextQuote() = "Be where you are."
+        }
+        val social = SocialMediaEngine(financeEngine, quotes)
+        when (val result = social.postContent(accountHolder(looks = 50, smarts = 50))) {
+            is SocialMediaResult.Success -> {
+                assertTrue(result.character.eventLog.first().contains("Be where you are."))
+            }
+            is SocialMediaResult.Failed -> error("Expected post success")
+        }
+    }
+
+    @Test
     fun monetizeAccount_addsCashToNetWorthIfThresholdMet() {
         val character = accountHolder(looks = 50, smarts = 50).copy(
             stats = Stats(money = 10_000, looks = 50, smarts = 50),

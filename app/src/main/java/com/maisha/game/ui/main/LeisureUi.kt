@@ -24,8 +24,11 @@ fun leisureTitle(activity: LeisureActivity): String = when (activity) {
     LeisureActivity.COMMUNITY_CLUB -> stringResource(R.string.leisure_community_club_title)
     LeisureActivity.MEMOIR_WRITING -> stringResource(R.string.leisure_memoir_title)
     LeisureActivity.LIBRARY_VISIT -> stringResource(R.string.leisure_library_title)
+    LeisureActivity.VISIT_MUSEUM -> stringResource(R.string.leisure_museum_title)
     LeisureActivity.MEDITATION -> stringResource(R.string.leisure_meditation_title)
     LeisureActivity.ANNUAL_CHECKUP -> stringResource(R.string.leisure_checkup_title)
+    LeisureActivity.YACHT_DAY -> stringResource(R.string.leisure_yacht_day_title)
+    LeisureActivity.PRIVATE_JET_TRIP -> stringResource(R.string.leisure_private_jet_title)
 }
 
 @Composable
@@ -47,8 +50,11 @@ fun leisureDescription(activity: LeisureActivity): String = when (activity) {
     LeisureActivity.COMMUNITY_CLUB -> stringResource(R.string.leisure_community_club_desc)
     LeisureActivity.MEMOIR_WRITING -> stringResource(R.string.leisure_memoir_desc)
     LeisureActivity.LIBRARY_VISIT -> stringResource(R.string.leisure_library_desc)
+    LeisureActivity.VISIT_MUSEUM -> stringResource(R.string.leisure_museum_desc)
     LeisureActivity.MEDITATION -> stringResource(R.string.leisure_meditation_desc)
     LeisureActivity.ANNUAL_CHECKUP -> stringResource(R.string.leisure_checkup_desc)
+    LeisureActivity.YACHT_DAY -> stringResource(R.string.leisure_yacht_day_desc)
+    LeisureActivity.PRIVATE_JET_TRIP -> stringResource(R.string.leisure_private_jet_desc)
 }
 
 @Composable
@@ -70,8 +76,11 @@ fun leisureEffectLabel(activity: LeisureActivity): String = when (activity) {
     LeisureActivity.COMMUNITY_CLUB -> stringResource(R.string.leisure_effect_community)
     LeisureActivity.MEMOIR_WRITING -> stringResource(R.string.leisure_effect_memoir)
     LeisureActivity.LIBRARY_VISIT -> stringResource(R.string.leisure_effect_library)
+    LeisureActivity.VISIT_MUSEUM -> stringResource(R.string.leisure_effect_museum)
     LeisureActivity.MEDITATION -> stringResource(R.string.leisure_effect_meditation)
     LeisureActivity.ANNUAL_CHECKUP -> stringResource(R.string.leisure_effect_checkup)
+    LeisureActivity.YACHT_DAY -> stringResource(R.string.leisure_effect_yacht_day)
+    LeisureActivity.PRIVATE_JET_TRIP -> stringResource(R.string.leisure_effect_private_jet)
 }
 
 fun leisureMessageRes(activity: LeisureActivity): Int = when (activity) {
@@ -92,6 +101,9 @@ fun leisureMessageRes(activity: LeisureActivity): Int = when (activity) {
     LeisureActivity.COMMUNITY_CLUB -> R.string.msg_leisure_community_club
     LeisureActivity.MEMOIR_WRITING -> R.string.msg_leisure_memoir
     LeisureActivity.LIBRARY_VISIT -> R.string.msg_leisure_library
+    LeisureActivity.VISIT_MUSEUM -> R.string.msg_leisure_museum
     LeisureActivity.MEDITATION -> R.string.msg_leisure_meditation
     LeisureActivity.ANNUAL_CHECKUP -> R.string.msg_leisure_checkup
+    LeisureActivity.YACHT_DAY -> R.string.msg_leisure_yacht_day
+    LeisureActivity.PRIVATE_JET_TRIP -> R.string.msg_leisure_private_jet
 }

@@ -8,6 +8,8 @@ enum class AssetType {
     HOUSE,
     CAR,
     MOTORBIKE,
+    BOAT,
+    PRIVATE_JET,
     HEIRLOOM
 }
 
@@ -16,6 +18,7 @@ enum class AssetType {
  * [condition] affects [currentValue] via [com.maisha.game.domain.FinanceEngine.recalculateValue].
  * Heirlooms skip degradation and appreciate over time.
  * Real estate may be [isRentedOut] for passive income and tenant events.
+ * Properties may have a mortgage tracked by [mortgageBalance] and [monthlyMortgagePayment].
  */
 @Serializable
 data class Asset(
@@ -36,5 +39,9 @@ data class Asset(
     /** Tenant satisfaction 0–100 when [isRentedOut]; null when vacant. */
     val tenantHappiness: Int? = null,
     /** Home upgrades (0–3): boosts value and tenant appeal. */
-    val renovationLevel: Int = 0
+    val renovationLevel: Int = 0,
+    /** Outstanding mortgage principal; 0 means fully owned. */
+    val mortgageBalance: Int = 0,
+    /** Fixed annual mortgage payment (principal + interest); 0 when no mortgage. */
+    val annualMortgagePayment: Int = 0
 )

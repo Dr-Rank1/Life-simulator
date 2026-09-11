@@ -1577,9 +1577,18 @@
     <string name="leisure_effect_library">+Happy · +Smarts</string>
     <string name="leisure_effect_meditation">+Happy · +Health</string>
     <string name="leisure_effect_checkup">+Health</string>
-    <string name="msg_leisure_library">You read at the library.</string>
-    <string name="msg_leisure_meditation">You meditated and feel clearer.</string>
+    <string name="msg_leisure_library">You read %1$s at the library.</string>
+    <string name="msg_leisure_meditation">You meditated: \"%1$s\"</string>
     <string name="msg_leisure_checkup">The checkup went well.</string>
+    <!-- Luxury leisure activities -->
+    <string name="leisure_yacht_day_title">Yacht day</string>
+    <string name="leisure_yacht_day_desc">Spend a glorious day on your yacht.</string>
+    <string name="leisure_effect_yacht_day">+Happy · +Health</string>
+    <string name="msg_leisure_yacht_day">You spent the day on your yacht. Absolute luxury.</string>
+    <string name="leisure_private_jet_title">Private jet trip</string>
+    <string name="leisure_private_jet_desc">Fly somewhere fabulous on your private jet.</string>
+    <string name="leisure_effect_private_jet">+Happy</string>
+    <string name="msg_leisure_private_jet">You took a trip on your private jet. The world is yours.</string>
     <string name="section_prison">Prison life</string>
     <string name="prison_work_title">Work detail</string>
     <string name="prison_work_desc">Earn a little and stay busy.</string>
@@ -1806,4 +1815,9 @@
         <item quantity="one">%d year remaining</item>
         <item quantity="other">%d years remaining</item>
     </plurals>
+    <string name="leisure_museum_title">Visit Museum</string>
+    <string name="leisure_museum_desc">Explore art, history, and science.</string>
+    <string name="leisure_effect_museum">Small boost to smarts and happiness.</string>
+    <string name="msg_leisure_museum">You visited a museum and saw %1$s.</string>
+    <string name="msg_date_rejected">%1$s turned you down: \"%2$s\"</string>
 </resources>

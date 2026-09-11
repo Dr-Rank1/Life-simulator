@@ -44,6 +44,20 @@ class RelationshipEngineTest {
     }
 
     @Test
+    fun insult_includesCatalogFlavor() {
+        val insults = object : com.maisha.game.data.content.InsultCatalog {
+            override fun nextInsult() = "That was painfully average."
+        }
+        val relationship = RelationshipEngine(FinanceEngine(), insultCatalog = insults)
+        val member = TestFixtures.person(id = "s1", name = "Alex", relationshipLevel = 55)
+        val character = TestFixtures.character(family = listOf(member))
+        val result = relationship.progressRelationship(character, "s1", InteractionType.INSULT)
+        assertEquals("msg_insult_success", result.messageKey)
+        assertEquals(listOf("Alex", "That was painfully average."), result.messageArgs)
+        assertTrue(result.character.family.first().relationshipLevel < 55)
+    }
+
+    @Test
     fun tickFamilyYear_decaysNeglectedRelationships() {
         val neglected = TestFixtures.person(
             id = "s1",

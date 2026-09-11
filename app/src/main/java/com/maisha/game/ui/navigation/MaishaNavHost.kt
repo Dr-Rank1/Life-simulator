@@ -386,6 +386,8 @@ fun MaishaNavHost(
                 onDismissYearQuestsTip = viewModel::onDismissYearQuestsTip,
                 onDismissLeisureTip = viewModel::onDismissLeisureTip,
                 onDismissAssetsMarketsTip = viewModel::onDismissAssetsMarketsTip,
+                carMakeCatalog = viewModel.carMakeCatalog,
+                streetCatalog = viewModel.streetCatalog,
                 onThrowParty = viewModel::onThrowParty
             )
 

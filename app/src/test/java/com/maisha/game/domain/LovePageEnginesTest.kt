@@ -23,12 +23,13 @@ class LovePageEnginesTest {
                 assertTrue(result.character.stats.money < character.stats.money)
                 assertTrue(result.character.hasSpouse())
             }
-            is StartDatingResult.Ineligible -> {
+            is StartDatingResult.Ineligible,
+            is StartDatingResult.Rejected -> {
                 // Start-dating is intentionally probabilistic (random acceptance chance),
                 // so this test only validates the "success path" invariants when it happens.
                 assertTrue(true)
             }
-            else -> error(result.toString())
+            is StartDatingResult.InsufficientFunds -> error("expected enough cash for a first date")
         }
     }
 

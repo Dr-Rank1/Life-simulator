@@ -239,6 +239,10 @@ fun LifeScreen(
     onDismissYearQuestsTip: () -> Unit = {},
     onDismissLeisureTip: () -> Unit = {},
     onDismissAssetsMarketsTip: () -> Unit = {},
+    carMakeCatalog: com.maisha.game.data.content.CarMakeCatalog =
+        com.maisha.game.data.content.FallbackCarMakeCatalog,
+    streetCatalog: com.maisha.game.data.content.StreetCatalog =
+        com.maisha.game.data.content.FallbackStreetCatalog,
     onThrowParty: (Int) -> Unit
 ) {
     if (uiState.isLoading) {
@@ -490,6 +494,8 @@ fun LifeScreen(
                 onSetPortfolioStrategy = onSetPortfolioStrategy,
                 onAssetsMessageDismissed = onAssetsMessageDismissed,
                 onDismissAssetsMarketsTip = onDismissAssetsMarketsTip,
+                carMakeCatalog = carMakeCatalog,
+                streetCatalog = streetCatalog,
                 modifier = Modifier.padding(innerPadding)
             )
             MainTab.ACTIONS -> ActionsScreen(

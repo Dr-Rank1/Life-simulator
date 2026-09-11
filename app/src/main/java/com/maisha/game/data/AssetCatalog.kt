@@ -2,6 +2,7 @@
 package com.maisha.game.data
 
 import com.maisha.game.data.model.AssetType
+import com.maisha.game.data.content.CarMakeCatalog
 
 typealias AssetCatalogEntry = CatalogAsset
 
@@ -101,6 +102,31 @@ object AssetCatalog {
             name = "Family Home",
             purchasePrice = 15_000_000,
             monthlyUpkeep = 25_000
+        )
+    )
+
+    /** Luxury vehicles: boats and private jets — status symbols with high upkeep. */
+    private val luxuryVehicleAssets: List<CatalogAsset> = listOf(
+        CatalogAsset(
+            id = "boat_speedboat",
+            type = AssetType.BOAT,
+            name = "Speedboat",
+            purchasePrice = 2_500_000,
+            monthlyUpkeep = 30_000
+        ),
+        CatalogAsset(
+            id = "boat_yacht",
+            type = AssetType.BOAT,
+            name = "Luxury Yacht",
+            purchasePrice = 15_000_000,
+            monthlyUpkeep = 150_000
+        ),
+        CatalogAsset(
+            id = "jet_private",
+            type = AssetType.PRIVATE_JET,
+            name = "Private Jet",
+            purchasePrice = 100_000_000,
+            monthlyUpkeep = 800_000
         )
     )
 
@@ -340,6 +366,7 @@ object AssetCatalog {
         (
             kenyaAssets +
                 universalAssets +
+                luxuryVehicleAssets +
                 heirloomAssets +
                 countryExclusiveAssets.values.flatten()
             ).distinctBy { it.id }
@@ -351,11 +378,51 @@ object AssetCatalog {
     fun getPurchasableAssetsForCountry(countryCode: String): List<CatalogAsset> {
         val nameOverrides = (housingNameOverrides[countryCode].orEmpty() +
             vehicleNameOverrides[countryCode].orEmpty())
-        val base = universalAssets.map { asset ->
+        val base = (universalAssets + luxuryVehicleAssets).map { asset ->
             nameOverrides[asset.id]?.let { localizedName -> asset.copy(name = localizedName) } ?: asset
         }
         val exclusive = countryExclusiveAssets[countryCode].orEmpty()
         return (base + exclusive).filter { it.isPurchasable }
+    }
+
+    /**
+     * Relabels generic cars with a cached manufacturer. Country-specific names (e.g. Toyota Vitz) stay as-is.
+     */
+    fun withVehicleMakes(
+        countryCode: String,
+        carMakes: CarMakeCatalog
+    ): List<CatalogAsset> {
+        val genericNames = universalAssets.associate { it.id to it.name }
+        return getPurchasableAssetsForCountry(countryCode).map { asset ->
+            if (asset.type != AssetType.CAR) return@map asset
+            val generic = genericNames[asset.id] ?: return@map asset
+            if (asset.name != generic) return@map asset
+            val make = carMakes.makeFor(asset.id)
+            val branded = when (asset.id) {
+                "car_used_compact" -> "Used $make compact"
+                "car_used_mid" -> "Used $make"
+                "car_sedan_used" -> "Used $make sedan"
+                "car_new" -> "New $make"
+                else -> "$make ${asset.name}"
+            }
+            asset.copy(name = branded)
+        }
+    }
+
+    /**
+     * Brands generic cars, then appends a cached street for houses.
+     */
+    fun withPropertyListings(
+        countryCode: String,
+        carMakes: CarMakeCatalog,
+        streets: com.maisha.game.data.content.StreetCatalog
+    ): List<CatalogAsset> {
+        return withVehicleMakes(countryCode, carMakes).map { asset ->
+            if (asset.type != AssetType.HOUSE) return@map asset
+            val place = streets.listingFor(countryCode, asset.id)
+            if (place.isBlank()) return@map asset
+            asset.copy(name = "${asset.name} — $place")
+        }
     }
 
     fun findHeirloomById(catalogId: String): CatalogAsset? =

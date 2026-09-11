@@ -167,6 +167,17 @@ class GlobalContentCoverageTest {
         assertTrue(AssetCatalog.getAssetsForCountry("PH").any { it.name == "Bedspace" })
     }
 
+    @Test
+    fun `bundled flavor content json files parse as non-empty string lists`() {
+        listOf("car_makes", "insults", "books", "quotes", "streets", "artworks", "wanted", "space_news").forEach { name ->
+            val file = File("src/main/assets/data/content/$name.json")
+            assertTrue("Missing $name.json", file.exists())
+            val items = json.decodeFromString<List<String>>(file.readText())
+            assertTrue("$name.json is empty", items.size >= 4)
+            assertTrue(items.all { it.isNotBlank() })
+        }
+    }
+
     private fun loadAllEvents(): List<LifeEvent> =
         eventAssetPaths.flatMap { path -> loadEventsFromAsset(path) }
 

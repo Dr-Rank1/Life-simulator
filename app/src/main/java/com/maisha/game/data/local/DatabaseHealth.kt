@@ -57,6 +57,9 @@ class DatabaseHealth @Inject constructor(
     override val achievementDao: AchievementDao?
         get() = ensureOpened()?.achievementDao()
 
+    override val proceduralCacheDao: ProceduralCacheDao?
+        get() = ensureOpened()?.proceduralCacheDao()
+
     companion object {
         private const val TAG = "DatabaseHealth"
     }

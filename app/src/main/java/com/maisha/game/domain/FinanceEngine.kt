@@ -4,6 +4,10 @@ package com.maisha.game.domain
 import com.maisha.game.data.AssetCatalog
 import com.maisha.game.data.EconomyScaler
 import com.maisha.game.data.PetCatalog
+import com.maisha.game.data.content.CarMakeCatalog
+import com.maisha.game.data.content.FallbackCarMakeCatalog
+import com.maisha.game.data.content.FallbackStreetCatalog
+import com.maisha.game.data.content.StreetCatalog
 import com.maisha.game.data.model.Asset
 import com.maisha.game.data.model.AssetType
 import com.maisha.game.data.model.Character
@@ -48,7 +52,12 @@ data class EconomicShiftResult(
 )
 
 @Singleton
-class FinanceEngine @Inject constructor() {
+class FinanceEngine @Inject constructor(
+    private val carMakeCatalog: CarMakeCatalog,
+    private val streetCatalog: StreetCatalog
+) {
+    constructor(carMakeCatalog: CarMakeCatalog) : this(carMakeCatalog, FallbackStreetCatalog)
+    constructor() : this(FallbackCarMakeCatalog, FallbackStreetCatalog)
 
     /**
      * Buys a catalog asset scaled to [Character.countryCode]; deducts scaled price from money.
@@ -69,11 +78,16 @@ class FinanceEngine @Inject constructor() {
             return PurchaseResult.InsufficientFunds
         }
 
+        val displayName = AssetCatalog.withPropertyListings(
+            character.countryCode,
+            carMakeCatalog,
+            streetCatalog
+        ).find { it.id == catalogItem.id }?.name ?: catalogItem.name
         val asset = Asset(
             id = UUID.randomUUID().toString(),
             catalogId = catalogItem.id,
             type = catalogItem.type,
-            name = catalogItem.name,
+            name = displayName,
             purchasePrice = purchasePrice,
             currentValue = purchasePrice,
             condition = 100,
@@ -93,11 +107,126 @@ class FinanceEngine @Inject constructor() {
     fun sellAsset(character: Character, assetId: String): Character {
         val asset = character.assets.find { it.id == assetId } ?: return character
         if (asset.isHeirloom) return character
+        // If asset has a mortgage, pay it off from the sale proceeds
+        val saleProceeds = (asset.currentValue - asset.mortgageBalance).coerceAtLeast(0)
         return character.copy(
             stats = character.stats.copy(
-                money = character.stats.money + asset.currentValue
+                money = character.stats.money + saleProceeds
             ),
-            assets = character.assets.filterNot { it.id == assetId }
+            assets = character.assets.filterNot { it.id == assetId },
+            eventLog = if (asset.mortgageBalance > 0) EventLogCap.prepend(
+                character.eventLog,
+                "Sold ${asset.name} for ${formatMoney(asset.currentValue, character.countryCode)}, " +
+                    "settling ${formatMoney(asset.mortgageBalance, character.countryCode)} mortgage."
+            ) else character.eventLog
+        )
+    }
+
+    sealed class MortgagePurchaseResult {
+        data class Success(val character: Character) : MortgagePurchaseResult()
+        data object InsufficientFunds : MortgagePurchaseResult()
+        data object NotEligible : MortgagePurchaseResult()
+    }
+
+    /**
+     * Purchases a house with a [downPaymentPercent] (20–50%) down payment.
+     * The remainder becomes a 30-year amortised mortgage at a fixed 8% annual interest.
+     * Monthly payment = P * r / (1 - (1+r)^-n), where r = annual_rate/12, n = 360.
+     */
+    fun purchaseWithMortgage(
+        character: Character,
+        assetCatalogId: String,
+        downPaymentPercent: Int = 20
+    ): MortgagePurchaseResult {
+        val catalogItem = AssetCatalog.findById(assetCatalogId)
+            ?: return MortgagePurchaseResult.NotEligible
+        if (catalogItem.type != AssetType.HOUSE || !catalogItem.isPurchasable || catalogItem.isHeirloom) {
+            return MortgagePurchaseResult.NotEligible
+        }
+        val pct = downPaymentPercent.coerceIn(20, 100)
+        val purchasePrice = EconomyScaler.scaleAmount(catalogItem.purchasePrice, character.countryCode)
+        val downPayment = (purchasePrice * pct / 100.0).toInt()
+
+        if (character.stats.money < downPayment) return MortgagePurchaseResult.InsufficientFunds
+
+        val principal = purchasePrice - downPayment
+        val monthlyRate = MORTGAGE_ANNUAL_RATE / 12.0
+        val annualPayment = if (principal <= 0) 0 else {
+            val monthly = principal * monthlyRate /
+                (1.0 - Math.pow(1.0 + monthlyRate, -MORTGAGE_TERM_MONTHS.toDouble()))
+            (monthly * 12).toInt()
+        }
+
+        val displayName = AssetCatalog.withPropertyListings(
+            character.countryCode, carMakeCatalog, streetCatalog
+        ).find { it.id == catalogItem.id }?.name ?: catalogItem.name
+
+        val asset = Asset(
+            id = UUID.randomUUID().toString(),
+            catalogId = catalogItem.id,
+            type = catalogItem.type,
+            name = displayName,
+            purchasePrice = purchasePrice,
+            currentValue = purchasePrice,
+            condition = 100,
+            monthlyUpkeep = EconomyScaler.scaleAmount(catalogItem.monthlyUpkeep, character.countryCode),
+            mortgageBalance = principal,
+            annualMortgagePayment = annualPayment
+        )
+
+        val logEntry = if (principal > 0) {
+            "Bought ${asset.name} with a ${pct}% down payment " +
+                "(${formatMoney(downPayment, character.countryCode)}). " +
+                "Mortgage: ${formatMoney(principal, character.countryCode)} over 30 years."
+        } else {
+            "Bought ${asset.name} outright for ${formatMoney(purchasePrice, character.countryCode)}."
+        }
+
+        return MortgagePurchaseResult.Success(
+            character.copy(
+                stats = character.stats.copy(money = character.stats.money - downPayment),
+                assets = character.assets + asset,
+                eventLog = EventLogCap.prepend(character.eventLog, logEntry)
+            )
+        )
+    }
+
+    /**
+     * Pays annual mortgage installments on all mortgaged properties.
+     * Deducts [Asset.annualMortgagePayment] from cash, reduces [Asset.mortgageBalance].
+     * When balance hits 0 the mortgage is cleared.
+     */
+    fun payMortgages(character: Character): Character {
+        val mortgaged = character.assets.filter { it.mortgageBalance > 0 && it.annualMortgagePayment > 0 }
+        if (mortgaged.isEmpty()) return character
+
+        var cash = character.stats.money
+        val updatedAssets = character.assets.map { asset ->
+            if (asset.mortgageBalance <= 0 || asset.annualMortgagePayment <= 0) return@map asset
+            val payment = minOf(asset.annualMortgagePayment, asset.mortgageBalance)
+            cash -= payment
+            val newBalance = (asset.mortgageBalance - payment).coerceAtLeast(0)
+            asset.copy(mortgageBalance = newBalance, annualMortgagePayment = if (newBalance == 0) 0 else asset.annualMortgagePayment)
+        }
+
+        val totalPaid = character.stats.money - cash.coerceAtLeast(0)
+        val paidOffNames = character.assets.zip(updatedAssets)
+            .filter { (old, new) -> old.mortgageBalance > 0 && new.mortgageBalance == 0 }
+            .map { it.second.name }
+
+        var eventLog = character.eventLog
+        if (totalPaid > 0) {
+            eventLog = EventLogCap.prepend(eventLog,
+                "Paid ${formatMoney(totalPaid, character.countryCode)} in mortgage installments.")
+        }
+        paidOffNames.forEach { name ->
+            eventLog = EventLogCap.prepend(eventLog, "🏠 Mortgage fully paid off on $name!")
+        }
+
+        return character.copy(
+            stats = character.stats.copy(money = cash.coerceAtLeast(0)),
+            assets = updatedAssets,
+            eventLog = eventLog
         )
     }
 
@@ -954,6 +1083,7 @@ class FinanceEngine @Inject constructor() {
     /**
      * Sets [Asset.currentValue] from purchase price, condition, and [marketModifier].
      * Real estate may appreciate; vehicles only depreciate via condition.
+     * Boats and jets depreciate slowly (70% of vehicle rate).
      */
     fun recalculateValue(asset: Asset, marketModifier: Float = 1.0f): Asset {
         val conditionFactor = asset.condition / 100f
@@ -970,6 +1100,10 @@ class FinanceEngine @Inject constructor() {
             }
             AssetType.CAR, AssetType.MOTORBIKE -> {
                 (asset.purchasePrice * conditionFactor).toInt()
+            }
+            AssetType.BOAT, AssetType.PRIVATE_JET -> {
+                // Luxury vehicles depreciate slower — retain 70% value at 100% condition
+                (asset.purchasePrice * (0.70f + conditionFactor * 0.30f)).toInt()
             }
             AssetType.HEIRLOOM -> {
                 val appreciation = asset.currentValue * HEIRLOOM_ANNUAL_APPRECIATION_RATE
@@ -1028,6 +1162,8 @@ class FinanceEngine @Inject constructor() {
         AssetType.HOUSE -> "Critical failure: ${asset.name} suffered major damage — the roof collapsed."
         AssetType.CAR -> "Critical failure: ${asset.name}'s engine blew out completely."
         AssetType.MOTORBIKE -> "Critical failure: ${asset.name}'s engine seized on the road."
+        AssetType.BOAT -> "Critical failure: ${asset.name}'s hull developed a serious leak."
+        AssetType.PRIVATE_JET -> "Critical failure: ${asset.name} suffered major avionics damage — grounded for major repairs."
         AssetType.HEIRLOOM -> ""
     }
 
@@ -1114,6 +1250,10 @@ class FinanceEngine @Inject constructor() {
         const val PORTFOLIO_RETURN_MAX_PERCENT = 40
         private const val RENT_YIELD_MIN = 0.05f
         private const val RENT_YIELD_MAX = 0.08f
+        /** 30-year amortisation term in months. */
+        private const val MORTGAGE_TERM_MONTHS = 360
+        /** Fixed annual interest rate for mortgages (8%). */
+        private const val MORTGAGE_ANNUAL_RATE = 0.08
         private const val RENTED_EXTRA_DEGRADATION = 3
         private const val STARTING_TENANT_HAPPINESS = 72
         private const val TENANT_HAPPINESS_DRIFT_MIN = -5

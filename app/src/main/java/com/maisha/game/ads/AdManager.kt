@@ -1,8 +1,8 @@
-// app/src/main/java/com/maisha/game/ads/AdManager.kt
 package com.maisha.game.ads
 
 import android.app.Activity
 import android.content.Context
+import androidx.annotation.MainThread
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -14,18 +14,24 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import javax.inject.Inject
 import javax.inject.Singleton
 
+typealias AdDismissAction = () -> Unit
+typealias AdRewardAction = () -> Unit
+
 @Singleton
 class AdManager @Inject constructor() {
 
     private var interstitialAd: InterstitialAd? = null
     private var rewardedAd: RewardedAd? = null
+    
     private var isLoadingInterstitial = false
     private var isLoadingRewarded = false
 
+    @MainThread
     fun preloadInterstitial(context: Context) {
-        if (!AdUnitConfig.adsEnabled) return
-        if (interstitialAd != null || isLoadingInterstitial) return
+        if (!AdUnitConfig.isInterstitialEnabled || interstitialAd != null || isLoadingInterstitial) return
+        
         isLoadingInterstitial = true
+        
         InterstitialAd.load(
             context,
             AdUnitConfig.INTERSTITIAL,
@@ -44,14 +50,18 @@ class AdManager @Inject constructor() {
         )
     }
 
-    fun showInterstitialIfReady(activity: Activity, onDismissed: () -> Unit) {
+    @MainThread
+    fun showInterstitialIfReady(activity: Activity, onDismissed: AdDismissAction) {
         val ad = interstitialAd
         if (ad == null) {
             preloadInterstitial(activity.applicationContext)
             onDismissed()
             return
         }
+
+        // Clear reference immediately to prevent double-showing
         interstitialAd = null
+        
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 preloadInterstitial(activity.applicationContext)
@@ -63,13 +73,16 @@ class AdManager @Inject constructor() {
                 onDismissed()
             }
         }
+        
         ad.show(activity)
     }
 
+    @MainThread
     fun preloadRewarded(context: Context) {
-        if (!AdUnitConfig.adsEnabled) return
-        if (rewardedAd != null || isLoadingRewarded) return
+        if (!AdUnitConfig.isRewardedEnabled || rewardedAd != null || isLoadingRewarded) return
+        
         isLoadingRewarded = true
+        
         RewardedAd.load(
             context,
             AdUnitConfig.REWARDED,
@@ -88,10 +101,11 @@ class AdManager @Inject constructor() {
         )
     }
 
+    @MainThread
     fun showRewardedIfReady(
         activity: Activity,
-        onReward: () -> Unit,
-        onDismissedNoReward: () -> Unit
+        onReward: AdRewardAction,
+        onDismissedNoReward: AdDismissAction
     ) {
         val ad = rewardedAd
         if (ad == null) {
@@ -99,8 +113,11 @@ class AdManager @Inject constructor() {
             onDismissedNoReward()
             return
         }
+
+        // Clear reference immediately
         rewardedAd = null
         var rewardEarned = false
+        
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 preloadRewarded(activity.applicationContext)
@@ -114,6 +131,7 @@ class AdManager @Inject constructor() {
                 onDismissedNoReward()
             }
         }
+        
         ad.show(activity) { _ ->
             rewardEarned = true
             onReward()

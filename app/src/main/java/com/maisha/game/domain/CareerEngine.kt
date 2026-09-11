@@ -100,8 +100,33 @@ sealed class OfficeActionResult {
 @Singleton
 class CareerEngine @Inject constructor(
     private val healthEngine: HealthEngine,
-    private val relocationEngine: RelocationEngine
+    private val relocationEngine: RelocationEngine,
+    private val insultCatalog: com.maisha.game.data.content.InsultCatalog,
+    private val wantedCatalog: com.maisha.game.data.content.WantedCatalog,
+    private val spaceNewsCatalog: com.maisha.game.data.content.SpaceNewsCatalog
 ) {
+    constructor(
+        healthEngine: HealthEngine,
+        relocationEngine: RelocationEngine
+    ) : this(
+        healthEngine,
+        relocationEngine,
+        com.maisha.game.data.content.FallbackInsultCatalog,
+        com.maisha.game.data.content.FallbackWantedCatalog,
+        com.maisha.game.data.content.FallbackSpaceNewsCatalog
+    )
+
+    constructor(
+        healthEngine: HealthEngine,
+        relocationEngine: RelocationEngine,
+        insultCatalog: com.maisha.game.data.content.InsultCatalog
+    ) : this(
+        healthEngine,
+        relocationEngine,
+        insultCatalog,
+        com.maisha.game.data.content.FallbackWantedCatalog,
+        com.maisha.game.data.content.FallbackSpaceNewsCatalog
+    )
 
     /** Minimum age and completed-or-enrolled secondary+ education; rejects expelled and incomplete dropouts. */
     fun isJobEligible(character: Character): Boolean {
@@ -632,6 +657,7 @@ class CareerEngine @Inject constructor(
             minAge = character.age,
             maxAge = character.age,
             text = "Your employer lets you go from your role as $formerTitle due to poor performance. " +
+                "On the way out they muttered: \"${insultCatalog.nextInsult()}\" " +
                 "It is a tough day, but you can look for something new.",
             choices = listOf(
                 EventChoice(
@@ -648,6 +674,99 @@ class CareerEngine @Inject constructor(
             tags = listOf(CAREER_SYSTEM_TAG, ONE_TIME_TAG)
         )
     }
+
+    /**
+     * Police bulletin or STEM briefing while employed. Independent of office politics.
+     */
+    fun buildJobFlavorEvent(character: Character): LifeEvent? {
+        val jobId = character.career.currentJob?.id ?: return null
+        if (character.career.isRetired) return null
+        return when {
+            isPoliceJob(jobId) && Random.nextFloat() < POLICE_FLAVOR_CHANCE ->
+                buildPoliceBulletinEvent(character)
+            isStemJob(jobId) && Random.nextFloat() < STEM_FLAVOR_CHANCE ->
+                buildStemBriefingEvent(character)
+            else -> null
+        }
+    }
+
+    fun buildPoliceBulletinEvent(character: Character): LifeEvent {
+        val bulletin = wantedCatalog.nextBulletin()
+        return LifeEvent(
+            id = "police_bulletin_${character.age}",
+            minAge = character.age,
+            maxAge = character.age,
+            text = "A bulletin lands on your desk: $bulletin.",
+            choices = listOf(
+                EventChoice(
+                    label = "Take the lead",
+                    statEffects = mapOf("smarts" to 2),
+                    performanceEffect = 4,
+                    resultText = "You worked the case and logged every lead."
+                ),
+                EventChoice(
+                    label = "Pass it to another unit",
+                    statEffects = mapOf("happiness" to 1),
+                    resultText = "You handed it off and stayed on your usual patrol."
+                )
+            ),
+            tags = listOf(CAREER_SYSTEM_TAG, ONE_TIME_TAG, REQUIRES_JOB_TAG),
+            weight = 8
+        )
+    }
+
+    fun buildStemBriefingEvent(character: Character): LifeEvent {
+        val headline = spaceNewsCatalog.nextHeadline()
+        return LifeEvent(
+            id = "stem_briefing_${character.age}",
+            minAge = character.age,
+            maxAge = character.age,
+            text = "The lab channel is buzzing: $headline",
+            choices = listOf(
+                EventChoice(
+                    label = "Read the paper",
+                    statEffects = mapOf("smarts" to 3),
+                    resultText = "You took notes and argued about the methodology at lunch."
+                ),
+                EventChoice(
+                    label = "Keep your head down",
+                    resultText = "You stayed on your own experiment."
+                )
+            ),
+            tags = listOf(CAREER_SYSTEM_TAG, ONE_TIME_TAG, REQUIRES_JOB_TAG),
+            weight = 8
+        )
+    }
+
+    fun buildNewsEvent(character: Character): LifeEvent? {
+        if (character.age < NEWS_MIN_AGE) return null
+        if (isPoliceJob(character.career.currentJob?.id)) return null
+        if (Random.nextFloat() > NEWS_CHANCE) return null
+        val bulletin = wantedCatalog.nextBulletin()
+        return LifeEvent(
+            id = "wanted_news_${character.age}",
+            minAge = character.age,
+            maxAge = character.age,
+            text = "Local news: authorities are seeking $bulletin.",
+            choices = listOf(
+                EventChoice(
+                    label = "Follow the story",
+                    statEffects = mapOf("smarts" to 1),
+                    resultText = "You read the coverage and argued about it with friends."
+                ),
+                EventChoice(
+                    label = "Change the channel",
+                    resultText = "You let it fade into the rest of the day's noise."
+                )
+            ),
+            tags = listOf(CAREER_SYSTEM_TAG, ONE_TIME_TAG),
+            weight = 4
+        )
+    }
+
+    private fun isPoliceJob(jobId: String?): Boolean = jobId == POLICE_JOB_ID
+
+    private fun isStemJob(jobId: String?): Boolean = jobId in STEM_JOB_IDS
 
     /** One-time layoff event (random downsizing, not performance-based). */
     fun buildDownsizingEvent(character: Character, formerTitle: String): LifeEvent {
@@ -2484,6 +2603,18 @@ class CareerEngine @Inject constructor(
         private const val PROMOTION_INTERVAL_YEARS = 3
         private const val DOWNSIZING_CHANCE = 0.04f
         private const val OFFICE_POLITICS_CHANCE = 0.18f
+        private const val POLICE_FLAVOR_CHANCE = 0.28f
+        private const val STEM_FLAVOR_CHANCE = 0.28f
+        private const val NEWS_CHANCE = 0.10f
+        private const val NEWS_MIN_AGE = 16
+        const val POLICE_JOB_ID = "police_officer"
+        val STEM_JOB_IDS: Set<String> = setOf(
+            "scientist",
+            "engineer",
+            "software_developer",
+            "professor",
+            "architect"
+        )
         const val OFFICE_POLITICS_TAG = "office_politics"
         private const val BURNOUT_STRESS_THRESHOLD = 80f
         private const val BURNOUT_HAPPINESS_HIT = 8

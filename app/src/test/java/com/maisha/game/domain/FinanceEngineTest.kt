@@ -27,6 +27,60 @@ class FinanceEngineTest {
     }
 
     @Test
+    fun purchaseAsset_brandsGenericCarWithCatalogMake() {
+        val catalog = object : com.maisha.game.data.content.CarMakeCatalog {
+            override fun makeFor(assetId: String) = "Saab"
+            override fun randomMake() = "Saab"
+        }
+        val finance = FinanceEngine(catalog)
+        val character = TestFixtures.character(
+            countryCode = "US",
+            stats = com.maisha.game.data.model.Stats(money = 2_000_000)
+        )
+        val result = finance.purchaseAsset(character, "car_new")
+        assertTrue(result is PurchaseResult.Success)
+        assertEquals("New Saab", (result as PurchaseResult.Success).character.assets.single().name)
+    }
+
+    @Test
+    fun purchaseAsset_keepsKenyaVehicleNames() {
+        val catalog = object : com.maisha.game.data.content.CarMakeCatalog {
+            override fun makeFor(assetId: String) = "Saab"
+            override fun randomMake() = "Saab"
+        }
+        val finance = FinanceEngine(catalog)
+        val character = TestFixtures.character(
+            countryCode = "KE",
+            stats = com.maisha.game.data.model.Stats(money = 5_000_000)
+        )
+        val result = finance.purchaseAsset(character, "car_new")
+        assertTrue(result is PurchaseResult.Success)
+        assertEquals(
+            "New Toyota Corolla",
+            (result as PurchaseResult.Success).character.assets.single().name
+        )
+    }
+
+    @Test
+    fun purchaseAsset_appendsStreetToHouseName() {
+        val streets = object : com.maisha.game.data.content.StreetCatalog {
+            override fun listingFor(countryCode: String, key: String) = "Bedford Avenue"
+        }
+        val finance = FinanceEngine(
+            com.maisha.game.data.content.FallbackCarMakeCatalog,
+            streets
+        )
+        val character = TestFixtures.character(
+            countryCode = "US",
+            stats = com.maisha.game.data.model.Stats(money = 5_000_000)
+        )
+        val result = finance.purchaseAsset(character, "house_suburban")
+        assertTrue(result is PurchaseResult.Success)
+        val name = (result as PurchaseResult.Success).character.assets.single().name
+        assertTrue(name.contains("Bedford Avenue"))
+    }
+
+    @Test
     fun applyUpkeep_reducesMoneyOverMultipleYears() {
         val character = TestFixtures.character(
             stats = com.maisha.game.data.model.Stats(money = 1_000_000),

@@ -17,6 +17,23 @@ This data stays on the device unless you share a life card, reset data in Settin
 
 If you tap Random Name during character creation, Maisha may request a first and last name from the [Random User Generator](https://randomuser.me/). The request includes only optional gender and nationality filters. No account is created and no other profile data is sent. If the request fails or the country is not supported by that service, Maisha uses a name list stored in the app.
 
+## Optional flavor content
+
+While you play, Maisha may download public flavor data in the background from:
+
+- [Advice Slip](https://api.adviceslip.com/) (parent/mentor quotes)
+- [Open Trivia DB](https://opentdb.com/) (exam-paper flavor)
+- [NHTSA vPIC](https://vpic.nhtsa.dot.gov/api/) (vehicle make names for the dealership)
+- [Evil Insult Generator](https://evilinsult.com/) (conflict encounter flavor)
+- [Gutendex](https://gutendex.com/) (library book titles from Project Gutenberg)
+- [ZenQuotes](https://zenquotes.io/) (meditation and social posts)
+- [OpenStreetMap Nominatim](https://nominatim.openstreetmap.org/) (street names for house listings; cached per city)
+- [The Met Collection API](https://metmuseum.github.io/) (museum visit titles)
+- [FBI Wanted](https://api.fbi.gov/docs) (sanitized suspect flavor for police work and news)
+- [Spaceflight News](https://api.spaceflightnewsapi.net/) (STEM workplace headlines)
+
+These requests send no account or gameplay data. Lists and quotes are stored on the device and used only when already cached. Age-up and other gameplay never wait on the network. If a request fails or the device is offline, Maisha uses text bundled with the app.
+
 ## Ads
 
 The app may show ads through Google AdMob. Google may collect advertising identifiers and approximate location or device information as described in [Google’s advertising privacy policy](https://policies.google.com/privacy).

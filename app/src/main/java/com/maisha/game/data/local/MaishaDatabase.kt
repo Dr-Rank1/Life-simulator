@@ -5,12 +5,13 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [CharacterEntity::class, AchievementEntity::class],
-    version = 27,
+    entities = [CharacterEntity::class, AchievementEntity::class, ProceduralCacheEntity::class],
+    version = 28,
     exportSchema = false
 )
 abstract class MaishaDatabase : RoomDatabase() {
     abstract fun characterDao(): CharacterDao
     abstract fun achievementDao(): AchievementDao
+    abstract fun proceduralCacheDao(): ProceduralCacheDao
 }
 

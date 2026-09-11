@@ -120,6 +120,69 @@ class LeisureEngineTest {
         assertTrue(activities.contains(LeisureActivity.GRANDKIDS_DAY))
         assertTrue(activities.contains(LeisureActivity.MEMOIR_WRITING))
     }
+
+    @Test
+    fun libraryVisit_usesBookCatalogTitle() {
+        val books = object : com.maisha.game.data.content.BookCatalog {
+            override fun nextBookTitle() = "Things Fall Apart by Chinua Achebe"
+        }
+        val quotes = object : com.maisha.game.data.content.QuoteCatalog {
+            override fun nextQuote() = "unused"
+        }
+        val leisure = LeisureEngine(books, quotes)
+        val before = TestFixtures.character(
+            age = 20,
+            stats = Stats(money = 50_000, happiness = 40, health = 70, smarts = 50)
+        )
+        val result = leisure.perform(before, LeisureActivity.LIBRARY_VISIT)
+        assertTrue(result is LeisureResult.Success)
+        val success = result as LeisureResult.Success
+        assertEquals("Things Fall Apart by Chinua Achebe", success.flavor)
+        assertTrue(success.character.eventLog.first().contains("Things Fall Apart"))
+    }
+
+    @Test
+    fun meditation_usesQuoteCatalog() {
+        val books = object : com.maisha.game.data.content.BookCatalog {
+            override fun nextBookTitle() = "unused"
+        }
+        val quotes = object : com.maisha.game.data.content.QuoteCatalog {
+            override fun nextQuote() = "Quiet the mind."
+        }
+        val leisure = LeisureEngine(books, quotes)
+        val before = TestFixtures.character(
+            age = 20,
+            stats = Stats(money = 50_000, happiness = 40, health = 70, smarts = 50)
+        )
+        val result = leisure.perform(before, LeisureActivity.MEDITATION)
+        assertTrue(result is LeisureResult.Success)
+        val success = result as LeisureResult.Success
+        assertEquals("Quiet the mind.", success.flavor)
+        assertTrue(success.character.eventLog.first().contains("Quiet the mind."))
+    }
+
+    @Test
+    fun museumVisit_usesArtCatalogTitle() {
+        val books = object : com.maisha.game.data.content.BookCatalog {
+            override fun nextBookTitle() = "unused"
+        }
+        val quotes = object : com.maisha.game.data.content.QuoteCatalog {
+            override fun nextQuote() = "unused"
+        }
+        val art = object : com.maisha.game.data.content.ArtCatalog {
+            override fun nextArtwork() = "The Dance Class by Edgar Degas"
+        }
+        val leisure = LeisureEngine(books, quotes, art)
+        val before = TestFixtures.character(
+            age = 22,
+            stats = Stats(money = 50_000, happiness = 40, health = 70, smarts = 50)
+        )
+        val result = leisure.perform(before, LeisureActivity.VISIT_MUSEUM)
+        assertTrue(result is LeisureResult.Success)
+        val success = result as LeisureResult.Success
+        assertEquals("The Dance Class by Edgar Degas", success.flavor)
+        assertTrue(success.character.eventLog.any { it.contains("Dance Class") })
+    }
 }
 
 class CrimeStatusMapperTest {

@@ -115,4 +115,33 @@ class CountryCatalogContentTest {
         assertEquals("Used Boda Boda", AssetCatalog.findById("boda_basic")?.name)
         assertEquals("Used Motorbike", AssetCatalog.findById("motorbike_used")?.name)
     }
+
+    @Test
+    fun `withVehicleMakes brands generic cars but keeps Kenya names`() {
+        val catalog = object : com.maisha.game.data.content.CarMakeCatalog {
+            override fun makeFor(assetId: String) = "Saab"
+            override fun randomMake() = "Saab"
+        }
+        val us = AssetCatalog.withVehicleMakes("US", catalog)
+        assertTrue(us.any { it.id == "car_new" && it.name == "New Saab" })
+        val ke = AssetCatalog.withVehicleMakes("KE", catalog)
+        assertTrue(ke.any { it.id == "car_new" && it.name == "New Toyota Corolla" })
+        assertTrue(ke.any { it.id == "car_used_compact" && it.name == "Used Toyota Vitz" })
+    }
+
+    @Test
+    fun `withPropertyListings appends streets to houses`() {
+        val cars = object : com.maisha.game.data.content.CarMakeCatalog {
+            override fun makeFor(assetId: String) = "Saab"
+            override fun randomMake() = "Saab"
+        }
+        val streets = object : com.maisha.game.data.content.StreetCatalog {
+            override fun listingFor(countryCode: String, key: String) = "Westlands · Kenyatta Avenue"
+        }
+        val us = AssetCatalog.withPropertyListings("US", cars, streets)
+        assertTrue(us.any { it.id == "house_suburban" && it.name.contains("Westlands · Kenyatta Avenue") })
+        val ke = AssetCatalog.withPropertyListings("KE", cars, streets)
+        assertTrue(ke.any { it.type == com.maisha.game.data.model.AssetType.HOUSE && it.name.contains("Westlands") })
+        assertTrue(ke.any { it.id == "car_new" && it.name == "New Toyota Corolla" })
+    }
 }

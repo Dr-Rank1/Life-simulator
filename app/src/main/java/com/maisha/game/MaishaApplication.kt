@@ -10,6 +10,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.google.android.gms.ads.MobileAds
 import com.maisha.game.data.events.EventRepository
+import com.maisha.game.data.content.ContentCacheScheduler
+import com.maisha.game.data.content.ContentPrefetcher
 import com.maisha.game.data.local.SettingsRepository
 import com.maisha.game.feedback.FeedbackManager
 import com.maisha.game.notifications.NotificationHelper
@@ -39,6 +41,12 @@ class MaishaApplication : Application(), Configuration.Provider {
     @Inject
     lateinit var eventRepository: EventRepository
 
+    @Inject
+    lateinit var contentPrefetcher: ContentPrefetcher
+
+    @Inject
+    lateinit var contentCacheScheduler: ContentCacheScheduler
+
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override val workManagerConfiguration: Configuration
@@ -58,6 +66,12 @@ class MaishaApplication : Application(), Configuration.Provider {
         applicationScope.launch(Dispatchers.Default) {
             eventRepository.ensureLoaded()
         }
+
+        applicationScope.launch(Dispatchers.IO) {
+            contentPrefetcher.hydrateFromDisk()
+        }
+        contentCacheScheduler.enqueueStartupRefresh()
+        contentCacheScheduler.enqueuePeriodicRefresh()
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onDestroy(owner: LifecycleOwner) {

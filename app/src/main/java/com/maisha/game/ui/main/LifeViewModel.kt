@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maisha.game.R
 import com.maisha.game.ads.AdFrequencyController
+import com.maisha.game.data.content.CarMakeCatalog
+import com.maisha.game.data.content.StreetCatalog
 import com.maisha.game.data.AchievementRepository
 import com.maisha.game.data.EconomyScaler
 import com.maisha.game.data.events.EventRepository
@@ -175,7 +177,9 @@ class LifeViewModel @Inject constructor(
     private val yearQuestEngine: YearQuestEngine,
     private val weeklyChallengeEngine: WeeklyChallengeEngine,
     private val adFrequencyController: AdFrequencyController,
-    private val notificationScheduler: NotificationScheduler
+    private val notificationScheduler: NotificationScheduler,
+    val carMakeCatalog: CarMakeCatalog,
+    val streetCatalog: StreetCatalog
 ) : ViewModel() {
 
     private val slotId: Int = savedStateHandle.get<Int>("slotId")
@@ -2052,7 +2056,7 @@ class LifeViewModel @Inject constructor(
             if (args.isEmpty()) {
                 context.getString(resId)
             } else {
-                context.getString(resId, *args.toTypedArray())
+                context.getString(resId, *args.map { it.replace("%", "%%") }.toTypedArray())
             }
         } else {
             key
@@ -2151,6 +2155,17 @@ class LifeViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             relationshipMessage = context.getString(R.string.msg_date_ineligible)
+                        )
+                    }
+                }
+                is StartDatingResult.Rejected -> {
+                    _uiState.update {
+                        it.copy(
+                            relationshipMessage = context.getString(
+                                R.string.msg_date_rejected,
+                                prospect.name.replace("%", "%%"),
+                                result.insult.replace("%", "%%")
+                            )
                         )
                     }
                 }
@@ -3275,11 +3290,28 @@ class LifeViewModel @Inject constructor(
                 is LeisureResult.Success -> {
                     persist(result.character)
                     processMidLifeAchievements(result.character)
-                    val msgRes = leisureMessageRes(result.activity)
+                    val actionMessage = when (result.activity) {
+                        LeisureActivity.LIBRARY_VISIT ->
+                            context.getString(
+                                R.string.msg_leisure_library,
+                                (result.flavor ?: "").replace("%", "%%")
+                            )
+                        LeisureActivity.MEDITATION ->
+                            context.getString(
+                                R.string.msg_leisure_meditation,
+                                (result.flavor ?: "").replace("%", "%%")
+                            )
+                        LeisureActivity.VISIT_MUSEUM ->
+                            context.getString(
+                                R.string.msg_leisure_museum,
+                                (result.flavor ?: "").replace("%", "%%")
+                            )
+                        else -> context.getString(leisureMessageRes(result.activity))
+                    }
                     _uiState.update {
                         it.copy(
                             character = result.character,
-                            actionMessage = context.getString(msgRes),
+                            actionMessage = actionMessage,
                             netWorth = financeEngine.calculateNetWorth(result.character),
                             headerExpression = ExpressionResolver.resolveExpression(result.character, null)
                         )

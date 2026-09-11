@@ -4,6 +4,10 @@ package com.maisha.game.domain
 import com.maisha.game.data.CountryCatalog
 import com.maisha.game.data.EconomyScaler
 import com.maisha.game.data.NamePool
+import com.maisha.game.data.content.FallbackTriviaCatalog
+import com.maisha.game.data.content.FallbackInsultCatalog
+import com.maisha.game.data.content.InsultCatalog
+import com.maisha.game.data.content.TriviaCatalog
 import com.maisha.game.data.model.AvatarConfig
 import com.maisha.game.data.model.Character
 import com.maisha.game.data.model.CareerTrack
@@ -90,7 +94,9 @@ sealed class SchoolDisciplineResult {
 
 @Singleton
 class EducationEngine @Inject constructor(
-    private val relocationEngine: RelocationEngine
+    private val relocationEngine: RelocationEngine,
+    private val triviaCatalog: TriviaCatalog = FallbackTriviaCatalog,
+    private val insultCatalog: InsultCatalog = FallbackInsultCatalog
 ) {
 
     /**
@@ -2171,11 +2177,14 @@ class EducationEngine @Inject constructor(
         val stress = character.education.examStress
         val chance = (calculateExamPassChance(character) * 100).roundToInt()
         val outlook = examOutlookTip(prep, stress, character.education.plannedCheatOnExam)
+        val paper = triviaCatalog.nextQuestion()?.prompt?.take(180)?.let { question ->
+            " Today's paper includes: \"$question\""
+        }.orEmpty()
         return LifeEvent(
             id = "exam_prompt_${character.age}_${title.replace(' ', '_').lowercase()}",
             minAge = character.age,
             maxAge = character.age,
-            text = "$title are here. Preparedness $prep%. Stress $stress. Pass chance ~$chance%. $outlook How do you play it?",
+            text = "$title are here.$paper Preparedness $prep%. Stress $stress. Pass chance ~$chance%. $outlook How do you play it?",
             choices = listOf(
                 EventChoice(
                     label = "Study hard",
@@ -2896,7 +2905,7 @@ class EducationEngine @Inject constructor(
                         relationshipDelta = -8,
                         reputation = -4,
                         healthDelta = -4,
-                        message = "Confronting ${bully.name} went badly. You got shoved and sent home early."
+                        message = "Confronting ${bully.name} went badly. They snapped: \"${insultCatalog.nextInsult()}\""
                     )
                     if (bruised is SchoolActionResult.Success && Random.nextFloat() < 0.4f) {
                         val detained = recordDetention(
@@ -3209,9 +3218,9 @@ class EducationEngine @Inject constructor(
                         null
                     },
                     message = if (becomesBully) {
-                        "You insulted ${person.name}. They turn on you — school just got harder."
+                        "You insulted ${person.name}: \"${insultCatalog.nextInsult()}\" They turn on you — school just got harder."
                     } else {
-                        "You insulted ${person.name}. The hallway goes quiet."
+                        "You insulted ${person.name}: \"${insultCatalog.nextInsult()}\" The hallway goes quiet."
                     }
                 )
                 if (person.role == SchoolRole.TEACHER &&
@@ -3257,7 +3266,7 @@ class EducationEngine @Inject constructor(
                         reputationDelta = -2,
                         karmaDelta = 0,
                         statusOverride = person.status ?: "Not interested",
-                        message = "${person.name} turned you down. Everyone somehow knows."
+                        message = "${person.name} turned you down: \"${insultCatalog.nextInsult()}\" Everyone somehow knows."
                     )
                 }
             }

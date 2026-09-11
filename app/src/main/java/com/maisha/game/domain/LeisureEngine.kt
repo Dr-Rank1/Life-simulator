@@ -1,10 +1,14 @@
 package com.maisha.game.domain
 
 import com.maisha.game.data.EconomyScaler
+import com.maisha.game.data.model.Asset
+import com.maisha.game.data.model.AssetType
 import com.maisha.game.data.model.Character
 import com.maisha.game.util.formatMoney
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.random.Random
 
 enum class LeisureActivity {
     /** Toddler: bedtime stories. */
@@ -39,12 +43,22 @@ enum class LeisureActivity {
     LIBRARY_VISIT,
     /** Mind & body: meditation / calm. */
     MEDITATION,
+    /** High culture: museum visit. */
+    VISIT_MUSEUM,
     /** Mind & body: annual health checkup. */
-    ANNUAL_CHECKUP
+    ANNUAL_CHECKUP,
+    /** Luxury: day on the yacht (requires owning a boat). */
+    YACHT_DAY,
+    /** Luxury: private jet trip (requires owning a private jet). */
+    PRIVATE_JET_TRIP
 }
 
 sealed class LeisureResult {
-    data class Success(val character: Character, val activity: LeisureActivity) : LeisureResult()
+    data class Success(
+        val character: Character,
+        val activity: LeisureActivity,
+        val flavor: String? = null
+    ) : LeisureResult()
     data object InsufficientFunds : LeisureResult()
     data object Ineligible : LeisureResult()
 }
@@ -54,7 +68,24 @@ sealed class LeisureResult {
  * Costs are Kenya-baseline, scaled via [EconomyScaler].
  */
 @Singleton
-class LeisureEngine @Inject constructor() {
+class LeisureEngine @Inject constructor(
+    private val bookCatalog: com.maisha.game.data.content.BookCatalog,
+    private val quoteCatalog: com.maisha.game.data.content.QuoteCatalog,
+    private val artCatalog: com.maisha.game.data.content.ArtCatalog
+) {
+    constructor() : this(
+        com.maisha.game.data.content.FallbackBookCatalog,
+        com.maisha.game.data.content.FallbackQuoteCatalog,
+        com.maisha.game.data.content.FallbackArtCatalog
+    )
+    constructor(
+        bookCatalog: com.maisha.game.data.content.BookCatalog,
+        quoteCatalog: com.maisha.game.data.content.QuoteCatalog
+    ) : this(
+        bookCatalog,
+        quoteCatalog,
+        com.maisha.game.data.content.FallbackArtCatalog
+    )
 
     fun cost(activity: LeisureActivity, countryCode: String): Int =
         EconomyScaler.scaleAmount(baseCostKenya(activity), countryCode)
@@ -87,6 +118,11 @@ class LeisureEngine @Inject constructor() {
             LeisureActivity.LIBRARY_VISIT -> age >= MIND_BODY_MIN_AGE
             LeisureActivity.MEDITATION -> age >= MIND_BODY_MIN_AGE
             LeisureActivity.ANNUAL_CHECKUP -> age >= CHECKUP_MIN_AGE
+            LeisureActivity.VISIT_MUSEUM -> age >= ADULT_LEISURE_MIN_AGE
+            LeisureActivity.YACHT_DAY -> age >= ADULT_LEISURE_MIN_AGE &&
+                character.assets.any { it.type == com.maisha.game.data.model.AssetType.BOAT }
+            LeisureActivity.PRIVATE_JET_TRIP -> age >= ADULT_LEISURE_MIN_AGE &&
+                character.assets.any { it.type == com.maisha.game.data.model.AssetType.PRIVATE_JET }
         }
     }
 
@@ -102,7 +138,13 @@ class LeisureEngine @Inject constructor() {
 
         val (happinessDelta, healthDelta, smartsDelta, moneyDelta) =
             deltas(activity, fee, character.countryCode)
-        val updated = character.copy(
+        val flavor = when (activity) {
+            LeisureActivity.LIBRARY_VISIT -> bookCatalog.nextBookTitle()
+            LeisureActivity.MEDITATION -> quoteCatalog.nextQuote()
+            LeisureActivity.VISIT_MUSEUM -> artCatalog.nextArtwork()
+            else -> null
+        }
+        var updated = character.copy(
             stats = character.stats.copy(
                 money = (character.stats.money + moneyDelta).coerceAtLeast(0),
                 happiness = (character.stats.happiness + happinessDelta).coerceIn(0, 100),
@@ -111,10 +153,13 @@ class LeisureEngine @Inject constructor() {
             ),
             eventLog = EventLogCap.prepend(
                 character.eventLog,
-                logLine(activity, fee, character.countryCode)
+                logLine(activity, fee, character.countryCode, flavor)
             )
         )
-        return LeisureResult.Success(updated, activity)
+        if (activity == LeisureActivity.VISIT_MUSEUM) {
+            updated = maybeCollectPrint(updated, flavor)
+        }
+        return LeisureResult.Success(updated, activity, flavor)
     }
 
     /** @deprecated Prefer [activitiesFor]. */
@@ -138,8 +183,11 @@ class LeisureEngine @Inject constructor() {
         LeisureActivity.COMMUNITY_CLUB -> COMMUNITY_CLUB_COST_KENYA
         LeisureActivity.MEMOIR_WRITING -> MEMOIR_COST_KENYA
         LeisureActivity.LIBRARY_VISIT -> LIBRARY_COST_KENYA
+        LeisureActivity.VISIT_MUSEUM -> VISIT_MUSEUM_COST_KENYA
         LeisureActivity.MEDITATION -> 0
         LeisureActivity.ANNUAL_CHECKUP -> CHECKUP_COST_KENYA
+        LeisureActivity.YACHT_DAY -> YACHT_DAY_COST_KENYA
+        LeisureActivity.PRIVATE_JET_TRIP -> PRIVATE_JET_TRIP_COST_KENYA
     }
 
     private fun deltas(
@@ -169,11 +217,19 @@ class LeisureEngine @Inject constructor() {
         LeisureActivity.COMMUNITY_CLUB -> Quad(6, 3, 1, -fee)
         LeisureActivity.MEMOIR_WRITING -> Quad(5, 0, 4, -fee)
         LeisureActivity.LIBRARY_VISIT -> Quad(3, 0, 4, -fee)
+        LeisureActivity.VISIT_MUSEUM -> Quad(6, 0, 3, -fee)
         LeisureActivity.MEDITATION -> Quad(4, 2, 0, 0)
         LeisureActivity.ANNUAL_CHECKUP -> Quad(0, 6, 0, -fee)
+        LeisureActivity.YACHT_DAY -> Quad(15, 3, 0, -fee)
+        LeisureActivity.PRIVATE_JET_TRIP -> Quad(18, 2, 0, -fee)
     }
 
-    private fun logLine(activity: LeisureActivity, fee: Int, countryCode: String): String {
+    private fun logLine(
+        activity: LeisureActivity,
+        fee: Int,
+        countryCode: String,
+        flavor: String?
+    ): String {
         val money = formatMoney(fee, countryCode)
         val chorePay = formatMoney(
             EconomyScaler.scaleAmount(CHORES_PAY_KENYA, countryCode),
@@ -196,10 +252,50 @@ class LeisureEngine @Inject constructor() {
             LeisureActivity.GRANDKIDS_DAY -> "You spent the day with grandchildren."
             LeisureActivity.COMMUNITY_CLUB -> "You joined a community club meetup ($money)."
             LeisureActivity.MEMOIR_WRITING -> "You worked on your life story ($money)."
-            LeisureActivity.LIBRARY_VISIT -> "You spent time reading at the library ($money)."
-            LeisureActivity.MEDITATION -> "You meditated and cleared your mind."
+            LeisureActivity.LIBRARY_VISIT -> {
+                val book = flavor?.takeIf { it.isNotBlank() } ?: "a book"
+                "You read $book at the library ($money)."
+            }
+            LeisureActivity.VISIT_MUSEUM -> {
+                val art = flavor?.takeIf { it.isNotBlank() } ?: "some art"
+                "You visited a museum and saw $art ($money)."
+            }
+            LeisureActivity.MEDITATION -> {
+                val quote = flavor?.takeIf { it.isNotBlank() }
+                if (quote == null) "You meditated and cleared your mind."
+                else "You meditated on \"$quote\""
+            }
             LeisureActivity.ANNUAL_CHECKUP -> "You got an annual checkup ($money)."
+            LeisureActivity.YACHT_DAY -> "You spent the day on your yacht ($money). Absolute luxury."
+            LeisureActivity.PRIVATE_JET_TRIP -> "You took a trip on your private jet ($money). The world is yours."
         }
+    }
+
+    private fun maybeCollectPrint(character: Character, artwork: String?): Character {
+        val title = artwork?.takeIf { it.isNotBlank() } ?: return character
+        if (Random.nextFloat() > PRINT_COLLECT_CHANCE) return character
+        val owned = character.assets.count { it.catalogId == ART_PRINT_CATALOG_ID }
+        if (owned >= MAX_ART_PRINTS) return character
+        val printCost = EconomyScaler.scaleAmount(ART_PRINT_COST_KENYA, character.countryCode)
+        if (character.stats.money < printCost) return character
+        val print = Asset(
+            id = UUID.randomUUID().toString(),
+            catalogId = ART_PRINT_CATALOG_ID,
+            type = AssetType.HEIRLOOM,
+            name = "Print: $title",
+            purchasePrice = printCost,
+            currentValue = printCost,
+            monthlyUpkeep = 0,
+            isHeirloom = true
+        )
+        return character.copy(
+            stats = character.stats.copy(money = character.stats.money - printCost),
+            assets = character.assets + print,
+            eventLog = EventLogCap.prepend(
+                character.eventLog,
+                "You added a print of $title to your collection (${formatMoney(printCost, character.countryCode)})."
+            )
+        )
     }
 
     private data class Quad(
@@ -246,8 +342,17 @@ class LeisureEngine @Inject constructor() {
         const val COMMUNITY_CLUB_COST_KENYA = 1_500
         const val MEMOIR_COST_KENYA = 3_000
         const val LIBRARY_COST_KENYA = 500
+        const val VISIT_MUSEUM_COST_KENYA = 2_500
+        const val ART_PRINT_COST_KENYA = 15_000
+        const val ART_PRINT_CATALOG_ID = "art_print"
+        const val MAX_ART_PRINTS = 12
+        const val PRINT_COLLECT_CHANCE = 0.35f
         const val CHECKUP_COST_KENYA = 4_000
         const val MIND_BODY_MIN_AGE = 8
         const val CHECKUP_MIN_AGE = 14
+        /** Fuel, crew, and dockage for a full day trip. */
+        const val YACHT_DAY_COST_KENYA = 120_000
+        /** Fuel, handling fees, and incidentals for one jet trip. */
+        const val PRIVATE_JET_TRIP_COST_KENYA = 500_000
     }
 }

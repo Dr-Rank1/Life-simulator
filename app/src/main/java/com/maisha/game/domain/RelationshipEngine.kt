@@ -6,6 +6,10 @@ import com.maisha.game.data.DatingPool
 import com.maisha.game.data.EconomyScaler
 import com.maisha.game.data.NamePool
 import com.maisha.game.data.PetCatalog
+import com.maisha.game.data.content.AdviceCatalog
+import com.maisha.game.data.content.FallbackAdviceCatalog
+import com.maisha.game.data.content.FallbackInsultCatalog
+import com.maisha.game.data.content.InsultCatalog
 import com.maisha.game.data.model.AvatarConfig
 import com.maisha.game.data.model.Character
 import com.maisha.game.data.model.Gender
@@ -51,6 +55,7 @@ sealed class StartDatingResult {
     data class Success(val character: Character) : StartDatingResult()
     data object InsufficientFunds : StartDatingResult()
     data object Ineligible : StartDatingResult()
+    data class Rejected(val insult: String) : StartDatingResult()
 }
 
 sealed class HaveChildResult {
@@ -102,7 +107,9 @@ data class PetYearTickResult(val character: Character)
 
 @Singleton
 class RelationshipEngine @Inject constructor(
-    private val financeEngine: FinanceEngine
+    private val financeEngine: FinanceEngine,
+    private val adviceCatalog: AdviceCatalog = FallbackAdviceCatalog,
+    private val insultCatalog: InsultCatalog = FallbackInsultCatalog
 ) {
 
     /** Maps [Person.relationshipLevel] to a display tier (ESTRANGED through INSEPARABLE). */
@@ -438,7 +445,7 @@ class RelationshipEngine @Inject constructor(
                 character.stats.happiness / 100f * DATING_HAPPINESS_WEIGHT
             ).coerceIn(0.20f, 0.92f)
         if (Random.nextFloat() > acceptanceChance) {
-            return StartDatingResult.Ineligible
+            return StartDatingResult.Rejected(insultCatalog.nextInsult())
         }
         val partner = prospect.copy(
             relation = RelationType.SPOUSE,
@@ -1131,7 +1138,7 @@ class RelationshipEngine @Inject constructor(
                 )
             ),
             messageKey = "msg_insult_success",
-            messageArgs = listOf(member.name)
+            messageArgs = listOf(member.name, insultCatalog.nextInsult())
         )
     }
 
@@ -1197,7 +1204,7 @@ class RelationshipEngine @Inject constructor(
                 )
             ),
             messageKey = "msg_advice_success",
-            messageArgs = listOf(member.name)
+            messageArgs = listOf(member.name, adviceCatalog.nextAdvice())
         )
     }
 
