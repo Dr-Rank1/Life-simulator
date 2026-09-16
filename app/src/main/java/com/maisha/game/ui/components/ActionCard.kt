@@ -22,11 +22,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.draw.clip
 import com.maisha.game.feedback.HapticType
 import com.maisha.game.ui.feedback.LocalFeedbackManager
+import com.maisha.game.ui.theme.CoralNegative
+import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.Hairline
+import com.maisha.game.ui.theme.InkPrimary
+import com.maisha.game.ui.theme.InkSecondary
+import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
-import com.maisha.game.ui.theme.OutlineInk
+import com.maisha.game.ui.theme.LifeGreenSoft
+import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.TealPrimary
+
 
 enum class ActionCardAccent {
     DEFAULT,
@@ -51,67 +64,87 @@ fun ActionCard(
 ) {
     val view = LocalView.current
     val feedbackManager = LocalFeedbackManager.current
-    val fill = when {
-        !enabled -> Color(0xFFE0E0E0)
-        accent == ActionCardAccent.RISK -> Color(0xFFE53935)
+    val iconBg = when {
+        !enabled -> CreamMuted
+        accent == ActionCardAccent.RISK -> CoralNegative.copy(alpha = 0.12f)
+        accent == ActionCardAccent.CARE -> LifeGreenSoft
+        accent == ActionCardAccent.GOLD -> GoldAccent.copy(alpha = 0.15f)
+        else -> TealPrimary.copy(alpha = 0.12f)
+    }
+    val iconTint = when {
+        !enabled -> InkTertiary
+        accent == ActionCardAccent.RISK -> CoralNegative
         accent == ActionCardAccent.CARE -> LifeGreen
         accent == ActionCardAccent.GOLD -> GoldAccent
-        else -> Color(0xFF4FC3F7)
+        else -> TealPrimary
     }
-    val onFill = when {
-        !enabled -> Color(0xFF111111).copy(alpha = 0.45f)
-        accent == ActionCardAccent.GOLD -> Color(0xFF111111)
-        else -> Color.White
-    }
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(16.dp)
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1.15f)
-            .border(2.5.dp, OutlineInk, shape)
             .clickable(enabled = enabled) {
                 feedbackManager.triggerHaptic(view, HapticType.LIGHT_TAP)
                 onClick()
             },
         shape = shape,
-        colors = CardDefaults.cardColors(containerColor = fill),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = if (enabled) PaperWhite else CreamMuted
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (enabled) 2.dp else 0.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Hairline)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(14.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            MaishaIcon(
-                icon = icon,
-                contentDescription = null,
-                size = 36.dp,
-                tint = onFill
-            )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Black,
-                color = onFill,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(iconBg),
+                contentAlignment = Alignment.Center
+            ) {
+                MaishaIcon(
+                    icon = icon,
+                    contentDescription = null,
+                    size = 24.dp,
+                    tint = iconTint
+                )
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = if (enabled) InkPrimary else InkTertiary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (description.isNotBlank()) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (enabled) InkSecondary else InkTertiary,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
             val caption = questHint ?: metaLabel
             if (!caption.isNullOrBlank()) {
                 Text(
                     text = caption,
                     style = MaterialTheme.typography.labelSmall,
-                    color = onFill.copy(alpha = 0.9f),
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (questHint != null) LifeGreen else GoldAccent,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 4.dp)
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
     }
 }
+

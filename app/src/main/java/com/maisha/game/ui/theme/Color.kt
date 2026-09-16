@@ -1,54 +1,56 @@
-// app/src/main/java/com/maisha/game/ui/theme/Color.kt
 package com.maisha.game.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
 /**
- * Comic life-sim palette: parchment paper, ink outlines, lime Age button.
- * Maisha names stay; the chrome is the familiar life-sim look.
+ * Modern, polished life-simulator palette: crisp warm canvas, elevated white cards,
+ * vibrant accessible stat accents, and emerald action CTAs.
  */
 val NavyDeep = Color(0xFF0B1628)
 val NavySurface = Color(0xFF152238)
 val NavyElevated = Color(0xFF1E2F4A)
 val NavyMid = Color(0xFF0F1E35)
 
-val CreamBg = Color(0xFFF4E4B8)
-val CreamMuted = Color(0xFFE8D5A3)
-val InkPrimary = Color(0xFF111111)
-val InkSecondary = Color(0xFF3D3D3D)
-val InkTertiary = Color(0xFF6B5E3C)
-val Hairline = Color(0xFF111111)
-val HairlineSoft = Color(0xFF111111)
+val CreamBg = Color(0xFFF8F9FA)
+val CreamMuted = Color(0xFFEFF1F5)
+val PaperWhite = Color(0xFFFFFFFF)
 
-/** Primary interactive green — Age Up, active nav. */
-val LifeGreen = Color(0xFF6BCB3A)
-val LifeGreenPressed = Color(0xFF4EA524)
-val LifeGreenSoft = Color(0x336BCB3A)
+val InkPrimary = Color(0xFF1E293B)
+val InkSecondary = Color(0xFF64748B)
+val InkTertiary = Color(0xFF94A3B8)
+val Hairline = Color(0xFFE2E8F0)
+val HairlineSoft = Color(0xFFF1F5F9)
 
-val TealPrimary = Color(0xFF2F9E8F)
-val TealLight = Color(0xFF5BC4B6)
-val GoldAccent = Color(0xFFFFC107)
-val GoldMuted = Color(0xFFD4A017)
-val CoralNegative = Color(0xFFE53935)
+/** Primary interactive emerald green — Age Up, active navigation. */
+val LifeGreen = Color(0xFF22C55E)
+val LifeGreenPressed = Color(0xFF16A34A)
+val LifeGreenSoft = Color(0x1A22C55E)
 
-// Legacy aliases used by older screens (now mapped onto the parchment set)
-val TextPrimary = Color(0xFF111111)
-val TextSecondary = Color(0xFF3D3D3D)
-val TextMuted = Color(0xFF6B6458)
-val DividerDark = Color(0xFF111111)
+val TealPrimary = Color(0xFF0D9488)
+val TealLight = Color(0xFF14B8A6)
+val GoldAccent = Color(0xFFF59E0B)
+val GoldMuted = Color(0xFFD97706)
+val CoralNegative = Color(0xFFEF4444)
 
-val StatHealth = Color(0xFFE53935)
-val StatHappiness = Color(0xFFFFC107)
-val StatSmarts = Color(0xFF2196F3)
-val StatLooks = Color(0xFFE91E8C)
-val StatMoney = Color(0xFF2E7D32)
-val StatRelationship = Color(0xFFE91E8C)
-val StatCondition = Color(0xFF26A69A)
-val StatPerformance = Color(0xFF2196F3)
+// Legacy aliases used by older screens
+val TextPrimary = Color(0xFF1E293B)
+val TextSecondary = Color(0xFF64748B)
+val TextMuted = Color(0xFF94A3B8)
+val DividerDark = Color(0xFFE2E8F0)
 
-val AccentPink = Color(0xFFE91E8C)
-val SuccessGreen = Color(0xFF6BCB3A)
-val StatKarma = Color(0xFF26A69A)
+// Vibrant Stat colors
+val StatHealth = Color(0xFFEF4444)
+val StatHappiness = Color(0xFFF59E0B)
+val StatSmarts = Color(0xFF3B82F6)
+val StatLooks = Color(0xFFEC4899)
+val StatMoney = Color(0xFF10B981)
+val StatRelationship = Color(0xFFF43F5E)
+val StatCondition = Color(0xFF14B8A6)
+val StatPerformance = Color(0xFF3B82F6)
 
-val OutlineInk = Color(0xFF111111)
-val PaperWhite = Color(0xFFFFF8E7)
+val AccentPink = Color(0xFFEC4899)
+val SuccessGreen = Color(0xFF22C55E)
+val StatKarma = Color(0xFF8B5CF6)
+
+val OutlineInk = Color(0xFFE2E8F0)
+

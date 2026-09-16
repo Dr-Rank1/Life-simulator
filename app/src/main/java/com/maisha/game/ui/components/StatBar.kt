@@ -39,8 +39,10 @@ import androidx.compose.ui.unit.dp
 import com.maisha.game.R
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.CoralNegative
-import com.maisha.game.ui.theme.OutlineInk
+import com.maisha.game.ui.theme.Hairline
+import com.maisha.game.ui.theme.HairlineSoft
 import com.maisha.game.ui.theme.StatCondition
+
 import com.maisha.game.ui.theme.StatHappiness
 import com.maisha.game.ui.theme.StatHealth
 import com.maisha.game.ui.theme.StatKarma
@@ -204,11 +206,11 @@ fun StatBar(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(10.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(1.5.dp, OutlineInk, RoundedCornerShape(6.dp))
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(HairlineSoft)
             ) {
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(animatedProgress)

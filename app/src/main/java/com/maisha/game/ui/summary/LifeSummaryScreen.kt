@@ -529,8 +529,10 @@ private fun MemorialHeader(
         colors = CardDefaults.cardColors(
             containerColor = PaperWhite
         ),
-        border = androidx.compose.foundation.BorderStroke(2.5.dp, OutlineInk)
+        border = androidx.compose.foundation.BorderStroke(1.dp, OutlineInk),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -639,8 +641,10 @@ private fun SummarySectionCard(
         colors = CardDefaults.cardColors(
             containerColor = PaperWhite
         ),
-        border = androidx.compose.foundation.BorderStroke(2.5.dp, OutlineInk)
+        border = androidx.compose.foundation.BorderStroke(1.dp, OutlineInk),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
+
         Column(
             modifier = Modifier.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)

@@ -21,9 +21,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.illustrations.EmptyStateIllustrationView
+import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
-import com.maisha.game.ui.theme.OutlineInk
+import com.maisha.game.ui.theme.PaperWhite
+
 
 @Composable
 fun EmptyStateCard(
@@ -37,13 +39,14 @@ fun EmptyStateCard(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .border(2.5.dp, OutlineInk, MaishaRadius.cardShape),
+            .border(1.dp, Hairline, MaishaRadius.cardShape),
         shape = MaishaRadius.cardShape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = PaperWhite
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()

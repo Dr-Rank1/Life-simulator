@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -104,12 +106,16 @@ import com.maisha.game.ui.navigation.NavAnimations
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.CreamBg
+import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.HairlineSoft
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
+import com.maisha.game.ui.theme.LifeGreenSoft
+
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
 import com.maisha.game.ui.theme.NavyDeep
@@ -582,9 +588,11 @@ private fun LifeTabContent(
         LifeHeroHeader(
             character = character,
             expression = uiState.headerExpression,
+            netWorth = netWorth,
             onViewCharacterStats = onViewCharacterStats,
             onOpenSettings = onOpenSettings
         )
+
 
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
             LazyColumn(
@@ -690,108 +698,233 @@ private const val JOURNAL_VISIBLE_CAP = 12
 private fun LifeHeroHeader(
     character: Character,
     expression: Expression,
+    netWorth: Int,
     onViewCharacterStats: () -> Unit,
     onOpenSettings: () -> Unit
 ) {
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .background(CreamBg)
-            .padding(start = 12.dp, end = 16.dp, top = 4.dp, bottom = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Hairline)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            IconButton(onClick = onOpenSettings, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    imageVector = Icons.Filled.Menu,
-                    contentDescription = stringResource(R.string.content_desc_settings),
-                    tint = InkPrimary,
-                    modifier = Modifier.size(26.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onOpenSettings, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.Menu,
+                        contentDescription = stringResource(R.string.content_desc_settings),
+                        tint = InkSecondary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(CreamMuted)
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    CountryFlag(countryCode = character.countryCode, size = 16.dp)
+                    Text(
+                        text = stringResource(R.string.format_age, character.age),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = InkPrimary
+                    )
+                }
+
+                IconButton(onClick = onViewCharacterStats, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.AccountCircle,
+                        contentDescription = stringResource(R.string.content_desc_view_full_life),
+                        tint = InkSecondary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Box(
+                modifier = Modifier
+                    .size(76.dp)
+                    .clip(CircleShape)
+                    .background(CreamMuted)
+                    .border(2.dp, LifeGreenSoft, CircleShape)
+                    .clickable(onClick = onViewCharacterStats),
+                contentAlignment = Alignment.Center
+            ) {
+                PersonAvatar(
+                    avatarConfig = character.avatarConfig,
+                    size = 70,
+                    age = character.age,
+                    expression = expression,
+                    forPlayerCharacter = true,
+                    hideFromAccessibility = true,
+                    seed = "${character.gender.name}-${character.name}"
                 )
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
-                text = formatMoney(character.stats.money, character.countryCode),
+                text = character.name,
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Black,
-                color = StatMoney,
-                maxLines = 1
+                fontWeight = FontWeight.Bold,
+                color = InkPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
+
+            Row(
+                modifier = Modifier.padding(top = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = formatMoney(character.stats.money, character.countryCode),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = StatMoney
+                )
+                Text(
+                    text = "•",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = InkTertiary
+                )
+                Text(
+                    text = stringResource(R.string.label_net_worth) + ": " + formatMoney(netWorth, character.countryCode),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = InkSecondary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ModernStatChip(
+                    label = stringResource(R.string.stat_happiness),
+                    value = character.stats.happiness,
+                    color = StatHappiness,
+                    type = StatType.HAPPINESS,
+                    modifier = Modifier.weight(1f)
+                )
+                ModernStatChip(
+                    label = stringResource(R.string.stat_health),
+                    value = character.stats.health,
+                    color = StatHealth,
+                    type = StatType.HEALTH,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ModernStatChip(
+                    label = stringResource(R.string.stat_smarts),
+                    value = character.stats.smarts,
+                    color = StatSmarts,
+                    type = StatType.SMARTS,
+                    modifier = Modifier.weight(1f)
+                )
+                ModernStatChip(
+                    label = stringResource(R.string.stat_looks),
+                    value = character.stats.looks,
+                    color = StatLooks,
+                    type = StatType.LOOKS,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
+    }
+}
 
-        val viewStatsDesc = stringResource(R.string.content_desc_view_full_life)
-        Box(
-            modifier = Modifier
-                .size(118.dp)
-                .clip(CircleShape)
-                .background(PaperWhite)
-                .border(3.dp, OutlineInk, CircleShape)
-                .clickable(onClick = onViewCharacterStats)
-                .semantics { contentDescription = viewStatsDesc },
-            contentAlignment = Alignment.Center
-        ) {
-            PersonAvatar(
-                avatarConfig = character.avatarConfig,
-                size = 112,
-                age = character.age,
-                expression = expression,
-                forPlayerCharacter = true,
-                hideFromAccessibility = true,
-                seed = "${character.gender.name}-${character.name}"
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = character.name,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Black,
-            color = InkPrimary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = stringResource(R.string.format_age, character.age),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = InkPrimary,
-            modifier = Modifier.padding(top = 2.dp)
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
+@Composable
+private fun ModernStatChip(
+    label: String,
+    value: Int,
+    color: Color,
+    type: StatType,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = CreamMuted),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Hairline)
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            ComicStatBubble(
-                label = stringResource(R.string.stat_happiness),
-                value = character.stats.happiness,
-                color = StatHappiness,
-                type = StatType.HAPPINESS
-            )
-            ComicStatBubble(
-                label = stringResource(R.string.stat_health),
-                value = character.stats.health,
-                color = StatHealth,
-                type = StatType.HEALTH
-            )
-            ComicStatBubble(
-                label = stringResource(R.string.stat_smarts),
-                value = character.stats.smarts,
-                color = StatSmarts,
-                type = StatType.SMARTS
-            )
-            ComicStatBubble(
-                label = stringResource(R.string.stat_looks),
-                value = character.stats.looks,
-                color = StatLooks,
-                type = StatType.LOOKS
-            )
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                MaishaStatIcon(type = type, size = 16.dp)
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = InkSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "$value%",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = InkPrimary
+                    )
+                }
+                Spacer(modifier = Modifier.height(3.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(Hairline)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth((value.toFloat() / 100f).coerceIn(0f, 1f))
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(color)
+                    )
+                }
+            }
         }
     }
 }
@@ -806,7 +939,7 @@ private fun HeroChip(text: String, bg: Color, fg: Color) {
         modifier = Modifier
             .clip(RoundedCornerShape(99.dp))
             .background(bg)
-            .border(2.dp, OutlineInk, RoundedCornerShape(99.dp))
+            .border(1.dp, Hairline, RoundedCornerShape(99.dp))
             .padding(horizontal = 9.dp, vertical = 3.dp),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis
@@ -814,44 +947,8 @@ private fun HeroChip(text: String, bg: Color, fg: Color) {
 }
 
 @Composable
-private fun ComicStatBubble(
-    label: String,
-    value: Int,
-    color: Color,
-    type: StatType
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(58.dp)
-                .clip(CircleShape)
-                .background(color)
-                .border(2.5.dp, OutlineInk, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                MaishaStatIcon(type = type, size = 18.dp)
-                Text(
-                    text = value.toString(),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White
-                )
-            }
-        }
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = InkPrimary,
-            modifier = Modifier.padding(top = 4.dp),
-            maxLines = 1
-        )
-    }
-}
-
-@Composable
 private fun dynastyTitleLabel(titleKey: String): String {
+
     val resId = when (titleKey) {
         "dynasty_title_seedling" -> R.string.dynasty_title_seedling
         "dynasty_title_rooted" -> R.string.dynasty_title_rooted
@@ -1022,13 +1119,14 @@ private fun StatusInfoCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(2.5.dp, OutlineInk, MaishaRadius.cardShape),
+            .border(1.dp, Hairline, MaishaRadius.cardShape),
         shape = MaishaRadius.cardShape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = PaperWhite
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
+
         Column(
             modifier = Modifier.padding(MaishaSpacing.md + 2.dp),
             verticalArrangement = Arrangement.spacedBy(MaishaSpacing.sm)
@@ -1235,13 +1333,14 @@ private fun YearQuestsCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(2.5.dp, OutlineInk, MaishaRadius.cardShape),
+            .border(1.dp, Hairline, MaishaRadius.cardShape),
         shape = MaishaRadius.cardShape,
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = PaperWhite
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
+
         Column(
             modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)

@@ -245,10 +245,15 @@ private fun AchievementTrophyCard(
             .alpha(if (unlocked) 1f else 0.92f),
         shape = MaishaRadius.cardShape,
         colors = CardDefaults.cardColors(
-            containerColor = if (unlocked) GoldAccent else PaperWhite
+            containerColor = if (unlocked) GoldAccent.copy(alpha = 0.12f) else PaperWhite
         ),
-        border = androidx.compose.foundation.BorderStroke(2.5.dp, com.maisha.game.ui.theme.OutlineInk),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (unlocked) GoldAccent.copy(alpha = 0.5f) else com.maisha.game.ui.theme.Hairline
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()

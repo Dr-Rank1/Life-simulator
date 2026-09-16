@@ -11,14 +11,14 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/** Thick ink outlines used across the life-sim chrome. */
+/** Refined surface outlines and card shapes for modern life-sim chrome. */
 object ComicStyle {
-    val outline: Dp = 2.5.dp
-    val ink: Color = OutlineInk
+    val outline: Dp = 1.dp
+    val ink: Color = Hairline
     val paper: Color = PaperWhite
-    val cardShape: RoundedCornerShape = RoundedCornerShape(14.dp)
-    val pillShape: RoundedCornerShape = RoundedCornerShape(18.dp)
-    val bubbleShape: RoundedCornerShape = RoundedCornerShape(22.dp)
+    val cardShape: RoundedCornerShape = RoundedCornerShape(16.dp)
+    val pillShape: RoundedCornerShape = RoundedCornerShape(20.dp)
+    val bubbleShape: RoundedCornerShape = RoundedCornerShape(24.dp)
 }
 
 fun Modifier.comicOutline(
@@ -37,5 +37,6 @@ fun Modifier.comicPanel(
 fun Modifier.comicChip(fill: Color = ComicStyle.paper): Modifier =
     clip(ComicStyle.pillShape)
         .background(fill)
-        .border(2.dp, ComicStyle.ink, ComicStyle.pillShape)
+        .border(1.dp, ComicStyle.ink, ComicStyle.pillShape)
         .padding(horizontal = 10.dp, vertical = 4.dp)
+

@@ -68,8 +68,10 @@ import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.MaishaRadius
+
 import com.maisha.game.ui.theme.MaishaSpacing
 import com.maisha.game.ui.theme.MaishaTheme
 import com.maisha.game.ui.theme.OutlineInk
@@ -284,9 +286,10 @@ private fun OccupiedSlotCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(2.5.dp, OutlineInk),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        border = BorderStroke(1.dp, Hairline),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.5.dp)
     ) {
+
         Column(
             modifier = Modifier.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)

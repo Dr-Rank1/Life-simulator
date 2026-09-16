@@ -86,11 +86,13 @@ import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaTheme
 import com.maisha.game.ui.theme.OutlineInk
+
 import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.StatHappiness
 import com.maisha.game.ui.theme.StatHealth
@@ -174,14 +176,15 @@ fun EventDialogStyled(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 620.dp)
-                        .border(3.dp, OutlineInk, RoundedCornerShape(18.dp)),
-                    shape = RoundedCornerShape(18.dp),
+                        .heightIn(max = 620.dp),
+                    shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = PaperWhite
                     ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Hairline)
                 ) {
+
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -517,8 +520,9 @@ private fun EventChoiceCard(
             .scale(scale)
             .clip(RoundedCornerShape(14.dp))
             .background(backgroundColor)
-            .border(2.5.dp, borderColor, RoundedCornerShape(14.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(14.dp))
             .semantics { role = Role.Button }
+
             .pointerInput(enabled, eventId, index) {
                 if (!enabled) return@pointerInput
                 awaitEachGesture {

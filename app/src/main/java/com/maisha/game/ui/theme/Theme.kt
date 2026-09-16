@@ -1,4 +1,3 @@
-// app/src/main/java/com/maisha/game/ui/theme/Theme.kt
 package com.maisha.game.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,20 +17,20 @@ object MaishaSpacing {
 }
 
 object MaishaRadius {
-    val card = 14.dp
+    val card = 16.dp
     val button = 14.dp
     val ageUp = 22.dp
-    val sheet = 20.dp
-    val avatar = 99.dp
+    val sheet = 24.dp
+    val avatar = 20.dp
     val cardShape = RoundedCornerShape(card)
     val buttonShape = RoundedCornerShape(button)
     val ageUpShape = RoundedCornerShape(ageUp)
 }
 
 object MaishaElevation {
-    val card = 0.dp
-    val raised = 0.dp
-    val dialog = 0.dp
+    val card = 2.dp
+    val raised = 4.dp
+    val dialog = 12.dp
 }
 
 private val MaishaLightColorScheme = lightColorScheme(
@@ -41,7 +40,7 @@ private val MaishaLightColorScheme = lightColorScheme(
     onPrimaryContainer = InkPrimary,
     secondary = GoldAccent,
     onSecondary = InkPrimary,
-    secondaryContainer = Color(0x33FFC107),
+    secondaryContainer = Color(0x22F59E0B),
     onSecondaryContainer = InkPrimary,
     tertiary = AccentPink,
     onTertiary = Color.White,
@@ -53,8 +52,8 @@ private val MaishaLightColorScheme = lightColorScheme(
     onSurfaceVariant = InkSecondary,
     error = CoralNegative,
     onError = Color.White,
-    outline = OutlineInk,
-    outlineVariant = OutlineInk
+    outline = Hairline,
+    outlineVariant = HairlineSoft
 )
 
 @Composable
@@ -65,3 +64,4 @@ fun MaishaTheme(content: @Composable () -> Unit) {
         content = content
     )
 }
+

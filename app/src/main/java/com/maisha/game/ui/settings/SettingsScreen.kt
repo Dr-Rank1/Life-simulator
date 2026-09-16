@@ -278,9 +278,10 @@ private fun SettingsSectionCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = androidx.compose.foundation.BorderStroke(2.5.dp, com.maisha.game.ui.theme.OutlineInk),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        border = androidx.compose.foundation.BorderStroke(1.dp, com.maisha.game.ui.theme.Hairline),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
+
         Column(
             modifier = Modifier.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)

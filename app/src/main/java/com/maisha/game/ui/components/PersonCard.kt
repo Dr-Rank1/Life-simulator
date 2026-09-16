@@ -44,9 +44,11 @@ import com.maisha.game.ui.avatar.AvatarImage
 import com.maisha.game.ui.avatar.ExpressionResolver
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
 import com.maisha.game.ui.theme.TealPrimary
+
 
 @Composable
 fun PersonCard(
@@ -72,9 +74,9 @@ fun PersonCard(
     )
 
     val socialBorder = when (person.relation) {
-        RelationType.BEST_FRIEND -> BorderStroke(2.5.dp, GoldAccent)
-        RelationType.ENEMY -> BorderStroke(2.5.dp, CoralNegative)
-        else -> BorderStroke(2.5.dp, com.maisha.game.ui.theme.OutlineInk)
+        RelationType.BEST_FRIEND -> BorderStroke(1.5.dp, GoldAccent)
+        RelationType.ENEMY -> BorderStroke(1.5.dp, CoralNegative)
+        else -> BorderStroke(1.dp, Hairline)
     }
 
     Card(
@@ -94,8 +96,9 @@ fun PersonCard(
             }
         ),
         border = socialBorder,
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -27,11 +28,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.maisha.game.R
 import com.maisha.game.ui.theme.AppIcons
+import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.InkPrimary
+import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
-import com.maisha.game.ui.theme.OutlineInk
+import com.maisha.game.ui.theme.LifeGreenSoft
 import com.maisha.game.ui.theme.PaperWhite
+
 
 enum class MainTab {
     LIFE,
@@ -65,9 +69,9 @@ fun MaishaBottomNav(
     NavigationBar(
         modifier = modifier
             .fillMaxWidth()
-            .border(width = 2.5.dp, color = OutlineInk),
+            .border(width = 1.dp, color = Hairline),
         containerColor = PaperWhite,
-        tonalElevation = 0.dp,
+        tonalElevation = 2.dp,
         contentColor = InkPrimary
     ) {
         tabs.forEach { item ->
@@ -81,19 +85,18 @@ fun MaishaBottomNav(
                 icon = {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .background(if (selected) LifeGreen else Color.Transparent)
-                            .then(
-                                if (selected) Modifier.border(2.dp, OutlineInk, CircleShape)
-                                else Modifier
-                            ),
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(
+                                if (selected) LifeGreenSoft
+                                else Color.Transparent
+                            )
+                            .padding(horizontal = 12.dp, vertical = 4.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         MaishaNavIcon(
                             tab = item.tab,
                             contentDescription = label,
-                            size = 22.dp
+                            size = 24.dp
                         )
                     }
                 },
@@ -102,17 +105,19 @@ fun MaishaBottomNav(
                         text = label,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                        style = MaterialTheme.typography.labelSmall
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.White,
-                    selectedTextColor = InkPrimary,
+                    selectedIconColor = LifeGreen,
+                    selectedTextColor = LifeGreen,
                     indicatorColor = Color.Transparent,
                     unselectedIconColor = InkTertiary,
-                    unselectedTextColor = InkTertiary
+                    unselectedTextColor = InkSecondary
                 )
             )
         }
     }
 }
+

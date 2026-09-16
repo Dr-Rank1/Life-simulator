@@ -75,10 +75,13 @@ import com.maisha.game.ui.components.CountryFlag
 import com.maisha.game.ui.components.PersonAvatar
 import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
+import com.maisha.game.ui.theme.LifeGreenSoft
+
 import com.maisha.game.ui.theme.OutlineInk
 import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.StatHappiness
@@ -160,15 +163,15 @@ fun CharacterCreationScreen(
             // ── Avatar preview (live, uses current gender + avatarConfig) ──
             Box(
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(112.dp)
                     .clip(CircleShape)
                     .background(PaperWhite)
-                    .border(3.dp, OutlineInk, CircleShape),
+                    .border(2.dp, LifeGreenSoft, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 PersonAvatar(
                     avatarConfig = uiState.avatarConfig,
-                    size = 110,
+                    size = 104,
                     age = 0
                 )
             }
@@ -230,8 +233,8 @@ fun CharacterCreationScreen(
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = InkPrimary,
                         unfocusedTextColor = InkPrimary,
-                        focusedBorderColor = OutlineInk,
-                        unfocusedBorderColor = OutlineInk,
+                        focusedBorderColor = LifeGreen,
+                        unfocusedBorderColor = Hairline,
                         cursorColor = LifeGreen,
                         focusedContainerColor = PaperWhite,
                         unfocusedContainerColor = PaperWhite,
@@ -245,8 +248,9 @@ fun CharacterCreationScreen(
                         .size(52.dp)
                         .clip(RoundedCornerShape(14.dp))
                         .background(PaperWhite)
-                        .border(2.dp, OutlineInk, RoundedCornerShape(14.dp))
+                        .border(1.dp, Hairline, RoundedCornerShape(14.dp))
                 ) {
+
                     Icon(
                         imageVector = Icons.Default.Refresh,
                         contentDescription = stringResource(R.string.btn_random_name),
@@ -290,8 +294,8 @@ fun CharacterCreationScreen(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedTextColor = InkPrimary,
                     unfocusedTextColor = InkPrimary,
-                    focusedBorderColor = OutlineInk,
-                    unfocusedBorderColor = OutlineInk,
+                    focusedBorderColor = LifeGreen,
+                    unfocusedBorderColor = Hairline,
                     cursorColor = LifeGreen,
                     focusedContainerColor = PaperWhite,
                     unfocusedContainerColor = PaperWhite
@@ -340,7 +344,7 @@ fun CharacterCreationScreen(
                     disabledContainerColor = LifeGreen.copy(alpha = 0.4f),
                     disabledContentColor = Color.White.copy(alpha = 0.5f)
                 ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
                 Text(
                     text = if (uiState.isSaving) {
@@ -409,12 +413,12 @@ private fun GenderPill(
     modifier: Modifier = Modifier
 ) {
     val bgColor by animateColorAsState(
-        targetValue = if (selected) selectedColor.copy(alpha = 0.22f) else PaperWhite,
+        targetValue = if (selected) selectedColor.copy(alpha = 0.15f) else PaperWhite,
         animationSpec = tween(250, easing = EaseOutCubic),
         label = "genderBg"
     )
     val borderColor by animateColorAsState(
-        targetValue = if (selected) selectedColor else OutlineInk.copy(alpha = 0.35f),
+        targetValue = if (selected) selectedColor else Hairline,
         animationSpec = tween(250, easing = EaseOutCubic),
         label = "genderBorder"
     )
@@ -462,11 +466,12 @@ private fun SelectedCountryCard(country: Country) {
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(PaperWhite)
-            .border(2.dp, OutlineInk, RoundedCornerShape(16.dp))
+            .border(1.dp, Hairline, RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+
         CountryFlag(countryCode = country.code, size = 44.dp)
         Column(modifier = Modifier.weight(1f)) {
             Text(

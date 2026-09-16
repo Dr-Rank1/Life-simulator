@@ -35,11 +35,16 @@ import androidx.compose.ui.unit.sp
 import com.maisha.game.R
 import com.maisha.game.ui.theme.ComicStyle
 import com.maisha.game.ui.theme.CreamMuted
+import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.InkPrimary
+import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.LifeGreenPressed
 import com.maisha.game.ui.theme.MaishaRadius
-import com.maisha.game.ui.theme.OutlineInk
+
+
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 
 @Composable
 fun AgeUpButton(
@@ -59,21 +64,30 @@ fun AgeUpButton(
         label = "ageUpScale"
     )
 
-    val containerColor = when {
-        !canPress -> CreamMuted
-        pressed -> LifeGreenPressed
-        else -> LifeGreen
+    val buttonBrush = when {
+        !canPress -> Brush.horizontalGradient(listOf(CreamMuted, CreamMuted))
+        pressed -> Brush.horizontalGradient(listOf(LifeGreenPressed, LifeGreenPressed))
+        else -> Brush.horizontalGradient(listOf(LifeGreen, Color(0xFF16A34A)))
     }
-    val contentColor = if (canPress) Color.White else InkPrimary.copy(alpha = 0.45f)
+    val contentColor = if (canPress) Color.White else InkTertiary
 
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(64.dp)
+            .height(58.dp)
             .scale(scale)
+            .shadow(
+                elevation = if (canPress && !pressed) 4.dp else 0.dp,
+                shape = MaishaRadius.ageUpShape,
+                spotColor = LifeGreen.copy(alpha = 0.35f)
+            )
             .clip(MaishaRadius.ageUpShape)
-            .background(containerColor)
-            .border(ComicStyle.outline, OutlineInk, MaishaRadius.ageUpShape)
+            .background(buttonBrush)
+            .border(
+                width = 1.dp,
+                color = if (canPress) Color.White.copy(alpha = 0.2f) else Hairline,
+                shape = MaishaRadius.ageUpShape
+            )
             .semantics { role = Role.Button }
             .pointerInput(canPress, onClick) {
                 if (!canPress) return@pointerInput
@@ -97,10 +111,11 @@ fun AgeUpButton(
                 isLoading -> stringResource(R.string.btn_aging)
                 else -> stringResource(R.string.btn_live_another_year)
             },
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Black,
-            fontSize = 28.sp,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
             color = contentColor
         )
     }
 }
+
