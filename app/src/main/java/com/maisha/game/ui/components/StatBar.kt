@@ -6,6 +6,7 @@ import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.maisha.game.R
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.CoralNegative
+import com.maisha.game.ui.theme.OutlineInk
 import com.maisha.game.ui.theme.StatCondition
 import com.maisha.game.ui.theme.StatHappiness
 import com.maisha.game.ui.theme.StatHealth
@@ -202,9 +204,10 @@ fun StatBar(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                    .height(10.dp)
+                    .clip(RoundedCornerShape(6.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .border(1.5.dp, OutlineInk, RoundedCornerShape(6.dp))
             ) {
                 Box(
                     modifier = Modifier

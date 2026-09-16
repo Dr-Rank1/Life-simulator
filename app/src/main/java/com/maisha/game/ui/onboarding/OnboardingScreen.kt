@@ -47,7 +47,9 @@ import com.maisha.game.ui.illustrations.OnboardingIllustration
 import com.maisha.game.ui.components.MaishaIcon
 import com.maisha.game.ui.illustrations.OnboardingIllustrationView
 import com.maisha.game.ui.theme.AppIcons
+import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
@@ -76,7 +78,9 @@ fun OnboardingScreen(
     val scope = rememberCoroutineScope()
     val isLastSlide = pagerState.currentPage == SLIDE_COUNT - 1
 
-    Scaffold { innerPadding ->
+    Scaffold(
+        containerColor = CreamBg
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -376,20 +378,22 @@ fun ActionsScreen(
                     .padding(horizontal = MaishaSpacing.md)
             )
         } else {
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                    .padding(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (show(ActionCategory.RISK) && crimeStatus.kind != CrimeStatusKind.CLEAR) {
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         CrimeStatusCard(statusKind = crimeStatus.kind, yearsRemaining = crimeStatus.yearsRemaining)
                     }
                 }
 
                 if (show(ActionCategory.RISK) && showPrisonActions) {
-                    item { SectionHeader(title = stringResource(R.string.section_prison)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_prison)) }
                     items(PrisonActivity.entries.toList(), key = { it.name }) { activity ->
                         ActionCard(
                             icon = AppIcons.Health,
@@ -402,8 +406,8 @@ fun ActionsScreen(
                 }
 
                 if (show(ActionCategory.CARE) && untreated.isNotEmpty()) {
-                    item { SectionHeader(title = stringResource(R.string.section_health)) }
-                    items(untreated, key = { it.id }) { condition ->
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_health)) }
+                    items(untreated, key = { it.id }, span = { GridItemSpan(maxLineSpan) }) { condition ->
                         val isExpanded = expandedConditionId == condition.id
                         val treatmentHint = questHintIf(yearQuests, ActionFamily.TREATMENT, questHintLabel)
                         ConditionBadge(
@@ -454,7 +458,7 @@ fun ActionsScreen(
                 }
 
                 if (show(ActionCategory.CARE) && showLifestyleActions) {
-                    item { SectionHeader(title = stringResource(R.string.section_wellness)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_wellness)) }
                     item {
                         LifestyleActionCard(
                             character = character,
@@ -528,7 +532,7 @@ fun ActionsScreen(
                 }
 
                 if ((show(ActionCategory.CARE) || show(ActionCategory.LIVE)) && showLeisureActions) {
-                    item { SectionHeader(title = stringResource(R.string.section_leisure)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_leisure)) }
                     items(leisureActivities, key = { it.name }) { activity ->
                         val cost = leisureEngine.cost(activity, character.countryCode)
                         val isChores = activity == LeisureActivity.CHORES
@@ -564,7 +568,7 @@ fun ActionsScreen(
                 }
 
                 if ((show(ActionCategory.CARE) || show(ActionCategory.GROW)) && showStudySession) {
-                    item { SectionHeader(title = stringResource(R.string.label_education)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.label_education)) }
                     item {
                         ActionCard(
                             icon = AppIcons.Education,
@@ -584,8 +588,8 @@ fun ActionsScreen(
                     !incarcerated &&
                     !awaitingTrial
                 ) {
-                    item { SectionHeader(title = stringResource(R.string.section_fame_talent_hub)) }
-                    item(key = "fame_hub_summary") {
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_fame_talent_hub)) }
+                    item(key = "fame_hub_summary", span = { GridItemSpan(maxLineSpan) }) {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = MaishaRadius.cardShape,
@@ -709,8 +713,8 @@ fun ActionsScreen(
                 }
 
                 if ((show(ActionCategory.EARN) || show(ActionCategory.LIVE)) && showJobsAndHustles) {
-                    item { SectionHeader(title = stringResource(R.string.section_jobs_side_hustles)) }
-                    item(key = "jobs_hustles_energy") {
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_jobs_side_hustles)) }
+                    item(key = "jobs_hustles_energy", span = { GridItemSpan(maxLineSpan) }) {
                         val canRest = showStudentPartTime &&
                             !character.career.energyRestedThisYear &&
                             character.career.energyLevel < 95
@@ -722,7 +726,7 @@ fun ActionsScreen(
                         )
                     }
                     if (character.career.activePartTimeJob != null) {
-                        item(key = "active_part_time") {
+                        item(key = "active_part_time", span = { GridItemSpan(maxLineSpan) }) {
                             ActivePartTimeManagementCard(
                                 character = character,
                                 careerEngine = careerEngine,
@@ -732,7 +736,7 @@ fun ActionsScreen(
                     }
                     if (showStudentPartTime) {
                         PartTimeJob.entries.forEach { job ->
-                            item(key = "part_time_${job.name}") {
+                            item(key = "part_time_${job.name}", span = { GridItemSpan(maxLineSpan) }) {
                                 PartTimeJobMarketCard(
                                     character = character,
                                     careerEngine = careerEngine,
@@ -757,7 +761,7 @@ fun ActionsScreen(
                 }
 
                 if ((show(ActionCategory.EARN) || show(ActionCategory.GROW)) && showSocialMediaActions) {
-                    item { SectionHeader(title = stringResource(R.string.section_social_media)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_social_media)) }
                     if (!character.socialMedia.hasAccount) {
                         item {
                             ActionCard(
@@ -774,7 +778,7 @@ fun ActionsScreen(
                         if (show(ActionCategory.EARN) || category == ActionCategory.ALL ||
                             category == ActionCategory.GROW
                         ) {
-                            item {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
                                 Text(
                                     text = stringResource(
                                         R.string.format_fame_badge,
@@ -851,8 +855,8 @@ fun ActionsScreen(
                 }
 
                 if ((show(ActionCategory.EARN) || show(ActionCategory.GROW)) && showSkillActions) {
-                    item { SectionHeader(title = stringResource(R.string.section_hobbies_skills)) }
-                    items(SkillType.entries.toList(), key = { it.name }) { skillType ->
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_hobbies_skills)) }
+                    items(SkillType.entries.toList(), key = { it.name }, span = { GridItemSpan(maxLineSpan) }) { skillType ->
                         val level = character.skills.find { it.type == skillType }?.level ?: 0
                         CollapsibleSkillRow(
                             skillType = skillType,
@@ -893,7 +897,7 @@ fun ActionsScreen(
                 }
 
                 if (show(ActionCategory.GROW) && showAdoptPetActions) {
-                    item { SectionHeader(title = stringResource(R.string.section_adopt_pet)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_adopt_pet)) }
                     items(PetCatalog.getAll(), key = { it.species.name }) { entry ->
                         val adoptionCost = EconomyScaler.scaleAmount(
                             entry.adoptionFee,
@@ -924,7 +928,7 @@ fun ActionsScreen(
                 }
 
                 if (show(ActionCategory.GROW) && showBucketList) {
-                    item { SectionHeader(title = stringResource(R.string.section_bucket_list)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_bucket_list)) }
                     items(
                         character.bucketList.filter { !it.completed },
                         key = { "active_${it.id}" }
@@ -985,7 +989,7 @@ fun ActionsScreen(
                 }
 
                 if (show(ActionCategory.LIVE) && showDrivingTest) {
-                    item { SectionHeader(title = stringResource(R.string.section_driving)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_driving)) }
                     item {
                         val canAfford = character.stats.money >= drivingTestFee
                         ActionCard(
@@ -1007,7 +1011,7 @@ fun ActionsScreen(
                 }
 
                 if (show(ActionCategory.LIVE) && showPhilanthropy) {
-                    item { SectionHeader(title = stringResource(R.string.section_philanthropy)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_philanthropy)) }
                     item {
                         ActionCard(
                             icon = AppIcons.Happiness,
@@ -1044,7 +1048,7 @@ fun ActionsScreen(
                 }
 
                 if (show(ActionCategory.LIVE) && showAdoptChild) {
-                    item { SectionHeader(title = stringResource(R.string.btn_adopt_child)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.btn_adopt_child)) }
                     item {
                         ActionCard(
                             icon = AppIcons.Family,
@@ -1057,7 +1061,7 @@ fun ActionsScreen(
                 }
 
                 if (show(ActionCategory.LIVE) && showExpungement) {
-                    item { SectionHeader(title = stringResource(R.string.btn_request_expungement)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.btn_request_expungement)) }
                     item {
                         ActionCard(
                             icon = AppIcons.Career,
@@ -1073,8 +1077,8 @@ fun ActionsScreen(
                 }
 
                 if (show(ActionCategory.LIVE) && showImmigrationOffice) {
-                    item { SectionHeader(title = stringResource(R.string.section_immigration_office)) }
-                    item {
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_immigration_office)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Text(
                             text = stringResource(
                                 R.string.immigration_status_summary,
@@ -1126,7 +1130,7 @@ fun ActionsScreen(
                             )
                         }
                     } else {
-                        item {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
                             Text(
                                 text = stringResource(
                                     R.string.immigration_citizenship_locked,
@@ -1141,7 +1145,7 @@ fun ActionsScreen(
                 }
 
                 if (show(ActionCategory.RISK) && showCrimeActions) {
-                    item { SectionHeader(title = stringResource(R.string.section_street_risks)) }
+                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_street_risks)) }
                     item {
                         ActionCard(
                             icon = AppIcons.CrimePickpocket,
@@ -1183,7 +1187,7 @@ fun ActionsScreen(
                     }
                 }
 
-                item { Spacer(modifier = Modifier.height(16.dp)) }
+                item(span = { GridItemSpan(maxLineSpan) }) { Spacer(modifier = Modifier.height(16.dp)) }
             }
         }
     }

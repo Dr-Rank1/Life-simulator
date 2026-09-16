@@ -17,52 +17,44 @@ object MaishaSpacing {
     val xl = 24.dp
 }
 
-/**
- * Radii from Figma Make reference: cards ~16, Age Up ~18, sheets ~20.
- */
 object MaishaRadius {
-    val card = 16.dp
-    val button = 12.dp
-    val ageUp = 18.dp
+    val card = 14.dp
+    val button = 14.dp
+    val ageUp = 22.dp
     val sheet = 20.dp
-    val avatar = 20.dp
+    val avatar = 99.dp
     val cardShape = RoundedCornerShape(card)
     val buttonShape = RoundedCornerShape(button)
     val ageUpShape = RoundedCornerShape(ageUp)
 }
 
-/** Elevation: light cream canvas uses soft 1–6dp card shadows conceptually. */
 object MaishaElevation {
-    val card = 1.dp
-    val raised = 2.dp
-    val dialog = 8.dp
+    val card = 0.dp
+    val raised = 0.dp
+    val dialog = 0.dp
 }
 
-/**
- * Light game-loop scheme from the zip prototype (cream body, green primary).
- * Navy hero headers still paint with [NavyDeep] / [NavySurface] explicitly.
- */
 private val MaishaLightColorScheme = lightColorScheme(
     primary = LifeGreen,
     onPrimary = Color.White,
     primaryContainer = LifeGreenSoft,
-    onPrimaryContainer = NavyDeep,
+    onPrimaryContainer = InkPrimary,
     secondary = GoldAccent,
-    onSecondary = NavyDeep,
-    secondaryContainer = Color(0x33F4B942),
-    onSecondaryContainer = NavyDeep,
+    onSecondary = InkPrimary,
+    secondaryContainer = Color(0x33FFC107),
+    onSecondaryContainer = InkPrimary,
     tertiary = AccentPink,
     onTertiary = Color.White,
     background = CreamBg,
     onBackground = InkPrimary,
-    surface = Color.White,
+    surface = PaperWhite,
     onSurface = InkPrimary,
     surfaceVariant = CreamMuted,
     onSurfaceVariant = InkSecondary,
     error = CoralNegative,
     onError = Color.White,
-    outline = Hairline,
-    outlineVariant = HairlineSoft
+    outline = OutlineInk,
+    outlineVariant = OutlineInk
 )
 
 @Composable

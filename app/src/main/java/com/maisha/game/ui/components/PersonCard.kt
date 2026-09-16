@@ -72,9 +72,9 @@ fun PersonCard(
     )
 
     val socialBorder = when (person.relation) {
-        RelationType.BEST_FRIEND -> BorderStroke(2.dp, GoldAccent)
-        RelationType.ENEMY -> BorderStroke(2.dp, CoralNegative)
-        else -> null
+        RelationType.BEST_FRIEND -> BorderStroke(2.5.dp, GoldAccent)
+        RelationType.ENEMY -> BorderStroke(2.5.dp, CoralNegative)
+        else -> BorderStroke(2.5.dp, com.maisha.game.ui.theme.OutlineInk)
     }
 
     Card(
@@ -90,7 +90,7 @@ fun PersonCard(
             containerColor = when (person.relation) {
                 RelationType.BEST_FRIEND -> GoldAccent.copy(alpha = 0.12f)
                 RelationType.ENEMY -> CoralNegative.copy(alpha = 0.10f)
-                else -> MaterialTheme.colorScheme.surfaceVariant
+                else -> MaterialTheme.colorScheme.surface
             }
         ),
         border = socialBorder,
@@ -154,25 +154,23 @@ fun PersonCard(
                     }
                 }
                 Text(
-                    text = relationLabel,
+                    text = "$relationLabel, $ageLabel",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = tierLabel,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
 
             Text(
-                text = stringResource(R.string.format_age, person.age),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = "${person.relationshipLevel}%",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Black,
+                color = when {
+                    person.relationshipLevel >= 70 -> TealPrimary
+                    person.relationshipLevel <= 30 -> CoralNegative
+                    else -> MaterialTheme.colorScheme.onSurface
+                },
                 maxLines = 1
             )
         }

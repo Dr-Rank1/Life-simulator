@@ -3,6 +3,8 @@
     <string name="app_name">Maisha</string>
     <!-- AdMob app ID. Debug uses Google's sample ID; set ADMOB_APP_ID for production. Publisher: ca-app-pub-9418386170210711 -->
     <string name="admob_app_id" translatable="false">ca-app-pub-3940256099942544~3347511713</string>
+    <!-- Play Games app ID. Replace with your real ID from Google Play Console. -->
+    <string name="play_games_app_id" translatable="false">000000000000</string>
 
     <!-- App -->
     <string name="tagline">Live your story. One year at a time.</string>
@@ -115,7 +117,7 @@
     <string name="btn_view_achievements">View Achievements</string>
     <string name="btn_watch_second_wind">Watch Ad for a Second Wind</string>
     <string name="btn_age_up">+ Age Up</string>
-    <string name="btn_live_another_year">Live Another Year →</string>
+    <string name="btn_live_another_year">Age +</string>
     <string name="btn_aging">Aging…</string>
     <string name="btn_nice">Nice!</string>
 

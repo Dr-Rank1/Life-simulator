@@ -72,9 +72,14 @@ import com.maisha.game.ui.share.ShareCardComposable
 import com.maisha.game.ui.share.ShareCardData
 import com.maisha.game.ui.share.ShareCardDimensions
 import com.maisha.game.ui.theme.CoralNegative
+import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.InkPrimary
+import com.maisha.game.ui.theme.InkSecondary
+import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaTheme
-import com.maisha.game.ui.theme.NavyDeep
+import com.maisha.game.ui.theme.OutlineInk
+import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.ComposableToImage
 import com.maisha.game.util.ShareIntentHelper
@@ -166,7 +171,11 @@ fun LifeSummaryScreen(
         )
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(CreamBg)
+    ) {
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -338,7 +347,7 @@ fun LifeSummaryScreen(
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GoldAccent,
-                    contentColor = NavyDeep
+                    contentColor = InkPrimary
                 ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
             ) {
@@ -434,7 +443,7 @@ private fun SharePreviewDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(NavyDeep.copy(alpha = 0.96f))
+                .background(InkPrimary.copy(alpha = 0.45f))
                 .padding(16.dp)
         ) {
             Column(
@@ -486,7 +495,7 @@ private fun SharePreviewDialog(
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = GoldAccent,
-                            contentColor = NavyDeep
+                            contentColor = InkPrimary
                         )
                     ) {
                         if (isCapturing) {
@@ -518,8 +527,9 @@ private fun MemorialHeader(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = NavyDeep.copy(alpha = 0.92f)
-        )
+            containerColor = PaperWhite
+        ),
+        border = androidx.compose.foundation.BorderStroke(2.5.dp, OutlineInk)
     ) {
         Column(
             modifier = Modifier
@@ -550,7 +560,7 @@ private fun MemorialHeader(
                     text = character.name,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = InkPrimary,
                     textAlign = TextAlign.Center,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
@@ -564,7 +574,7 @@ private fun MemorialHeader(
                     stringResource(R.string.format_age, character.age)
                 ),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.75f),
+                color = InkSecondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -590,14 +600,14 @@ private fun MemorialHeader(
                         text = deathCauseLabel,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = InkPrimary,
                         textAlign = TextAlign.Center
                     )
                     if (deathFlavorText.isNotBlank()) {
                         Text(
                             text = deathFlavorText,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                            color = InkPrimary.copy(alpha = 0.8f),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -627,8 +637,9 @@ private fun SummarySectionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = PaperWhite
+        ),
+        border = androidx.compose.foundation.BorderStroke(2.5.dp, OutlineInk)
     ) {
         Column(
             modifier = Modifier.padding(14.dp),

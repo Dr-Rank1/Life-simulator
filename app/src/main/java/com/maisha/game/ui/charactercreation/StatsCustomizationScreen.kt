@@ -296,7 +296,7 @@ fun StatsCustomizationScreen(
                 .padding(horizontal = 20.dp, vertical = 16.dp)
                 .height(52.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = GoldAccent, contentColor = NavyDeep)
+            colors = ButtonDefaults.buttonColors(containerColor = GoldAccent, contentColor = InkPrimary)
         ) {
             Text(
                 text = if (uiState.isSaving) {

@@ -73,11 +73,14 @@ import com.maisha.game.data.model.Country
 import com.maisha.game.data.model.Gender
 import com.maisha.game.ui.components.CountryFlag
 import com.maisha.game.ui.components.PersonAvatar
+import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
-import com.maisha.game.ui.theme.NavyDeep
-import com.maisha.game.ui.theme.NavyMid
+import com.maisha.game.ui.theme.InkTertiary
+import com.maisha.game.ui.theme.LifeGreen
+import com.maisha.game.ui.theme.OutlineInk
+import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.StatHappiness
 import com.maisha.game.ui.theme.StatHealth
 import com.maisha.game.ui.theme.StatLooks
@@ -122,19 +125,11 @@ fun CharacterCreationScreen(
         filteredCountries
     }
     val selectedCountry = CountryCatalog.getCountry(uiState.selectedCountryCode)
-    val gradient = remember(uiState.selectedCountryCode) {
-        countryGradient(uiState.selectedCountryCode)
-    }
-    val bgColor1 by animateColorAsState(gradient[0], tween(600), label = "bg1")
-    val bgColor2 by animateColorAsState(gradient[1], tween(600), label = "bg2")
-    val bgColor3 by animateColorAsState(gradient[2], tween(600), label = "bg3")
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(listOf(bgColor1, bgColor2, bgColor3))
-            )
+            .background(CreamBg)
     ) {
         Column(
             modifier = Modifier
@@ -150,13 +145,13 @@ fun CharacterCreationScreen(
                 text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.White,
+                color = InkPrimary,
                 letterSpacing = 1.sp
             )
             Text(
                 text = stringResource(R.string.tagline),
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.7f),
+                color = InkSecondary,
                 textAlign = TextAlign.Center
             )
 
@@ -167,8 +162,8 @@ fun CharacterCreationScreen(
                 modifier = Modifier
                     .size(120.dp)
                     .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.12f))
-                    .border(3.dp, GoldAccent.copy(alpha = 0.8f), CircleShape),
+                    .background(PaperWhite)
+                    .border(3.dp, OutlineInk, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 PersonAvatar(
@@ -224,7 +219,7 @@ fun CharacterCreationScreen(
                 OutlinedTextField(
                     value = uiState.name,
                     onValueChange = onNameChange,
-                    placeholder = { Text(stringResource(R.string.hint_enter_name), color = Color.White.copy(alpha = 0.45f)) },
+                    placeholder = { Text(stringResource(R.string.hint_enter_name), color = InkSecondary) },
                     singleLine = true,
                     isError = uiState.nameError != null,
                     supportingText = uiState.nameError?.let { err -> { Text(err, color = Color(0xFFFF8A80)) } },
@@ -233,15 +228,15 @@ fun CharacterCreationScreen(
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = GoldAccent,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                        cursorColor = GoldAccent,
-                        focusedContainerColor = Color.White.copy(alpha = 0.08f),
-                        unfocusedContainerColor = Color.White.copy(alpha = 0.05f),
-                        errorBorderColor = Color(0xFFFF8A80),
-                        errorTextColor = Color.White
+                        focusedTextColor = InkPrimary,
+                        unfocusedTextColor = InkPrimary,
+                        focusedBorderColor = OutlineInk,
+                        unfocusedBorderColor = OutlineInk,
+                        cursorColor = LifeGreen,
+                        focusedContainerColor = PaperWhite,
+                        unfocusedContainerColor = PaperWhite,
+                        errorBorderColor = Color(0xFFE53935),
+                        errorTextColor = InkPrimary
                     )
                 )
                 IconButton(
@@ -249,7 +244,8 @@ fun CharacterCreationScreen(
                     modifier = Modifier
                         .size(52.dp)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(Color.White.copy(alpha = 0.1f))
+                        .background(PaperWhite)
+                        .border(2.dp, OutlineInk, RoundedCornerShape(14.dp))
                 ) {
                     Icon(
                         imageVector = Icons.Default.Refresh,
@@ -285,20 +281,20 @@ fun CharacterCreationScreen(
             OutlinedTextField(
                 value = uiState.countrySearchQuery,
                 onValueChange = onCountrySearchChange,
-                placeholder = { Text(stringResource(R.string.hint_search_countries), color = Color.White.copy(alpha = 0.45f)) },
+                placeholder = { Text(stringResource(R.string.hint_search_countries), color = InkSecondary) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedBorderColor = TealPrimary,
-                    unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
-                    cursorColor = TealPrimary,
-                    focusedContainerColor = Color.White.copy(alpha = 0.08f),
-                    unfocusedContainerColor = Color.White.copy(alpha = 0.05f)
+                    focusedTextColor = InkPrimary,
+                    unfocusedTextColor = InkPrimary,
+                    focusedBorderColor = OutlineInk,
+                    unfocusedBorderColor = OutlineInk,
+                    cursorColor = LifeGreen,
+                    focusedContainerColor = PaperWhite,
+                    unfocusedContainerColor = PaperWhite
                 )
             )
 
@@ -339,10 +335,10 @@ fun CharacterCreationScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(18.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = GoldAccent,
-                    contentColor = NavyDeep,
-                    disabledContainerColor = GoldAccent.copy(alpha = 0.4f),
-                    disabledContentColor = NavyDeep.copy(alpha = 0.5f)
+                    containerColor = LifeGreen,
+                    contentColor = Color.White,
+                    disabledContainerColor = LifeGreen.copy(alpha = 0.4f),
+                    disabledContentColor = Color.White.copy(alpha = 0.5f)
                 ),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
             ) {
@@ -369,7 +365,7 @@ private fun SectionLabel(text: String) {
         text = text.uppercase(),
         style = MaterialTheme.typography.labelSmall,
         fontWeight = FontWeight.Bold,
-        color = Color.White.copy(alpha = 0.55f),
+        color = InkSecondary,
         letterSpacing = 1.5.sp,
         modifier = Modifier.fillMaxWidth()
     )
@@ -413,12 +409,12 @@ private fun GenderPill(
     modifier: Modifier = Modifier
 ) {
     val bgColor by animateColorAsState(
-        targetValue = if (selected) selectedColor.copy(alpha = 0.22f) else Color.White.copy(alpha = 0.07f),
+        targetValue = if (selected) selectedColor.copy(alpha = 0.22f) else PaperWhite,
         animationSpec = tween(250, easing = EaseOutCubic),
         label = "genderBg"
     )
     val borderColor by animateColorAsState(
-        targetValue = if (selected) selectedColor else Color.White.copy(alpha = 0.15f),
+        targetValue = if (selected) selectedColor else OutlineInk.copy(alpha = 0.35f),
         animationSpec = tween(250, easing = EaseOutCubic),
         label = "genderBorder"
     )
@@ -445,7 +441,7 @@ private fun GenderPill(
                 text = label,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                color = if (selected) Color.White else Color.White.copy(alpha = 0.7f)
+                color = InkPrimary
             )
             if (selected) {
                 Icon(
@@ -465,8 +461,8 @@ private fun SelectedCountryCard(country: Country) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.12f))
-            .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+            .background(PaperWhite)
+            .border(2.dp, OutlineInk, RoundedCornerShape(16.dp))
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -477,12 +473,12 @@ private fun SelectedCountryCard(country: Country) {
                 text = country.displayName,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = InkPrimary
             )
             Text(
                 text = "${country.currencySymbol}  ${country.currencyCode}",
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.6f)
+                color = InkSecondary
             )
         }
         Box(
@@ -495,7 +491,7 @@ private fun SelectedCountryCard(country: Country) {
             Icon(
                 Icons.Default.Check,
                 contentDescription = null,
-                tint = NavyDeep,
+                tint = InkPrimary,
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -509,12 +505,12 @@ private fun CountryChip(
     onClick: () -> Unit
 ) {
     val bgColor by animateColorAsState(
-        targetValue = if (selected) GoldAccent.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.08f),
+        targetValue = if (selected) GoldAccent.copy(alpha = 0.2f) else PaperWhite,
         animationSpec = tween(250),
         label = "chipBg"
     )
     val borderColor by animateColorAsState(
-        targetValue = if (selected) GoldAccent else Color.White.copy(alpha = 0.12f),
+        targetValue = if (selected) GoldAccent else OutlineInk.copy(alpha = 0.35f),
         animationSpec = tween(250),
         label = "chipBorder"
     )
@@ -538,7 +534,7 @@ private fun CountryChip(
             text = country.displayName,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color = if (selected) Color.White else Color.White.copy(alpha = 0.65f),
+            color = InkPrimary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
@@ -577,7 +573,7 @@ private fun BirthStatPreviewRow() {
                         .fillMaxWidth()
                         .height(6.dp)
                         .clip(RoundedCornerShape(3.dp))
-                        .background(Color.White.copy(alpha = 0.15f))
+                        .background(PaperWhite)
                 ) {
                     Box(
                         modifier = Modifier
@@ -596,7 +592,7 @@ private fun BirthStatPreviewRow() {
                 Text(
                     text = name,
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.5f),
+                    color = InkSecondary,
                     fontSize = 9.sp
                 )
             }
@@ -606,7 +602,7 @@ private fun BirthStatPreviewRow() {
     Text(
         text = stringResource(R.string.birth_stats_random_note),
         style = MaterialTheme.typography.labelSmall,
-        color = Color.White.copy(alpha = 0.4f),
+        color = InkTertiary,
         textAlign = TextAlign.Center,
         fontSize = 10.sp
     )

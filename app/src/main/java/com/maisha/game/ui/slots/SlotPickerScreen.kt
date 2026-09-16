@@ -65,11 +65,15 @@ import com.maisha.game.ui.components.ConfirmSeverity
 import com.maisha.game.ui.components.CountryFlag
 import com.maisha.game.ui.components.countryDisplayName
 import com.maisha.game.ui.theme.CoralNegative
+import com.maisha.game.ui.theme.CreamBg
+import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
 import com.maisha.game.ui.theme.MaishaTheme
-import com.maisha.game.ui.theme.NavyDeep
+import com.maisha.game.ui.theme.OutlineInk
+import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
 import java.util.Calendar
@@ -89,17 +93,9 @@ fun SlotPickerScreen(
     modifier: Modifier = Modifier
 ) {
     val timeOfDayBrush = remember { timeOfDayBackgroundBrush() }
-    val needsDaytimeScrim = remember { isDaytimeHour() }
     val rootModifier = modifier
         .fillMaxSize()
         .background(timeOfDayBrush)
-        .then(
-            if (needsDaytimeScrim) {
-                Modifier.background(Color.Black.copy(alpha = 0.42f))
-            } else {
-                Modifier
-            }
-        )
         .windowInsetsPadding(WindowInsets.safeDrawing)
 
     if (uiState.isLoading) {
@@ -286,9 +282,10 @@ private fun OccupiedSlotCard(
         modifier = Modifier.fillMaxWidth(),
         shape = MaishaRadius.cardShape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        border = BorderStroke(2.5.dp, OutlineInk),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -397,7 +394,7 @@ private fun OccupiedSlotCard(
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = GoldAccent,
-                        contentColor = NavyDeep
+                        contentColor = InkPrimary
                     )
                 ) {
                     Text(stringResource(R.string.btn_continue), maxLines = 1)
@@ -597,27 +594,9 @@ private fun isDaytimeHour(hour: Int = currentHourOfDay()): Boolean =
     hour in 6..17
 
 private fun timeOfDayBackgroundBrush(): Brush {
-    val hour = currentHourOfDay()
-    return when (hour) {
-        in 6..11 -> Brush.verticalGradient(
-            colors = listOf(
-                Color(0xFFFFD1A8), // soft peach
-                Color(0xFFB8D9F0)  // light blue
-            )
-        )
-        in 12..17 -> Brush.verticalGradient(
-            colors = listOf(
-                Color(0xFF4DD0E1), // cyan
-                Color(0xFF1E88E5)  // blue
-            )
-        )
-        else -> Brush.verticalGradient(
-            colors = listOf(
-                Color(0xFF0A1628), // deep navy
-                Color(0xFF2D1B4E)  // purple
-            )
-        )
-    }
+    return Brush.verticalGradient(
+        colors = listOf(CreamBg, PaperWhite, CreamMuted)
+    )
 }
 
 @Preview(showBackground = true, widthDp = 360, name = "Slot picker mixed states")

@@ -896,7 +896,7 @@
     <string name="celebration_age_100">Un siècle complet !</string>
 
     <!-- Synced from EN (pending translation) -->
-    <string name="btn_live_another_year">Live Another Year →</string>
+    <string name="btn_live_another_year">Âge +</string>
     <string name="dialog_throw_party_tier_body">Spend %1$s. Guests gain about +%2$d bond.</string>
     <string name="sheet_party_tiers_title">Choose a party budget</string>
     <string name="party_tier_modest">Modest gathering</string>

@@ -29,6 +29,7 @@ import com.maisha.game.ui.components.ConfirmActionDialog
 import com.maisha.game.ui.components.ConfirmSeverity
 import com.maisha.game.ui.components.PersonAvatar
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.NavyDeep
 import com.maisha.game.ui.theme.TealPrimary
 
@@ -145,7 +146,7 @@ private fun HeirOptionCard(
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GoldAccent,
-                    contentColor = NavyDeep
+                    contentColor = InkPrimary
                 )
             ) {
                 Text(

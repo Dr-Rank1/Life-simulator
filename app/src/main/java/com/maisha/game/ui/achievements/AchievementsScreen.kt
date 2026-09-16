@@ -59,9 +59,12 @@ import com.maisha.game.ui.components.AppLoadingIndicator
 import com.maisha.game.ui.components.EmptyStateCard
 import com.maisha.game.ui.components.IllustrationImage
 import com.maisha.game.ui.illustrations.EmptyStateIllustration
+import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaTheme
+import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.TealPrimary
 import kotlinx.coroutines.launch
 
@@ -80,6 +83,7 @@ fun AchievementsScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = CreamBg,
         topBar = {
             TopAppBar(
                 title = {
@@ -98,8 +102,9 @@ fun AchievementsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                    containerColor = CreamBg,
+                    titleContentColor = InkPrimary,
+                    navigationIconContentColor = InkPrimary
                 )
             )
         }
@@ -240,12 +245,9 @@ private fun AchievementTrophyCard(
             .alpha(if (unlocked) 1f else 0.92f),
         shape = MaishaRadius.cardShape,
         colors = CardDefaults.cardColors(
-            containerColor = if (unlocked) {
-                GoldAccent.copy(alpha = 0.12f)
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            }
-        )
+            containerColor = if (unlocked) GoldAccent else PaperWhite
+        ),
+        border = androidx.compose.foundation.BorderStroke(2.5.dp, com.maisha.game.ui.theme.OutlineInk),
     ) {
         Column(
             modifier = Modifier

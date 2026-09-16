@@ -79,6 +79,7 @@ import com.maisha.game.ui.components.TabPageHero
 import com.maisha.game.ui.components.rememberConfirmableAction
 import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.theme.AccentPink
+import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
@@ -278,16 +279,7 @@ fun FamilyScreen(
             TabPageHero(
                 title = stringResource(R.string.screen_relationships),
                 subtitle = partnerStatus,
-                primaryChip = stringResource(
-                    R.string.format_friend_slots,
-                    friendCount,
-                    RelationshipEngine.MAX_FRIENDS
-                ),
-                secondaryChip = if (character.pets.isNotEmpty()) {
-                    stringResource(R.string.format_pet_count_short, character.pets.size)
-                } else {
-                    null
-                }
+                primaryChip = formatMoney(character.stats.money, character.countryCode)
             )
 
             if (hasBondFamilyQuest) {
@@ -677,7 +669,7 @@ private fun PartyTierButton(
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = GoldAccent.copy(alpha = 0.85f),
-            contentColor = NavyDeep
+            contentColor = InkPrimary
         )
     ) {
         Text("$label · $costLabel", fontWeight = FontWeight.SemiBold)
@@ -816,7 +808,7 @@ private fun DatingProspectsSheet(
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = AccentPink,
-                            contentColor = NavyDeep
+                            contentColor = InkPrimary
                         )
                     ) {
                         Text(

@@ -1,6 +1,7 @@
 package com.maisha.game.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -13,23 +14,24 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.InkPrimary
+import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.LifeGreen
-import com.maisha.game.ui.theme.NavyDeep
-import com.maisha.game.ui.theme.NavyElevated
-import com.maisha.game.ui.theme.NavySurface
+import com.maisha.game.ui.theme.OutlineInk
+import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.StatMoney
 
-/**
- * Shared navy hero used by Career / Assets / Actions-style tabs.
- */
+/** Other tabs: title on the left, cash on the right. */
 @Composable
+@Suppress("UNUSED_PARAMETER")
 fun TabPageHero(
     title: String,
     subtitle: String,
@@ -37,49 +39,42 @@ fun TabPageHero(
     secondaryChip: String? = null,
     tertiaryChip: String? = null
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Brush.linearGradient(listOf(NavyDeep, NavySurface, NavyElevated))
-            )
-            .padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 16.dp)
+            .background(CreamBg)
+            .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-        Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.White.copy(alpha = 0.65f),
-            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            HeroMoneyChip(text = primaryChip)
-            secondaryChip?.let { HeroMoneyChip(text = it, muted = true) }
-            tertiaryChip?.let { HeroMoneyChip(text = it, muted = true) }
-        }
-    }
-}
-
-@Composable
-private fun HeroMoneyChip(text: String, muted: Boolean = false) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
-        color = if (muted) Color.White.copy(alpha = 0.85f) else GoldAccent,
-        maxLines = 1,
-        modifier = Modifier
-            .clip(RoundedCornerShape(99.dp))
-            .background(
-                if (muted) Color.White.copy(alpha = 0.12f) else GoldAccent.copy(alpha = 0.18f)
+        Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Black,
+                color = InkPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    )
+            if (subtitle.isNotBlank()) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = InkSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+        }
+        Text(
+            text = primaryChip,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Black,
+            color = StatMoney,
+            maxLines = 1
+        )
+    }
 }
 
 @Composable
@@ -104,7 +99,8 @@ fun CategoryFilterChipRow(
                 color = if (active) Color.White else InkPrimary,
                 modifier = Modifier
                     .clip(RoundedCornerShape(99.dp))
-                    .background(if (active) LifeGreen else Color.White)
+                    .background(if (active) LifeGreen else PaperWhite)
+                    .border(2.dp, OutlineInk, RoundedCornerShape(99.dp))
                     .clickable { onSelected(index) }
                     .padding(horizontal = 14.dp, vertical = 8.dp)
             )

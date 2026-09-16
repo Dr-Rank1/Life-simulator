@@ -377,32 +377,6 @@ fun CareerScreen(
         )
         else -> stringResource(R.string.career_subtitle_open)
     }
-    val heroPrimary = when {
-        isRetired -> formatMoney(character.career.pensionAmount, character.countryCode)
-        currentJob != null -> CareerFormatter.formatSalary(currentJob, resources, character.countryCode)
-        else -> formatMoney(character.stats.money, character.countryCode)
-    }
-    val heroSecondary = when {
-        isRetired -> stringResource(R.string.chip_career_pension)
-        currentJob != null -> stringResource(
-            R.string.format_job_level_short,
-            currentJob.level,
-            character.career.yearsAtCurrentJob
-        )
-        hireChance != null -> stringResource(R.string.format_hire_chance, hireChance)
-        else -> null
-    }
-    val heroTertiary = when {
-        currentJob != null -> stringResource(
-            R.string.format_work_effort_chip,
-            when (character.career.plannedWorkEffort) {
-                WorkEffort.COAST -> stringResource(R.string.work_effort_coast)
-                WorkEffort.NORMAL -> stringResource(R.string.work_effort_normal)
-                WorkEffort.GRIND -> stringResource(R.string.work_effort_grind)
-            }
-        )
-        else -> null
-    }
 
     val chipLabels = listOf(
         stringResource(R.string.chip_career_all),
@@ -420,9 +394,7 @@ fun CareerScreen(
         TabPageHero(
             title = stringResource(R.string.screen_career),
             subtitle = heroSubtitle,
-            primaryChip = heroPrimary,
-            secondaryChip = heroSecondary,
-            tertiaryChip = heroTertiary
+            primaryChip = formatMoney(character.stats.money, character.countryCode)
         )
 
         CategoryFilterChipRow(
@@ -4045,7 +4017,7 @@ private fun PoliticsSection(
             onClick = onLaunchCampaign,
             modifier = Modifier.fillMaxWidth(),
             shape = MaishaRadius.buttonShape,
-            colors = ButtonDefaults.buttonColors(containerColor = GoldAccent, contentColor = NavyDeep)
+            colors = ButtonDefaults.buttonColors(containerColor = GoldAccent, contentColor = InkPrimary)
         ) {
             Text(
                 stringResource(

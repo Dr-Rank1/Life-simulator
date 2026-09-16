@@ -34,6 +34,7 @@ import com.maisha.game.ui.avatar.AvatarImage
 import com.maisha.game.ui.avatar.ExpressionResolver
 import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.theme.AccentPink
+import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.NavyDeep
@@ -622,11 +623,11 @@ private fun DetailSheetButton(
     val colors = when {
         emphasizePink -> ButtonDefaults.buttonColors(
             containerColor = AccentPink,
-            contentColor = NavyDeep
+            contentColor = InkPrimary
         )
         emphasizeGreen -> ButtonDefaults.buttonColors(
             containerColor = LifeGreen,
-            contentColor = NavyDeep
+            contentColor = InkPrimary
         )
         else -> ButtonDefaults.buttonColors()
     }

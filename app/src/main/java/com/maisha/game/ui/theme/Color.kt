@@ -4,48 +4,51 @@ package com.maisha.game.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /**
- * Palette aligned with the Maisha Figma prototype (cream game loop + navy hero headers + green primary CTA).
+ * Comic life-sim palette: parchment paper, ink outlines, lime Age button.
+ * Maisha names stay; the chrome is the familiar life-sim look.
  */
 val NavyDeep = Color(0xFF0B1628)
 val NavySurface = Color(0xFF152238)
 val NavyElevated = Color(0xFF1E2F4A)
 val NavyMid = Color(0xFF0F1E35)
 
-val CreamBg = Color(0xFFF5F4F0)
-val CreamMuted = Color(0xFFF2F2F7)
-val InkPrimary = Color(0xFF1C1C1E)
-val InkSecondary = Color(0xFF8E8E93)
-val InkTertiary = Color(0xFF9CA3AF)
-val Hairline = Color(0xFFE5E5EA)
-val HairlineSoft = Color(0xFFE9E9EF)
+val CreamBg = Color(0xFFF4E4B8)
+val CreamMuted = Color(0xFFE8D5A3)
+val InkPrimary = Color(0xFF111111)
+val InkSecondary = Color(0xFF3D3D3D)
+val InkTertiary = Color(0xFF6B5E3C)
+val Hairline = Color(0xFF111111)
+val HairlineSoft = Color(0xFF111111)
 
-/** Primary interactive green — Age Up, active nav (zip `#34C759`). */
-val LifeGreen = Color(0xFF34C759)
-val LifeGreenPressed = Color(0xFF1A7A32)
-val LifeGreenSoft = Color(0x1434C759)
+/** Primary interactive green — Age Up, active nav. */
+val LifeGreen = Color(0xFF6BCB3A)
+val LifeGreenPressed = Color(0xFF4EA524)
+val LifeGreenSoft = Color(0x336BCB3A)
 
-val TealPrimary = Color(0xFF1A8A8A)
-val TealLight = Color(0xFF2BB8B8)
-val GoldAccent = Color(0xFFF4B942)
-val GoldMuted = Color(0xFFC9A227)
-val CoralNegative = Color(0xFFE85D5D)
+val TealPrimary = Color(0xFF2F9E8F)
+val TealLight = Color(0xFF5BC4B6)
+val GoldAccent = Color(0xFFFFC107)
+val GoldMuted = Color(0xFFD4A017)
+val CoralNegative = Color(0xFFE53935)
 
-// Legacy aliases used by older screens
-val TextPrimary = Color(0xFFF0F4FA)
-val TextSecondary = Color(0xFF9AADCC)
-val TextMuted = Color(0xFF6B7F9E)
-val DividerDark = Color(0xFF2A3D5C)
+// Legacy aliases used by older screens (now mapped onto the parchment set)
+val TextPrimary = Color(0xFF111111)
+val TextSecondary = Color(0xFF3D3D3D)
+val TextMuted = Color(0xFF6B6458)
+val DividerDark = Color(0xFF111111)
 
-// Stat colors — match zip / index.css
-val StatHealth = Color(0xFF4CAF79)
-val StatHappiness = Color(0xFFF4B942)
-val StatSmarts = Color(0xFF4B8EF0)
-val StatLooks = Color(0xFFA78BFA)
-val StatMoney = Color(0xFFF4B942)
-val StatRelationship = Color(0xFFFF2D55)
-val StatCondition = Color(0xFF80CBC4)
-val StatPerformance = Color(0xFF4B8EF0)
+val StatHealth = Color(0xFFE53935)
+val StatHappiness = Color(0xFFFFC107)
+val StatSmarts = Color(0xFF2196F3)
+val StatLooks = Color(0xFFE91E8C)
+val StatMoney = Color(0xFF2E7D32)
+val StatRelationship = Color(0xFFE91E8C)
+val StatCondition = Color(0xFF26A69A)
+val StatPerformance = Color(0xFF2196F3)
 
 val AccentPink = Color(0xFFE91E8C)
-val SuccessGreen = Color(0xFF4CAF79)
+val SuccessGreen = Color(0xFF6BCB3A)
 val StatKarma = Color(0xFF26A69A)
+
+val OutlineInk = Color(0xFF111111)
+val PaperWhite = Color(0xFFFFF8E7)

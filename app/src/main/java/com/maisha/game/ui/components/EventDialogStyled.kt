@@ -83,14 +83,15 @@ import com.maisha.game.ui.feedback.LocalFeedbackManager
 import com.maisha.game.ui.theme.AccentPink
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.CoralNegative
+import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaTheme
-import com.maisha.game.ui.theme.NavyDeep
-import com.maisha.game.ui.theme.NavyElevated
-import com.maisha.game.ui.theme.NavySurface
+import com.maisha.game.ui.theme.OutlineInk
+import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.StatHappiness
 import com.maisha.game.ui.theme.StatHealth
 import com.maisha.game.ui.theme.StatMoney
@@ -120,6 +121,7 @@ private data class ChoiceStatHint(
 )
 
 @Composable
+@Suppress("UNUSED_PARAMETER")
 fun EventDialogStyled(
     event: LifeEvent,
     character: Character,
@@ -140,22 +142,9 @@ fun EventDialogStyled(
         feedbackManager.triggerHaptic(view, HapticType.LIGHT_TAP)
     }
 
-    val npc: Person? = remember(event.id, character) {
-        EventNpcResolver.resolveNpc(character, event)
-    }
-    val displayConfig = npc?.avatarConfig ?: playerAvatarConfig
-    val displayAge = npc?.age ?: playerAge
-    val promptExpression = remember(event.id) {
-        ExpressionResolver.expressionForEventPrompt(event)
-    }
-    val displayExpression = npc?.let { ExpressionResolver.resolvePersonExpression(it) }
-        ?: promptExpression.takeUnless { it == Expression.NEUTRAL }
-        ?: playerExpression
-
     val category = remember(event.tags) { categoryVisualFor(event) }
     val tone = remember(event.tags) { toneFor(event) }
     val accentBarColor = remember(tone, category) { accentColorFor(tone, category) }
-    val showQueue = eventQueueTotal > 1
 
     Dialog(
         onDismissRequest = {},
@@ -168,8 +157,8 @@ fun EventDialogStyled(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(NavyDeep.copy(alpha = 0.62f))
-                .padding(horizontal = 12.dp, vertical = 20.dp),
+                .background(InkPrimary.copy(alpha = 0.45f))
+                .padding(horizontal = 16.dp, vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
             AnimatedVisibility(
@@ -185,62 +174,30 @@ fun EventDialogStyled(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 620.dp),
-                    shape = RoundedCornerShape(24.dp),
+                        .heightIn(max = 620.dp)
+                        .border(3.dp, OutlineInk, RoundedCornerShape(18.dp)),
+                    shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = PaperWhite
                     ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 20.dp, vertical = 20.dp)
                     ) {
-                        EventDialogHeroHeader(
-                            category = category,
-                            tone = tone,
-                            playerAge = playerAge,
-                            showQueue = showQueue,
-                            eventQueueIndex = eventQueueIndex,
-                            eventQueueTotal = eventQueueTotal
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp)
-                        ) {
-                            EventAvatarScene(
-                                config = displayConfig,
-                                age = displayAge,
-                                expression = displayExpression,
-                                seed = npc?.id ?: character.name,
-                                speakerName = npc?.name ?: character.name,
-                                isPlayer = npc == null,
-                                accent = category.accent
-                            )
-                        }
-
                         EventNarrativePanel(
                             text = event.text,
-                            accentBarColor = accentBarColor,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)
-                        )
-
-                        Text(
-                            text = stringResource(R.string.event_choose_prompt),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = InkSecondary,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                            accentBarColor = accentBarColor
                         )
 
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                                .padding(top = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             event.choices.forEachIndexed { index, choice ->
                                 EventChoiceCard(
@@ -259,8 +216,6 @@ fun EventDialogStyled(
                                 )
                             }
                         }
-
-                        Spacer(modifier = Modifier.height(12.dp))
                     }
                 }
             }
@@ -277,17 +232,9 @@ private fun EventDialogHeroHeader(
     eventQueueIndex: Int,
     eventQueueTotal: Int
 ) {
-    val headerBrush = when (tone) {
-        EventTone.HOLIDAY -> Brush.verticalGradient(
-            colors = listOf(NavyElevated, NavySurface, Color(0xFF1A2840))
-        )
-        EventTone.NEGATIVE -> Brush.verticalGradient(
-            colors = listOf(Color(0xFF2A1520), NavySurface, NavyDeep)
-        )
-        else -> Brush.verticalGradient(
-            colors = listOf(NavyElevated, NavySurface, NavyDeep)
-        )
-    }
+    val headerBrush = Brush.verticalGradient(
+        colors = listOf(CreamBg, PaperWhite)
+    )
 
     Box(
         modifier = Modifier
@@ -331,21 +278,22 @@ private fun EventDialogHeroHeader(
                             text = stringResource(R.string.event_dialog_subtitle),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = InkPrimary
                         )
                     }
                 }
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.12f))
+                        .background(PaperWhite)
+                        .border(2.dp, OutlineInk, RoundedCornerShape(20.dp))
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.event_age_badge, playerAge),
                         style = MaterialTheme.typography.labelMedium,
-                        color = Color.White.copy(alpha = 0.92f),
-                        fontWeight = FontWeight.Medium
+                        color = InkPrimary,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -364,12 +312,12 @@ private fun EventDialogHeroHeader(
                             eventQueueTotal
                         ),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color.White.copy(alpha = 0.75f)
+                        color = InkSecondary
                     )
                     Text(
                         text = "${((eventQueueIndex.toFloat() / eventQueueTotal) * 100).toInt()}%",
                         style = MaterialTheme.typography.labelSmall,
-                        color = GoldAccent.copy(alpha = 0.9f)
+                        color = InkPrimary
                     )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
@@ -379,8 +327,8 @@ private fun EventDialogHeroHeader(
                         .fillMaxWidth()
                         .height(4.dp)
                         .clip(RoundedCornerShape(2.dp)),
-                    color = GoldAccent,
-                    trackColor = Color.White.copy(alpha = 0.15f)
+                    color = LifeGreen,
+                    trackColor = CreamMuted
                 )
             }
         }
@@ -418,7 +366,7 @@ private fun EventAvatarScene(
                 modifier = Modifier
                     .size(88.dp)
                     .clip(CircleShape)
-                    .background(NavyDeep)
+                    .background(OutlineInk)
                     .border(3.dp, accent.copy(alpha = 0.65f), CircleShape)
                     .padding(4.dp),
                 contentAlignment = Alignment.Center
@@ -546,7 +494,7 @@ private fun EventChoiceCard(
         targetValue = when {
             flashing -> accent
             pressed -> accent.copy(alpha = 0.55f)
-            else -> Color.Black.copy(alpha = 0.08f)
+            else -> OutlineInk
         },
         animationSpec = tween(90),
         label = "eventChoiceBorder"
@@ -567,9 +515,9 @@ private fun EventChoiceCard(
         modifier = Modifier
             .fillMaxWidth()
             .scale(scale)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(14.dp))
             .background(backgroundColor)
-            .border(1.5.dp, borderColor, RoundedCornerShape(16.dp))
+            .border(2.5.dp, borderColor, RoundedCornerShape(14.dp))
             .semantics { role = Role.Button }
             .pointerInput(enabled, eventId, index) {
                 if (!enabled) return@pointerInput
@@ -587,24 +535,9 @@ private fun EventChoiceCard(
                     }
                 }
             }
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(accent.copy(alpha = if (flashing) 0.35f else 0.15f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = index.toString(),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = accent
-            )
-        }
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -612,7 +545,7 @@ private fun EventChoiceCard(
             Text(
                 text = choice.label,
                 style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             if (hints.isNotEmpty()) {
@@ -626,12 +559,6 @@ private fun EventChoiceCard(
                 }
             }
         }
-        Text(
-            text = "\u203A",
-            style = MaterialTheme.typography.headlineSmall,
-            color = accent.copy(alpha = 0.65f),
-            modifier = Modifier.padding(start = 2.dp)
-        )
     }
 }
 

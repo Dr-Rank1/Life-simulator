@@ -1,6 +1,7 @@
 // app/src/main/java/com/maisha/game/ui/components/EmptyStateCard.kt (modified — illustration support)
 package com.maisha.game.ui.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.illustrations.EmptyStateIllustrationView
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
+import com.maisha.game.ui.theme.OutlineInk
 
 @Composable
 fun EmptyStateCard(
@@ -33,7 +35,9 @@ fun EmptyStateCard(
     onAction: (() -> Unit)? = null
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .border(2.5.dp, OutlineInk, MaishaRadius.cardShape),
         shape = MaishaRadius.cardShape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant

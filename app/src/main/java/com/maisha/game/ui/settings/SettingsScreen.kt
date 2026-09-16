@@ -58,6 +58,8 @@ import com.maisha.game.ui.components.ConfirmActionDialog
 import com.maisha.game.ui.components.CountryFlagWithName
 import com.maisha.game.ui.components.ConfirmSeverity
 import com.maisha.game.ui.theme.CoralNegative
+import com.maisha.game.ui.theme.CreamBg
+import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.LocaleManager
 
@@ -96,6 +98,7 @@ fun SettingsScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        containerColor = CreamBg,
         topBar = {
             TopAppBar(
                 title = {
@@ -114,7 +117,9 @@ fun SettingsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = CreamBg,
+                    titleContentColor = InkPrimary,
+                    navigationIconContentColor = InkPrimary
                 )
             )
         }
@@ -271,9 +276,10 @@ private fun SettingsSectionCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        border = androidx.compose.foundation.BorderStroke(2.5.dp, com.maisha.game.ui.theme.OutlineInk),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier.padding(14.dp),

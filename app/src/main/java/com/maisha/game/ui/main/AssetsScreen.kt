@@ -163,20 +163,6 @@ fun AssetsScreen(
         }
     }
     val livingCost = financeEngine.estimateAnnualCostOfLiving(character)
-    val heroSecondary = buildString {
-        append(stringResource(R.string.chip_assets_savings_short))
-        append(" ")
-        append(formatMoney(character.savingsBalance, character.countryCode))
-    }
-    val heroTertiary = if (character.investmentPortfolioValue > 0) {
-        buildString {
-            append(stringResource(R.string.chip_assets_portfolio_short))
-            append(" ")
-            append(formatMoney(character.investmentPortfolioValue, character.countryCode))
-        }
-    } else {
-        null
-    }
 
     LaunchedEffect(uiState.assetsMessage) {
         uiState.assetsMessage?.let { message ->
@@ -355,12 +341,7 @@ fun AssetsScreen(
         TabPageHero(
             title = stringResource(R.string.screen_assets),
             subtitle = stringResource(R.string.assets_subtitle),
-            primaryChip = formatMoney(character.stats.money, character.countryCode),
-            secondaryChip = stringResource(
-                R.string.format_net_worth_chip,
-                formatMoney(netWorth, character.countryCode)
-            ),
-            tertiaryChip = heroTertiary ?: heroSecondary
+            primaryChip = formatMoney(character.stats.money, character.countryCode)
         )
 
         CategoryFilterChipRow(

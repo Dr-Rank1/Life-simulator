@@ -44,6 +44,7 @@ import com.maisha.game.data.model.Expression
 import com.maisha.game.data.model.AvatarConfig
 import com.maisha.game.data.model.EyewearStyle
 import com.maisha.game.data.model.FacialHairStyle
+import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.NavyDeep
@@ -86,8 +87,8 @@ fun AvatarPickerScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            // Ensure readable contrast even if the previous screen used a strong background.
-            .background(Color.White)
+            // Parchment canvas so this matches the rest of the life-sim chrome.
+            .background(CreamBg)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -163,7 +164,7 @@ fun AvatarPickerScreen(
                 .fillMaxWidth()
                 .height(52.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = GoldAccent, contentColor = NavyDeep)
+            colors = ButtonDefaults.buttonColors(containerColor = GoldAccent, contentColor = InkPrimary)
         ) {
             Text(
                 text = if (isSaving) stringResource(R.string.btn_starting) else "Customize stats",
