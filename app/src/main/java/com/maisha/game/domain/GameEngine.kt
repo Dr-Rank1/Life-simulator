@@ -110,8 +110,9 @@ class GameEngine @Inject constructor(
 
         val preStage = character.education.stage
         val previousAge = character.age
+        val nextAge = character.age + 1
         var updatedCharacter = character.copy(
-            age = character.age + 1,
+            age = nextAge,
             yearsInCurrentCountry = character.yearsInCurrentCountry + 1,
             criminalRecord = character.criminalRecord.copy(crimeAttemptsThisYear = 0),
             career = character.career.copy(
@@ -119,7 +120,8 @@ class GameEngine @Inject constructor(
                 workEffortThisYear = null,
                 partTimeWorkedThisYear = false,
                 energyRestedThisYear = false
-            )
+            ),
+            eventLog = EventLogCap.ensureAgeHeader(character.eventLog, nextAge)
         )
         updatedCharacter = applyAvatarVisualEvolution(updatedCharacter, previousAge)
         updatedCharacter = socialMediaEngine.resetYearlyFlags(updatedCharacter)
@@ -836,6 +838,16 @@ class GameEngine @Inject constructor(
     fun askForPromotion(character: Character): OfficeActionResult =
         careerEngine.askForPromotion(character)
 
+    fun ensureWorkplaceRoster(character: Character): Character =
+        careerEngine.ensureWorkplaceRoster(character)
+
+    fun handleWorkplaceAction(
+        character: Character,
+        personId: String,
+        action: com.maisha.game.data.model.WorkplaceAction
+    ): Pair<Character, WorkplaceActionResult> =
+        careerEngine.handleWorkplaceAction(character, personId, action)
+
     fun setPlannedStudyEffort(character: Character, effort: StudyEffort): Character =
         educationEngine.setPlannedStudyEffort(character, effort)
 
@@ -906,11 +918,26 @@ class GameEngine @Inject constructor(
     fun performInternship(character: Character): EducationEngine.UniversityActionResult =
         educationEngine.performInternship(character)
 
+    fun performCampusMixer(character: Character): EducationEngine.UniversityActionResult =
+        educationEngine.performCampusMixer(character)
+
+    fun performProfessorOfficeHours(character: Character): EducationEngine.UniversityActionResult =
+        educationEngine.performProfessorOfficeHours(character)
+
+    fun performExamAllNighter(character: Character): EducationEngine.UniversityActionResult =
+        educationEngine.performExamAllNighter(character)
+
+    fun performCampusRivalryPrank(character: Character): EducationEngine.UniversityActionResult =
+        educationEngine.performCampusRivalryPrank(character)
+
     fun repayStudentLoan(
         character: Character,
         amount: Int
     ): FinanceEngine.StudentLoanRepayResult =
         financeEngine.repayStudentLoan(character, amount)
+
+    fun payOffMortgage(character: Character, assetId: String): Character =
+        financeEngine.payOffMortgage(character, assetId)
 
     fun resolveExpulsionHearing(
         character: Character,
@@ -1028,13 +1055,30 @@ class GameEngine @Inject constructor(
     fun findDatingProspects(character: Character) =
         relationshipEngine.findDatingProspects(character)
 
+    fun findMatchmakerCandidates(
+        character: Character,
+        minAge: Int,
+        maxAge: Int,
+        wealthTier: Int
+    ) = relationshipEngine.findMatchmakerCandidates(character, minAge, maxAge, wealthTier)
+
+    fun matchmakerCost(character: Character): Int =
+        relationshipEngine.matchmakerCost(character)
+
     /** Delegates to [RelationshipEngine.startDating]. */
     fun startDating(character: Character, prospect: Person): StartDatingResult =
         relationshipEngine.startDating(character, prospect)
 
+    fun makeRelationshipExclusive(character: Character, personId: String) =
+        relationshipEngine.makeRelationshipExclusive(character, personId)
+
     /** Delegates to [RelationshipEngine.proposeMarriage]. */
-    fun proposeMarriage(character: Character, personId: String, signPrenup: Boolean = false) =
-        relationshipEngine.proposeMarriage(character, personId, signPrenup)
+    fun proposeMarriage(
+        character: Character,
+        personId: String,
+        signPrenup: Boolean = false,
+        venueTier: com.maisha.game.data.model.WeddingVenueTier = com.maisha.game.data.model.WeddingVenueTier.LOCAL_VENUE
+    ) = relationshipEngine.proposeMarriage(character, personId, signPrenup, venueTier)
 
     /** Delegates to [RelationshipEngine.adoptChild]. */
     fun adoptChild(character: Character): AdoptChildResult =
@@ -1104,6 +1148,9 @@ class GameEngine @Inject constructor(
     /** Delegates to [CrimeEngine.attemptCrime]. */
     fun attemptCrime(character: Character, crimeType: com.maisha.game.data.model.CrimeType): CrimeResult =
         crimeEngine.attemptCrime(character, crimeType)
+
+    fun attemptTargetedCrime(character: Character, target: com.maisha.game.data.model.CrimeTarget): CrimeResult =
+        crimeEngine.attemptTargetedCrime(character, target)
 
     /** Delegates to [CrimeEngine.goToTrial]. */
     fun goToTrial(

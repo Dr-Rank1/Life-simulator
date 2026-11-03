@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -51,7 +53,13 @@ import com.maisha.game.ui.theme.StatMoney
 import com.maisha.game.ui.theme.StatPerformance
 import com.maisha.game.ui.theme.StatRelationship
 import com.maisha.game.ui.theme.StatSmarts
+import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.SuccessGreen
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.unit.sp
 import com.maisha.game.util.formatMoney
 import kotlinx.coroutines.delay
 
@@ -262,4 +270,108 @@ fun MoneyStatRow(
         showBar = false,
         modifier = modifier
     )
+}
+
+/**
+ * Compact docked bottom stat strip inspired by BitLife/Another Life.
+ * Shows Happiness, Health, Smarts, Looks with animated progress bars and exact numeric percentages.
+ */
+@Composable
+fun DockedStatStrip(
+    happiness: Int,
+    health: Int,
+    smarts: Int,
+    looks: Int,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Hairline)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 9.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            MiniStatItem(
+                type = StatType.HAPPINESS,
+                value = happiness,
+                modifier = Modifier.weight(1f)
+            )
+            MiniStatItem(
+                type = StatType.HEALTH,
+                value = health,
+                modifier = Modifier.weight(1f)
+            )
+            MiniStatItem(
+                type = StatType.SMARTS,
+                value = smarts,
+                modifier = Modifier.weight(1f)
+            )
+            MiniStatItem(
+                type = StatType.LOOKS,
+                value = looks,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun MiniStatItem(
+    type: StatType,
+    value: Int,
+    modifier: Modifier = Modifier
+) {
+    val progress = (value.toFloat() / 100f).coerceIn(0f, 1f)
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 500, easing = EaseOutCubic),
+        label = "miniStatProgress"
+    )
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                imageVector = type.icon(),
+                contentDescription = null,
+                tint = type.color(),
+                modifier = Modifier.size(13.dp)
+            )
+            Text(
+                text = "${value.coerceIn(0, 100)}%",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = InkPrimary,
+                fontSize = 11.sp
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(6.dp)
+                .clip(RoundedCornerShape(3.dp))
+                .background(HairlineSoft)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(animatedProgress)
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(type.color())
+            )
+        }
+    }
 }

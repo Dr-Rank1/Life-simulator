@@ -17,4 +17,22 @@ object DatingPool {
             PersonGenerator.buildDatingProspect(character, MIN_DATING_AGE)
         }
     }
+
+    fun generateMatchmakerCandidates(
+        character: Character,
+        minAge: Int,
+        maxAge: Int,
+        wealthTier: Int
+    ): List<Person> {
+        if (character.age < MIN_DATING_AGE) return emptyList()
+        return (0 until 4).map {
+            PersonGenerator.buildDatingProspect(
+                character = character,
+                minDatingAge = MIN_DATING_AGE,
+                targetMinAge = minAge,
+                targetMaxAge = maxAge,
+                targetWealthTier = wealthTier
+            )
+        }
+    }
 }

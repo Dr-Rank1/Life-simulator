@@ -231,6 +231,27 @@ class FinanceEngine @Inject constructor(
     }
 
     /**
+     * Pays off the entire remaining mortgage on a property if player has sufficient funds.
+     */
+    fun payOffMortgage(character: Character, assetId: String): Character {
+        val asset = character.assets.find { it.id == assetId } ?: return character
+        if (asset.mortgageBalance <= 0) return character
+        val payoff = asset.mortgageBalance
+        if (character.stats.money < payoff) return character
+
+        val updatedAssets = character.assets.map {
+            if (it.id == assetId) it.copy(mortgageBalance = 0, annualMortgagePayment = 0)
+            else it
+        }
+        val message = "Paid off the mortgage on ${asset.name} in full (${formatMoney(payoff, character.countryCode)})."
+        return character.copy(
+            stats = character.stats.copy(money = character.stats.money - payoff),
+            assets = updatedAssets,
+            eventLog = EventLogCap.prependToCurrentYear(character.eventLog, message, character.age)
+        )
+    }
+
+    /**
      * Deducts annual upkeep (12× monthly, with multi-asset discount and economic climate).
      * If money goes negative, floors at 0 and applies a happiness penalty.
      */

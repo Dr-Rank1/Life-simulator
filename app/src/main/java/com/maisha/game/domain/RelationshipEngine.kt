@@ -20,8 +20,10 @@ import com.maisha.game.data.model.PetSpecies
 import com.maisha.game.data.model.RelationType
 import com.maisha.game.data.model.RelationshipDecayNotice
 import com.maisha.game.data.model.RelationshipMilestone
+import com.maisha.game.data.model.RelationshipStage
 import com.maisha.game.data.model.RelationshipTier
 import com.maisha.game.data.model.Stats
+import com.maisha.game.data.model.WeddingVenueTier
 import com.maisha.game.data.model.relationshipTierFor
 import com.maisha.game.util.clampRelationshipLevel
 import com.maisha.game.util.clampStat
@@ -308,6 +310,24 @@ class RelationshipEngine @Inject constructor(
     fun findDatingProspects(character: Character): List<Person> {
         if (character.age < MIN_DATING_AGE || character.hasSpouse()) return emptyList()
         return DatingPool.generateProspects(character)
+    }
+
+    fun matchmakerCost(character: Character): Int =
+        EconomyScaler.scaleAmount(500, character.countryCode)
+
+    fun findMatchmakerCandidates(
+        character: Character,
+        minAge: Int,
+        maxAge: Int,
+        wealthTier: Int
+    ): Pair<Character, List<Person>> {
+        if (character.age < MIN_DATING_AGE || character.hasSpouse()) return character to emptyList()
+        val cost = matchmakerCost(character)
+        if (character.stats.money < cost) return character to emptyList()
+        val updated = character.copy(
+            stats = character.stats.copy(money = character.stats.money - cost)
+        )
+        return updated to DatingPool.generateMatchmakerCandidates(character, minAge, maxAge, wealthTier)
     }
 
     /**
@@ -705,6 +725,44 @@ class RelationshipEngine @Inject constructor(
         }
     }
 
+    fun weddingVenueCost(venueTier: WeddingVenueTier, countryCode: String): Int = when (venueTier) {
+        WeddingVenueTier.COURTHOUSE -> EconomyScaler.scaleAmount(150, countryCode)
+        WeddingVenueTier.LOCAL_VENUE -> EconomyScaler.scaleAmount(5_000, countryCode)
+        WeddingVenueTier.LUXURY_DESTINATION -> EconomyScaler.scaleAmount(50_000, countryCode)
+    }
+
+    fun makeRelationshipExclusive(character: Character, personId: String): Pair<Character, Boolean> {
+        val memberIndex = character.family.indexOfFirst { it.id == personId }
+        if (memberIndex == -1) return character to false
+        val partner = character.family[memberIndex]
+        if (partner.relation != RelationType.SPOUSE || partner.stage != RelationshipStage.CASUAL) {
+            return character to false
+        }
+        val accepted = partner.relationshipLevel >= 45 || Random.nextFloat() < 0.75f
+        return if (accepted) {
+            val updatedPartner = partner.copy(
+                stage = RelationshipStage.EXCLUSIVE,
+                relationshipLevel = clampRelationshipLevel(partner.relationshipLevel + 10)
+            ).coerceRelationship()
+            val updated = character.copy(
+                family = character.family.replaceAt(memberIndex, updatedPartner),
+                eventLog = EventLogCap.prepend(
+                    character.eventLog,
+                    "Agreed to be in an exclusive relationship with ${partner.name}."
+                )
+            )
+            updated to true
+        } else {
+            val updated = character.copy(
+                eventLog = EventLogCap.prepend(
+                    character.eventLog,
+                    "${partner.name} wants to keep things casual for now."
+                )
+            )
+            updated to false
+        }
+    }
+
     /**
      * Marriage proposal to a dating partner. Requires relationship ≥ [PROPOSAL_THRESHOLD];
      * acceptance chance scales with level.
@@ -712,7 +770,8 @@ class RelationshipEngine @Inject constructor(
     fun proposeMarriage(
         character: Character,
         personId: String,
-        signPrenup: Boolean = false
+        signPrenup: Boolean = false,
+        venueTier: WeddingVenueTier = WeddingVenueTier.LOCAL_VENUE
     ): Pair<Character, ProposalResult> {
         val memberIndex = character.family.indexOfFirst { it.id == personId }
         if (memberIndex == -1) return character to ProposalResult.Rejected
@@ -725,11 +784,34 @@ class RelationshipEngine @Inject constructor(
             return character to ProposalResult.Rejected
         }
 
+        // Prenup reaction: high crazy or low generosity causes offense
+        if (signPrenup && (partner.crazy > 65 || (partner.crazy > 45 && partner.stats.karma < 40))) {
+            val declinedPartner = partner.copy(
+                relationshipLevel = clampRelationshipLevel(partner.relationshipLevel - 25)
+            ).coerceRelationship()
+            val updated = character.copy(
+                family = character.family.replaceAt(memberIndex, declinedPartner),
+                eventLog = EventLogCap.prepend(
+                    character.eventLog,
+                    "${partner.name} was deeply offended by the prenuptial agreement and called off the marriage plans!"
+                )
+            )
+            return updated to ProposalResult.Rejected
+        }
+
         val accepted = Random.nextFloat() < proposalAcceptChance(partner, character)
         return if (accepted) {
+            val venueCost = weddingVenueCost(venueTier, character.countryCode).coerceAtMost(character.stats.money)
+            val happinessBonus = when (venueTier) {
+                WeddingVenueTier.LUXURY_DESTINATION -> 25
+                WeddingVenueTier.LOCAL_VENUE -> 15
+                WeddingVenueTier.COURTHOUSE -> 8
+            }
             val marriedPartner = partner.copy(
                 isMarried = true,
+                stage = RelationshipStage.MARRIED,
                 prenupSigned = signPrenup,
+                relationshipLevel = clampRelationshipLevel(partner.relationshipLevel + 15),
                 milestones = RelationshipMilestoneCap.trim(
                     partner.milestones + RelationshipMilestone.fromKind(
                         age = character.age,
@@ -742,11 +824,12 @@ class RelationshipEngine @Inject constructor(
             val updated = character.copy(
                 family = character.family.replaceAt(memberIndex, marriedPartner),
                 stats = character.stats.copy(
-                    happiness = clampStat(character.stats.happiness + 10)
+                    money = (character.stats.money - venueCost).coerceAtLeast(0),
+                    happiness = clampStat(character.stats.happiness + happinessBonus)
                 ),
                 eventLog = EventLogCap.prepend(
                     character.eventLog,
-                    "Married ${partner.name} at age ${character.age}.$prenupNote"
+                    "Married ${partner.name} at age ${character.age} (${venueTier.name.lowercase().replace('_', ' ')}).$prenupNote"
                 )
             )
             updated to ProposalResult.Accepted(updated)

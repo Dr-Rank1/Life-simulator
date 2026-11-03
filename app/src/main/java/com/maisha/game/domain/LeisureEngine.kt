@@ -50,7 +50,21 @@ enum class LeisureActivity {
     /** Luxury: day on the yacht (requires owning a boat). */
     YACHT_DAY,
     /** Luxury: private jet trip (requires owning a private jet). */
-    PRIVATE_JET_TRIP
+    PRIVATE_JET_TRIP,
+    /** Child (3-11): play with toys. */
+    PLAY_WITH_TOYS,
+    /** Child (3-8): throw a tantrum. */
+    THROW_TANTRUM,
+    /** Child/teen (6-15): ask parents for pocket money. */
+    ASK_ALLOWANCE,
+    /** Child/teen (6-15): youth hobby (art, music, sports). */
+    CHILDHOOD_HOBBY,
+    /** Teen (12-17): sneak out after hours. */
+    SNEAK_OUT,
+    /** Teen (12-17): mall hangout with friends. */
+    MALL_HANGOUT,
+    /** Child/teen (10-17): gaming marathon. */
+    GAMING_MARATHON
 }
 
 sealed class LeisureResult {
@@ -123,6 +137,13 @@ class LeisureEngine @Inject constructor(
                 character.assets.any { it.type == com.maisha.game.data.model.AssetType.BOAT }
             LeisureActivity.PRIVATE_JET_TRIP -> age >= ADULT_LEISURE_MIN_AGE &&
                 character.assets.any { it.type == com.maisha.game.data.model.AssetType.PRIVATE_JET }
+            LeisureActivity.PLAY_WITH_TOYS -> age in 3..11
+            LeisureActivity.THROW_TANTRUM -> age in 3..8
+            LeisureActivity.ASK_ALLOWANCE -> age in 6..15
+            LeisureActivity.CHILDHOOD_HOBBY -> age in 6..15
+            LeisureActivity.SNEAK_OUT -> age in 12..17
+            LeisureActivity.MALL_HANGOUT -> age in 12..17
+            LeisureActivity.GAMING_MARATHON -> age in 10..17
         }
     }
 
@@ -151,9 +172,10 @@ class LeisureEngine @Inject constructor(
                 health = (character.stats.health + healthDelta).coerceIn(0, 100),
                 smarts = (character.stats.smarts + smartsDelta).coerceIn(0, 100)
             ),
-            eventLog = EventLogCap.prepend(
+            eventLog = EventLogCap.prependToCurrentYear(
                 character.eventLog,
-                logLine(activity, fee, character.countryCode, flavor)
+                logLine(activity, fee, character.countryCode, flavor),
+                character.age
             )
         )
         if (activity == LeisureActivity.VISIT_MUSEUM) {
@@ -188,6 +210,13 @@ class LeisureEngine @Inject constructor(
         LeisureActivity.ANNUAL_CHECKUP -> CHECKUP_COST_KENYA
         LeisureActivity.YACHT_DAY -> YACHT_DAY_COST_KENYA
         LeisureActivity.PRIVATE_JET_TRIP -> PRIVATE_JET_TRIP_COST_KENYA
+        LeisureActivity.PLAY_WITH_TOYS -> 0
+        LeisureActivity.THROW_TANTRUM -> 0
+        LeisureActivity.ASK_ALLOWANCE -> 0
+        LeisureActivity.CHILDHOOD_HOBBY -> CHILDHOOD_HOBBY_COST_KENYA
+        LeisureActivity.SNEAK_OUT -> 0
+        LeisureActivity.MALL_HANGOUT -> MALL_HANGOUT_COST_KENYA
+        LeisureActivity.GAMING_MARATHON -> 0
     }
 
     private fun deltas(
@@ -222,6 +251,18 @@ class LeisureEngine @Inject constructor(
         LeisureActivity.ANNUAL_CHECKUP -> Quad(0, 6, 0, -fee)
         LeisureActivity.YACHT_DAY -> Quad(15, 3, 0, -fee)
         LeisureActivity.PRIVATE_JET_TRIP -> Quad(18, 2, 0, -fee)
+        LeisureActivity.PLAY_WITH_TOYS -> Quad(6, 1, 2, 0)
+        LeisureActivity.THROW_TANTRUM -> Quad(3, -1, -2, 0)
+        LeisureActivity.ASK_ALLOWANCE -> Quad(
+            4,
+            0,
+            0,
+            EconomyScaler.scaleAmount(ALLOWANCE_PAY_KENYA, countryCode)
+        )
+        LeisureActivity.CHILDHOOD_HOBBY -> Quad(7, 2, 3, -fee)
+        LeisureActivity.SNEAK_OUT -> Quad(8, -1, 0, 0)
+        LeisureActivity.MALL_HANGOUT -> Quad(7, 0, 1, -fee)
+        LeisureActivity.GAMING_MARATHON -> Quad(8, -2, 1, 0)
     }
 
     private fun logLine(
@@ -268,6 +309,19 @@ class LeisureEngine @Inject constructor(
             LeisureActivity.ANNUAL_CHECKUP -> "You got an annual checkup ($money)."
             LeisureActivity.YACHT_DAY -> "You spent the day on your yacht ($money). Absolute luxury."
             LeisureActivity.PRIVATE_JET_TRIP -> "You took a trip on your private jet ($money). The world is yours."
+            LeisureActivity.PLAY_WITH_TOYS -> "You spent hours building worlds and playing with your favorite toys."
+            LeisureActivity.THROW_TANTRUM -> "You threw a fierce tantrum on the living room floor."
+            LeisureActivity.ASK_ALLOWANCE -> {
+                val allowance = formatMoney(
+                    EconomyScaler.scaleAmount(ALLOWANCE_PAY_KENYA, countryCode),
+                    countryCode
+                )
+                "You asked your parents for pocket money and received $allowance."
+            }
+            LeisureActivity.CHILDHOOD_HOBBY -> "You practiced your childhood hobby with passion ($money)."
+            LeisureActivity.SNEAK_OUT -> "You snuck out of the house late at night for an exhilarating adventure."
+            LeisureActivity.MALL_HANGOUT -> "You met up with friends to walk around the mall ($money)."
+            LeisureActivity.GAMING_MARATHON -> "You stayed glued to the screen for an epic gaming session."
         }
     }
 
@@ -354,5 +408,8 @@ class LeisureEngine @Inject constructor(
         const val YACHT_DAY_COST_KENYA = 120_000
         /** Fuel, handling fees, and incidentals for one jet trip. */
         const val PRIVATE_JET_TRIP_COST_KENYA = 500_000
+        const val ALLOWANCE_PAY_KENYA = 800
+        const val CHILDHOOD_HOBBY_COST_KENYA = 400
+        const val MALL_HANGOUT_COST_KENYA = 600
     }
 }

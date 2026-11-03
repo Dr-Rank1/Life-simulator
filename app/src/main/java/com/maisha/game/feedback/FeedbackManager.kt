@@ -123,23 +123,23 @@ class FeedbackManager private constructor(
                 HapticType.SUCCESS -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         if (!view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)) {
-                            vibrateOneShot(view, durationMs = 24, amplitude = 80)
+                            vibratePattern(view, timings = longArrayOf(0, 18, 40, 22), amplitudes = intArrayOf(0, 70, 0, 110))
                         }
                     } else {
-                        vibrateOneShot(view, durationMs = 24, amplitude = 80)
+                        vibratePattern(view, timings = longArrayOf(0, 18, 40, 22), amplitudes = intArrayOf(0, 70, 0, 110))
                     }
                 }
                 HapticType.WARNING -> {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         if (!view.performHapticFeedback(HapticFeedbackConstants.REJECT)) {
-                            vibrateOneShot(view, durationMs = 36, amplitude = 120)
+                            vibratePattern(view, timings = longArrayOf(0, 30, 35, 45), amplitudes = intArrayOf(0, 100, 0, 140))
                         }
                     } else {
-                        vibrateOneShot(view, durationMs = 36, amplitude = 120)
+                        vibratePattern(view, timings = longArrayOf(0, 30, 35, 45), amplitudes = intArrayOf(0, 100, 0, 140))
                     }
                 }
                 HapticType.ERROR -> {
-                    vibrateOneShot(view, durationMs = 48, amplitude = 180)
+                    vibratePattern(view, timings = longArrayOf(0, 45, 30, 55), amplitudes = intArrayOf(0, 160, 0, 220))
                 }
             }
         } catch (error: Exception) {
@@ -212,6 +212,19 @@ class FeedbackManager private constructor(
         } else {
             @Suppress("DEPRECATION")
             vibrator.vibrate(durationMs)
+        }
+    }
+
+    private fun vibratePattern(view: View, timings: LongArray, amplitudes: IntArray) {
+        val vibrator = resolveVibrator(view.context) ?: return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val clampedAmplitudes = amplitudes.map { it.coerceIn(0, 255) }.toIntArray()
+            vibrator.vibrate(
+                VibrationEffect.createWaveform(timings, clampedAmplitudes, -1)
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(timings, -1)
         }
     }
 

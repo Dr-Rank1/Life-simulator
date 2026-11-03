@@ -4,13 +4,16 @@ package com.maisha.game.domain
 import com.maisha.game.data.CountryCatalog
 import com.maisha.game.data.EconomyScaler
 import com.maisha.game.data.JobPool
+import com.maisha.game.data.NamePool
 import com.maisha.game.data.model.AssetType
+import com.maisha.game.data.model.AvatarConfig
 import com.maisha.game.data.model.CareerTrack
 import com.maisha.game.data.model.CareerState
 import com.maisha.game.data.model.Character
 import com.maisha.game.data.model.ClubRank
 import com.maisha.game.data.model.EventChoice
 import com.maisha.game.data.model.FameEventAction
+import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.HustleType
 import com.maisha.game.data.model.JobLadder
 import com.maisha.game.data.model.OfficeAction
@@ -19,15 +22,21 @@ import com.maisha.game.data.model.PartTimeJob
 import com.maisha.game.data.model.PartTimeDemand
 import com.maisha.game.data.model.Job
 import com.maisha.game.data.model.LifeEvent
+import com.maisha.game.data.model.Person
+import com.maisha.game.data.model.RelationType
+import com.maisha.game.data.model.RelationshipStage
 import com.maisha.game.data.model.SchoolClub
 import com.maisha.game.data.model.SchoolStage
 import com.maisha.game.data.model.TalentTraining
 import com.maisha.game.data.model.UniversityMajor
 import com.maisha.game.data.model.VisaType
 import com.maisha.game.data.model.WorkEffort
+import com.maisha.game.data.model.WorkplaceAction
+import com.maisha.game.data.model.WorkplacePerson
 import com.maisha.game.util.clampPerformanceScore
 import com.maisha.game.util.clampStat
 import com.maisha.game.util.formatMoney
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.roundToInt
@@ -95,6 +104,12 @@ sealed class OfficeActionResult {
     data object Ineligible : OfficeActionResult()
     data object AlreadyDone : OfficeActionResult()
     data class Denied(val character: Character, val message: String) : OfficeActionResult()
+}
+
+sealed class WorkplaceActionResult {
+    data class Success(val character: Character, val message: String) : WorkplaceActionResult()
+    data class Denied(val character: Character, val message: String) : WorkplaceActionResult()
+    data object Ineligible : WorkplaceActionResult()
 }
 
 @Singleton
@@ -268,6 +283,7 @@ class CareerEngine @Inject constructor(
         )
         val pendingDeployment = hiredJob.isMilitary && Random.nextFloat() < DEPLOYMENT_CHANCE
         val seed = hiredCharacter.name.hashCode() xor hiredJob.id.hashCode()
+        val roster = generateWorkplaceRoster(workCountry, seed)
         val updatedCareer = hiredCharacter.career.copy(
             currentJob = hiredJob,
             yearsAtCurrentJob = 0,
@@ -278,6 +294,7 @@ class CareerEngine @Inject constructor(
             stress = 28f,
             bossRelationship = Random.nextInt(0, 25),
             colleagueRelationships = JobLadder.defaultColleagues(seed),
+            workplaceRoster = roster,
             officeWorkActionDoneThisYear = false,
             kissUpDoneThisYear = false,
             askPromotionDoneThisYear = false
@@ -1029,6 +1046,305 @@ class CareerEngine @Inject constructor(
         }
     }
 
+    fun generateWorkplaceRoster(countryCode: String, seed: Int = Random.nextInt()): List<WorkplacePerson> {
+        val supervisorGender = if (Random.nextBoolean()) Gender.MALE else Gender.FEMALE
+        val supervisorName = NamePool.randomFullName(supervisorGender, countryCode)
+        val supervisor = WorkplacePerson(
+            id = UUID.randomUUID().toString(),
+            name = supervisorName,
+            role = "Supervisor / Manager",
+            relationshipLevel = Random.nextInt(35, 65),
+            competence = Random.nextInt(45, 85),
+            strictness = Random.nextInt(30, 80),
+            isSupervisor = true,
+            avatarConfig = AvatarConfig.random()
+        )
+
+        val coworkerRoles = listOf("Senior Associate", "Colleague", "Junior Associate", "Operations Specialist")
+        val coworkers = coworkerRoles.map { role ->
+            val gender = if (Random.nextBoolean()) Gender.MALE else Gender.FEMALE
+            val name = NamePool.randomFullName(gender, countryCode)
+            WorkplacePerson(
+                id = UUID.randomUUID().toString(),
+                name = name,
+                role = role,
+                relationshipLevel = Random.nextInt(40, 70),
+                competence = Random.nextInt(35, 80),
+                strictness = Random.nextInt(20, 60),
+                isSupervisor = false,
+                avatarConfig = AvatarConfig.random()
+            )
+        }
+        return listOf(supervisor) + coworkers
+    }
+
+    fun ensureWorkplaceRoster(character: Character): Character {
+        if (character.career.currentJob == null) return character
+        if (character.career.workplaceRoster.isNotEmpty()) return character
+        val roster = generateWorkplaceRoster(character.countryCode)
+        return character.copy(
+            career = character.career.copy(workplaceRoster = roster)
+        )
+    }
+
+    fun handleWorkplaceAction(
+        character: Character,
+        personId: String,
+        action: WorkplaceAction
+    ): Pair<Character, WorkplaceActionResult> {
+        val roster = character.career.workplaceRoster
+        val personIndex = roster.indexOfFirst { it.id == personId }
+        if (personIndex == -1 || character.career.currentJob == null) {
+            return character to WorkplaceActionResult.Ineligible
+        }
+        val target = roster[personIndex]
+
+        return when (action) {
+            WorkplaceAction.SCHMOOZE -> {
+                val praiseBonus = Random.nextInt(8, 16)
+                val backfire = target.strictness > 75 && Random.nextFloat() < 0.25f
+                if (backfire) {
+                    val updatedTarget = target.copy(
+                        relationshipLevel = (target.relationshipLevel - 5).coerceIn(0, 100)
+                    )
+                    val updatedRoster = roster.toMutableList().apply { set(personIndex, updatedTarget) }
+                    val updated = character.copy(
+                        career = character.career.copy(workplaceRoster = updatedRoster),
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "${target.name} saw through your flattery and seemed annoyed."
+                        )
+                    )
+                    updated to WorkplaceActionResult.Denied(updated, "${target.name} rolled their eyes at your flattery.")
+                } else {
+                    val updatedTarget = target.copy(
+                        relationshipLevel = (target.relationshipLevel + praiseBonus).coerceIn(0, 100)
+                    )
+                    val updatedRoster = roster.toMutableList().apply { set(personIndex, updatedTarget) }
+                    val updated = character.copy(
+                        career = character.career.copy(
+                            workplaceRoster = updatedRoster,
+                            bossRelationship = if (target.isSupervisor) (character.career.bossRelationship + 10).coerceIn(-100, 100) else character.career.bossRelationship
+                        ),
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "Complimented ${target.name}'s work and earned their appreciation."
+                        )
+                    )
+                    updated to WorkplaceActionResult.Success(updated, "You schmoozed with ${target.name} (+${praiseBonus}% bond).")
+                }
+            }
+
+            WorkplaceAction.ASK_RAISE -> {
+                if (!target.isSupervisor) {
+                    return character to WorkplaceActionResult.Ineligible
+                }
+                val chance = ((character.career.performance - 40) / 100f * 0.6f + target.relationshipLevel / 100f * 0.4f).coerceIn(0.1f, 0.85f)
+                if (Random.nextFloat() < chance) {
+                    val raisePct = Random.nextInt(8, 16)
+                    val oldJob = character.career.currentJob!!
+                    val newSalary = (oldJob.baseSalary * (1f + raisePct / 100f)).roundToInt()
+                    val updatedJob = oldJob.copy(baseSalary = newSalary)
+                    val updated = character.copy(
+                        career = character.career.copy(currentJob = updatedJob),
+                        stats = character.stats.copy(happiness = clampStat(character.stats.happiness + 10)),
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "${target.name} approved a $raisePct% salary raise to ${formatMoney(newSalary, character.countryCode)}!"
+                        )
+                    )
+                    updated to WorkplaceActionResult.Success(updated, "Raise approved! Salary is now ${formatMoney(newSalary, character.countryCode)}.")
+                } else {
+                    val updated = character.copy(
+                        career = character.career.copy(stress = (character.career.stress + 6f).coerceIn(0f, 100f)),
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "${target.name} denied your request for a raise, citing company budget."
+                        )
+                    )
+                    updated to WorkplaceActionResult.Denied(updated, "${target.name} denied your raise request.")
+                }
+            }
+
+            WorkplaceAction.ASK_PROMOTION -> {
+                if (!target.isSupervisor) {
+                    return character to WorkplaceActionResult.Ineligible
+                }
+                if (character.career.performance < 65f || target.relationshipLevel < 40) {
+                    val updated = character.copy(
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "${target.name} told you to focus on your performance before asking for a promotion."
+                        )
+                    )
+                    return updated to WorkplaceActionResult.Denied(updated, "${target.name} said your performance isn't ready.")
+                }
+                val currentJob = character.career.currentJob!!
+                val maxLevel = JobLadder.maxLevel(currentJob.id)
+                if (currentJob.level >= maxLevel) {
+                    return character to WorkplaceActionResult.Denied(character, "You are already at the top rung of this track.")
+                }
+                val newLevel = currentJob.level + 1
+                val newTitle = JobLadder.titleFor(currentJob.id, newLevel, currentJob.title)
+                val newSalary = (currentJob.baseSalary * 1.25f).roundToInt()
+                val promotedJob = currentJob.copy(level = newLevel, title = newTitle, baseSalary = newSalary)
+                val updated = character.copy(
+                    career = character.career.copy(
+                        currentJob = promotedJob,
+                        promotionsEarned = character.career.promotionsEarned + 1,
+                        performance = 55f
+                    ),
+                    stats = character.stats.copy(happiness = clampStat(character.stats.happiness + 18)),
+                    eventLog = EventLogCap.prepend(
+                        character.eventLog,
+                        "Promoted to $newTitle by ${target.name}!"
+                    )
+                )
+                updated to WorkplaceActionResult.Success(updated, "Congratulations! You have been promoted to $newTitle!")
+            }
+
+            WorkplaceAction.COLLABORATE -> {
+                val relBonus = Random.nextInt(10, 18)
+                val perfBonus = Random.nextInt(6, 12).toFloat()
+                val updatedTarget = target.copy(
+                    relationshipLevel = (target.relationshipLevel + relBonus).coerceIn(0, 100)
+                )
+                val updatedRoster = roster.toMutableList().apply { set(personIndex, updatedTarget) }
+                val updated = character.copy(
+                    career = character.career.copy(
+                        workplaceRoster = updatedRoster,
+                        performance = (character.career.performance + perfBonus).coerceIn(0f, 100f),
+                        stress = (character.career.stress - 5f).coerceIn(0f, 100f)
+                    ),
+                    stats = character.stats.copy(happiness = clampStat(character.stats.happiness + 4)),
+                    eventLog = EventLogCap.prepend(
+                        character.eventLog,
+                        "Collaborated on a project with ${target.name} with great teamwork."
+                    )
+                )
+                updated to WorkplaceActionResult.Success(updated, "Great collaboration with ${target.name} (+Performance, +Bond).")
+            }
+
+            WorkplaceAction.PRANK -> {
+                val prankSucceeded = target.strictness < 60 && Random.nextFloat() < 0.70f
+                if (prankSucceeded) {
+                    val updated = character.copy(
+                        stats = character.stats.copy(happiness = clampStat(character.stats.happiness + 10)),
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "Pulled a hilarious office prank on ${target.name} and the whole team cracked up."
+                        )
+                    )
+                    updated to WorkplaceActionResult.Success(updated, "The prank on ${target.name} was a hilarious hit!")
+                } else {
+                    val updatedTarget = target.copy(
+                        relationshipLevel = (target.relationshipLevel - 20).coerceIn(0, 100)
+                    )
+                    val updatedRoster = roster.toMutableList().apply { set(personIndex, updatedTarget) }
+                    val updated = character.copy(
+                        career = character.career.copy(
+                            workplaceRoster = updatedRoster,
+                            performance = (character.career.performance - 6f).coerceIn(0f, 100f),
+                            stress = (character.career.stress + 10f).coerceIn(0f, 100f)
+                        ),
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "${target.name} was deeply offended by your prank and filed a complaint!"
+                        )
+                    )
+                    updated to WorkplaceActionResult.Denied(updated, "${target.name} took offense and reported you.")
+                }
+            }
+
+            WorkplaceAction.REPORT_HR -> {
+                val justified = target.relationshipLevel < 35 || target.competence < 40
+                if (justified) {
+                    val updatedTarget = target.copy(
+                        relationshipLevel = (target.relationshipLevel - 15).coerceIn(0, 100)
+                    )
+                    val updatedRoster = roster.toMutableList().apply { set(personIndex, updatedTarget) }
+                    val updated = character.copy(
+                        career = character.career.copy(
+                            workplaceRoster = updatedRoster,
+                            stress = (character.career.stress - 8f).coerceIn(0f, 100f)
+                        ),
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "Reported ${target.name}'s misconduct to HR. Management issued a warning."
+                        )
+                    )
+                    updated to WorkplaceActionResult.Success(updated, "HR investigated and reprimanded ${target.name}.")
+                } else {
+                    val updatedTarget = target.copy(
+                        relationshipLevel = (target.relationshipLevel - 25).coerceIn(0, 100)
+                    )
+                    val updatedRoster = roster.toMutableList().apply { set(personIndex, updatedTarget) }
+                    val updated = character.copy(
+                        career = character.career.copy(
+                            workplaceRoster = updatedRoster,
+                            performance = (character.career.performance - 5f).coerceIn(0f, 100f)
+                        ),
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "HR dismissed your complaint against ${target.name} as unsubstantiated."
+                        )
+                    )
+                    updated to WorkplaceActionResult.Denied(updated, "HR found no wrongdoing by ${target.name}.")
+                }
+            }
+
+            WorkplaceAction.OFFICE_ROMANCE -> {
+                if (target.isSupervisor) {
+                    return character to WorkplaceActionResult.Denied(character, "Dating your direct supervisor violates company ethics policy.")
+                }
+                if (character.hasSpouse()) {
+                    return character to WorkplaceActionResult.Denied(character, "You are already in a relationship!")
+                }
+                val accepted = target.relationshipLevel >= 50 && character.stats.looks >= 35 && Random.nextFloat() < 0.75f
+                if (accepted) {
+                    val partner = Person(
+                        id = UUID.randomUUID().toString(),
+                        name = target.name,
+                        relation = RelationType.SPOUSE,
+                        gender = if (Random.nextBoolean()) Gender.MALE else Gender.FEMALE,
+                        age = (character.age + Random.nextInt(-3, 4)).coerceAtLeast(18),
+                        relationshipLevel = (target.relationshipLevel + 15).coerceIn(0, 100),
+                        occupation = target.role,
+                        avatarConfig = target.avatarConfig,
+                        countryCode = character.countryCode,
+                        isMarried = false,
+                        stage = RelationshipStage.CASUAL
+                    )
+                    val updated = character.copy(
+                        family = character.family + partner,
+                        stats = character.stats.copy(happiness = clampStat(character.stats.happiness + 20)),
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "Sparked an office romance with coworker ${target.name}!"
+                        )
+                    )
+                    updated to WorkplaceActionResult.Success(updated, "${target.name} said YES! You are now dating.")
+                } else {
+                    val updatedTarget = target.copy(
+                        relationshipLevel = (target.relationshipLevel - 10).coerceIn(0, 100)
+                    )
+                    val updatedRoster = roster.toMutableList().apply { set(personIndex, updatedTarget) }
+                    val updated = character.copy(
+                        career = character.career.copy(
+                            workplaceRoster = updatedRoster,
+                            stress = (character.career.stress + 5f).coerceIn(0f, 100f)
+                        ),
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "${target.name} gently declined your advances to keep things professional."
+                        )
+                    )
+                    updated to WorkplaceActionResult.Denied(updated, "${target.name} prefers to stay professional.")
+                }
+            }
+        }
+    }
+
     /** True when performance ≥ 90 and boss standing is positive — ready to ask. */
     fun isPromotionReady(character: Character): Boolean {
         val job = character.career.currentJob ?: return false
@@ -1414,6 +1730,7 @@ class CareerEngine @Inject constructor(
             stress = 20f,
             bossRelationship = 0,
             colleagueRelationships = emptyMap(),
+            workplaceRoster = emptyList(),
             officeWorkActionDoneThisYear = false,
             kissUpDoneThisYear = false,
             askPromotionDoneThisYear = false,

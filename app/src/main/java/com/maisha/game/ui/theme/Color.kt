@@ -13,6 +13,7 @@ val NavyMid = Color(0xFF0F1E35)
 
 val CreamBg = Color(0xFFF8F9FA)
 val CreamMuted = Color(0xFFEFF1F5)
+val SurfaceMuted = CreamMuted
 val PaperWhite = Color(0xFFFFFFFF)
 
 val InkPrimary = Color(0xFF1E293B)

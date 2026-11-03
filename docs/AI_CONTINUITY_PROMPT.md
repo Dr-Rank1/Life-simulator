@@ -2,8 +2,8 @@
 
 > **Purpose:** Paste this document (or point an AI agent at it) at the start of any new session so the assistant understands **what Maisha is**, **what has already been built**, **what just shipped**, **what is still missing**, and **how to work in this repo without undoing progress**.
 >
-> **Last updated:** 2026-08-25 (university / corporate / part-time marketplace UI)  
-> **Repo path:** `/home/dr-rank/Documents/Apps/Life-simulator`  
+> **Last updated:** 2026-11-03 (BitLife Overhaul: DrillDownRow & ModalBottomSheet architecture, Matchmaking, Workplace Agency, Targeted Crime & Prison, Tombstone Ribbons, Audio & Haptics)  
+> **Repo path:** `/home/ian/Documents/Apps/Life-simulator`  
 > **Remote:** `https://github.com/stewiriffin/Life-simulator` (`origin/main`)  
 > **Package:** `com.maisha.game`
 
@@ -357,6 +357,13 @@ Newest first:
 
 | Commit | Meaning |
 |--------|---------|
+| *HEAD* | BitLife / Another Life Simulator overhaul Part 2: Complete `DrillDownRow` & bottom sheets across all tabs (Actions, Career, Assets, Family), journal auto-scroll & milestone pills, childhood & youth action density (ages 0–15), university social life (mixers, office hours, crams, pranks), and tactile 44.1kHz audio synthesis & haptics |
+| `06a54e4` | Overhaul UI design system: Material 3 polish, refined cards, modern hero header, and sleek components |
+| `e133e66` | Add Play Games Services, localization tooling, and snapshot UI updates; real estate mortgages & luxury vehicles |
+| `c316e89` | Prefetch public flavor APIs into Room so gameplay can use real streets, art, quotes, and news offline |
+| `8aeb4d0` | Expand country job and name catalogs and fetch optional random names from Random User |
+| `a292c19` | Rewrite the README as a product page for GitHub |
+| `a9eb222` | Replace stub events and test placeholders with real game content |
 | `4b16211` | Career UI polish: university major grid + funding sheet, corporate dashboard, part-time marketplace |
 | `dd3170e` | Fame & Talent Hub: athleticism/musicalTalent/fame, pathways, busk/match gigs, idle decay, leave track, endorsements, paparazzi |
 | `f0bbc8a` | Student part-time + youth side hustles: energy, Hard-study balance, year-end pay, rest/quit, Jobs & Side Hustles UI |
@@ -449,7 +456,7 @@ Always confirm with the user’s latest message if the request is ambiguous.
 
 ## 16. Copy-paste short briefing (for tiny context windows)
 
-> Maisha is an Android BitLife-style life sim (Compose, Hilt, Room, pure domain engines). Worldwide 15 countries. Latest: Career UI polish (`4b16211`: university enroll dialog, corporate dashboard, part-time marketplace); Fame & Talent Hub (`dd3170e`); student jobs (`f0bbc8a`); career ladders (`30b316a`). Prefer agency/UI/systems over event spam. Commit/push/install only on request.
+> Maisha is an Android BitLife-style life sim (Compose, Hilt, Room, pure domain engines). Worldwide 15 countries. Latest: BitLife Overhaul Parts 1–3 (`DrillDownRow` list pattern, `ModalBottomSheet` drill-down architecture across all 5 main tabs, dating matchmaking sheets, workplace roster & schmoozing, targeted crimes & prison gang/parole, tombstone ribbons, high-fidelity audio & multi-waveform haptics). Prefer agency/UI/systems over event spam. Commit/push/install only on request.
 
 ---
 

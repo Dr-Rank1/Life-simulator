@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.maisha.game.R
@@ -189,7 +190,8 @@ fun LifeSummaryScreen(
                     character = character,
                     deathCauseLabel = uiState.deathCauseLabel,
                     deathFlavorText = uiState.deathFlavorText,
-                    lifeArchetypeLabel = uiState.lifeArchetypeLabel
+                    lifeArchetypeLabel = uiState.lifeArchetypeLabel,
+                    ribbon = uiState.ribbon
                 )
             }
 
@@ -518,10 +520,35 @@ private fun MemorialHeader(
     character: Character,
     deathCauseLabel: String,
     deathFlavorText: String,
-    lifeArchetypeLabel: String = ""
+    lifeArchetypeLabel: String = "",
+    ribbon: com.maisha.game.domain.LifeRibbon = com.maisha.game.domain.LifeRibbon.MEDIOCRE
 ) {
     val deathYear = character.birthYear + character.age
     val stage = ageStageFor(character.age)
+    val ribbonTitleRes = when (ribbon) {
+        com.maisha.game.domain.LifeRibbon.LOADED -> R.string.ribbon_loaded
+        com.maisha.game.domain.LifeRibbon.ACADEMIC -> R.string.ribbon_academic
+        com.maisha.game.domain.LifeRibbon.CUNNING -> R.string.ribbon_cunning
+        com.maisha.game.domain.LifeRibbon.FAMILY_ANCHOR -> R.string.ribbon_family
+        com.maisha.game.domain.LifeRibbon.FAME_ICON -> R.string.ribbon_fame
+        com.maisha.game.domain.LifeRibbon.SAINT -> R.string.ribbon_saint
+        com.maisha.game.domain.LifeRibbon.SCANDALOUS -> R.string.ribbon_scandalous
+        com.maisha.game.domain.LifeRibbon.WORKAHOLIC -> R.string.ribbon_workaholic
+        com.maisha.game.domain.LifeRibbon.MEDIOCRE -> R.string.ribbon_mediocre
+    }
+    val ribbonDescRes = when (ribbon) {
+        com.maisha.game.domain.LifeRibbon.LOADED -> R.string.ribbon_loaded_desc
+        com.maisha.game.domain.LifeRibbon.ACADEMIC -> R.string.ribbon_academic_desc
+        com.maisha.game.domain.LifeRibbon.CUNNING -> R.string.ribbon_cunning_desc
+        com.maisha.game.domain.LifeRibbon.FAMILY_ANCHOR -> R.string.ribbon_family_desc
+        com.maisha.game.domain.LifeRibbon.FAME_ICON -> R.string.ribbon_fame_desc
+        com.maisha.game.domain.LifeRibbon.SAINT -> R.string.ribbon_saint_desc
+        com.maisha.game.domain.LifeRibbon.SCANDALOUS -> R.string.ribbon_scandalous_desc
+        com.maisha.game.domain.LifeRibbon.WORKAHOLIC -> R.string.ribbon_workaholic_desc
+        com.maisha.game.domain.LifeRibbon.MEDIOCRE -> R.string.ribbon_mediocre_desc
+    }
+    val col1 = androidx.compose.ui.graphics.Color(ribbon.primaryColorHex)
+    val col2 = androidx.compose.ui.graphics.Color(ribbon.secondaryColorHex)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -532,6 +559,31 @@ private fun MemorialHeader(
         border = androidx.compose.foundation.BorderStroke(1.dp, OutlineInk),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
+        // High-contrast Silk Sash Life Ribbon Banner
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(col1, col2)))
+                .padding(vertical = 10.dp, horizontal = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "🎗️",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = stringResource(ribbonTitleRes),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = androidx.compose.ui.graphics.Color.White,
+                    letterSpacing = 1.5.sp
+                )
+            }
+        }
 
         Column(
             modifier = Modifier
@@ -545,7 +597,15 @@ private fun MemorialHeader(
                 age = character.age,
                 seed = character.name
             )
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = stringResource(ribbonDescRes),
+                style = MaterialTheme.typography.bodySmall,
+                color = col1,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = stringResource(R.string.section_memorial),
                 style = MaterialTheme.typography.labelLarge,

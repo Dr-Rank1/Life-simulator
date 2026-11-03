@@ -57,6 +57,7 @@ data class LifeSummaryUiState(
     val showSecondWindButton: Boolean = false,
     val secondWindMessage: String? = null,
     val lifeArchetypeLabel: String = "",
+    val ribbon: com.maisha.game.domain.LifeRibbon = com.maisha.game.domain.LifeRibbon.MEDIOCRE,
     val navigateToSlotPicker: Boolean = false,
     val showRewardedAd: Boolean = false,
     val showAchievementsCarryOverTip: Boolean = false,
@@ -142,6 +143,7 @@ class LifeSummaryViewModel @Inject constructor(
                                     LifeArchetypeEngine.resolveTitleKey(character, netWorth)
                                 )
                             ),
+                            ribbon = LifeArchetypeEngine.evaluateRibbon(character, netWorth),
                             showSecondWindButton = sessionAdTracker.canShowSecondWindOffer(),
                             showAchievementsCarryOverTip = showAchievementsTip,
                             shareCardData = buildShareCardData(

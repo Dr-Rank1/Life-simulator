@@ -176,7 +176,7 @@ fun EventDialogStyled(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 620.dp),
+                        .heightIn(max = 640.dp),
                     shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = PaperWhite
@@ -184,39 +184,49 @@ fun EventDialogStyled(
                     elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
                     border = androidx.compose.foundation.BorderStroke(1.dp, Hairline)
                 ) {
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 20.dp, vertical = 20.dp)
-                    ) {
-                        EventNarrativePanel(
-                            text = event.text,
-                            accentBarColor = accentBarColor
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        EventDialogHeroHeader(
+                            category = category,
+                            tone = tone,
+                            playerAge = playerAge,
+                            showQueue = eventQueueTotal > 1,
+                            eventQueueIndex = eventQueueIndex,
+                            eventQueueTotal = eventQueueTotal
                         )
 
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                .verticalScroll(rememberScrollState())
+                                .padding(horizontal = 20.dp, vertical = 16.dp)
                         ) {
-                            event.choices.forEachIndexed { index, choice ->
-                                EventChoiceCard(
-                                    index = index + 1,
-                                    choice = choice,
-                                    countryCode = character.countryCode,
-                                    accent = category.accent,
-                                    enabled = !selectionLocked,
-                                    staggerIndex = index,
-                                    eventId = event.id,
-                                    onSelectStart = {
-                                        selectionLocked = true
-                                        feedbackManager.triggerHaptic(view, HapticType.LIGHT_TAP)
-                                    },
-                                    onClick = { onChoiceSelected(choice) }
-                                )
+                            EventNarrativePanel(
+                                text = event.text,
+                                accentBarColor = accentBarColor
+                            )
+
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                event.choices.forEachIndexed { index, choice ->
+                                    EventChoiceCard(
+                                        index = index + 1,
+                                        choice = choice,
+                                        countryCode = character.countryCode,
+                                        accent = category.accent,
+                                        enabled = !selectionLocked,
+                                        staggerIndex = index,
+                                        eventId = event.id,
+                                        onSelectStart = {
+                                            selectionLocked = true
+                                            feedbackManager.triggerHaptic(view, HapticType.LIGHT_TAP)
+                                        },
+                                        onClick = { onChoiceSelected(choice) }
+                                    )
+                                }
                             }
                         }
                     }
@@ -289,7 +299,7 @@ private fun EventDialogHeroHeader(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20.dp))
                         .background(PaperWhite)
-                        .border(2.dp, OutlineInk, RoundedCornerShape(20.dp))
+                        .border(1.dp, Hairline, RoundedCornerShape(20.dp))
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(

@@ -29,6 +29,13 @@ fun leisureTitle(activity: LeisureActivity): String = when (activity) {
     LeisureActivity.ANNUAL_CHECKUP -> stringResource(R.string.leisure_checkup_title)
     LeisureActivity.YACHT_DAY -> stringResource(R.string.leisure_yacht_day_title)
     LeisureActivity.PRIVATE_JET_TRIP -> stringResource(R.string.leisure_private_jet_title)
+    LeisureActivity.PLAY_WITH_TOYS -> stringResource(R.string.leisure_play_toys_title)
+    LeisureActivity.THROW_TANTRUM -> stringResource(R.string.leisure_throw_tantrum_title)
+    LeisureActivity.ASK_ALLOWANCE -> stringResource(R.string.leisure_ask_allowance_title)
+    LeisureActivity.CHILDHOOD_HOBBY -> stringResource(R.string.leisure_childhood_hobby_title)
+    LeisureActivity.SNEAK_OUT -> stringResource(R.string.leisure_sneak_out_title)
+    LeisureActivity.MALL_HANGOUT -> stringResource(R.string.leisure_mall_hangout_title)
+    LeisureActivity.GAMING_MARATHON -> stringResource(R.string.leisure_gaming_marathon_title)
 }
 
 @Composable
@@ -55,6 +62,13 @@ fun leisureDescription(activity: LeisureActivity): String = when (activity) {
     LeisureActivity.ANNUAL_CHECKUP -> stringResource(R.string.leisure_checkup_desc)
     LeisureActivity.YACHT_DAY -> stringResource(R.string.leisure_yacht_day_desc)
     LeisureActivity.PRIVATE_JET_TRIP -> stringResource(R.string.leisure_private_jet_desc)
+    LeisureActivity.PLAY_WITH_TOYS -> stringResource(R.string.leisure_play_toys_desc)
+    LeisureActivity.THROW_TANTRUM -> stringResource(R.string.leisure_throw_tantrum_desc)
+    LeisureActivity.ASK_ALLOWANCE -> stringResource(R.string.leisure_ask_allowance_desc)
+    LeisureActivity.CHILDHOOD_HOBBY -> stringResource(R.string.leisure_childhood_hobby_desc)
+    LeisureActivity.SNEAK_OUT -> stringResource(R.string.leisure_sneak_out_desc)
+    LeisureActivity.MALL_HANGOUT -> stringResource(R.string.leisure_mall_hangout_desc)
+    LeisureActivity.GAMING_MARATHON -> stringResource(R.string.leisure_gaming_marathon_desc)
 }
 
 @Composable
@@ -81,6 +95,13 @@ fun leisureEffectLabel(activity: LeisureActivity): String = when (activity) {
     LeisureActivity.ANNUAL_CHECKUP -> stringResource(R.string.leisure_effect_checkup)
     LeisureActivity.YACHT_DAY -> stringResource(R.string.leisure_effect_yacht_day)
     LeisureActivity.PRIVATE_JET_TRIP -> stringResource(R.string.leisure_effect_private_jet)
+    LeisureActivity.PLAY_WITH_TOYS -> stringResource(R.string.leisure_effect_play_toys)
+    LeisureActivity.THROW_TANTRUM -> stringResource(R.string.leisure_effect_throw_tantrum)
+    LeisureActivity.ASK_ALLOWANCE -> stringResource(R.string.leisure_effect_ask_allowance)
+    LeisureActivity.CHILDHOOD_HOBBY -> stringResource(R.string.leisure_effect_childhood_hobby)
+    LeisureActivity.SNEAK_OUT -> stringResource(R.string.leisure_effect_sneak_out)
+    LeisureActivity.MALL_HANGOUT -> stringResource(R.string.leisure_effect_mall_hangout)
+    LeisureActivity.GAMING_MARATHON -> stringResource(R.string.leisure_effect_gaming_marathon)
 }
 
 fun leisureMessageRes(activity: LeisureActivity): Int = when (activity) {
@@ -106,4 +127,11 @@ fun leisureMessageRes(activity: LeisureActivity): Int = when (activity) {
     LeisureActivity.ANNUAL_CHECKUP -> R.string.msg_leisure_checkup
     LeisureActivity.YACHT_DAY -> R.string.msg_leisure_yacht_day
     LeisureActivity.PRIVATE_JET_TRIP -> R.string.msg_leisure_private_jet
+    LeisureActivity.PLAY_WITH_TOYS -> R.string.msg_leisure_play_toys
+    LeisureActivity.THROW_TANTRUM -> R.string.msg_leisure_throw_tantrum
+    LeisureActivity.ASK_ALLOWANCE -> R.string.msg_leisure_ask_allowance
+    LeisureActivity.CHILDHOOD_HOBBY -> R.string.msg_leisure_childhood_hobby
+    LeisureActivity.SNEAK_OUT -> R.string.msg_leisure_sneak_out
+    LeisureActivity.MALL_HANGOUT -> R.string.msg_leisure_mall_hangout
+    LeisureActivity.GAMING_MARATHON -> R.string.msg_leisure_gaming_marathon
 }

@@ -76,6 +76,8 @@ data class CareerState(
     val bossRelationship: Int = 10,
     /** Named coworker standings (−100…100). */
     val colleagueRelationships: Map<String, Int> = emptyMap(),
+    /** Active roster of workplace colleagues and manager. */
+    val workplaceRoster: List<WorkplacePerson> = emptyList(),
     /** Work Harder / Slack Off used this year. */
     val officeWorkActionDoneThisYear: Boolean = false,
     /** Kiss-up / network action used this year. */
@@ -105,6 +107,29 @@ data class CareerState(
     /** Years since last fame-boosting action (training, gig, track practice). */
     val fameIdleYears: Int = 0
 )
+
+@Serializable
+data class WorkplacePerson(
+    val id: String,
+    val name: String,
+    val role: String,
+    val relationshipLevel: Int = 50,
+    val competence: Int = 50,
+    val strictness: Int = 50,
+    val isSupervisor: Boolean = false,
+    val avatarConfig: AvatarConfig = AvatarConfig.DEFAULT
+)
+
+@Serializable
+enum class WorkplaceAction {
+    SCHMOOZE,
+    ASK_RAISE,
+    ASK_PROMOTION,
+    COLLABORATE,
+    PRANK,
+    REPORT_HR,
+    OFFICE_ROMANCE
+}
 
 @Serializable
 enum class WorkEffort {

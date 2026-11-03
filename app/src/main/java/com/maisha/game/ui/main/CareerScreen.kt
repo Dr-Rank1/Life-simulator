@@ -95,6 +95,8 @@ import com.maisha.game.data.model.HustleType
 import com.maisha.game.data.model.OfficeAction
 import com.maisha.game.data.model.PartTimeJob
 import com.maisha.game.data.model.WorkEffort
+import com.maisha.game.data.model.WorkplaceAction
+import com.maisha.game.data.model.WorkplacePerson
 import com.maisha.game.domain.BusinessEngine
 import com.maisha.game.domain.CareerEngine
 import com.maisha.game.domain.EducationEngine
@@ -106,7 +108,9 @@ import com.maisha.game.ui.components.CategoryFilterChipRow
 import com.maisha.game.ui.components.ConfirmActionDialog
 import com.maisha.game.ui.components.ConfirmSeverity
 import com.maisha.game.ui.components.ConfirmableActionHost
+import com.maisha.game.ui.components.DrillDownRow
 import com.maisha.game.ui.components.EmptyStateCard
+import com.maisha.game.ui.components.WorkplaceRosterSheet
 import com.maisha.game.ui.components.rememberConfirmableAction
 import com.maisha.game.ui.components.IllustrationImage
 import com.maisha.game.ui.components.RecordBadge
@@ -125,6 +129,7 @@ import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
 import com.maisha.game.ui.theme.NavyDeep
+import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.SuccessGreen
 import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
@@ -135,6 +140,8 @@ private const val MIN_RETIREMENT_AGE = 60
 private val schoolUiEngine by lazy { EducationEngine(RelocationEngine()) }
 
 private enum class CareerCategory { ALL, WORK, SCHOOL, BUSINESS, POLITICS }
+
+private enum class CareerSheet { NONE, CLASSMATES, CLUBS, UNIVERSITY, FAME, JOBS, JOB_LISTINGS }
 
 private enum class CareerListContentType {
     Banner,
@@ -150,6 +157,7 @@ private enum class CareerListContentType {
     StartBusiness
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CareerScreen(
     character: Character,
@@ -186,6 +194,10 @@ fun CareerScreen(
     onCampusJob: () -> Unit = {},
     onInternship: () -> Unit = {},
     onRepayStudentLoan: (Int) -> Unit = {},
+    onCampusMixer: () -> Unit = {},
+    onProfessorOfficeHours: () -> Unit = {},
+    onExamAllNighter: () -> Unit = {},
+    onCampusRivalryPrank: () -> Unit = {},
     onStartCareerTrack: (CareerTrack) -> Unit,
     onPracticeCareerTrack: () -> Unit,
     onTrainTalent: (TalentTraining) -> Unit = {},
@@ -196,6 +208,7 @@ fun CareerScreen(
     onExecuteSideHustle: (HustleType) -> Unit = {},
     onQuitPartTimeJob: () -> Unit = {},
     onRestStudentEnergy: () -> Unit = {},
+    onWorkplaceAction: (String, WorkplaceAction) -> Unit = { _, _ -> },
     onCareerMessageDismissed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -368,6 +381,7 @@ fun CareerScreen(
         category == CareerCategory.ALL || category == cat
 
     var historyExpanded by rememberSaveable { mutableStateOf(false) }
+    var activeCareerSheet by rememberSaveable { mutableStateOf(CareerSheet.NONE) }
 
     val heroSubtitle = when {
         isRetired -> stringResource(R.string.career_subtitle_retired)
@@ -446,19 +460,6 @@ fun CareerScreen(
 
             if (show(CareerCategory.SCHOOL)) {
                 item(
-                    key = "university_dashboard",
-                    contentType = CareerListContentType.Education
-                ) {
-                    UniversityDashboardCard(
-                        character = character,
-                        onEnrollInUniversity = onEnrollInUniversity,
-                        onCampusJob = onCampusJob,
-                        onInternship = onInternship,
-                        onRepayStudentLoan = onRepayStudentLoan,
-                        onStartCareerTrack = onStartCareerTrack
-                    )
-                }
-                item(
                     key = "education",
                     contentType = CareerListContentType.Education
                 ) {
@@ -472,70 +473,63 @@ fun CareerScreen(
                         onSyncExamSchedule = onSyncExamSchedule
                     )
                 }
-                item(
-                    key = "school_life",
-                    contentType = CareerListContentType.Education
-                ) {
-                    SchoolLifeSectionCard(
-                        character = character,
-                        onPerformSchoolActivity = onPerformSchoolActivity,
-                        onSchoolPersonInteraction = onSchoolPersonInteraction,
-                        onResolveExpulsionHearing = onResolveExpulsionHearing,
-                        onServeDetention = onServeDetention,
-                        onApologizeToPrincipal = onApologizeToPrincipal
+
+                item(key = "drill_classmates") {
+                    DrillDownRow(
+                        title = stringResource(R.string.section_school_life),
+                        subtitle = "Classmates, Teachers, Bully & Crush",
+                        icon = AppIcons.Relationship,
+                        iconTint = TealPrimary,
+                        trailingBadge = if (character.education.schoolPeople.isNotEmpty()) "${character.education.schoolPeople.size}" else null,
+                        onClick = { activeCareerSheet = CareerSheet.CLASSMATES }
                     )
                 }
-                item(
-                    key = "school_club",
-                    contentType = CareerListContentType.Education
-                ) {
-                    SchoolClubSectionCard(
-                        character = character,
-                        onJoinSchoolClub = onJoinSchoolClub,
-                        onPerformClubActivity = onPerformClubActivity,
-                        onClaimClubMajorEvent = onClaimClubMajorEvent,
-                        onHostClubFundraiser = onHostClubFundraiser,
-                        onChallengeRivalSchool = onChallengeRivalSchool,
-                        onLeaveSchoolClub = onLeaveSchoolClub
+
+                item(key = "drill_clubs") {
+                    DrillDownRow(
+                        title = stringResource(R.string.section_school_clubs),
+                        subtitle = character.education.schoolClub?.name ?: "Join a club or sports team",
+                        icon = AppIcons.Performance,
+                        iconTint = GoldAccent,
+                        trailingBadge = if (character.education.schoolClub != null) "Member" else null,
+                        onClick = { activeCareerSheet = CareerSheet.CLUBS }
                     )
                 }
-                item(
-                    key = "career_track",
-                    contentType = CareerListContentType.Education
-                ) {
-                    CareerTrackSectionCard(
-                        character = character,
-                        onStartCareerTrack = onStartCareerTrack,
-                        onPracticeCareerTrack = onPracticeCareerTrack
-                    )
+
+                if (character.age >= 16 || character.education.stage == SchoolStage.UNIVERSITY) {
+                    item(key = "drill_university") {
+                        DrillDownRow(
+                            title = stringResource(R.string.section_university_dashboard),
+                            subtitle = character.education.universityMajor?.courseLabel ?: "Degrees, Tuition & Loans",
+                            icon = AppIcons.Education,
+                            iconTint = LifeGreen,
+                            onClick = { activeCareerSheet = CareerSheet.UNIVERSITY }
+                        )
+                    }
                 }
-                item(
-                    key = "fame_talent_hub",
-                    contentType = CareerListContentType.Education
-                ) {
-                    FameAndTalentHubCard(
-                        character = character,
-                        careerEngine = careerEngine,
-                        onTrainTalent = onTrainTalent,
-                        onSignEndorsement = onSignEndorsement,
-                        onDropEndorsement = onDropEndorsement,
-                        onLeaveCareerTrack = onLeaveCareerTrack,
-                        onStartCareerTrack = onStartCareerTrack,
-                        onPracticeCareerTrack = onPracticeCareerTrack
-                    )
+
+                if (character.age >= 12) {
+                    item(key = "drill_fame") {
+                        DrillDownRow(
+                            title = stringResource(R.string.section_fame_talent_hub),
+                            subtitle = "Training, Gigs & Endorsements",
+                            icon = AppIcons.Looks,
+                            iconTint = GoldAccent,
+                            onClick = { activeCareerSheet = CareerSheet.FAME }
+                        )
+                    }
                 }
-                item(
-                    key = "jobs_side_hustles",
-                    contentType = CareerListContentType.Education
-                ) {
-                    JobsAndSideHustlesCard(
-                        character = character,
-                        careerEngine = careerEngine,
-                        onWorkPartTime = onWorkPartTime,
-                        onExecuteSideHustle = onExecuteSideHustle,
-                        onQuitPartTimeJob = onQuitPartTimeJob,
-                        onRestStudentEnergy = onRestStudentEnergy
-                    )
+
+                if (careerEngine.canWorkPartTime(character) || (character.alive && character.age >= CareerEngine.MIN_PART_TIME_AGE)) {
+                    item(key = "drill_jobs") {
+                        DrillDownRow(
+                            title = stringResource(R.string.section_part_time_marketplace),
+                            subtitle = character.career.activePartTimeJob?.name ?: "Campus jobs & side hustles",
+                            icon = AppIcons.Career,
+                            iconTint = TealPrimary,
+                            onClick = { activeCareerSheet = CareerSheet.JOBS }
+                        )
+                    }
                 }
             }
 
@@ -573,43 +567,6 @@ fun CareerScreen(
             }
 
             if (show(CareerCategory.WORK)) {
-                if (character.age >= 12 && !show(CareerCategory.SCHOOL)) {
-                    item(
-                        key = "fame_talent_hub_work",
-                        contentType = CareerListContentType.WorkState
-                    ) {
-                        FameAndTalentHubCard(
-                            character = character,
-                            careerEngine = careerEngine,
-                            onTrainTalent = onTrainTalent,
-                            onSignEndorsement = onSignEndorsement,
-                            onDropEndorsement = onDropEndorsement,
-                            onLeaveCareerTrack = onLeaveCareerTrack,
-                            onStartCareerTrack = onStartCareerTrack,
-                            onPracticeCareerTrack = onPracticeCareerTrack
-                        )
-                    }
-                }
-                // Avoid duplicate card when category filter is ALL (School section already shows it).
-                if (!show(CareerCategory.SCHOOL) &&
-                    (careerEngine.canWorkPartTime(character) ||
-                        (character.alive && character.age >= CareerEngine.MIN_PART_TIME_AGE &&
-                            !isRetired && currentJob == null))
-                ) {
-                    item(
-                        key = "jobs_side_hustles_work",
-                        contentType = CareerListContentType.WorkState
-                    ) {
-                        JobsAndSideHustlesCard(
-                            character = character,
-                            careerEngine = careerEngine,
-                            onWorkPartTime = onWorkPartTime,
-                            onExecuteSideHustle = onExecuteSideHustle,
-                            onQuitPartTimeJob = onQuitPartTimeJob,
-                            onRestStudentEnergy = onRestStudentEnergy
-                        )
-                    }
-                }
                 when {
                     isRetired -> {
                         item(
@@ -634,68 +591,43 @@ fun CareerScreen(
                                 onQuitJob = onQuitJob,
                                 onRetire = { retireConfirm.request(Unit) },
                                 onSetWorkEffort = onSetWorkEffort,
-                                onOfficeAction = onOfficeAction
+                                onOfficeAction = onOfficeAction,
+                                onWorkplaceAction = onWorkplaceAction
                             )
                         }
                     }
                 }
 
-                if (!isRetired && currentJob == null) {
-                    item(
-                        key = "job_listings_header",
-                        contentType = CareerListContentType.JobHeader
-                    ) {
-                        Column {
-                            Text(
-                                text = stringResource(R.string.section_job_listings),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = TealPrimary
-                            )
-                            if (hireChance != null) {
-                                Text(
-                                    text = stringResource(R.string.format_hire_outlook, hireChance),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = InkTertiary,
-                                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
-                                )
-                            } else {
-                                Spacer(modifier = Modifier.height(MaishaSpacing.sm))
-                            }
-                            Text(
-                                text = stringResource(R.string.career_side_hustle_hint),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = LifeGreen,
-                                modifier = Modifier.padding(bottom = 4.dp)
-                            )
-                            if (eligibleJobs.isEmpty()) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                EmptyStateCard(
-                                    illustration = EmptyStateIllustration.ACTIONS,
-                                    title = stringResource(R.string.screen_career),
-                                    message = stringResource(R.string.empty_career_no_eligible)
-                                )
-                            }
-                        }
-                    }
+                item(key = "drill_work_job_listings") {
+                    DrillDownRow(
+                        title = stringResource(R.string.section_job_listings),
+                        subtitle = if (currentJob != null) "Search for new career openings" else "Browse positions in ${character.countryCode}",
+                        icon = AppIcons.Career,
+                        iconTint = LifeGreen,
+                        trailingBadge = if (eligibleJobs.isNotEmpty()) "${eligibleJobs.size} Eligible" else null,
+                        onClick = { activeCareerSheet = CareerSheet.JOB_LISTINGS }
+                    )
+                }
 
-                    if (eligibleJobs.isNotEmpty()) {
-                        val countryJobs = JobPool.getJobsForCountry(character.countryCode)
-                        items(
-                            items = countryJobs,
-                            key = { it.id },
-                            contentType = { CareerListContentType.JobListing }
-                        ) { job ->
-                            val isEligible = job.id in eligibleIds
-                            val reason = jobIneligibilityReason(character, job)
-                            JobListingCard(
-                                job = job,
-                                countryCode = character.countryCode,
-                                isEligible = isEligible,
-                                ineligibilityReason = reason,
-                                onApply = { onApplyForJob(job.id) }
-                            )
-                        }
+                item(key = "drill_work_side_hustles") {
+                    DrillDownRow(
+                        title = stringResource(R.string.section_part_time_marketplace),
+                        subtitle = character.career.activePartTimeJob?.name ?: "Part-time work & freelance side hustles",
+                        icon = AppIcons.Performance,
+                        iconTint = TealPrimary,
+                        onClick = { activeCareerSheet = CareerSheet.JOBS }
+                    )
+                }
+
+                if (character.age >= 12) {
+                    item(key = "drill_work_fame") {
+                        DrillDownRow(
+                            title = stringResource(R.string.section_fame_talent_hub),
+                            subtitle = "Training, gigs & endorsements",
+                            icon = AppIcons.Looks,
+                            iconTint = GoldAccent,
+                            onClick = { activeCareerSheet = CareerSheet.FAME }
+                        )
                     }
                 }
 
@@ -790,6 +722,190 @@ fun CareerScreen(
                     }
                 }
             }
+        }
+
+        when (activeCareerSheet) {
+            CareerSheet.CLASSMATES -> {
+                ModalBottomSheet(
+                    onDismissRequest = { activeCareerSheet = CareerSheet.NONE },
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    containerColor = PaperWhite,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        SchoolLifeSectionCard(
+                            character = character,
+                            onPerformSchoolActivity = onPerformSchoolActivity,
+                            onSchoolPersonInteraction = onSchoolPersonInteraction,
+                            onResolveExpulsionHearing = onResolveExpulsionHearing,
+                            onServeDetention = onServeDetention,
+                            onApologizeToPrincipal = onApologizeToPrincipal
+                        )
+                    }
+                }
+            }
+            CareerSheet.CLUBS -> {
+                ModalBottomSheet(
+                    onDismissRequest = { activeCareerSheet = CareerSheet.NONE },
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    containerColor = PaperWhite,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        SchoolClubSectionCard(
+                            character = character,
+                            onJoinSchoolClub = onJoinSchoolClub,
+                            onPerformClubActivity = onPerformClubActivity,
+                            onClaimClubMajorEvent = onClaimClubMajorEvent,
+                            onHostClubFundraiser = onHostClubFundraiser,
+                            onChallengeRivalSchool = onChallengeRivalSchool,
+                            onLeaveSchoolClub = onLeaveSchoolClub
+                        )
+                    }
+                }
+            }
+            CareerSheet.UNIVERSITY -> {
+                ModalBottomSheet(
+                    onDismissRequest = { activeCareerSheet = CareerSheet.NONE },
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    containerColor = PaperWhite,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        UniversityDashboardCard(
+                            character = character,
+                            onEnrollInUniversity = onEnrollInUniversity,
+                            onCampusJob = onCampusJob,
+                            onInternship = onInternship,
+                            onRepayStudentLoan = onRepayStudentLoan,
+                            onStartCareerTrack = onStartCareerTrack,
+                            onCampusMixer = onCampusMixer,
+                            onProfessorOfficeHours = onProfessorOfficeHours,
+                            onExamAllNighter = onExamAllNighter,
+                            onCampusRivalryPrank = onCampusRivalryPrank
+                        )
+                    }
+                }
+            }
+            CareerSheet.FAME -> {
+                ModalBottomSheet(
+                    onDismissRequest = { activeCareerSheet = CareerSheet.NONE },
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    containerColor = PaperWhite,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        FameAndTalentHubCard(
+                            character = character,
+                            careerEngine = careerEngine,
+                            onTrainTalent = onTrainTalent,
+                            onSignEndorsement = onSignEndorsement,
+                            onDropEndorsement = onDropEndorsement,
+                            onLeaveCareerTrack = onLeaveCareerTrack,
+                            onStartCareerTrack = onStartCareerTrack,
+                            onPracticeCareerTrack = onPracticeCareerTrack
+                        )
+                    }
+                }
+            }
+            CareerSheet.JOBS -> {
+                ModalBottomSheet(
+                    onDismissRequest = { activeCareerSheet = CareerSheet.NONE },
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    containerColor = PaperWhite,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        JobsAndSideHustlesCard(
+                            character = character,
+                            careerEngine = careerEngine,
+                            onWorkPartTime = onWorkPartTime,
+                            onExecuteSideHustle = onExecuteSideHustle,
+                            onQuitPartTimeJob = onQuitPartTimeJob,
+                            onRestStudentEnergy = onRestStudentEnergy
+                        )
+                    }
+                }
+            }
+            CareerSheet.JOB_LISTINGS -> {
+                ModalBottomSheet(
+                    onDismissRequest = { activeCareerSheet = CareerSheet.NONE },
+                    sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                    containerColor = PaperWhite,
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.section_job_listings),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (hireChance != null) {
+                            Text(
+                                text = stringResource(R.string.format_hire_outlook, hireChance),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = InkTertiary
+                            )
+                        }
+                        if (eligibleJobs.isEmpty()) {
+                            EmptyStateCard(
+                                illustration = EmptyStateIllustration.ACTIONS,
+                                title = stringResource(R.string.screen_career),
+                                message = stringResource(R.string.empty_career_no_eligible)
+                            )
+                        } else {
+                            val countryJobs = JobPool.getJobsForCountry(character.countryCode)
+                            countryJobs.forEach { job ->
+                                val isEligible = job.id in eligibleIds
+                                val reason = jobIneligibilityReason(character, job)
+                                JobListingCard(
+                                    job = job,
+                                    countryCode = character.countryCode,
+                                    isEligible = isEligible,
+                                    ineligibilityReason = reason,
+                                    onApply = {
+                                        activeCareerSheet = CareerSheet.NONE
+                                        onApplyForJob(job.id)
+                                    }
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
+                }
+            }
+            CareerSheet.NONE -> Unit
         }
     }
 }
@@ -1069,7 +1185,11 @@ private fun UniversityDashboardCard(
     onCampusJob: () -> Unit,
     onInternship: () -> Unit,
     onRepayStudentLoan: (Int) -> Unit,
-    onStartCareerTrack: (CareerTrack) -> Unit
+    onStartCareerTrack: (CareerTrack) -> Unit,
+    onCampusMixer: () -> Unit = {},
+    onProfessorOfficeHours: () -> Unit = {},
+    onExamAllNighter: () -> Unit = {},
+    onCampusRivalryPrank: () -> Unit = {}
 ) {
     val education = character.education
     val canEnroll = remember(character.education, character.age, character.stats, character.alive) {
@@ -1252,6 +1372,44 @@ private fun UniversityDashboardCard(
                             textAlign = TextAlign.Center
                         )
                     }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = stringResource(R.string.university_social_life_title),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    DrillDownRow(
+                        title = stringResource(R.string.university_action_mixer_title),
+                        subtitle = stringResource(R.string.university_action_mixer_desc),
+                        icon = AppIcons.Relationship,
+                        iconTint = TealPrimary,
+                        onClick = onCampusMixer
+                    )
+                    DrillDownRow(
+                        title = stringResource(R.string.university_action_office_hours_title),
+                        subtitle = stringResource(R.string.university_action_office_hours_desc),
+                        icon = AppIcons.Education,
+                        iconTint = LifeGreen,
+                        onClick = onProfessorOfficeHours
+                    )
+                    DrillDownRow(
+                        title = stringResource(R.string.university_action_all_nighter_title),
+                        subtitle = stringResource(R.string.university_action_all_nighter_desc),
+                        icon = AppIcons.Performance,
+                        iconTint = GoldAccent,
+                        onClick = onExamAllNighter
+                    )
+                    DrillDownRow(
+                        title = stringResource(R.string.university_action_prank_title),
+                        subtitle = stringResource(R.string.university_action_prank_desc),
+                        icon = AppIcons.Mischief,
+                        iconTint = CoralNegative,
+                        onClick = onCampusRivalryPrank
+                    )
                 }
             }
 
@@ -3310,6 +3468,7 @@ private fun careerTrackLabel(track: CareerTrack): String = when (track) {
     CareerTrack.NONE -> ""
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CurrentJobCard(
     character: Character,
@@ -3318,7 +3477,8 @@ private fun CurrentJobCard(
     onQuitJob: () -> Unit,
     onRetire: () -> Unit,
     onSetWorkEffort: (com.maisha.game.data.model.WorkEffort) -> Unit,
-    onOfficeAction: (OfficeAction) -> Unit
+    onOfficeAction: (OfficeAction) -> Unit,
+    onWorkplaceAction: (String, WorkplaceAction) -> Unit = { _, _ -> }
 ) {
     val job = character.career.currentJob ?: return
     val resources = LocalContext.current.resources
@@ -3452,6 +3612,40 @@ private fun CurrentJobCard(
                     barColor = stressMeterColor(stressValue),
                     modifier = Modifier.weight(1f)
                 )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            var showRosterSheet by remember { mutableStateOf(false) }
+            val activeRoster = if (character.career.workplaceRoster.isNotEmpty()) {
+                character.career.workplaceRoster
+            } else {
+                remember(character.career.currentJob) {
+                    careerEngine.ensureWorkplaceRoster(character).career.workplaceRoster
+                }
+            }
+
+            DrillDownRow(
+                title = stringResource(R.string.workplace_roster_title),
+                subtitle = stringResource(R.string.workplace_roster_subtitle, activeRoster.size),
+                icon = AppIcons.Family,
+                iconTint = TealPrimary,
+                onClick = { showRosterSheet = true }
+            )
+
+            if (showRosterSheet) {
+                val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+                ModalBottomSheet(
+                    onDismissRequest = { showRosterSheet = false },
+                    sheetState = sheetState
+                ) {
+                    WorkplaceRosterSheet(
+                        character = character,
+                        roster = activeRoster,
+                        onWorkplaceAction = onWorkplaceAction,
+                        onDismiss = { showRosterSheet = false }
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))

@@ -184,6 +184,8 @@ class CharacterCreationViewModel @Inject constructor(
             val bonusStat = metaBonusRepository.consumeSecondWindBonus()
             val baseStats = state.selectedStats
             val stats = applySecondWindBonus(baseStats, bonusStat)
+            val countryName = CountryCatalog.getCountry(state.selectedCountryCode).displayName
+            val birthLog = context.getString(R.string.log_character_born, countryName)
             val character = Character(
                 name = trimmedName,
                 age = 0,
@@ -195,7 +197,7 @@ class CharacterCreationViewModel @Inject constructor(
                 birthCountryCode = state.selectedCountryCode,
                 citizenships = listOf(state.selectedCountryCode),
                 avatarConfig = state.avatarConfig,
-                eventLog = emptyList(),
+                eventLog = listOf("── Age 0 ──", birthLog),
                 family = familyGenerator.generateFamily(
                     characterAge = 0,
                     countryCode = state.selectedCountryCode

@@ -10,16 +10,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +51,7 @@ import com.maisha.game.data.JobPool
 import com.maisha.game.data.PetCatalog
 import com.maisha.game.data.model.BucketGoalKind
 import com.maisha.game.data.model.Character
+import com.maisha.game.data.model.CrimeTarget
 import com.maisha.game.data.model.CrimeType
 import com.maisha.game.data.model.FameTier
 import com.maisha.game.data.model.HealthCondition
@@ -80,6 +90,7 @@ import com.maisha.game.ui.components.ConfirmActionDialog
 import com.maisha.game.ui.components.ConfirmSeverity
 import com.maisha.game.ui.components.ConfirmableActionHost
 import com.maisha.game.ui.components.DismissibleTipCard
+import com.maisha.game.ui.components.DrillDownRow
 import com.maisha.game.ui.components.EmptyStateCard
 import com.maisha.game.ui.components.StatBar
 import com.maisha.game.ui.components.StatType
@@ -89,11 +100,13 @@ import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.CreamBg
+import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
+import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
 
@@ -104,8 +117,23 @@ private enum class ActionCategory {
     ALL, CARE, EARN, GROW, LIVE, RISK
 }
 
+private enum class ActionSheet {
+    NONE,
+    CHILDHOOD,
+    MIND_BODY,
+    DOCTOR_HEALTH,
+    SKILLS_MASTERY,
+    LOVE_FAMILY,
+    SIDE_HUSTLES,
+    LICENSES_RELOCATION,
+    PHILANTHROPY_GOALS,
+    CRIME,
+    PRISON
+}
+
 private sealed class PendingAction {
     data class Crime(val type: CrimeType) : PendingAction()
+    data class TargetedCrime(val target: CrimeTarget) : PendingAction()
     data class Treatment(val condition: HealthCondition, val careType: CareType) : PendingAction()
     data class Lifestyle(val option: LifestyleOption, val enable: Boolean) : PendingAction()
     data class SideHustle(val type: HustleType) : PendingAction()
@@ -126,12 +154,14 @@ private sealed class PendingAction {
     data object RequestExpungement : PendingAction()
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActionsScreen(
     character: Character,
     uiState: LifeUiState,
     snackbarHostState: SnackbarHostState,
     onAttemptCrime: (CrimeType) -> Unit,
+    onAttemptTargetedCrime: (CrimeTarget) -> Unit = {},
     onVisitDoctor: (String, CareType) -> Unit,
     onSetLifestyleOption: (LifestyleOption, Boolean) -> Unit,
     onExecuteSideHustle: (HustleType) -> Unit,
@@ -306,6 +336,7 @@ fun ActionsScreen(
     val pendingAction = rememberConfirmableAction<PendingAction>()
     var expandedConditionId by remember { mutableStateOf<String?>(null) }
     var expandedSkill by rememberSaveable { mutableStateOf<String?>(null) }
+    var activeActionSheet by rememberSaveable { mutableStateOf(ActionSheet.NONE) }
 
     LaunchedEffect(untreated.map { it.id }) {
         expandedConditionId = when {
@@ -378,162 +409,173 @@ fun ActionsScreen(
                     .padding(horizontal = MaishaSpacing.md)
             )
         } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp)
             ) {
-                if (show(ActionCategory.RISK) && crimeStatus.kind != CrimeStatusKind.CLEAR) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        CrimeStatusCard(statusKind = crimeStatus.kind, yearsRemaining = crimeStatus.yearsRemaining)
-                    }
-                }
-
-                if (show(ActionCategory.RISK) && showPrisonActions) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_prison)) }
-                    items(PrisonActivity.entries.toList(), key = { it.name }) { activity ->
-                        ActionCard(
-                            icon = AppIcons.Health,
-                            title = prisonActivityTitle(activity),
-                            description = prisonActivityDescription(activity),
-                            accent = ActionCardAccent.CARE,
-                            onClick = { onPerformPrisonActivity(activity) }
-                        )
-                    }
-                }
-
-                if (show(ActionCategory.CARE) && untreated.isNotEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_health)) }
-                    items(untreated, key = { it.id }, span = { GridItemSpan(maxLineSpan) }) { condition ->
-                        val isExpanded = expandedConditionId == condition.id
-                        val treatmentHint = questHintIf(yearQuests, ActionFamily.TREATMENT, questHintLabel)
-                        ConditionBadge(
-                            condition = condition,
-                            onClick = {
-                                expandedConditionId = if (isExpanded) null else condition.id
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        if (isExpanded) {
-                            Spacer(modifier = Modifier.height(4.dp))
-                            ActionCard(
-                                icon = AppIcons.HealthClinic,
-                                title = stringResource(R.string.care_public_clinic),
-                                description = successHint(CareType.PUBLIC_CLINIC),
-                                metaLabel = treatmentCostLabel(
-                                    character,
-                                    condition.severity,
-                                    CareType.PUBLIC_CLINIC
-                                ),
-                                accent = ActionCardAccent.CARE,
-                                questHint = treatmentHint,
-                                onClick = {
-                                    pendingAction.request(
-                                        PendingAction.Treatment(condition, CareType.PUBLIC_CLINIC)
-                                    )
-                                }
+                if (showPrisonActions || incarcerated) {
+                    if (crimeStatus.kind != CrimeStatusKind.CLEAR) {
+                        item {
+                            CrimeStatusCard(
+                                statusKind = crimeStatus.kind,
+                                yearsRemaining = crimeStatus.yearsRemaining
                             )
-                            ActionCard(
-                                icon = AppIcons.HealthHospital,
-                                title = CountryCatalog.flavorFor(character.countryCode).privateHospitalName,
-                                description = successHint(CareType.PRIVATE_HOSPITAL),
-                                metaLabel = treatmentCostLabel(
-                                    character,
-                                    condition.severity,
-                                    CareType.PRIVATE_HOSPITAL
-                                ),
-                                accent = ActionCardAccent.CARE,
-                                questHint = treatmentHint,
-                                onClick = {
-                                    pendingAction.request(
-                                        PendingAction.Treatment(condition, CareType.PRIVATE_HOSPITAL)
-                                    )
-                                }
+                        }
+                    }
+                    item {
+                        DrillDownRow(
+                            title = stringResource(R.string.act_cat_prison_title),
+                            subtitle = stringResource(R.string.act_cat_prison_desc),
+                            icon = AppIcons.CrimePickpocket,
+                            iconTint = CoralNegative,
+                            trailingBadge = "Inmate",
+                            onClick = { activeActionSheet = ActionSheet.PRISON }
+                        )
+                    }
+                } else {
+                    if (character.age < 16) {
+                        item {
+                            DrillDownRow(
+                                title = stringResource(R.string.act_cat_childhood_title),
+                                subtitle = stringResource(R.string.act_cat_childhood_desc),
+                                icon = AppIcons.Smarts,
+                                iconTint = LifeGreen,
+                                onClick = { activeActionSheet = ActionSheet.CHILDHOOD }
+                            )
+                        }
+                    }
+
+                    item {
+                        DrillDownRow(
+                            title = stringResource(R.string.act_cat_mind_body_title),
+                            subtitle = stringResource(R.string.act_cat_mind_body_desc),
+                            icon = AppIcons.Happiness,
+                            iconTint = LifeGreen,
+                            onClick = { activeActionSheet = ActionSheet.MIND_BODY }
+                        )
+                    }
+
+                    item {
+                        DrillDownRow(
+                            title = stringResource(R.string.act_cat_doctor_health_title),
+                            subtitle = if (untreated.isNotEmpty()) "${untreated.size} untreated conditions" else stringResource(R.string.act_cat_doctor_health_desc),
+                            icon = AppIcons.Health,
+                            iconTint = if (untreated.isNotEmpty()) CoralNegative else TealPrimary,
+                            trailingBadge = if (untreated.isNotEmpty()) "! ${untreated.size}" else null,
+                            onClick = { activeActionSheet = ActionSheet.DOCTOR_HEALTH }
+                        )
+                    }
+
+                    if (showSkillActions) {
+                        item {
+                            DrillDownRow(
+                                title = stringResource(R.string.act_cat_side_hustles_title),
+                                subtitle = "Practice, masterclasses & exhibitions",
+                                icon = AppIcons.Smarts,
+                                iconTint = GoldAccent,
+                                onClick = { activeActionSheet = ActionSheet.SKILLS_MASTERY }
+                            )
+                        }
+                    }
+
+                    if (showAdoptPetActions || showAdoptChild) {
+                        item {
+                            DrillDownRow(
+                                title = stringResource(R.string.act_cat_adoption_title),
+                                subtitle = stringResource(R.string.act_cat_adoption_desc),
+                                icon = AppIcons.Family,
+                                iconTint = TealPrimary,
+                                onClick = { activeActionSheet = ActionSheet.LOVE_FAMILY }
+                            )
+                        }
+                    }
+
+                    if (showJobsAndHustles || showSocialMediaActions || (character.alive && character.age >= CareerEngine.MIN_TALENT_TRAINING_AGE)) {
+                        item {
+                            DrillDownRow(
+                                title = stringResource(R.string.section_jobs_side_hustles),
+                                subtitle = if (character.socialMedia.hasAccount) "${character.socialMedia.followers} Followers" else "Social media, gigs & part-time jobs",
+                                icon = AppIcons.Career,
+                                iconTint = LifeGreen,
+                                onClick = { activeActionSheet = ActionSheet.SIDE_HUSTLES }
+                            )
+                        }
+                    }
+
+                    if (showDrivingTest || showImmigrationOffice) {
+                        item {
+                            DrillDownRow(
+                                title = stringResource(R.string.act_cat_relocate_title),
+                                subtitle = stringResource(R.string.act_cat_relocate_desc),
+                                icon = AppIcons.Travel,
+                                iconTint = TealPrimary,
+                                onClick = { activeActionSheet = ActionSheet.LICENSES_RELOCATION }
+                            )
+                        }
+                    }
+
+                    if (showPhilanthropy || showBucketList) {
+                        item {
+                            DrillDownRow(
+                                title = stringResource(R.string.act_cat_philanthropy_title),
+                                subtitle = stringResource(R.string.act_cat_philanthropy_desc),
+                                icon = AppIcons.Achievements,
+                                iconTint = GoldAccent,
+                                onClick = { activeActionSheet = ActionSheet.PHILANTHROPY_GOALS }
+                            )
+                        }
+                    }
+
+                    if (showCrimeActions || showExpungement) {
+                        item {
+                            DrillDownRow(
+                                title = stringResource(R.string.act_cat_crime_title),
+                                subtitle = stringResource(R.string.act_cat_crime_desc),
+                                icon = AppIcons.CrimePickpocket,
+                                iconTint = CoralNegative,
+                                onClick = { activeActionSheet = ActionSheet.CRIME }
                             )
                         }
                     }
                 }
+            }
+        }
 
-                if (show(ActionCategory.CARE) && showLifestyleActions) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_wellness)) }
-                    item {
-                        LifestyleActionCard(
-                            character = character,
-                            option = LifestyleOption.GYM,
-                            activeTitleRes = R.string.lifestyle_gym_active,
-                            inactiveTitleRes = R.string.lifestyle_gym_title,
-                            descriptionRes = R.string.lifestyle_gym_desc,
-                            yearlyCost = lifestyleYearlyCost(LifestyleOption.GYM, character.countryCode),
-                            icon = AppIcons.Health,
-                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
-                            onToggle = { enable ->
-                                pendingAction.request(PendingAction.Lifestyle(LifestyleOption.GYM, enable))
+        when (activeActionSheet) {
+            ActionSheet.CHILDHOOD -> {
+                ActionCategorySheet(
+                    title = stringResource(R.string.act_cat_childhood_title),
+                    onDismiss = { activeActionSheet = ActionSheet.NONE }
+                ) {
+                    if (showStudySession) {
+                        ActionCard(
+                            icon = AppIcons.Education,
+                            title = stringResource(R.string.action_study_session_title),
+                            description = stringResource(R.string.action_study_session_desc),
+                            metaLabel = stringResource(R.string.study_effort_hard),
+                            accent = ActionCardAccent.CARE,
+                            questHint = questHintIf(yearQuests, ActionFamily.STUDY, questHintLabel),
+                            onClick = {
+                                activeActionSheet = ActionSheet.NONE
+                                onPerformStudySession()
                             }
                         )
                     }
-                    item {
-                        LifestyleActionCard(
-                            character = character,
-                            option = LifestyleOption.DIET,
-                            activeTitleRes = R.string.lifestyle_diet_active,
-                            inactiveTitleRes = R.string.lifestyle_diet_title,
-                            descriptionRes = R.string.lifestyle_diet_desc,
-                            yearlyCost = lifestyleYearlyCost(LifestyleOption.DIET, character.countryCode),
-                            icon = AppIcons.Looks,
-                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
-                            onToggle = { enable ->
-                                pendingAction.request(PendingAction.Lifestyle(LifestyleOption.DIET, enable))
-                            }
-                        )
-                    }
-                    item {
-                        LifestyleActionCard(
-                            character = character,
-                            option = LifestyleOption.THERAPIST,
-                            activeTitleRes = R.string.lifestyle_therapist_active,
-                            inactiveTitleRes = R.string.lifestyle_therapist_title,
-                            descriptionRes = R.string.lifestyle_therapist_desc,
-                            yearlyCost = lifestyleYearlyCost(
-                                LifestyleOption.THERAPIST,
-                                character.countryCode
-                            ),
-                            icon = AppIcons.Happiness,
-                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
-                            onToggle = { enable ->
-                                pendingAction.request(
-                                    PendingAction.Lifestyle(LifestyleOption.THERAPIST, enable)
-                                )
-                            }
-                        )
-                    }
-                    item {
-                        LifestyleActionCard(
-                            character = character,
-                            option = LifestyleOption.HEALTH_INSURANCE,
-                            activeTitleRes = R.string.lifestyle_insurance_active,
-                            inactiveTitleRes = R.string.lifestyle_insurance_title,
-                            descriptionRes = R.string.lifestyle_insurance_desc,
-                            yearlyCost = lifestyleYearlyCost(
-                                LifestyleOption.HEALTH_INSURANCE,
-                                character.countryCode
-                            ),
-                            icon = AppIcons.Health,
-                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
-                            onToggle = { enable ->
-                                pendingAction.request(
-                                    PendingAction.Lifestyle(LifestyleOption.HEALTH_INSURANCE, enable)
-                                )
-                            }
-                        )
-                    }
-                }
+                    val childhoodActivities = listOf(
+                        LeisureActivity.PLAY_WITH_TOYS,
+                        LeisureActivity.THROW_TANTRUM,
+                        LeisureActivity.ASK_ALLOWANCE,
+                        LeisureActivity.CHILDHOOD_HOBBY,
+                        LeisureActivity.CHORES,
+                        LeisureActivity.SNEAK_OUT,
+                        LeisureActivity.MALL_HANGOUT,
+                        LeisureActivity.GAMING_MARATHON
+                    ).filter { it in leisureActivities }
 
-                if ((show(ActionCategory.CARE) || show(ActionCategory.LIVE)) && showLeisureActions) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_leisure)) }
-                    items(leisureActivities, key = { it.name }) { activity ->
+                    childhoodActivities.forEach { activity ->
                         val cost = leisureEngine.cost(activity, character.countryCode)
                         val isChores = activity == LeisureActivity.CHORES
                         val canAfford = isChores || character.stats.money >= cost
@@ -560,183 +602,326 @@ fun ActionsScreen(
                             questHint = questHintIf(yearQuests, ActionFamily.LEISURE, questHintLabel),
                             onClick = {
                                 if (canAfford) {
+                                    activeActionSheet = ActionSheet.NONE
                                     pendingAction.request(PendingAction.Leisure(activity))
                                 }
                             }
                         )
                     }
                 }
-
-                if ((show(ActionCategory.CARE) || show(ActionCategory.GROW)) && showStudySession) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.label_education)) }
-                    item {
+            }
+            ActionSheet.MIND_BODY -> {
+                ActionCategorySheet(
+                    title = stringResource(R.string.act_cat_mind_body_title),
+                    onDismiss = { activeActionSheet = ActionSheet.NONE }
+                ) {
+                    val adultLeisure = leisureActivities.filter {
+                        it !in listOf(
+                            LeisureActivity.PLAY_WITH_TOYS,
+                            LeisureActivity.THROW_TANTRUM,
+                            LeisureActivity.ASK_ALLOWANCE,
+                            LeisureActivity.CHILDHOOD_HOBBY,
+                            LeisureActivity.SNEAK_OUT,
+                            LeisureActivity.MALL_HANGOUT,
+                            LeisureActivity.GAMING_MARATHON
+                        )
+                    }
+                    adultLeisure.forEach { activity ->
+                        val cost = leisureEngine.cost(activity, character.countryCode)
+                        val isChores = activity == LeisureActivity.CHORES
+                        val canAfford = isChores || character.stats.money >= cost
+                        val meta = if (isChores) {
+                            stringResource(
+                                R.string.format_leisure_meta,
+                                stringResource(R.string.meta_earn_cash),
+                                leisureEffectLabel(activity)
+                            )
+                        } else {
+                            stringResource(
+                                R.string.format_leisure_meta,
+                                formatMoney(cost, character.countryCode),
+                                leisureEffectLabel(activity)
+                            )
+                        }
                         ActionCard(
-                            icon = AppIcons.Education,
-                            title = stringResource(R.string.action_study_session_title),
-                            description = stringResource(R.string.action_study_session_desc),
-                            metaLabel = stringResource(R.string.study_effort_hard),
+                            icon = AppIcons.Happiness,
+                            title = leisureTitle(activity),
+                            description = leisureDescription(activity),
+                            metaLabel = meta,
+                            enabled = canAfford,
                             accent = ActionCardAccent.CARE,
-                            questHint = questHintIf(yearQuests, ActionFamily.STUDY, questHintLabel),
-                            onClick = onPerformStudySession
+                            questHint = questHintIf(yearQuests, ActionFamily.LEISURE, questHintLabel),
+                            onClick = {
+                                if (canAfford) {
+                                    activeActionSheet = ActionSheet.NONE
+                                    pendingAction.request(PendingAction.Leisure(activity))
+                                }
+                            }
+                        )
+                    }
+                    if (showLifestyleActions) {
+                        LifestyleActionCard(
+                            character = character,
+                            option = LifestyleOption.GYM,
+                            activeTitleRes = R.string.lifestyle_gym_active,
+                            inactiveTitleRes = R.string.lifestyle_gym_title,
+                            descriptionRes = R.string.lifestyle_gym_desc,
+                            yearlyCost = lifestyleYearlyCost(LifestyleOption.GYM, character.countryCode),
+                            icon = AppIcons.Health,
+                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
+                            onToggle = { enable ->
+                                activeActionSheet = ActionSheet.NONE
+                                pendingAction.request(PendingAction.Lifestyle(LifestyleOption.GYM, enable))
+                            }
+                        )
+                        LifestyleActionCard(
+                            character = character,
+                            option = LifestyleOption.DIET,
+                            activeTitleRes = R.string.lifestyle_diet_active,
+                            inactiveTitleRes = R.string.lifestyle_diet_title,
+                            descriptionRes = R.string.lifestyle_diet_desc,
+                            yearlyCost = lifestyleYearlyCost(LifestyleOption.DIET, character.countryCode),
+                            icon = AppIcons.Looks,
+                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
+                            onToggle = { enable ->
+                                activeActionSheet = ActionSheet.NONE
+                                pendingAction.request(PendingAction.Lifestyle(LifestyleOption.DIET, enable))
+                            }
+                        )
+                        LifestyleActionCard(
+                            character = character,
+                            option = LifestyleOption.THERAPIST,
+                            activeTitleRes = R.string.lifestyle_therapist_active,
+                            inactiveTitleRes = R.string.lifestyle_therapist_title,
+                            descriptionRes = R.string.lifestyle_therapist_desc,
+                            yearlyCost = lifestyleYearlyCost(LifestyleOption.THERAPIST, character.countryCode),
+                            icon = AppIcons.Happiness,
+                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
+                            onToggle = { enable ->
+                                activeActionSheet = ActionSheet.NONE
+                                pendingAction.request(PendingAction.Lifestyle(LifestyleOption.THERAPIST, enable))
+                            }
                         )
                     }
                 }
-
-                if ((show(ActionCategory.GROW) || show(ActionCategory.EARN)) &&
-                    character.alive &&
-                    character.age >= CareerEngine.MIN_TALENT_TRAINING_AGE &&
-                    !incarcerated &&
-                    !awaitingTrial
+            }
+            ActionSheet.DOCTOR_HEALTH -> {
+                ActionCategorySheet(
+                    title = stringResource(R.string.act_cat_doctor_health_title),
+                    onDismiss = { activeActionSheet = ActionSheet.NONE }
                 ) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_fame_talent_hub)) }
-                    item(key = "fame_hub_summary", span = { GridItemSpan(maxLineSpan) }) {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaishaRadius.cardShape,
-                            colors = CardDefaults.cardColors(containerColor = Color.White)
-                        ) {
-                            Column(modifier = Modifier.padding(14.dp)) {
-                                Text(
-                                    text = stringResource(
-                                        R.string.fame_rating_label,
-                                        character.career.fame
-                                    ),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = TealPrimary
+                    if (untreated.isNotEmpty()) {
+                        untreated.forEach { condition ->
+                            val isExpanded = expandedConditionId == condition.id
+                            val treatmentHint = questHintIf(yearQuests, ActionFamily.TREATMENT, questHintLabel)
+                            ConditionBadge(
+                                condition = condition,
+                                onClick = {
+                                    expandedConditionId = if (isExpanded) null else condition.id
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            if (isExpanded) {
+                                ActionCard(
+                                    icon = AppIcons.HealthClinic,
+                                    title = stringResource(R.string.care_public_clinic),
+                                    description = successHint(CareType.PUBLIC_CLINIC),
+                                    metaLabel = treatmentCostLabel(character, condition.severity, CareType.PUBLIC_CLINIC),
+                                    accent = ActionCardAccent.CARE,
+                                    questHint = treatmentHint,
+                                    onClick = {
+                                        activeActionSheet = ActionSheet.NONE
+                                        pendingAction.request(PendingAction.Treatment(condition, CareType.PUBLIC_CLINIC))
+                                    }
                                 )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = stringResource(
-                                        R.string.talent_athleticism,
-                                        character.career.athleticism
-                                    ) + " · " + stringResource(
-                                        R.string.talent_musical,
-                                        character.career.musicalTalent
-                                    ),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = InkTertiary
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = stringResource(R.string.fame_hub_hint),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = InkTertiary
+                                ActionCard(
+                                    icon = AppIcons.HealthHospital,
+                                    title = CountryCatalog.flavorFor(character.countryCode).privateHospitalName,
+                                    description = successHint(CareType.PRIVATE_HOSPITAL),
+                                    metaLabel = treatmentCostLabel(character, condition.severity, CareType.PRIVATE_HOSPITAL),
+                                    accent = ActionCardAccent.CARE,
+                                    questHint = treatmentHint,
+                                    onClick = {
+                                        activeActionSheet = ActionSheet.NONE
+                                        pendingAction.request(PendingAction.Treatment(condition, CareType.PRIVATE_HOSPITAL))
+                                    }
                                 )
                             }
                         }
                     }
-                    item(key = "talent_gym") {
-                        ActionCard(
+                    if (showLifestyleActions) {
+                        LifestyleActionCard(
+                            character = character,
+                            option = LifestyleOption.HEALTH_INSURANCE,
+                            activeTitleRes = R.string.lifestyle_insurance_active,
+                            inactiveTitleRes = R.string.lifestyle_insurance_title,
+                            descriptionRes = R.string.lifestyle_insurance_desc,
+                            yearlyCost = lifestyleYearlyCost(LifestyleOption.HEALTH_INSURANCE, character.countryCode),
                             icon = AppIcons.Health,
-                            title = stringResource(R.string.btn_gym_session),
-                            description = stringResource(R.string.talent_athleticism, character.career.athleticism),
-                            metaLabel = if (character.career.gymTrainedThisYear) {
-                                stringResource(R.string.msg_talent_already_trained)
-                            } else {
-                                null
+                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
+                            onToggle = { enable ->
+                                activeActionSheet = ActionSheet.NONE
+                                pendingAction.request(PendingAction.Lifestyle(LifestyleOption.HEALTH_INSURANCE, enable))
+                            }
+                        )
+                    }
+                }
+            }
+            ActionSheet.SKILLS_MASTERY -> {
+                ActionCategorySheet(
+                    title = stringResource(R.string.act_cat_side_hustles_title),
+                    onDismiss = { activeActionSheet = ActionSheet.NONE }
+                ) {
+                    SkillType.entries.forEach { skillType ->
+                        val level = character.skills.find { it.type == skillType }?.level ?: 0
+                        CollapsibleSkillRow(
+                            skillType = skillType,
+                            level = level,
+                            expanded = expandedSkill == skillType.name,
+                            onToggleExpand = {
+                                expandedSkill = if (expandedSkill == skillType.name) null else skillType.name
                             },
-                            enabled = !character.career.gymTrainedThisYear,
-                            accent = ActionCardAccent.CARE,
-                            onClick = { onTrainTalent(TalentTraining.GYM_SESSION) }
-                        )
-                    }
-                    item(key = "talent_music") {
-                        ActionCard(
-                            icon = AppIcons.Looks,
-                            title = stringResource(R.string.btn_music_lesson),
-                            description = stringResource(R.string.talent_musical, character.career.musicalTalent),
-                            metaLabel = if (character.career.musicTrainedThisYear) {
-                                stringResource(R.string.msg_talent_already_trained)
-                            } else {
-                                null
+                            masterclassCost = masterclassCost,
+                            countryCode = character.countryCode,
+                            money = character.stats.money,
+                            canShowcase = level >= SkillEngine.TIER_MASTER_MIN && !character.skillShowcaseDoneThisYear,
+                            practiceHint = questHintIf(yearQuests, ActionFamily.SKILL_PRACTICE, questHintLabel),
+                            showcaseHint = questHintIf(yearQuests, ActionFamily.SKILL_SHOWCASE, questHintLabel),
+                            showEarnActions = true,
+                            showGrowActions = true,
+                            onPractice = {
+                                activeActionSheet = ActionSheet.NONE
+                                pendingAction.request(PendingAction.PracticeSkill(skillType))
                             },
-                            enabled = !character.career.musicTrainedThisYear,
-                            accent = ActionCardAccent.GOLD,
-                            onClick = { onTrainTalent(TalentTraining.MUSIC_LESSON) }
+                            onMasterclass = {
+                                activeActionSheet = ActionSheet.NONE
+                                pendingAction.request(PendingAction.Masterclass(skillType))
+                            },
+                            onShowcase = {
+                                activeActionSheet = ActionSheet.NONE
+                                pendingAction.request(PendingAction.ShowcaseSkill(skillType))
+                            }
                         )
                     }
-                    item(key = "talent_busk") {
-                        ActionCard(
-                            icon = AppIcons.Money,
-                            title = stringResource(R.string.btn_street_busk),
-                            description = stringResource(R.string.fame_hub_hint),
-                            enabled = !character.career.talentGigDoneThisYear,
-                            accent = ActionCardAccent.GOLD,
-                            onClick = { onTrainTalent(TalentTraining.STREET_BUSK) }
-                        )
-                    }
-                    item(key = "talent_match") {
-                        ActionCard(
-                            icon = AppIcons.Health,
-                            title = stringResource(R.string.btn_exhibition_match),
-                            description = stringResource(
-                                R.string.talent_athleticism,
-                                character.career.athleticism
-                            ),
-                            enabled = !character.career.talentGigDoneThisYear,
-                            accent = ActionCardAccent.CARE,
-                            onClick = { onTrainTalent(TalentTraining.EXHIBITION_MATCH) }
-                        )
-                    }
-                    if (careerEngine.canSignEndorsement(character) || character.career.endorsementActive) {
-                        item(key = "talent_endorsement") {
+                }
+            }
+            ActionSheet.LOVE_FAMILY -> {
+                ActionCategorySheet(
+                    title = stringResource(R.string.act_cat_adoption_title),
+                    onDismiss = { activeActionSheet = ActionSheet.NONE }
+                ) {
+                    if (showAdoptPetActions) {
+                        PetCatalog.getAll().forEach { entry ->
+                            val adoptionCost = EconomyScaler.scaleAmount(entry.adoptionFee, character.countryCode)
+                            val yearlyCost = EconomyScaler.scaleAmount(entry.yearlyUpkeep, character.countryCode)
+                            val canAfford = character.stats.money >= adoptionCost
                             ActionCard(
-                                icon = AppIcons.Money,
-                                title = if (character.career.endorsementActive) {
-                                    stringResource(R.string.btn_drop_endorsement)
-                                } else {
-                                    stringResource(R.string.btn_sign_endorsement)
-                                },
-                                description = if (character.career.endorsementActive) {
-                                    stringResource(
-                                        R.string.endorsement_active,
-                                        formatMoney(
-                                            character.career.endorsementPayoutPerYear,
-                                            character.countryCode
-                                        )
-                                    )
-                                } else {
-                                    stringResource(R.string.endorsement_none)
-                                },
-                                accent = ActionCardAccent.GOLD,
+                                icon = AppIcons.Family,
+                                title = adoptPetTitle(entry.species),
+                                description = adoptPetDescription(entry.species),
+                                metaLabel = stringResource(
+                                    R.string.format_pet_adoption_cost,
+                                    formatMoney(adoptionCost, character.countryCode),
+                                    formatMoney(yearlyCost, character.countryCode)
+                                ),
+                                enabled = canAfford,
                                 onClick = {
-                                    if (character.career.endorsementActive) {
-                                        onDropEndorsement()
-                                    } else {
-                                        onSignEndorsement()
+                                    if (canAfford) {
+                                        activeActionSheet = ActionSheet.NONE
+                                        pendingAction.request(PendingAction.AdoptPet(entry.species))
                                     }
                                 }
                             )
                         }
                     }
+                    if (showAdoptChild) {
+                        ActionCard(
+                            icon = AppIcons.Family,
+                            title = stringResource(R.string.btn_adopt_child),
+                            description = stringResource(R.string.dialog_adopt_child_body),
+                            accent = ActionCardAccent.CARE,
+                            onClick = {
+                                activeActionSheet = ActionSheet.NONE
+                                pendingAction.request(PendingAction.AdoptChild)
+                            }
+                        )
+                    }
                 }
-
-                if ((show(ActionCategory.EARN) || show(ActionCategory.LIVE)) && showJobsAndHustles) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_jobs_side_hustles)) }
-                    item(key = "jobs_hustles_energy", span = { GridItemSpan(maxLineSpan) }) {
-                        val canRest = showStudentPartTime &&
-                            !character.career.energyRestedThisYear &&
-                            character.career.energyLevel < 95
+            }
+            ActionSheet.SIDE_HUSTLES -> {
+                ActionCategorySheet(
+                    title = stringResource(R.string.section_jobs_side_hustles),
+                    onDismiss = { activeActionSheet = ActionSheet.NONE }
+                ) {
+                    if (showSocialMediaActions) {
+                        if (!character.socialMedia.hasAccount) {
+                            ActionCard(
+                                icon = AppIcons.Looks,
+                                title = stringResource(R.string.btn_create_social_account),
+                                description = stringResource(R.string.social_create_desc),
+                                metaLabel = stringResource(R.string.social_create_meta),
+                                onClick = {
+                                    activeActionSheet = ActionSheet.NONE
+                                    pendingAction.request(PendingAction.CreateSocialAccount)
+                                }
+                            )
+                        } else {
+                            ActionCard(
+                                icon = AppIcons.Looks,
+                                title = stringResource(R.string.btn_post_social_update),
+                                description = stringResource(R.string.social_post_desc),
+                                metaLabel = stringResource(
+                                    R.string.format_social_followers,
+                                    character.socialMedia.followers,
+                                    if (character.socialMedia.isVerified) stringResource(R.string.social_verified_badge) else ""
+                                ),
+                                questHint = questHintIf(yearQuests, ActionFamily.SOCIAL_POST, questHintLabel),
+                                onClick = {
+                                    activeActionSheet = ActionSheet.NONE
+                                    onPostSocialContent()
+                                }
+                            )
+                            val canMonetize = character.socialMedia.followers >= SocialMediaEngine.MONETIZATION_FOLLOWER_THRESHOLD &&
+                                !character.socialMedia.monetizedThisYear
+                            ActionCard(
+                                icon = AppIcons.Money,
+                                title = stringResource(R.string.btn_monetize_social),
+                                description = stringResource(R.string.social_monetize_desc),
+                                metaLabel = when {
+                                    character.socialMedia.monetizedThisYear -> stringResource(R.string.msg_social_already_monetized)
+                                    character.socialMedia.followers < SocialMediaEngine.MONETIZATION_FOLLOWER_THRESHOLD ->
+                                        stringResource(R.string.format_social_monetize_req, SocialMediaEngine.MONETIZATION_FOLLOWER_THRESHOLD)
+                                    else -> stringResource(R.string.social_monetize_ready)
+                                },
+                                enabled = canMonetize,
+                                accent = ActionCardAccent.GOLD,
+                                questHint = questHintIf(yearQuests, ActionFamily.SOCIAL_MONETIZE, questHintLabel),
+                                onClick = {
+                                    if (canMonetize) {
+                                        activeActionSheet = ActionSheet.NONE
+                                        pendingAction.request(PendingAction.MonetizeSocialAccount)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                    if (showJobsAndHustles) {
+                        val canRest = showStudentPartTime && !character.career.energyRestedThisYear && character.career.energyLevel < 95
                         PartTimeEnergyHeader(
                             character = character,
                             showStudentHints = showStudentPartTime,
                             canRest = canRest,
                             onRestStudentEnergy = onRestStudentEnergy
                         )
-                    }
-                    if (character.career.activePartTimeJob != null) {
-                        item(key = "active_part_time", span = { GridItemSpan(maxLineSpan) }) {
+                        if (character.career.activePartTimeJob != null) {
                             ActivePartTimeManagementCard(
                                 character = character,
                                 careerEngine = careerEngine,
                                 onQuitPartTimeJob = onQuitPartTimeJob
                             )
                         }
-                    }
-                    if (showStudentPartTime) {
-                        PartTimeJob.entries.forEach { job ->
-                            item(key = "part_time_${job.name}", span = { GridItemSpan(maxLineSpan) }) {
+                        if (showStudentPartTime) {
+                            PartTimeJob.entries.forEach { job ->
                                 PartTimeJobMarketCard(
                                     character = character,
                                     careerEngine = careerEngine,
@@ -745,274 +930,158 @@ fun ActionsScreen(
                                 )
                             }
                         }
-                    }
-                    if (showSideHustleActions) {
-                        items(JobPool.getAllSideHustleTypes(), key = { "hustle_${it.name}" }) { hustleType ->
-                            SideHustleActionCard(
-                                character = character,
-                                hustleType = hustleType,
-                                questHint = questHintIf(yearQuests, ActionFamily.SIDE_HUSTLE, questHintLabel),
-                                onClick = {
-                                    pendingAction.request(PendingAction.SideHustle(hustleType))
-                                }
-                            )
-                        }
-                    }
-                }
-
-                if ((show(ActionCategory.EARN) || show(ActionCategory.GROW)) && showSocialMediaActions) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_social_media)) }
-                    if (!character.socialMedia.hasAccount) {
-                        item {
-                            ActionCard(
-                                icon = AppIcons.Looks,
-                                title = stringResource(R.string.btn_create_social_account),
-                                description = stringResource(R.string.social_create_desc),
-                                metaLabel = stringResource(R.string.social_create_meta),
-                                onClick = {
-                                    pendingAction.request(PendingAction.CreateSocialAccount)
-                                }
-                            )
-                        }
-                    } else {
-                        if (show(ActionCategory.EARN) || category == ActionCategory.ALL ||
-                            category == ActionCategory.GROW
-                        ) {
-                            item(span = { GridItemSpan(maxLineSpan) }) {
-                                Text(
-                                    text = stringResource(
-                                        R.string.format_fame_badge,
-                                        fameTierLabel(character.socialMedia.fameTier)
-                                    ),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = TealPrimary
-                                )
-                            }
-                        }
-                        if (show(ActionCategory.GROW) || category == ActionCategory.ALL ||
-                            category == ActionCategory.EARN
-                        ) {
-                            item {
-                                ActionCard(
-                                    icon = AppIcons.Looks,
-                                    title = stringResource(R.string.btn_post_social_update),
-                                    description = stringResource(R.string.social_post_desc),
-                                    metaLabel = stringResource(
-                                        R.string.format_social_followers,
-                                        character.socialMedia.followers,
-                                        if (character.socialMedia.isVerified) {
-                                            stringResource(R.string.social_verified_badge)
-                                        } else {
-                                            ""
-                                        }
-                                    ),
-                                    questHint = questHintIf(
-                                        yearQuests,
-                                        ActionFamily.SOCIAL_POST,
-                                        questHintLabel
-                                    ),
-                                    onClick = onPostSocialContent
-                                )
-                            }
-                        }
-                        if (show(ActionCategory.EARN) || category == ActionCategory.ALL) {
-                            item {
-                                val canMonetize = character.socialMedia.followers >=
-                                    SocialMediaEngine.MONETIZATION_FOLLOWER_THRESHOLD &&
-                                    !character.socialMedia.monetizedThisYear
-                                ActionCard(
-                                    icon = AppIcons.Money,
-                                    title = stringResource(R.string.btn_monetize_social),
-                                    description = stringResource(R.string.social_monetize_desc),
-                                    metaLabel = when {
-                                        character.socialMedia.monetizedThisYear ->
-                                            stringResource(R.string.msg_social_already_monetized)
-                                        character.socialMedia.followers <
-                                            SocialMediaEngine.MONETIZATION_FOLLOWER_THRESHOLD ->
-                                            stringResource(
-                                                R.string.format_social_monetize_req,
-                                                SocialMediaEngine.MONETIZATION_FOLLOWER_THRESHOLD
-                                            )
-                                        else -> stringResource(R.string.social_monetize_ready)
-                                    },
-                                    enabled = canMonetize,
-                                    accent = ActionCardAccent.GOLD,
-                                    questHint = questHintIf(
-                                        yearQuests,
-                                        ActionFamily.SOCIAL_MONETIZE,
-                                        questHintLabel
-                                    ),
+                        if (showSideHustleActions) {
+                            JobPool.getAllSideHustleTypes().forEach { hustleType ->
+                                SideHustleActionCard(
+                                    character = character,
+                                    hustleType = hustleType,
+                                    questHint = questHintIf(yearQuests, ActionFamily.SIDE_HUSTLE, questHintLabel),
                                     onClick = {
-                                        if (canMonetize) {
-                                            pendingAction.request(PendingAction.MonetizeSocialAccount)
-                                        }
+                                        activeActionSheet = ActionSheet.NONE
+                                        pendingAction.request(PendingAction.SideHustle(hustleType))
                                     }
                                 )
                             }
                         }
                     }
-                }
-
-                if ((show(ActionCategory.EARN) || show(ActionCategory.GROW)) && showSkillActions) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_hobbies_skills)) }
-                    items(SkillType.entries.toList(), key = { it.name }, span = { GridItemSpan(maxLineSpan) }) { skillType ->
-                        val level = character.skills.find { it.type == skillType }?.level ?: 0
-                        CollapsibleSkillRow(
-                            skillType = skillType,
-                            level = level,
-                            expanded = expandedSkill == skillType.name,
-                            onToggleExpand = {
-                                expandedSkill =
-                                    if (expandedSkill == skillType.name) null else skillType.name
-                            },
-                            masterclassCost = masterclassCost,
-                            countryCode = character.countryCode,
-                            money = character.stats.money,
-                            canShowcase = level >= SkillEngine.TIER_MASTER_MIN &&
-                                !character.skillShowcaseDoneThisYear,
-                            practiceHint = questHintIf(
-                                yearQuests,
-                                ActionFamily.SKILL_PRACTICE,
-                                questHintLabel
-                            ),
-                            showcaseHint = questHintIf(
-                                yearQuests,
-                                ActionFamily.SKILL_SHOWCASE,
-                                questHintLabel
-                            ),
-                            showEarnActions = show(ActionCategory.EARN) || category == ActionCategory.ALL,
-                            showGrowActions = show(ActionCategory.GROW) || category == ActionCategory.ALL,
-                            onPractice = {
-                                pendingAction.request(PendingAction.PracticeSkill(skillType))
-                            },
-                            onMasterclass = {
-                                pendingAction.request(PendingAction.Masterclass(skillType))
-                            },
-                            onShowcase = {
-                                pendingAction.request(PendingAction.ShowcaseSkill(skillType))
-                            }
-                        )
-                    }
-                }
-
-                if (show(ActionCategory.GROW) && showAdoptPetActions) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_adopt_pet)) }
-                    items(PetCatalog.getAll(), key = { it.species.name }) { entry ->
-                        val adoptionCost = EconomyScaler.scaleAmount(
-                            entry.adoptionFee,
-                            character.countryCode
-                        )
-                        val yearlyCost = EconomyScaler.scaleAmount(
-                            entry.yearlyUpkeep,
-                            character.countryCode
-                        )
-                        val canAfford = character.stats.money >= adoptionCost
+                    if (character.alive && character.age >= CareerEngine.MIN_TALENT_TRAINING_AGE && !incarcerated && !awaitingTrial) {
                         ActionCard(
-                            icon = AppIcons.Family,
-                            title = adoptPetTitle(entry.species),
-                            description = adoptPetDescription(entry.species),
-                            metaLabel = stringResource(
-                                R.string.format_pet_adoption_cost,
-                                formatMoney(adoptionCost, character.countryCode),
-                                formatMoney(yearlyCost, character.countryCode)
-                            ),
-                            enabled = canAfford,
-                            onClick = {
-                                if (canAfford) {
-                                    pendingAction.request(PendingAction.AdoptPet(entry.species))
-                                }
-                            }
-                        )
-                    }
-                }
-
-                if (show(ActionCategory.GROW) && showBucketList) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_bucket_list)) }
-                    items(
-                        character.bucketList.filter { !it.completed },
-                        key = { "active_${it.id}" }
-                    ) { goal ->
-                        ActionCard(
-                            icon = AppIcons.Smarts,
-                            title = bucketTitle(goal.kind),
-                            description = bucketDescription(goal.kind),
-                            metaLabel = stringResource(
-                                R.string.format_bucket_in_progress,
-                                bucketTitle(goal.kind)
-                            ),
-                            enabled = false,
-                            accent = ActionCardAccent.GOLD,
-                            onClick = {}
-                        )
-                    }
-                    items(
-                        character.bucketList.filter { it.completed },
-                        key = { "done_${it.id}" }
-                    ) { goal ->
-                        ActionCard(
-                            icon = AppIcons.Smarts,
-                            title = bucketTitle(goal.kind),
-                            description = bucketDescription(goal.kind),
-                            metaLabel = stringResource(R.string.bucket_completed_badge),
-                            enabled = false,
+                            icon = AppIcons.Health,
+                            title = stringResource(R.string.btn_gym_session),
+                            description = stringResource(R.string.talent_athleticism, character.career.athleticism),
+                            metaLabel = if (character.career.gymTrainedThisYear) stringResource(R.string.msg_talent_already_trained) else null,
+                            enabled = !character.career.gymTrainedThisYear,
                             accent = ActionCardAccent.CARE,
-                            onClick = {}
+                            onClick = {
+                                activeActionSheet = ActionSheet.NONE
+                                onTrainTalent(TalentTraining.GYM_SESSION)
+                            }
                         )
-                    }
-                    items(
-                        BucketListEngine().availableTemplates(character),
-                        key = { "tpl_${it.id}" }
-                    ) { template ->
-                        val cost = EconomyScaler.scaleAmount(
-                            template.commitmentKenya,
-                            character.countryCode
+                        ActionCard(
+                            icon = AppIcons.Looks,
+                            title = stringResource(R.string.btn_music_lesson),
+                            description = stringResource(R.string.talent_musical, character.career.musicalTalent),
+                            metaLabel = if (character.career.musicTrainedThisYear) stringResource(R.string.msg_talent_already_trained) else null,
+                            enabled = !character.career.musicTrainedThisYear,
+                            accent = ActionCardAccent.GOLD,
+                            onClick = {
+                                activeActionSheet = ActionSheet.NONE
+                                onTrainTalent(TalentTraining.MUSIC_LESSON)
+                            }
                         )
-                        val canAfford = character.stats.money >= cost
                         ActionCard(
                             icon = AppIcons.Money,
-                            title = bucketTitle(template.kind),
-                            description = bucketDescription(template.kind),
-                            metaLabel = stringResource(
-                                R.string.format_bucket_commitment,
-                                formatMoney(cost, character.countryCode)
-                            ),
-                            enabled = canAfford,
+                            title = stringResource(R.string.btn_street_busk),
+                            description = stringResource(R.string.fame_hub_hint),
+                            enabled = !character.career.talentGigDoneThisYear,
                             accent = ActionCardAccent.GOLD,
                             onClick = {
-                                if (canAfford) {
-                                    pendingAction.request(PendingAction.AdoptBucket(template.id))
-                                }
+                                activeActionSheet = ActionSheet.NONE
+                                onTrainTalent(TalentTraining.STREET_BUSK)
                             }
                         )
+                        ActionCard(
+                            icon = AppIcons.Health,
+                            title = stringResource(R.string.btn_exhibition_match),
+                            description = stringResource(R.string.talent_athleticism, character.career.athleticism),
+                            enabled = !character.career.talentGigDoneThisYear,
+                            accent = ActionCardAccent.CARE,
+                            onClick = {
+                                activeActionSheet = ActionSheet.NONE
+                                onTrainTalent(TalentTraining.EXHIBITION_MATCH)
+                            }
+                        )
+                        if (careerEngine.canSignEndorsement(character) || character.career.endorsementActive) {
+                            ActionCard(
+                                icon = AppIcons.Money,
+                                title = if (character.career.endorsementActive) stringResource(R.string.btn_drop_endorsement) else stringResource(R.string.btn_sign_endorsement),
+                                description = if (character.career.endorsementActive) {
+                                    stringResource(R.string.endorsement_active, formatMoney(character.career.endorsementPayoutPerYear, character.countryCode))
+                                } else {
+                                    stringResource(R.string.endorsement_none)
+                                },
+                                accent = ActionCardAccent.GOLD,
+                                onClick = {
+                                    activeActionSheet = ActionSheet.NONE
+                                    if (character.career.endorsementActive) onDropEndorsement() else onSignEndorsement()
+                                }
+                            )
+                        }
                     }
                 }
-
-                if (show(ActionCategory.LIVE) && showDrivingTest) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_driving)) }
-                    item {
+            }
+            ActionSheet.LICENSES_RELOCATION -> {
+                ActionCategorySheet(
+                    title = stringResource(R.string.act_cat_relocate_title),
+                    onDismiss = { activeActionSheet = ActionSheet.NONE }
+                ) {
+                    if (showDrivingTest) {
                         val canAfford = character.stats.money >= drivingTestFee
                         ActionCard(
                             icon = AppIcons.Career,
                             title = stringResource(R.string.btn_take_driving_test),
-                            description = stringResource(
-                                R.string.driving_test_desc,
-                                formatMoney(drivingTestFee, character.countryCode)
-                            ),
+                            description = stringResource(R.string.driving_test_desc, formatMoney(drivingTestFee, character.countryCode)),
                             metaLabel = formatMoney(drivingTestFee, character.countryCode),
                             enabled = canAfford,
                             onClick = {
                                 if (canAfford) {
+                                    activeActionSheet = ActionSheet.NONE
                                     pendingAction.request(PendingAction.TakeDrivingTest)
                                 }
                             }
                         )
                     }
+                    if (showImmigrationOffice) {
+                        Text(
+                            text = stringResource(
+                                R.string.immigration_status_summary,
+                                character.currentVisa?.name?.lowercase() ?: stringResource(R.string.immigration_no_visa),
+                                character.visaYearsRemaining
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (canRenewVisa) {
+                            val canAfford = character.stats.money >= visaRenewalFee
+                            ActionCard(
+                                icon = AppIcons.Career,
+                                title = stringResource(R.string.btn_renew_visa),
+                                description = stringResource(R.string.immigration_renew_visa_desc, formatMoney(visaRenewalFee, character.countryCode)),
+                                metaLabel = formatMoney(visaRenewalFee, character.countryCode),
+                                enabled = canAfford,
+                                onClick = {
+                                    if (canAfford) {
+                                        activeActionSheet = ActionSheet.NONE
+                                        pendingAction.request(PendingAction.RenewVisa)
+                                    }
+                                }
+                            )
+                        }
+                        if (canApplyCitizenship) {
+                            val canAfford = character.stats.money >= citizenshipFee
+                            ActionCard(
+                                icon = AppIcons.Family,
+                                title = stringResource(R.string.btn_apply_citizenship),
+                                description = stringResource(R.string.immigration_citizenship_desc, formatMoney(citizenshipFee, character.countryCode)),
+                                metaLabel = formatMoney(citizenshipFee, character.countryCode),
+                                enabled = canAfford,
+                                onClick = {
+                                    if (canAfford) {
+                                        activeActionSheet = ActionSheet.NONE
+                                        pendingAction.request(PendingAction.ApplyCitizenship)
+                                    }
+                                }
+                            )
+                        }
+                    }
                 }
-
-                if (show(ActionCategory.LIVE) && showPhilanthropy) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_philanthropy)) }
-                    item {
+            }
+            ActionSheet.PHILANTHROPY_GOALS -> {
+                ActionCategorySheet(
+                    title = stringResource(R.string.act_cat_philanthropy_title),
+                    onDismiss = { activeActionSheet = ActionSheet.NONE }
+                ) {
+                    if (showPhilanthropy) {
                         ActionCard(
                             icon = AppIcons.Happiness,
                             title = stringResource(R.string.btn_volunteer),
@@ -1020,18 +1089,16 @@ fun ActionsScreen(
                             metaLabel = stringResource(R.string.meta_free_karma),
                             accent = ActionCardAccent.CARE,
                             questHint = questHintIf(yearQuests, ActionFamily.VOLUNTEER, questHintLabel),
-                            onClick = { pendingAction.request(PendingAction.Volunteer) }
+                            onClick = {
+                                activeActionSheet = ActionSheet.NONE
+                                pendingAction.request(PendingAction.Volunteer)
+                            }
                         )
-                    }
-                    donationAmounts.forEach { amount ->
-                        item(key = "donate_$amount") {
+                        donationAmounts.forEach { amount ->
                             val canAfford = character.stats.money >= amount
                             ActionCard(
                                 icon = AppIcons.Money,
-                                title = stringResource(
-                                    R.string.btn_donate_amount,
-                                    formatMoney(amount, character.countryCode)
-                                ),
+                                title = stringResource(R.string.btn_donate_amount, formatMoney(amount, character.countryCode)),
                                 description = stringResource(R.string.donate_desc),
                                 metaLabel = formatMoney(amount, character.countryCode),
                                 enabled = canAfford,
@@ -1039,114 +1106,95 @@ fun ActionsScreen(
                                 questHint = questHintIf(yearQuests, ActionFamily.DONATE, questHintLabel),
                                 onClick = {
                                     if (canAfford) {
+                                        activeActionSheet = ActionSheet.NONE
                                         pendingAction.request(PendingAction.Donate(amount))
                                     }
                                 }
                             )
                         }
                     }
-                }
-
-                if (show(ActionCategory.LIVE) && showAdoptChild) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.btn_adopt_child)) }
-                    item {
-                        ActionCard(
-                            icon = AppIcons.Family,
-                            title = stringResource(R.string.btn_adopt_child),
-                            description = stringResource(R.string.dialog_adopt_child_body),
-                            accent = ActionCardAccent.CARE,
-                            onClick = { pendingAction.request(PendingAction.AdoptChild) }
-                        )
-                    }
-                }
-
-                if (show(ActionCategory.LIVE) && showExpungement) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.btn_request_expungement)) }
-                    item {
-                        ActionCard(
-                            icon = AppIcons.Career,
-                            title = stringResource(R.string.btn_request_expungement),
-                            description = stringResource(
-                                R.string.dialog_expunge_body,
-                                formatMoney(crimeEngine.expungementFee(character), character.countryCode)
-                            ),
-                            accent = ActionCardAccent.RISK,
-                            onClick = { pendingAction.request(PendingAction.RequestExpungement) }
-                        )
-                    }
-                }
-
-                if (show(ActionCategory.LIVE) && showImmigrationOffice) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_immigration_office)) }
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Text(
-                            text = stringResource(
-                                R.string.immigration_status_summary,
-                                character.currentVisa?.name?.lowercase()
-                                    ?: stringResource(R.string.immigration_no_visa),
-                                character.visaYearsRemaining
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    if (canRenewVisa) {
-                        item {
-                            val canAfford = character.stats.money >= visaRenewalFee
+                    if (showBucketList) {
+                        val bucketEngine = remember { BucketListEngine() }
+                        val templates = bucketEngine.availableTemplates(character)
+                        character.bucketList.filter { !it.completed }.forEach { goal ->
                             ActionCard(
-                                icon = AppIcons.Career,
-                                title = stringResource(R.string.btn_renew_visa),
-                                description = stringResource(
-                                    R.string.immigration_renew_visa_desc,
-                                    formatMoney(visaRenewalFee, character.countryCode)
-                                ),
-                                metaLabel = formatMoney(visaRenewalFee, character.countryCode),
+                                icon = AppIcons.Smarts,
+                                title = bucketTitle(goal.kind),
+                                description = bucketDescription(goal.kind),
+                                metaLabel = stringResource(R.string.format_bucket_in_progress, bucketTitle(goal.kind)),
+                                enabled = false,
+                                accent = ActionCardAccent.GOLD,
+                                onClick = {}
+                            )
+                        }
+                        templates.forEach { template ->
+                            val cost = EconomyScaler.scaleAmount(template.commitmentKenya, character.countryCode)
+                            val canAfford = character.stats.money >= cost
+                            ActionCard(
+                                icon = AppIcons.Money,
+                                title = bucketTitle(template.kind),
+                                description = bucketDescription(template.kind),
+                                metaLabel = stringResource(R.string.format_bucket_commitment, formatMoney(cost, character.countryCode)),
                                 enabled = canAfford,
+                                accent = ActionCardAccent.GOLD,
                                 onClick = {
                                     if (canAfford) {
-                                        pendingAction.request(PendingAction.RenewVisa)
+                                        activeActionSheet = ActionSheet.NONE
+                                        pendingAction.request(PendingAction.AdoptBucket(template.id))
                                     }
                                 }
                             )
                         }
                     }
-                    if (canApplyCitizenship) {
-                        item {
-                            val canAfford = character.stats.money >= citizenshipFee
-                            ActionCard(
-                                icon = AppIcons.Family,
-                                title = stringResource(R.string.btn_apply_citizenship),
-                                description = stringResource(
-                                    R.string.immigration_citizenship_desc,
-                                    formatMoney(citizenshipFee, character.countryCode)
-                                ),
-                                metaLabel = formatMoney(citizenshipFee, character.countryCode),
-                                enabled = canAfford,
-                                onClick = {
-                                    if (canAfford) {
-                                        pendingAction.request(PendingAction.ApplyCitizenship)
-                                    }
-                                }
-                            )
-                        }
-                    } else {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
+                }
+            }
+            ActionSheet.CRIME -> {
+                ActionCategorySheet(
+                    title = stringResource(R.string.act_cat_crime_title),
+                    onDismiss = { activeActionSheet = ActionSheet.NONE }
+                ) {
+                    // Notoriety Banner
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = CoralNegative.copy(alpha = 0.12f))
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.crime_notoriety_title),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = CoralNegative
+                                )
+                                Text(
+                                    text = when {
+                                        character.criminalRecord.notoriety >= 75 -> stringResource(R.string.notoriety_kingpin)
+                                        character.criminalRecord.notoriety >= 40 -> stringResource(R.string.notoriety_infamous)
+                                        character.criminalRecord.notoriety >= 15 -> stringResource(R.string.notoriety_hustler)
+                                        else -> stringResource(R.string.notoriety_amateur)
+                                    },
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                             Text(
-                                text = stringResource(
-                                    R.string.immigration_citizenship_locked,
-                                    RelocationEngine.NATURALIZATION_YEARS,
-                                    character.yearsInCurrentCountry
-                                ),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = "${character.criminalRecord.notoriety}%",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = CoralNegative
                             )
                         }
                     }
-                }
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                if (show(ActionCategory.RISK) && showCrimeActions) {
-                    item(span = { GridItemSpan(maxLineSpan) }) { SectionHeader(title = stringResource(R.string.section_street_risks)) }
-                    item {
+                    if (showCrimeActions) {
                         ActionCard(
                             icon = AppIcons.CrimePickpocket,
                             title = stringResource(R.string.crime_pickpocket_title),
@@ -1157,11 +1205,10 @@ fun ActionsScreen(
                             metaLabel = stringResource(R.string.meta_risk_moderate),
                             accent = ActionCardAccent.RISK,
                             onClick = {
+                                activeActionSheet = ActionSheet.NONE
                                 pendingAction.request(PendingAction.Crime(CrimeType.PICKPOCKET))
                             }
                         )
-                    }
-                    item {
                         ActionCard(
                             icon = AppIcons.CrimeShoplift,
                             title = stringResource(R.string.crime_shoplift_title),
@@ -1169,11 +1216,10 @@ fun ActionsScreen(
                             metaLabel = stringResource(R.string.meta_risk_moderate),
                             accent = ActionCardAccent.RISK,
                             onClick = {
+                                activeActionSheet = ActionSheet.NONE
                                 pendingAction.request(PendingAction.Crime(CrimeType.SHOPLIFT))
                             }
                         )
-                    }
-                    item {
                         ActionCard(
                             icon = AppIcons.CrimeFraud,
                             title = stringResource(R.string.crime_fraud_title),
@@ -1181,14 +1227,72 @@ fun ActionsScreen(
                             metaLabel = stringResource(R.string.meta_risk_high),
                             accent = ActionCardAccent.RISK,
                             onClick = {
+                                activeActionSheet = ActionSheet.NONE
                                 pendingAction.request(PendingAction.Crime(CrimeType.FRAUD))
+                            }
+                        )
+
+                        // Specialized Crime Targets (Burglary, GTA, Heists)
+                        CrimeTarget.entries.forEach { target ->
+                            val scaledReward = EconomyScaler.scaleAmount(target.baseReward, character.countryCode)
+                            val riskLabel = when {
+                                target.difficulty >= 0.75f -> "Extreme Risk"
+                                target.difficulty >= 0.50f -> "High Risk"
+                                else -> "Moderate Risk"
+                            }
+                            ActionCard(
+                                icon = AppIcons.CrimePickpocket,
+                                title = "${target.category}: ${target.name.lowercase().replace('_', ' ').replaceFirstChar { it.titlecase() }}",
+                                description = "Take: ~${formatMoney(scaledReward, character.countryCode)} · Notoriety: +${target.notorietyGain}%",
+                                metaLabel = riskLabel,
+                                accent = ActionCardAccent.RISK,
+                                onClick = {
+                                    activeActionSheet = ActionSheet.NONE
+                                    pendingAction.request(PendingAction.TargetedCrime(target))
+                                }
+                            )
+                        }
+                    }
+                    if (showExpungement) {
+                        ActionCard(
+                            icon = AppIcons.Career,
+                            title = stringResource(R.string.btn_request_expungement),
+                            description = stringResource(
+                                R.string.dialog_expunge_body,
+                                formatMoney(crimeEngine.expungementFee(character), character.countryCode)
+                            ),
+                            accent = ActionCardAccent.RISK,
+                            onClick = {
+                                activeActionSheet = ActionSheet.NONE
+                                pendingAction.request(PendingAction.RequestExpungement)
                             }
                         )
                     }
                 }
-
-                item(span = { GridItemSpan(maxLineSpan) }) { Spacer(modifier = Modifier.height(16.dp)) }
             }
+            ActionSheet.PRISON -> {
+                ActionCategorySheet(
+                    title = stringResource(R.string.act_cat_prison_title),
+                    onDismiss = { activeActionSheet = ActionSheet.NONE }
+                ) {
+                    if (crimeStatus.kind != CrimeStatusKind.CLEAR) {
+                        CrimeStatusCard(statusKind = crimeStatus.kind, yearsRemaining = crimeStatus.yearsRemaining)
+                    }
+                    PrisonActivity.entries.forEach { activity ->
+                        ActionCard(
+                            icon = AppIcons.Health,
+                            title = prisonActivityTitle(activity),
+                            description = prisonActivityDescription(activity),
+                            accent = ActionCardAccent.CARE,
+                            onClick = {
+                                activeActionSheet = ActionSheet.NONE
+                                onPerformPrisonActivity(activity)
+                            }
+                        )
+                    }
+                }
+            }
+            ActionSheet.NONE -> Unit
         }
     }
 
@@ -1197,6 +1301,7 @@ fun ActionsScreen(
         onConfirmed = { action ->
             when (action) {
                 is PendingAction.Crime -> onAttemptCrime(action.type)
+                is PendingAction.TargetedCrime -> onAttemptTargetedCrime(action.target)
                 is PendingAction.Treatment -> onVisitDoctor(action.condition.id, action.careType)
                 is PendingAction.Lifestyle -> onSetLifestyleOption(action.option, action.enable)
                 is PendingAction.SideHustle -> onExecuteSideHustle(action.type)
@@ -1224,6 +1329,20 @@ fun ActionsScreen(
                 ConfirmActionDialog(
                     title = title,
                     description = description,
+                    confirmLabel = stringResource(R.string.btn_attempt),
+                    severity = ConfirmSeverity.WARNING,
+                    onConfirm = onConfirm,
+                    onDismiss = onDismiss
+                )
+            }
+            is PendingAction.TargetedCrime -> {
+                val rewardLabel = formatMoney(
+                    EconomyScaler.scaleAmount(action.target.baseReward, character.countryCode),
+                    character.countryCode
+                )
+                ConfirmActionDialog(
+                    title = "${action.target.category}: ${action.target.name.lowercase().replace('_', ' ').replaceFirstChar { it.titlecase() }}",
+                    description = "Attempting this score will net ~${rewardLabel}. Notoriety will increase by +${action.target.notorietyGain}%. Extreme police heat if you get caught!",
                     confirmLabel = stringResource(R.string.btn_attempt),
                     severity = ConfirmSeverity.WARNING,
                     onConfirm = onConfirm,
@@ -1731,6 +1850,9 @@ private fun prisonActivityTitle(activity: PrisonActivity): String = when (activi
     PrisonActivity.LIBRARY -> stringResource(R.string.prison_library_title)
     PrisonActivity.EXERCISE -> stringResource(R.string.prison_exercise_title)
     PrisonActivity.GOOD_BEHAVIOR -> stringResource(R.string.prison_good_behavior_title)
+    PrisonActivity.PRISON_YARD_GANG -> stringResource(R.string.prison_gang_title)
+    PrisonActivity.PRISON_ESCAPE_ATTEMPT -> stringResource(R.string.prison_escape_title)
+    PrisonActivity.PAROLE_HEARING_APPEAL -> stringResource(R.string.prison_parole_title)
 }
 
 @Composable
@@ -1739,6 +1861,9 @@ private fun prisonActivityDescription(activity: PrisonActivity): String = when (
     PrisonActivity.LIBRARY -> stringResource(R.string.prison_library_desc)
     PrisonActivity.EXERCISE -> stringResource(R.string.prison_exercise_desc)
     PrisonActivity.GOOD_BEHAVIOR -> stringResource(R.string.prison_good_behavior_desc)
+    PrisonActivity.PRISON_YARD_GANG -> stringResource(R.string.prison_gang_desc)
+    PrisonActivity.PRISON_ESCAPE_ATTEMPT -> stringResource(R.string.prison_escape_desc)
+    PrisonActivity.PAROLE_HEARING_APPEAL -> stringResource(R.string.prison_parole_desc)
 }
 
 @Composable
@@ -1917,4 +2042,37 @@ private fun crimeConfirmCopy(type: CrimeType): Pair<String, String> = when (type
         stringResource(R.string.dialog_crime_shoplift_desc)
     CrimeType.FRAUD -> stringResource(R.string.dialog_crime_fraud_title) to
         stringResource(R.string.dialog_crime_fraud_desc)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ActionCategorySheet(
+    title: String,
+    onDismiss: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = PaperWhite,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = InkPrimary
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            content()
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
 }

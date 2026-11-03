@@ -1822,4 +1822,176 @@
     <string name="leisure_effect_museum">Small boost to smarts and happiness.</string>
     <string name="msg_leisure_museum">You visited a museum and saw %1$s.</string>
     <string name="msg_date_rejected">%1$s turned you down: \"%2$s\"</string>
+    <string name="log_character_born">You were born in %1$s.</string>
+    <string name="challenge_active_pill">Challenge: %1$s</string>
+    <string name="challenge_status_in_progress">In Progress</string>
+    <string name="challenge_status_completed">Completed</string>
+
+    <!-- Part 2 — Childhood & Youth Actions -->
+    <string name="leisure_play_toys_title">Play with Toys</string>
+    <string name="leisure_play_toys_desc">Build worlds and play with your favorite toys</string>
+    <string name="leisure_effect_play_toys">+Happiness, +Smarts</string>
+    <string name="msg_leisure_play_toys">You spent hours lost in imagination playing with your toys.</string>
+
+    <string name="leisure_throw_tantrum_title">Throw Tantrum</string>
+    <string name="leisure_throw_tantrum_desc">Scream and roll on the floor to get attention</string>
+    <string name="leisure_effect_throw_tantrum">+Happiness, -Smarts</string>
+    <string name="msg_leisure_throw_tantrum">You threw a dramatic tantrum on the living room floor.</string>
+
+    <string name="leisure_ask_allowance_title">Ask for Allowance</string>
+    <string name="leisure_ask_allowance_desc">Beg your parents for extra pocket money</string>
+    <string name="leisure_effect_ask_allowance">+Money, +Happiness</string>
+    <string name="msg_leisure_ask_allowance">You asked your parents for pocket money and got some cash!</string>
+
+    <string name="leisure_childhood_hobby_title">Practice Youth Hobby</string>
+    <string name="leisure_childhood_hobby_desc">Dedicate time to drawing, an instrument, or sports</string>
+    <string name="leisure_effect_childhood_hobby">+Smarts, +Health, +Happiness</string>
+    <string name="msg_leisure_childhood_hobby">You practiced your hobby with dedication and joy.</string>
+
+    <string name="leisure_sneak_out_title">Sneak Out</string>
+    <string name="leisure_sneak_out_desc">Climb out the window after curfew for late-night fun</string>
+    <string name="leisure_effect_sneak_out">+Happiness, Thrill</string>
+    <string name="msg_leisure_sneak_out">You snuck out into the night and had an unforgettable adventure.</string>
+
+    <string name="leisure_mall_hangout_title">Mall Hangout</string>
+    <string name="leisure_mall_hangout_desc">Browse shops and loiter in the food court with friends</string>
+    <string name="leisure_effect_mall_hangout">+Happiness, +Smarts</string>
+    <string name="msg_leisure_mall_hangout">You spent the afternoon hanging out at the mall with friends.</string>
+
+    <string name="leisure_gaming_marathon_title">Gaming Marathon</string>
+    <string name="leisure_gaming_marathon_desc">Lock your door and play video games with friends all night</string>
+    <string name="leisure_effect_gaming_marathon">++Happiness, -Health</string>
+    <string name="msg_leisure_gaming_marathon">You dominated the online leaderboards during an epic gaming marathon.</string>
+
+    <!-- Part 2 — University Social Life -->
+    <string name="university_action_mixer_title">Campus Mixer &amp; Party</string>
+    <string name="university_action_mixer_desc">Socialize with peers, dance, and meet dates</string>
+    <string name="university_action_office_hours_title">Professor Office Hours</string>
+    <string name="university_action_office_hours_desc">Discuss lectures and build academic rapport (+GPA)</string>
+    <string name="university_action_all_nighter_title">All-Nighter Cram Session</string>
+    <string name="university_action_all_nighter_desc">Sacrifice sleep to master material before exams (+GPA)</string>
+    <string name="university_action_prank_title">Campus Rivalry Prank</string>
+    <string name="university_action_prank_desc">Pull a legendary prank on rival faculty</string>
+    <string name="msg_university_action_ineligible">You cannot perform this university action right now.</string>
+
+    <!-- Part 2 — Action Categories -->
+    <string name="act_cat_childhood_title">Childhood &amp; Youth</string>
+    <string name="act_cat_childhood_desc">Play with toys, tantrums, pocket money, and hobbies</string>
+    <string name="act_cat_mind_body_title">Mind &amp; Body</string>
+    <string name="act_cat_mind_body_desc">Meditation, reading at the library, and culture</string>
+    <string name="act_cat_doctor_health_title">Doctor &amp; Health</string>
+    <string name="act_cat_doctor_health_desc">General physician, medical care, and wellness</string>
+    <string name="act_cat_crime_title">Crime &amp; Syndicate</string>
+    <string name="act_cat_crime_desc">Petty theft, grand theft auto, and illicit schemes</string>
+    <string name="act_cat_love_title">Love &amp; Dating</string>
+    <string name="act_cat_love_desc">Find dates, dating apps, and romance</string>
+    <string name="act_cat_lifestyle_title">Lifestyle &amp; Leisure</string>
+    <string name="act_cat_lifestyle_desc">Nights out, vacations, spa retreats, and luxury trips</string>
+    <string name="act_cat_relocate_title">Emigrate &amp; Relocate</string>
+    <string name="act_cat_relocate_desc">Passports, visas, and international moves</string>
+    <string name="act_cat_side_hustles_title">Side Hustles &amp; Skills</string>
+    <string name="act_cat_side_hustles_desc">Social media, masterclasses, and side income</string>
+    <string name="act_cat_adoption_title">Adoption &amp; Pets</string>
+    <string name="act_cat_adoption_desc">Animal shelter pets and child adoption</string>
+    <string name="act_cat_philanthropy_title">Goals &amp; Philanthropy</string>
+    <string name="act_cat_philanthropy_desc">Bucket list milestones, volunteering, and charity</string>
+    <string name="act_cat_prison_title">Prison Life</string>
+    <string name="act_cat_prison_desc">Yard time, library, riots, and escape attempts</string>
+    <string name="university_social_life_title">Campus &amp; Social Life</string>
+
+    <!-- Part 2 — Assets Drill-Down Categories -->
+    <string name="asset_cat_real_estate">Real Estate</string>
+    <string name="asset_cat_real_estate_desc">Houses, apartments, mortgages &amp; property market</string>
+    <string name="asset_cat_vehicles">Vehicles &amp; Aircraft</string>
+    <string name="asset_cat_vehicles_desc">Cars, speedboats, yachts, and private jets</string>
+    <string name="asset_cat_markets">Investments &amp; Wealth</string>
+    <string name="asset_cat_markets_desc">High-yield savings and portfolio investment</string>
+    <string name="asset_cat_living">Living Standard</string>
+    <string name="asset_cat_living_desc">Annual living arrangements and lifestyle costs</string>
+    <string name="asset_cat_will">Will &amp; Testament</string>
+    <string name="asset_cat_will_desc">Inheritance, estate planning &amp; dynasty heirs</string>
+    <string name="dialog_asset_action_title">Asset Details</string>
+    <string name="label_equity">Net Equity</string>
+    <string name="label_condition">Condition</string>
+    <string name="label_upkeep">Annual Upkeep</string>
+    <string name="label_mortgage_remaining">Mortgage Remaining</string>
+    <string name="btn_pay_mortgage">Pay Off Mortgage</string>
+
+    <!-- Part 3 — Dating & Matchmaking App -->
+    <string name="dating_match_title">Dating Profile</string>
+    <string name="dating_match_counter">Candidate %1$d of %2$d</string>
+    <string name="dating_match_empty_title">No Candidates</string>
+    <string name="dating_match_no_more_title">No More Matches Nearby</string>
+    <string name="dating_match_no_more_body">You have reviewed all available candidates this year. Tap Age Up or try again next year!</string>
+    <string name="format_prospect_info">%1$d years old · %2$s</string>
+    <string name="stat_crazy">Drama / Volatility</string>
+    <string name="stat_money_finances">Financial Standing</string>
+    <string name="btn_pass_match">Pass</string>
+    <string name="btn_ask_out">Ask Out</string>
+    <string name="stage_casual">Casual Dating</string>
+    <string name="stage_exclusive">Exclusive</string>
+    <string name="stage_engaged">Engaged</string>
+    <string name="stage_married">Married</string>
+    <string name="btn_make_exclusive">Ask to be Exclusive</string>
+    <string name="venue_courthouse">City Courthouse</string>
+    <string name="venue_local">Local Banquet Venue</string>
+    <string name="venue_luxury">Luxury Destination Wedding</string>
+
+    <!-- Part 3 — Workplace Roster & Office Interactions -->
+    <string name="workplace_roster_title">Supervisor &amp; Coworkers</string>
+    <string name="workplace_roster_subtitle">%1$d Colleagues &amp; Manager</string>
+    <string name="workplace_roster_count">%1$d in Roster</string>
+    <string name="section_direct_manager">Direct Manager</string>
+    <string name="section_coworkers">Coworkers</string>
+    <string name="badge_boss">BOSS</string>
+    <string name="stat_competence">Competence</string>
+    <string name="stat_strictness">Strictness</string>
+    <string name="action_schmooze">Schmooze &amp; Compliment</string>
+    <string name="action_schmooze_desc">Praise their work to raise standing</string>
+    <string name="action_ask_raise">Ask for Salary Raise</string>
+    <string name="action_ask_raise_desc">Request a bump based on your performance</string>
+    <string name="action_ask_promotion">Request Promotion</string>
+    <string name="action_ask_promotion_desc">Petition for the next ladder rung</string>
+    <string name="action_collaborate">Collaborate on Project</string>
+    <string name="action_collaborate_desc">Work together to boost performance and bond</string>
+    <string name="action_office_romance">Flirt &amp; Ask on Date</string>
+    <string name="action_office_romance_desc">Pursue an office romance</string>
+    <string name="action_office_prank">Pull Office Prank</string>
+    <string name="action_office_prank_desc">Play a harmless joke on them</string>
+    <string name="action_report_hr">Report to HR</string>
+    <string name="action_report_hr_desc">File an ethics or misconduct complaint</string>
+
+    <!-- Part 3 — Crime Specialization & Prison Life -->
+    <string name="crime_notoriety_title">Underworld Notoriety</string>
+    <string name="notoriety_amateur">Amateur Criminal</string>
+    <string name="notoriety_hustler">Street Hustler</string>
+    <string name="notoriety_infamous">Infamous Felon</string>
+    <string name="notoriety_kingpin">Underworld Kingpin</string>
+    <string name="prison_gang_title">Join Prison Yard Clique</string>
+    <string name="prison_gang_desc">Mingle with the yard clique for protection (+Notoriety)</string>
+    <string name="prison_escape_title">Attempt Prison Break</string>
+    <string name="prison_escape_desc">Risk everything to escape through the perimeter wire</string>
+    <string name="prison_parole_title">Petition Parole Board</string>
+    <string name="prison_parole_desc">Appeal for early release on good behavior</string>
+
+    <!-- Part 3 — Tombstone Ribbons -->
+    <string name="ribbon_loaded">LOADED</string>
+    <string name="ribbon_loaded_desc">Amassed immense fortunes and lived in supreme luxury.</string>
+    <string name="ribbon_academic">ACADEMIC</string>
+    <string name="ribbon_academic_desc">A brilliant mind dedicated to higher education and scholarship.</string>
+    <string name="ribbon_cunning">CUNNING</string>
+    <string name="ribbon_cunning_desc">A criminal mastermind who outsmarted the legal system.</string>
+    <string name="ribbon_family">FAMILY ANCHOR</string>
+    <string name="ribbon_family_desc">Devoted to family, raising generations of happy loved ones.</string>
+    <string name="ribbon_fame">FAME ICON</string>
+    <string name="ribbon_fame_desc">A celebrated household name adored by countless admirers.</string>
+    <string name="ribbon_saint">SAINT</string>
+    <string name="ribbon_saint_desc">A life of pure altruism, charity, and flawless karma.</string>
+    <string name="ribbon_scandalous">SCANDALOUS</string>
+    <string name="ribbon_scandalous_desc">A chaotic life full of courtroom battles, arrests, and controversy.</string>
+    <string name="ribbon_workaholic">WORKAHOLIC</string>
+    <string name="ribbon_workaholic_desc">Dedicated every waking hour to climbing the corporate ladder.</string>
+    <string name="ribbon_mediocre">MEDIOCRE</string>
+    <string name="ribbon_mediocre_desc">Lived a quiet, ordinary life without too much fanfare.</string>
+    <string name="btn_close">Close</string>
 </resources>

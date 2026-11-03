@@ -26,18 +26,23 @@ import com.maisha.game.R
 import com.maisha.game.data.EconomyScaler
 import com.maisha.game.data.model.Person
 import com.maisha.game.data.model.RelationType
+import com.maisha.game.data.model.RelationshipStage
 import com.maisha.game.data.model.relationshipTierFor
 import com.maisha.game.domain.GiftTier
 import com.maisha.game.domain.InteractionType
 import com.maisha.game.domain.RelationshipEngine
 import com.maisha.game.ui.avatar.AvatarImage
 import com.maisha.game.ui.avatar.ExpressionResolver
+import com.maisha.game.ui.components.DrillDownRow
 import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.theme.AccentPink
+import com.maisha.game.ui.theme.AppIcons
+import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.NavyDeep
+import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
 
 @Composable
@@ -53,6 +58,7 @@ fun PersonDetailSheet(
     childHospitalCost: Int = 0,
     divorceSettlementCost: Int = 0,
     onInteraction: (InteractionType, GiftTier?) -> Unit,
+    onMakeExclusive: () -> Unit = {},
     onPropose: () -> Unit,
     onProposeWithPrenup: () -> Unit = onPropose,
     onBreakUp: () -> Unit,
@@ -330,12 +336,31 @@ fun PersonDetailSheet(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Text(
-                        text = relationshipTierLabel(tier),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = relationshipTierLabel(tier),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        if (isSpouse) {
+                            val stageLabel = when {
+                                member.isMarried -> stringResource(R.string.stage_married)
+                                member.stage == RelationshipStage.ENGAGED -> stringResource(R.string.stage_engaged)
+                                member.stage == RelationshipStage.EXCLUSIVE -> stringResource(R.string.stage_exclusive)
+                                else -> stringResource(R.string.stage_casual)
+                            }
+                            Text(
+                                text = "· $stageLabel",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = TealPrimary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
             }
 
@@ -344,6 +369,14 @@ fun PersonDetailSheet(
                 value = member.relationshipLevel,
                 label = stringResource(R.string.stat_relationship)
             )
+
+            if (isSpouse || member.relation == RelationType.FRIEND || member.relation == RelationType.ENEMY) {
+                StatBar(
+                    type = StatType.KARMA,
+                    value = member.crazy,
+                    label = stringResource(R.string.stat_crazy)
+                )
+            }
 
             Text(
                 text = stringResource(
@@ -429,13 +462,12 @@ fun PersonDetailSheet(
                     onClick = { pendingGiftTier.request(GiftTier.MEDIUM) },
                     enabled = playerMoney >= giftCost(GiftTier.MEDIUM)
                 )
-                OutlinedButton(
-                    onClick = { onInteraction(InteractionType.DISCIPLINE, null) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(stringResource(R.string.btn_discipline))
-                }
+                DetailSheetButton(
+                    text = stringResource(R.string.btn_discipline),
+                    icon = AppIcons.Argue,
+                    iconTint = CoralNegative,
+                    onClick = { onInteraction(InteractionType.DISCIPLINE, null) }
+                )
             } else {
                 if (!isAdultChild) {
                     SheetSectionTitle(stringResource(R.string.section_bond_actions))
@@ -505,20 +537,18 @@ fun PersonDetailSheet(
                         onClick = { onInteraction(InteractionType.SET_UP_ON_DATE, null) }
                     )
                 }
-                OutlinedButton(
-                    onClick = { onInteraction(InteractionType.ARGUE, null) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(if (isChild) stringResource(R.string.btn_scold) else stringResource(R.string.btn_argue))
-                }
-                OutlinedButton(
-                    onClick = { onInteraction(InteractionType.INSULT, null) },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(stringResource(R.string.btn_insult))
-                }
+                DetailSheetButton(
+                    text = if (isChild) stringResource(R.string.btn_scold) else stringResource(R.string.btn_argue),
+                    icon = AppIcons.Argue,
+                    iconTint = CoralNegative,
+                    onClick = { onInteraction(InteractionType.ARGUE, null) }
+                )
+                DetailSheetButton(
+                    text = stringResource(R.string.btn_insult),
+                    icon = AppIcons.Insult,
+                    iconTint = CoralNegative,
+                    onClick = { onInteraction(InteractionType.INSULT, null) }
+                )
                 if (canAskForMoney) {
                     DetailSheetButton(
                         text = if (member.relationshipLevel > 60) {
@@ -544,6 +574,14 @@ fun PersonDetailSheet(
             if (isSpouse) {
                 SheetSectionTitle(stringResource(R.string.section_life_together))
                 if (!member.isMarried) {
+                    if (member.stage == RelationshipStage.CASUAL) {
+                        DetailSheetButton(
+                            text = stringResource(R.string.btn_make_exclusive),
+                            onClick = onMakeExclusive,
+                            enabled = member.relationshipLevel >= 40,
+                            emphasizePink = true
+                        )
+                    }
                     DetailSheetButton(
                         text = if (member.relationshipLevel >= RelationshipEngine.PROPOSAL_THRESHOLD) {
                             stringResource(R.string.btn_propose_marriage)
@@ -578,22 +616,19 @@ fun PersonDetailSheet(
                         emphasizeGreen = true
                     )
                 }
-                OutlinedButton(
+                DetailSheetButton(
+                    text = if (member.isMarried) {
+                        stringResource(R.string.btn_divorce)
+                    } else {
+                        stringResource(R.string.btn_break_up)
+                    },
+                    icon = AppIcons.Argue,
+                    iconTint = CoralNegative,
                     onClick = {
                         if (member.isMarried) pendingDivorce.request(Unit)
                         else pendingBreakUp.request(Unit)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text(
-                        if (member.isMarried) {
-                            stringResource(R.string.btn_divorce)
-                        } else {
-                            stringResource(R.string.btn_break_up)
-                        }
-                    )
-                }
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -617,31 +652,26 @@ private fun DetailSheetButton(
     text: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
+    subtitle: String? = null,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    iconTint: androidx.compose.ui.graphics.Color? = null,
     emphasizePink: Boolean = false,
     emphasizeGreen: Boolean = false
 ) {
-    val colors = when {
-        emphasizePink -> ButtonDefaults.buttonColors(
-            containerColor = AccentPink,
-            contentColor = InkPrimary
-        )
-        emphasizeGreen -> ButtonDefaults.buttonColors(
-            containerColor = LifeGreen,
-            contentColor = InkPrimary
-        )
-        else -> ButtonDefaults.buttonColors()
+    val tint = when {
+        emphasizePink -> AccentPink
+        emphasizeGreen -> LifeGreen
+        iconTint != null -> iconTint
+        else -> TealPrimary
     }
-    Button(
-        onClick = onClick,
+    DrillDownRow(
+        title = text,
+        subtitle = subtitle,
+        icon = icon ?: AppIcons.Relationship,
+        iconTint = tint,
         enabled = enabled,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(48.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = colors
-    ) {
-        Text(text, maxLines = 2)
-    }
+        onClick = onClick
+    )
 }
 
 @Composable

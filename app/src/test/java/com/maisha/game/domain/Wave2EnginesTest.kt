@@ -36,7 +36,9 @@ class Wave2EnginesTest {
                 stage = SchoolStage.SECONDARY,
                 currentGrade = 2,
                 gpa = 2.0f,
-                schoolClub = SchoolClub.CODING
+                schoolClub = SchoolClub.CODING,
+                clubSkill = 50,
+                clubActivityDoneThisYear = true
             )
         )
         val after = educationEngine.applySchoolClubYear(student)

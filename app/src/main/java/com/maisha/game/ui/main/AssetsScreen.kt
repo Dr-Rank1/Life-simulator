@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -34,14 +35,22 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
+import com.maisha.game.ui.components.DrillDownRow
+import com.maisha.game.ui.theme.AccentPink
+import com.maisha.game.ui.theme.AppIcons
+import com.maisha.game.ui.theme.NavyDeep
+import com.maisha.game.ui.theme.PaperWhite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -91,7 +100,9 @@ import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
 
 private enum class AssetsCategory { ALL, OVERVIEW, OWNED, SHOP, MARKETS, ESTATE }
+private enum class AssetSheet { NONE, REAL_ESTATE, VEHICLES, MARKETS, LIVING_STANDARD }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AssetsScreen(
     character: Character,
@@ -114,6 +125,8 @@ fun AssetsScreen(
     onSetPortfolioStrategy: (com.maisha.game.data.model.PortfolioStrategy) -> Unit,
     onAssetsMessageDismissed: () -> Unit,
     onDismissAssetsMarketsTip: () -> Unit = {},
+    onPerformLeisure: (com.maisha.game.domain.LeisureActivity) -> Unit = {},
+    onPayMortgage: (String) -> Unit = {},
     carMakeCatalog: com.maisha.game.data.content.CarMakeCatalog =
         com.maisha.game.data.content.FallbackCarMakeCatalog,
     streetCatalog: com.maisha.game.data.content.StreetCatalog =
@@ -130,6 +143,8 @@ fun AssetsScreen(
     val pendingSavingsDeposit = rememberConfirmableAction<Int>()
     val pendingSavingsWithdraw = rememberConfirmableAction<Int>()
     val financeEngine = remember { FinanceEngine() }
+    var activeAssetSheet by rememberSaveable { mutableStateOf(AssetSheet.NONE) }
+    var selectedAssetForAction by remember { mutableStateOf<Asset?>(null) }
     var showWillEditor by remember { mutableStateOf(false) }
     var showInvestDialog by remember { mutableStateOf(false) }
     var showWithdrawDialog by remember { mutableStateOf(false) }
@@ -368,21 +383,82 @@ fun AssetsScreen(
             verticalArrangement = Arrangement.spacedBy(MaishaSpacing.sm + 2.dp)
         ) {
             if (show(AssetsCategory.OVERVIEW) || category == AssetsCategory.ALL) {
-                item {
-                    LivingStandardCard(
-                        character = character,
-                        estimatedCost = livingCost,
-                        onSelect = onSetLivingStandard
+                val houses = character.assets.filter { it.type == AssetType.HOUSE }
+                val vehicles = character.assets.filter {
+                    it.type == AssetType.CAR || it.type == AssetType.MOTORBIKE ||
+                        it.type == AssetType.BOAT || it.type == AssetType.PRIVATE_JET
+                }
+                val propertyEquity = houses.sumOf { (it.currentValue - it.mortgageBalance).coerceAtLeast(0) }
+                val vehicleUpkeep = vehicles.sumOf { it.monthlyUpkeep * 12 }
+
+                item(key = "drill_real_estate") {
+                    DrillDownRow(
+                        title = stringResource(R.string.asset_cat_real_estate),
+                        subtitle = if (houses.isNotEmpty()) {
+                            "${houses.size} owned · Equity ${formatMoney(propertyEquity, character.countryCode)}"
+                        } else {
+                            stringResource(R.string.asset_cat_real_estate_desc)
+                        },
+                        icon = AppIcons.NavAssets,
+                        iconTint = LifeGreen,
+                        trailingBadge = if (houses.isNotEmpty()) "${houses.size}" else null,
+                        trailingBadgeColor = LifeGreen,
+                        onClick = { activeAssetSheet = AssetSheet.REAL_ESTATE }
                     )
-                    Text(
-                        text = stringResource(
-                            R.string.format_living_cost_age_up_hint,
-                            formatMoney(livingCost, character.countryCode)
-                        ),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = InkTertiary,
-                        modifier = Modifier.padding(top = 6.dp)
+                }
+
+                item(key = "drill_vehicles") {
+                    DrillDownRow(
+                        title = stringResource(R.string.asset_cat_vehicles),
+                        subtitle = if (vehicles.isNotEmpty()) {
+                            "${vehicles.size} owned · Upkeep ${formatMoney(vehicleUpkeep, character.countryCode)}/yr"
+                        } else {
+                            stringResource(R.string.asset_cat_vehicles_desc)
+                        },
+                        icon = AppIcons.Career,
+                        iconTint = TealPrimary,
+                        trailingBadge = if (vehicles.isNotEmpty()) "${vehicles.size}" else null,
+                        trailingBadgeColor = TealPrimary,
+                        onClick = { activeAssetSheet = AssetSheet.VEHICLES }
                     )
+                }
+
+                item(key = "drill_markets") {
+                    DrillDownRow(
+                        title = stringResource(R.string.asset_cat_markets),
+                        subtitle = "Portfolio: ${formatMoney(character.investmentPortfolioValue, character.countryCode)} · Savings: ${formatMoney(character.savingsBalance, character.countryCode)}",
+                        icon = AppIcons.Money,
+                        iconTint = GoldAccent,
+                        onClick = { activeAssetSheet = AssetSheet.MARKETS }
+                    )
+                }
+
+                item(key = "drill_living") {
+                    DrillDownRow(
+                        title = stringResource(R.string.asset_cat_living),
+                        subtitle = "${character.lifestyle.livingStandard.name} · ${formatMoney(livingCost, character.countryCode)}/yr",
+                        icon = AppIcons.Performance,
+                        iconTint = AccentPink,
+                        onClick = { activeAssetSheet = AssetSheet.LIVING_STANDARD }
+                    )
+                }
+
+                if (willBeneficiaries.isNotEmpty() && character.alive) {
+                    item(key = "drill_will") {
+                        DrillDownRow(
+                            title = stringResource(R.string.asset_cat_will),
+                            subtitle = if (character.will != null) {
+                                stringResource(R.string.will_on_file)
+                            } else {
+                                stringResource(R.string.asset_cat_will_desc)
+                            },
+                            icon = AppIcons.Family,
+                            iconTint = NavyDeep,
+                            trailingBadge = if (character.will != null) "On File" else null,
+                            trailingBadgeColor = if (character.will != null) SuccessGreen else null,
+                            onClick = { showWillEditor = true }
+                        )
+                    }
                 }
             }
 
@@ -601,6 +677,371 @@ fun AssetsScreen(
                 showWillEditor = false
             }
         )
+    }
+
+    when (activeAssetSheet) {
+        AssetSheet.REAL_ESTATE -> {
+            val houses = character.assets.filter { it.type == AssetType.HOUSE }
+            val realEstateCatalog = remember(character.countryCode) {
+                AssetCatalog.getPurchasableAssetsForCountry(character.countryCode).filter { it.type == AssetType.HOUSE }
+            }
+            ModalBottomSheet(
+                onDismissRequest = { activeAssetSheet = AssetSheet.NONE },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                containerColor = PaperWhite
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.asset_cat_real_estate),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Owned Properties",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TealPrimary
+                    )
+                    if (houses.isEmpty()) {
+                        Text(
+                            text = "You do not own any real estate yet.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = InkTertiary
+                        )
+                    } else {
+                        houses.forEach { house ->
+                            DrillDownRow(
+                                title = house.name,
+                                subtitle = "Value: ${formatMoney(house.currentValue, character.countryCode)} · Equity: ${formatMoney(house.currentValue - house.mortgageBalance, character.countryCode)}",
+                                icon = AppIcons.NavAssets,
+                                iconTint = LifeGreen,
+                                trailingBadge = if (house.mortgageBalance > 0) "Mortgage" else if (house.isRentedOut) "Rented" else "Owned",
+                                trailingBadgeColor = if (house.isRentedOut) LifeGreen else if (house.mortgageBalance > 0) GoldAccent else TealPrimary,
+                                onClick = {
+                                    activeAssetSheet = AssetSheet.NONE
+                                    selectedAssetForAction = house
+                                }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Property Market",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TealPrimary
+                    )
+                    realEstateCatalog.forEach { catalogItem ->
+                        ShopAssetCard(
+                            item = catalogItem,
+                            countryCode = character.countryCode,
+                            canAfford = character.stats.money >= catalogItem.purchasePrice,
+                            onBuy = {
+                                activeAssetSheet = AssetSheet.NONE
+                                pendingPurchase.request(catalogItem)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+        AssetSheet.VEHICLES -> {
+            val vehicles = character.assets.filter {
+                it.type == AssetType.CAR || it.type == AssetType.MOTORBIKE ||
+                    it.type == AssetType.BOAT || it.type == AssetType.PRIVATE_JET
+            }
+            val vehiclesCatalog = remember(character.countryCode) {
+                AssetCatalog.getPurchasableAssetsForCountry(character.countryCode).filter {
+                    it.type == AssetType.CAR || it.type == AssetType.MOTORBIKE ||
+                        it.type == AssetType.BOAT || it.type == AssetType.PRIVATE_JET
+                }
+            }
+            ModalBottomSheet(
+                onDismissRequest = { activeAssetSheet = AssetSheet.NONE },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                containerColor = PaperWhite
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.asset_cat_vehicles),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Owned Vehicles & Aircraft",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TealPrimary
+                    )
+                    if (vehicles.isEmpty()) {
+                        Text(
+                            text = "You do not own any vehicles yet.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = InkTertiary
+                        )
+                    } else {
+                        vehicles.forEach { vehicle ->
+                            DrillDownRow(
+                                title = vehicle.name,
+                                subtitle = "Value: ${formatMoney(vehicle.currentValue, character.countryCode)} · Condition: ${vehicle.condition}%",
+                                icon = if (vehicle.type == AssetType.BOAT || vehicle.type == AssetType.PRIVATE_JET) AppIcons.Travel else AppIcons.Career,
+                                iconTint = TealPrimary,
+                                onClick = {
+                                    activeAssetSheet = AssetSheet.NONE
+                                    selectedAssetForAction = vehicle
+                                }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Dealerships",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TealPrimary
+                    )
+                    vehiclesCatalog.forEach { catalogItem ->
+                        ShopAssetCard(
+                            item = catalogItem,
+                            countryCode = character.countryCode,
+                            canAfford = character.stats.money >= catalogItem.purchasePrice,
+                            onBuy = {
+                                activeAssetSheet = AssetSheet.NONE
+                                pendingPurchase.request(catalogItem)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+        AssetSheet.MARKETS -> {
+            ModalBottomSheet(
+                onDismissRequest = { activeAssetSheet = AssetSheet.NONE },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                containerColor = PaperWhite
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.asset_cat_markets),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    SavingsAccountCard(
+                        savingsBalance = character.savingsBalance,
+                        lastInterestPercent = character.lastSavingsInterestPercent,
+                        countryCode = character.countryCode,
+                        canDeposit = character.stats.money > 0 && character.alive,
+                        canWithdraw = character.savingsBalance > 0 && character.alive,
+                        onDeposit = { showSavingsDepositDialog = true },
+                        onWithdraw = { showSavingsWithdrawDialog = true }
+                    )
+                    InvestmentPortfolioCard(
+                        portfolioValue = character.investmentPortfolioValue,
+                        lastReturnPercent = character.lastPortfolioReturnPercent,
+                        countryCode = character.countryCode,
+                        currentStrategy = character.lifestyle.portfolioStrategy,
+                        canDeposit = character.stats.money > 0 && character.alive,
+                        canWithdraw = character.investmentPortfolioValue > 0 && character.alive,
+                        onDeposit = { showInvestDialog = true },
+                        onWithdraw = { showWithdrawDialog = true },
+                        onSetStrategy = onSetPortfolioStrategy
+                    )
+                }
+            }
+        }
+        AssetSheet.LIVING_STANDARD -> {
+            ModalBottomSheet(
+                onDismissRequest = { activeAssetSheet = AssetSheet.NONE },
+                sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+                containerColor = PaperWhite
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.asset_cat_living),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    )
+                    LivingStandardCard(
+                        character = character,
+                        estimatedCost = livingCost,
+                        onSelect = onSetLivingStandard
+                    )
+                }
+            }
+        }
+        AssetSheet.NONE -> Unit
+    }
+
+    selectedAssetForAction?.let { asset ->
+        ModalBottomSheet(
+            onDismissRequest = { selectedAssetForAction = null },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = PaperWhite
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                AssetHeroImage(
+                    ref = IllustrationCatalog.getIllustrationForOwnedAsset(asset),
+                    height = 130.dp,
+                    contentDescription = asset.name,
+                    cornerRadius = 16.dp
+                )
+                Text(
+                    text = asset.name,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Value: ${formatMoney(asset.currentValue, character.countryCode)}", fontWeight = FontWeight.SemiBold, color = GoldAccent)
+                    Text("Equity: ${formatMoney(asset.currentValue - asset.mortgageBalance, character.countryCode)}", fontWeight = FontWeight.SemiBold, color = SuccessGreen)
+                }
+                Text("Condition: ${asset.condition}% · Upkeep: ${formatMoney(asset.monthlyUpkeep * 12, character.countryCode)}/yr", style = MaterialTheme.typography.bodySmall, color = InkTertiary)
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                if (asset.mortgageBalance > 0) {
+                    DrillDownRow(
+                        title = stringResource(R.string.btn_pay_mortgage),
+                        subtitle = "Balance: ${formatMoney(asset.mortgageBalance, character.countryCode)} (Payment: ${formatMoney(asset.annualMortgagePayment, character.countryCode)}/yr)",
+                        icon = AppIcons.Money,
+                        iconTint = LifeGreen,
+                        enabled = character.stats.money >= asset.mortgageBalance,
+                        onClick = {
+                            val id = asset.id
+                            selectedAssetForAction = null
+                            onPayMortgage(id)
+                        }
+                    )
+                }
+
+                if (asset.type == AssetType.HOUSE) {
+                    val renovationCost = financeEngine.calculateRenovationCost(asset, character.countryCode)
+                    if (asset.renovationLevel < 3 && asset.condition >= FinanceEngine.RENOVATE_MIN_CONDITION) {
+                        DrillDownRow(
+                            title = stringResource(R.string.btn_renovate_with_cost, formatMoney(renovationCost, character.countryCode)),
+                            subtitle = "Upgrade to Level ${asset.renovationLevel + 1}",
+                            icon = AppIcons.NavAssets,
+                            iconTint = TealPrimary,
+                            enabled = character.stats.money >= renovationCost,
+                            onClick = {
+                                selectedAssetForAction = null
+                                pendingRenovate.request(asset)
+                            }
+                        )
+                    }
+                    if (asset.isRentedOut) {
+                        DrillDownRow(
+                            title = stringResource(R.string.btn_evict_tenant),
+                            subtitle = "Tenant satisfaction: ${asset.tenantHappiness ?: 0}%",
+                            icon = AppIcons.Family,
+                            iconTint = CoralNegative,
+                            onClick = {
+                                selectedAssetForAction = null
+                                pendingEvict.request(asset)
+                            }
+                        )
+                    } else {
+                        val yield = financeEngine.estimateYearlyRent(asset)
+                        DrillDownRow(
+                            title = stringResource(R.string.btn_rent_out),
+                            subtitle = "Est. yearly yield: ${formatMoney(yield, character.countryCode)}",
+                            icon = AppIcons.Family,
+                            iconTint = LifeGreen,
+                            onClick = {
+                                selectedAssetForAction = null
+                                pendingRentOut.request(asset)
+                            }
+                        )
+                    }
+                }
+
+                if (asset.condition < FinanceEngine.REPAIR_UI_THRESHOLD) {
+                    val repairCost = financeEngine.calculateRepairCost(asset, character.countryCode)
+                    DrillDownRow(
+                        title = stringResource(R.string.btn_repair_with_cost, formatMoney(repairCost, character.countryCode)),
+                        icon = AppIcons.Performance,
+                        iconTint = TealPrimary,
+                        enabled = character.stats.money >= repairCost,
+                        onClick = {
+                            selectedAssetForAction = null
+                            pendingRepair.request(asset)
+                        }
+                    )
+                }
+
+                if (asset.type == AssetType.BOAT) {
+                    DrillDownRow(
+                        title = stringResource(R.string.leisure_yacht_day_title),
+                        subtitle = stringResource(R.string.leisure_yacht_day_desc),
+                        icon = AppIcons.Travel,
+                        iconTint = TealPrimary,
+                        onClick = {
+                            selectedAssetForAction = null
+                            onPerformLeisure(com.maisha.game.domain.LeisureActivity.YACHT_DAY)
+                        }
+                    )
+                }
+
+                if (asset.type == AssetType.PRIVATE_JET) {
+                    DrillDownRow(
+                        title = stringResource(R.string.leisure_private_jet_title),
+                        subtitle = stringResource(R.string.leisure_private_jet_desc),
+                        icon = AppIcons.Travel,
+                        iconTint = GoldAccent,
+                        onClick = {
+                            selectedAssetForAction = null
+                            onPerformLeisure(com.maisha.game.domain.LeisureActivity.PRIVATE_JET_TRIP)
+                        }
+                    )
+                }
+
+                DrillDownRow(
+                    title = stringResource(R.string.btn_sell),
+                    subtitle = "Estimated proceeds: ${formatMoney(asset.currentValue - asset.mortgageBalance, character.countryCode)}",
+                    icon = AppIcons.Money,
+                    iconTint = CoralNegative,
+                    onClick = {
+                        val id = asset.id
+                        selectedAssetForAction = null
+                        onSellAsset(id)
+                    }
+                )
+            }
+        }
     }
 }
 

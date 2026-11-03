@@ -114,6 +114,7 @@ fun FamilyScreen(
     onSeekFriendship: () -> Unit,
     onDismissDatingProspects: () -> Unit,
     onStartDating: (Person) -> Unit,
+    onMakeExclusive: (String) -> Unit = {},
     onPropose: (String) -> Unit,
     onProposeWithPrenup: (String) -> Unit = onPropose,
     onBreakUp: (String) -> Unit,
@@ -601,11 +602,12 @@ fun FamilyScreen(
             onDismissRequest = onDismissDatingProspects,
             sheetState = sheetState
         ) {
-            DatingProspectsSheet(
+            com.maisha.game.ui.components.DatingMatchSheet(
                 prospects = uiState.datingProspects,
                 playerCountryCode = character.countryCode,
                 dateFeeLabel = formatMoney(dateFee, character.countryCode),
-                onStartDating = { pendingDate.request(it) }
+                onStartDating = { pendingDate.request(it) },
+                onDismiss = onDismissDatingProspects
             )
         }
     }
@@ -628,6 +630,7 @@ fun FamilyScreen(
                 childHospitalCost = childCost,
                 divorceSettlementCost = divorceCost,
                 onInteraction = { type, giftTier -> onInteraction(member.id, type, giftTier) },
+                onMakeExclusive = { onMakeExclusive(member.id) },
                 onPropose = { onPropose(member.id) },
                 onProposeWithPrenup = { onProposeWithPrenup(member.id) },
                 onBreakUp = { onBreakUp(member.id) },

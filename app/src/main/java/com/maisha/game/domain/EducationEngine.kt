@@ -1663,7 +1663,99 @@ class EducationEngine @Inject constructor(
                     campusJobDoneThisYear = true,
                     studentLoanBalance = loan.coerceAtLeast(0)
                 ),
-                eventLog = EventLogCap.prepend(character.eventLog, message)
+                eventLog = EventLogCap.prependToCurrentYear(character.eventLog, message, character.age)
+            ),
+            message
+        )
+    }
+
+    /** Social campus party / mixer: boosts social standing & happiness. */
+    fun performCampusMixer(character: Character): UniversityActionResult {
+        if (!character.alive || character.education.stage != SchoolStage.UNIVERSITY) {
+            return UniversityActionResult.Ineligible
+        }
+        val cost = EconomyScaler.scaleAmount(2_000, character.countryCode)
+        if (character.stats.money < cost) return UniversityActionResult.Ineligible
+        val message = "You attended a lively campus mixer, met fellow students, and danced the night away."
+        return UniversityActionResult.Success(
+            character.copy(
+                stats = character.stats.copy(
+                    money = (character.stats.money - cost).coerceAtLeast(0),
+                    happiness = clampStat(character.stats.happiness + 8),
+                    health = clampStat(character.stats.health - 1)
+                ),
+                education = character.education.copy(
+                    schoolReputation = (character.education.schoolReputation + 2).coerceIn(0, 100)
+                ),
+                eventLog = EventLogCap.prependToCurrentYear(character.eventLog, message, character.age)
+            ),
+            message
+        )
+    }
+
+    /** Office hours with professor: boosts GPA and academic reputation. */
+    fun performProfessorOfficeHours(character: Character): UniversityActionResult {
+        if (!character.alive || character.education.stage != SchoolStage.UNIVERSITY) {
+            return UniversityActionResult.Ineligible
+        }
+        val message = "You visited your professor's office hours and discussed course concepts in depth."
+        return UniversityActionResult.Success(
+            character.copy(
+                stats = character.stats.copy(
+                    smarts = clampStat(character.stats.smarts + 3),
+                    happiness = clampStat(character.stats.happiness - 1)
+                ),
+                education = character.education.copy(
+                    gpa = clampGpa(character.education.gpa + 0.12f),
+                    schoolReputation = (character.education.schoolReputation + 3).coerceIn(0, 100)
+                ),
+                eventLog = EventLogCap.prependToCurrentYear(character.eventLog, message, character.age)
+            ),
+            message
+        )
+    }
+
+    /** All-nighter study cram: boosts GPA at the cost of health and happiness. */
+    fun performExamAllNighter(character: Character): UniversityActionResult {
+        if (!character.alive || character.education.stage != SchoolStage.UNIVERSITY) {
+            return UniversityActionResult.Ineligible
+        }
+        val message = "You pulled an exhausting all-nighter cramming notes and past exams."
+        return UniversityActionResult.Success(
+            character.copy(
+                stats = character.stats.copy(
+                    health = clampStat(character.stats.health - 6),
+                    smarts = clampStat(character.stats.smarts + 2),
+                    happiness = clampStat(character.stats.happiness - 4)
+                ),
+                education = character.education.copy(
+                    gpa = clampGpa(character.education.gpa + 0.20f)
+                ),
+                eventLog = EventLogCap.prependToCurrentYear(character.eventLog, message, character.age)
+            ),
+            message
+        )
+    }
+
+    /** Pulls a campus rivalry prank: boosts happiness and reputation, slight karma risk. */
+    fun performCampusRivalryPrank(character: Character): UniversityActionResult {
+        if (!character.alive || character.education.stage != SchoolStage.UNIVERSITY) {
+            return UniversityActionResult.Ineligible
+        }
+        val cost = EconomyScaler.scaleAmount(1_500, character.countryCode)
+        if (character.stats.money < cost) return UniversityActionResult.Ineligible
+        val message = "You pulled a legendary campus prank on the rival faculty. Campus lore was made!"
+        return UniversityActionResult.Success(
+            character.copy(
+                stats = character.stats.copy(
+                    money = (character.stats.money - cost).coerceAtLeast(0),
+                    happiness = clampStat(character.stats.happiness + 9),
+                    karma = clampStat(character.stats.karma - 3)
+                ),
+                education = character.education.copy(
+                    schoolReputation = (character.education.schoolReputation + 4).coerceIn(0, 100)
+                ),
+                eventLog = EventLogCap.prependToCurrentYear(character.eventLog, message, character.age)
             ),
             message
         )
@@ -1696,7 +1788,7 @@ class EducationEngine @Inject constructor(
                     gpa = clampGpa(character.education.gpa + 0.15f),
                     schoolReputation = (character.education.schoolReputation + 4).coerceIn(0, 100)
                 ),
-                eventLog = EventLogCap.prepend(character.eventLog, message)
+                eventLog = EventLogCap.prependToCurrentYear(character.eventLog, message, character.age)
             ),
             message
         )

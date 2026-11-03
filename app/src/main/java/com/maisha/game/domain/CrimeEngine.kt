@@ -3,6 +3,7 @@ package com.maisha.game.domain
 
 import com.maisha.game.data.EconomyScaler
 import com.maisha.game.data.model.Character
+import com.maisha.game.data.model.CrimeTarget
 import com.maisha.game.data.model.CrimeType
 import com.maisha.game.data.model.CriminalRecord
 import com.maisha.game.data.model.LawyerTier
@@ -67,6 +68,52 @@ class CrimeEngine @Inject constructor() {
             CrimeResult.Success(updated, moneyGained)
         } else {
             CrimeResult.Caught(processArrest(character, crimeType))
+        }
+        return recordCrimeAttempt(result)
+    }
+
+    /**
+     * Executes a specialized crime target (Burglary, GTA, Heist).
+     * Success scales with smarts and prior notoriety.
+     */
+    fun attemptTargetedCrime(character: Character, target: CrimeTarget): CrimeResult {
+        val record = character.criminalRecord
+        if (record.currentlyIncarcerated || record.awaitingTrial || character.age < MIN_CRIME_AGE) {
+            return CrimeResult.Caught(character)
+        }
+
+        val smartsFactor = character.stats.smarts / 100f * 0.35f
+        val notorietyFactor = (record.notoriety / 100f) * 0.15f
+        val attemptPenalty = (record.crimeAttemptsThisYear * 0.15f)
+        val chance = (1.0f - target.difficulty + smartsFactor + notorietyFactor - attemptPenalty).coerceIn(0.08f, 0.90f)
+
+        val result = if (Random.nextFloat() < chance) {
+            val reward = EconomyScaler.scaleAmount(target.baseReward, character.countryCode)
+            val updatedNotoriety = (record.notoriety + target.notorietyGain).coerceIn(0, 100)
+            val updated = character.copy(
+                stats = character.stats.copy(
+                    money = character.stats.money + reward,
+                    happiness = clampStat(character.stats.happiness + 8)
+                ),
+                criminalRecord = record.copy(
+                    notoriety = updatedNotoriety
+                ),
+                eventLog = EventLogCap.prepend(
+                    character.eventLog,
+                    "Pulled off the ${target.category} target (${target.name.lowercase().replace('_', ' ')})! Scored ${formatMoney(reward, character.countryCode)}."
+                )
+            )
+            CrimeResult.Success(updated, reward)
+        } else {
+            val arrested = processArrest(character, CrimeType.FRAUD)
+            CrimeResult.Caught(
+                arrested.copy(
+                    eventLog = EventLogCap.prepend(
+                        arrested.eventLog,
+                        "Caught during attempted ${target.category}! The police surrounded the scene."
+                    )
+                )
+            )
         }
         return recordCrimeAttempt(result)
     }
@@ -317,6 +364,78 @@ class CrimeEngine @Inject constructor() {
                     "You kept your head down and earned good behavior credit."
                 )
             )
+            PrisonActivity.PRISON_YARD_GANG -> {
+                val newNotoriety = (character.criminalRecord.notoriety + 10).coerceIn(0, 100)
+                character.copy(
+                    criminalRecord = character.criminalRecord.copy(
+                        notoriety = newNotoriety,
+                        paroleBonus = (character.criminalRecord.paroleBonus - 1).coerceAtLeast(0)
+                    ),
+                    stats = character.stats.copy(
+                        happiness = clampStat(character.stats.happiness + 4)
+                    ),
+                    eventLog = EventLogCap.prepend(
+                        character.eventLog,
+                        "Joined the prison yard clique for protection and gained respect (+10 Notoriety)."
+                    )
+                )
+            }
+            PrisonActivity.PRISON_ESCAPE_ATTEMPT -> {
+                val escapeChance = ((character.stats.smarts * 0.4f + character.criminalRecord.notoriety * 0.3f) / 100f).coerceIn(0.12f, 0.65f)
+                if (Random.nextFloat() < escapeChance) {
+                    val released = releaseFromPrison(
+                        character,
+                        "Escaped from maximum security prison through the utility duct! You are now a fugitive on the run."
+                    )
+                    released.copy(
+                        criminalRecord = released.criminalRecord.copy(
+                            notoriety = (released.criminalRecord.notoriety + 30).coerceIn(0, 100)
+                        ),
+                        stats = released.stats.copy(happiness = clampStat(released.stats.happiness + 25))
+                    )
+                } else {
+                    val currentRecord = character.criminalRecord
+                    val penaltyYears = 4
+                    character.copy(
+                        criminalRecord = currentRecord.copy(
+                            yearsRemaining = currentRecord.yearsRemaining + penaltyYears,
+                            totalSentenceYears = currentRecord.totalSentenceYears + penaltyYears,
+                            negativePrisonEvents = currentRecord.negativePrisonEvents + 1
+                        ),
+                        stats = character.stats.copy(
+                            happiness = clampStat(character.stats.happiness - 20),
+                            health = clampStat(character.stats.health - 10)
+                        ),
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "Escape attempt failed! Guards caught you at the perimeter wire (+4 years added to sentence)."
+                        )
+                    )
+                }
+            }
+            PrisonActivity.PAROLE_HEARING_APPEAL -> {
+                if (paroleEligible(character.criminalRecord)) {
+                    val chance = paroleChance(character.criminalRecord)
+                    if (Random.nextFloat() < chance) {
+                        releaseFromPrison(character, "Granted early parole by the board! You walked free.")
+                    } else {
+                        character.copy(
+                            stats = character.stats.copy(happiness = clampStat(character.stats.happiness - 8)),
+                            eventLog = EventLogCap.prepend(
+                                character.eventLog,
+                                "The parole board reviewed your case and denied early release. Try again next year."
+                            )
+                        )
+                    }
+                } else {
+                    character.copy(
+                        eventLog = EventLogCap.prepend(
+                            character.eventLog,
+                            "The parole board rejected your petition: you have not served the minimum sentence yet."
+                        )
+                    )
+                }
+            }
         }
         return PrisonActivityResult.Success(updated)
     }

@@ -16,6 +16,21 @@ enum class RelationType {
     ENEMY
 }
 
+@Serializable
+enum class RelationshipStage {
+    CASUAL,
+    EXCLUSIVE,
+    ENGAGED,
+    MARRIED
+}
+
+@Serializable
+enum class WeddingVenueTier {
+    COURTHOUSE,
+    LOCAL_VENUE,
+    LUXURY_DESTINATION
+}
+
 /**
  * A family member, friend, or dating prospect attached to a [Character].
  *
@@ -45,7 +60,13 @@ data class Person(
     /** When true, divorce settlement is reduced for this spouse. */
     val prenupSigned: Boolean = false,
     /** True for adopted children (vs biological). */
-    val isAdopted: Boolean = false
+    val isAdopted: Boolean = false,
+    /** Current occupation or profession for dating profiles and adult relationships. */
+    val occupation: String = "Unemployed",
+    /** Drama / volatility index (0–100). Higher values reject prenups and cause relationship friction. */
+    val crazy: Int = 20,
+    /** Current romantic relationship progression stage. */
+    val stage: RelationshipStage = RelationshipStage.CASUAL
 ) {
     fun coerceRelationship(): Person = copy(
         relationshipLevel = clampRelationshipLevel(relationshipLevel)

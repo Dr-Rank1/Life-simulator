@@ -155,6 +155,8 @@ data class LifeUiState(
     val headerExpression: Expression = Expression.NEUTRAL,
     val yearQuests: List<YearQuest> = emptyList(),
     val yearQuestProgress: List<YearQuestProgress> = emptyList(),
+    val weeklyChallenge: com.maisha.game.domain.WeeklyChallenge? = null,
+    val weeklyChallengeCompleted: Boolean = false,
     val dynastyScore: Int = 0,
     val dynastyTitleKey: String = "dynasty_title_seedling",
     /** Ephemeral Life-tab toast (quest progress, etc.). */
@@ -233,7 +235,9 @@ class LifeViewModel @Inject constructor(
                             navigateToLifeSummary = !character.alive,
                             headerExpression = ExpressionResolver.resolveExpression(character, null),
                             yearQuests = loadedQuests,
-                            yearQuestProgress = emptyList()
+                            yearQuestProgress = emptyList(),
+                            weeklyChallenge = weeklyChallengeEngine.currentChallenge(),
+                            weeklyChallengeCompleted = weeklyChallengeEngine.isComplete(character, weeklyChallengeEngine.currentChallenge())
                         ).withDynasty(character, financeEngine.calculateNetWorth(character))
                     }
                     refreshYearQuestProgress(character)
@@ -716,6 +720,23 @@ class LifeViewModel @Inject constructor(
         }
     }
 
+    fun onPayMortgage(assetId: String) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+
+        viewModelScope.launch {
+            val updated = gameEngine.payOffMortgage(character, assetId)
+            persist(updated)
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    assetsMessage = "Mortgage paid in full!",
+                    netWorth = financeEngine.calculateNetWorth(updated)
+                )
+            }
+        }
+    }
+
     fun willBeneficiaries(): List<com.maisha.game.data.model.Person> {
         val character = _uiState.value.character ?: return emptyList()
         return gameEngine.willBeneficiaries(character)
@@ -893,6 +914,32 @@ class LifeViewModel @Inject constructor(
                         it.copy(careerMessage = context.getString(R.string.msg_office_ineligible))
                     }
                 }
+            }
+        }
+    }
+
+    fun onWorkplaceAction(personId: String, action: com.maisha.game.data.model.WorkplaceAction) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            val (updatedCharacter, result) = gameEngine.handleWorkplaceAction(character, personId, action)
+            persist(updatedCharacter)
+            val msg = when (result) {
+                is com.maisha.game.domain.WorkplaceActionResult.Success -> result.message
+                is com.maisha.game.domain.WorkplaceActionResult.Denied -> result.message
+                is com.maisha.game.domain.WorkplaceActionResult.Ineligible -> null
+            }
+            _uiState.update {
+                it.copy(
+                    character = updatedCharacter,
+                    careerMessage = msg,
+                    netWorth = financeEngine.calculateNetWorth(updatedCharacter)
+                )
+            }
+            if (result is com.maisha.game.domain.WorkplaceActionResult.Success) {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+            } else if (result is com.maisha.game.domain.WorkplaceActionResult.Denied) {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.WARNING))
             }
         }
     }
@@ -1443,6 +1490,102 @@ class LifeViewModel @Inject constructor(
                 EducationEngine.UniversityActionResult.Ineligible -> {
                     _uiState.update {
                         it.copy(careerMessage = context.getString(R.string.msg_internship_ineligible))
+                    }
+                }
+            }
+        }
+    }
+
+    fun onCampusMixer() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            when (val result = gameEngine.performCampusMixer(character)) {
+                is EducationEngine.UniversityActionResult.Success -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                else -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_university_action_ineligible))
+                    }
+                }
+            }
+        }
+    }
+
+    fun onProfessorOfficeHours() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            when (val result = gameEngine.performProfessorOfficeHours(character)) {
+                is EducationEngine.UniversityActionResult.Success -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                else -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_university_action_ineligible))
+                    }
+                }
+            }
+        }
+    }
+
+    fun onExamAllNighter() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            when (val result = gameEngine.performExamAllNighter(character)) {
+                is EducationEngine.UniversityActionResult.Success -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                else -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_university_action_ineligible))
+                    }
+                }
+            }
+        }
+    }
+
+    fun onCampusRivalryPrank() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            when (val result = gameEngine.performCampusRivalryPrank(character)) {
+                is EducationEngine.UniversityActionResult.Success -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                else -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_university_action_ineligible))
                     }
                 }
             }
@@ -2173,6 +2316,23 @@ class LifeViewModel @Inject constructor(
         }
     }
 
+    fun onMakeExclusive(personId: String) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+
+        viewModelScope.launch {
+            val (updatedCharacter, success) = gameEngine.makeRelationshipExclusive(character, personId)
+            persist(updatedCharacter)
+            _uiState.update {
+                it.copy(
+                    character = updatedCharacter,
+                    relationshipMessage = if (success) "You agreed to be exclusive!" else "They want to keep things casual for now.",
+                    selectedFamilyMember = updatedCharacter.family.find { person -> person.id == personId }
+                )
+            }
+        }
+    }
+
     fun onPropose(personId: String, signPrenup: Boolean = false) {
         val character = _uiState.value.character ?: return
         if (!character.alive) return
@@ -2314,6 +2474,43 @@ class LifeViewModel @Inject constructor(
                             netWorth = financeEngine.calculateNetWorth(result.character)
                         )
                     }
+                }
+            }
+        }
+    }
+
+    fun onAttemptTargetedCrime(target: com.maisha.game.data.model.CrimeTarget) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive || character.criminalRecord.currentlyIncarcerated) return
+
+        viewModelScope.launch {
+            when (val result = gameEngine.attemptTargetedCrime(character, target)) {
+                is CrimeResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            actionMessage = context.getString(
+                                R.string.msg_crime_success,
+                                formatMoney(result.moneyGained, result.character.countryCode)
+                            ),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.MONEY_GAIN, haptic = HapticType.SUCCESS))
+                }
+                is CrimeResult.Caught -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            actionMessage = context.getString(R.string.msg_crime_arrested),
+                            eligibleJobs = careerEngine.getEligibleJobs(result.character),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.WARNING))
                 }
             }
         }
@@ -3178,9 +3375,13 @@ class LifeViewModel @Inject constructor(
         val progress = yearQuestEngine.evaluate(quests, snapshot, current)
         val newlyDone = progress.filter { it.completed && it.quest.kind !in previousDone }
         _uiState.update { state ->
+            val challenge = weeklyChallengeEngine.currentChallenge()
+            val challengeDone = weeklyChallengeEngine.isComplete(current, challenge)
             state.copy(
                 yearQuests = quests,
                 yearQuestProgress = progress,
+                weeklyChallenge = challenge,
+                weeklyChallengeCompleted = challengeDone,
                 lifePulseMessage = when {
                     newlyDone.isEmpty() || state.isAgingUp -> state.lifePulseMessage
                     else -> context.getString(
