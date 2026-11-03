@@ -43,7 +43,8 @@ import com.maisha.game.ui.theme.PaperWhite
 
 /**
  * High-density interactive list row inspired by BitLife and Another Life.
- * Replaces oversized stacked cards with a compact, standardized 58-64dp touch target.
+ * Replaces oversized stacked cards with a compact, standardized 56-64dp touch target.
+ * Supports embedding inside [InsetCardContainer] without redundant nested card borders.
  */
 @Composable
 fun DrillDownRow(
@@ -57,23 +58,14 @@ fun DrillDownRow(
     trailingBadge: String? = null,
     trailingBadgeColor: Color? = null,
     trailingContent: (@Composable () -> Unit)? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    insideContainer: Boolean = false
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(64.dp)
-            .semantics { role = Role.Button }
-            .clickable(enabled = enabled, onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = PaperWhite),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Hairline)
-    ) {
+    val rowContent = @Composable {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+                .padding(horizontal = 14.dp, vertical = if (insideContainer) 8.dp else 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -81,18 +73,24 @@ fun DrillDownRow(
             if (leadingContent != null) {
                 leadingContent()
             } else if (icon != null) {
+                // Vibrant solid squircle badge with pure white icon
+                val badgeColor = if (iconTint != Color.Unspecified && iconTint != Color.Transparent) {
+                    iconTint
+                } else {
+                    Color(0xFF10B981)
+                }
                 Box(
                     modifier = Modifier
-                        .size(42.dp)
-                        .clip(CircleShape)
-                        .background(iconTint.copy(alpha = 0.12f)),
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(badgeColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = iconTint,
-                        modifier = Modifier.size(22.dp)
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -106,7 +104,7 @@ fun DrillDownRow(
                     text = title,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = if (enabled) InkPrimary else InkTertiary,
+                    color = if (enabled) Color(0xFF0F172A) else InkTertiary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontSize = 15.sp
@@ -116,7 +114,7 @@ fun DrillDownRow(
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = InkSecondary,
+                        color = Color(0xFF475569),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 12.sp
@@ -126,7 +124,7 @@ fun DrillDownRow(
 
             // Optional Trailing Badge or Custom Content
             if (trailingBadge != null) {
-                val badgeBg = trailingBadgeColor ?: iconTint.copy(alpha = 0.12f)
+                val badgeBg = trailingBadgeColor ?: iconTint.copy(alpha = 0.14f)
                 val badgeText = if (trailingBadgeColor != null) Color.White else iconTint
                 Box(
                     modifier = Modifier
@@ -151,10 +149,37 @@ fun DrillDownRow(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = InkSecondary.copy(alpha = 0.5f),
+                    tint = Color(0xFF94A3B8),
                     modifier = Modifier.size(20.dp)
                 )
             }
+        }
+    }
+
+    if (insideContainer) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(58.dp)
+                .semantics { role = Role.Button }
+                .clickable(enabled = enabled, onClick = onClick),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            rowContent()
+        }
+    } else {
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(64.dp)
+                .semantics { role = Role.Button }
+                .clickable(enabled = enabled, onClick = onClick),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = PaperWhite),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, Hairline)
+        ) {
+            rowContent()
         }
     }
 }

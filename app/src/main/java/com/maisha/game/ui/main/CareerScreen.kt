@@ -117,6 +117,8 @@ import com.maisha.game.ui.components.ConfirmSeverity
 import com.maisha.game.ui.components.ConfirmableActionHost
 import com.maisha.game.ui.components.DrillDownRow
 import com.maisha.game.ui.components.EmptyStateCard
+import com.maisha.game.ui.components.InsetCardContainer
+import com.maisha.game.ui.components.InsetDivider
 import com.maisha.game.ui.components.WorkplaceRosterSheet
 import com.maisha.game.ui.components.rememberConfirmableAction
 import com.maisha.game.ui.components.IllustrationImage
@@ -411,26 +413,12 @@ fun CareerScreen(
         modifier = modifier
             .fillMaxSize()
             .background(CreamBg)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
-        TabPageHero(
-            title = stringResource(R.string.screen_career),
-            subtitle = heroSubtitle,
-            primaryChip = formatMoney(character.stats.money, character.countryCode)
-        )
-
-        CategoryFilterChipRow(
-            labels = chipLabels,
-            selectedIndex = selectedCategory,
-            onSelected = { selectedCategory = it },
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-        )
-
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             if (showDeploymentBanner) {
                 item(
@@ -530,61 +518,65 @@ fun CareerScreen(
                         )
                     }
 
-                    item(key = "drill_classmates") {
-                        DrillDownRow(
-                            title = stringResource(R.string.section_school_life),
-                            subtitle = "Classmates, Teachers, Bully & Crush",
-                            icon = Icons.Rounded.Groups,
-                            iconTint = TealPrimary,
-                            trailingBadge = if (character.education.schoolPeople.isNotEmpty()) "${character.education.schoolPeople.size}" else null,
-                            onClick = { activeCareerSheet = CareerSheet.CLASSMATES }
-                        )
-                    }
-
-                    item(key = "drill_clubs") {
-                        DrillDownRow(
-                            title = stringResource(R.string.section_school_clubs),
-                            subtitle = character.education.schoolClub?.name ?: "Join a club or sports team",
-                            icon = Icons.Rounded.EmojiEvents,
-                            iconTint = GoldAccent,
-                            trailingBadge = if (character.education.schoolClub != null) "Member" else null,
-                            onClick = { activeCareerSheet = CareerSheet.CLUBS }
-                        )
-                    }
-
-                    if (character.age >= 16 || character.education.stage == SchoolStage.UNIVERSITY) {
-                        item(key = "drill_university") {
+                    item(key = "drill_school_group") {
+                        InsetCardContainer(title = stringResource(R.string.section_school_life)) {
                             DrillDownRow(
-                                title = stringResource(R.string.section_university_dashboard),
-                                subtitle = character.education.universityMajor?.courseLabel ?: "Degrees, Tuition & Loans",
-                                icon = Icons.Rounded.School,
-                                iconTint = LifeGreen,
-                                onClick = { activeCareerSheet = CareerSheet.UNIVERSITY }
-                            )
-                        }
-                    }
-
-                    if (character.age >= 12) {
-                        item(key = "drill_fame") {
-                            DrillDownRow(
-                                title = stringResource(R.string.section_fame_talent_hub),
-                                subtitle = "Training, Gigs & Endorsements",
-                                icon = Icons.Rounded.Star,
-                                iconTint = GoldAccent,
-                                onClick = { activeCareerSheet = CareerSheet.FAME }
-                            )
-                        }
-                    }
-
-                    if (careerEngine.canWorkPartTime(character) || (character.alive && character.age >= CareerEngine.MIN_PART_TIME_AGE)) {
-                        item(key = "drill_jobs") {
-                            DrillDownRow(
-                                title = stringResource(R.string.section_part_time_marketplace),
-                                subtitle = character.career.activePartTimeJob?.name ?: "Campus jobs & side hustles",
-                                icon = Icons.Rounded.Work,
+                                title = stringResource(R.string.section_school_life),
+                                subtitle = "Classmates, Teachers, Bully & Crush",
+                                icon = Icons.Rounded.Groups,
                                 iconTint = TealPrimary,
-                                onClick = { activeCareerSheet = CareerSheet.JOBS }
+                                trailingBadge = if (character.education.schoolPeople.isNotEmpty()) "${character.education.schoolPeople.size}" else null,
+                                insideContainer = true,
+                                onClick = { activeCareerSheet = CareerSheet.CLASSMATES }
                             )
+
+                            InsetDivider()
+
+                            DrillDownRow(
+                                title = stringResource(R.string.section_school_clubs),
+                                subtitle = character.education.schoolClub?.name ?: "Join a club or sports team",
+                                icon = Icons.Rounded.EmojiEvents,
+                                iconTint = GoldAccent,
+                                trailingBadge = if (character.education.schoolClub != null) "Member" else null,
+                                insideContainer = true,
+                                onClick = { activeCareerSheet = CareerSheet.CLUBS }
+                            )
+
+                            if (character.age >= 16 || character.education.stage == SchoolStage.UNIVERSITY) {
+                                InsetDivider()
+                                DrillDownRow(
+                                    title = stringResource(R.string.section_university_dashboard),
+                                    subtitle = character.education.universityMajor?.courseLabel ?: "Degrees, Tuition & Loans",
+                                    icon = Icons.Rounded.School,
+                                    iconTint = LifeGreen,
+                                    insideContainer = true,
+                                    onClick = { activeCareerSheet = CareerSheet.UNIVERSITY }
+                                )
+                            }
+
+                            if (character.age >= 12) {
+                                InsetDivider()
+                                DrillDownRow(
+                                    title = stringResource(R.string.section_fame_talent_hub),
+                                    subtitle = "Training, Gigs & Endorsements",
+                                    icon = Icons.Rounded.Star,
+                                    iconTint = GoldAccent,
+                                    insideContainer = true,
+                                    onClick = { activeCareerSheet = CareerSheet.FAME }
+                                )
+                            }
+
+                            if (careerEngine.canWorkPartTime(character) || (character.alive && character.age >= CareerEngine.MIN_PART_TIME_AGE)) {
+                                InsetDivider()
+                                DrillDownRow(
+                                    title = stringResource(R.string.section_part_time_marketplace),
+                                    subtitle = character.career.activePartTimeJob?.name ?: "Campus jobs & side hustles",
+                                    icon = Icons.Rounded.Work,
+                                    iconTint = TealPrimary,
+                                    insideContainer = true,
+                                    onClick = { activeCareerSheet = CareerSheet.JOBS }
+                                )
+                            }
                         }
                     }
                 }
@@ -654,50 +646,54 @@ fun CareerScreen(
                         }
                     }
 
-                    item(key = "drill_work_job_listings") {
+                    item(key = "drill_work_group") {
                         val canWorkFullTime = character.age >= 18
-                        DrillDownRow(
-                            title = stringResource(R.string.section_job_listings),
-                            subtitle = if (!canWorkFullTime) {
-                                stringResource(R.string.full_time_locked_age)
-                            } else if (currentJob != null) {
-                                "Search for new career openings"
-                            } else {
-                                "Browse positions in ${character.countryCode}"
-                            },
-                            icon = Icons.Rounded.Work,
-                            iconTint = LifeGreen,
-                            enabled = canWorkFullTime,
-                            trailingBadge = if (canWorkFullTime && eligibleJobs.isNotEmpty()) "${eligibleJobs.size} Eligible" else null,
-                            onClick = { if (canWorkFullTime) activeCareerSheet = CareerSheet.JOB_LISTINGS }
-                        )
-                    }
-
-                    item(key = "drill_work_side_hustles") {
                         val canWorkPartTime = character.age >= 16
-                        DrillDownRow(
-                            title = stringResource(R.string.section_part_time_marketplace),
-                            subtitle = if (!canWorkPartTime) {
-                                stringResource(R.string.part_time_locked_age)
-                            } else {
-                                character.career.activePartTimeJob?.name ?: "Part-time work & freelance side hustles"
-                            },
-                            icon = Icons.Rounded.Storefront,
-                            iconTint = TealPrimary,
-                            enabled = canWorkPartTime,
-                            onClick = { if (canWorkPartTime) activeCareerSheet = CareerSheet.JOBS }
-                        )
-                    }
-
-                    if (character.age >= 12) {
-                        item(key = "drill_work_fame") {
+                        InsetCardContainer(title = "Opportunities & Career") {
                             DrillDownRow(
-                                title = stringResource(R.string.section_fame_talent_hub),
-                                subtitle = "Training, gigs & endorsements",
-                                icon = Icons.Rounded.Star,
-                                iconTint = GoldAccent,
-                                onClick = { activeCareerSheet = CareerSheet.FAME }
+                                title = stringResource(R.string.section_job_listings),
+                                subtitle = if (!canWorkFullTime) {
+                                    stringResource(R.string.full_time_locked_age)
+                                } else if (currentJob != null) {
+                                    "Search for new career openings"
+                                } else {
+                                    "Browse positions in ${character.countryCode}"
+                                },
+                                icon = Icons.Rounded.Work,
+                                iconTint = LifeGreen,
+                                enabled = canWorkFullTime,
+                                trailingBadge = if (canWorkFullTime && eligibleJobs.isNotEmpty()) "${eligibleJobs.size} Eligible" else null,
+                                insideContainer = true,
+                                onClick = { if (canWorkFullTime) activeCareerSheet = CareerSheet.JOB_LISTINGS }
                             )
+
+                            InsetDivider()
+
+                            DrillDownRow(
+                                title = stringResource(R.string.section_part_time_marketplace),
+                                subtitle = if (!canWorkPartTime) {
+                                    stringResource(R.string.part_time_locked_age)
+                                } else {
+                                    character.career.activePartTimeJob?.name ?: "Part-time work & freelance side hustles"
+                                },
+                                icon = Icons.Rounded.Storefront,
+                                iconTint = TealPrimary,
+                                enabled = canWorkPartTime,
+                                insideContainer = true,
+                                onClick = { if (canWorkPartTime) activeCareerSheet = CareerSheet.JOBS }
+                            )
+
+                            if (character.age >= 12) {
+                                InsetDivider()
+                                DrillDownRow(
+                                    title = stringResource(R.string.section_fame_talent_hub),
+                                    subtitle = "Training, gigs & endorsements",
+                                    icon = Icons.Rounded.Star,
+                                    iconTint = GoldAccent,
+                                    insideContainer = true,
+                                    onClick = { activeCareerSheet = CareerSheet.FAME }
+                                )
+                            }
                         }
                     }
 

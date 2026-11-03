@@ -103,6 +103,8 @@ import com.maisha.game.ui.components.ConfirmableActionHost
 import com.maisha.game.ui.components.DismissibleTipCard
 import com.maisha.game.ui.components.DrillDownRow
 import com.maisha.game.ui.components.EmptyStateCard
+import com.maisha.game.ui.components.InsetCardContainer
+import com.maisha.game.ui.components.InsetDivider
 import com.maisha.game.ui.components.StatBar
 import com.maisha.game.ui.components.StatType
 import com.maisha.game.ui.components.TabPageHero
@@ -368,43 +370,8 @@ fun ActionsScreen(
         modifier = modifier
             .fillMaxSize()
             .background(CreamBg)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
-        TabPageHero(
-            title = stringResource(R.string.screen_actions),
-            subtitle = if (hasContent && actionCount > 0) {
-                stringResource(R.string.format_actions_this_year, actionCount)
-            } else {
-                stringResource(R.string.actions_subtitle)
-            },
-            primaryChip = formatMoney(character.stats.money, character.countryCode)
-        )
-
-        val chipLabels = listOf(
-            stringResource(R.string.chip_actions_all),
-            stringResource(R.string.chip_actions_care),
-            stringResource(R.string.chip_actions_earn),
-            stringResource(R.string.chip_actions_grow),
-            stringResource(R.string.chip_actions_live),
-            stringResource(R.string.chip_actions_risk)
-        )
-        CategoryFilterChipRow(
-            labels = chipLabels,
-            selectedIndex = ActionCategory.entries.indexOf(category).coerceAtLeast(0),
-            onSelected = { selectedCategory = ActionCategory.entries[it].name },
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-        )
-
-        val showLeisureTip = uiState.tipsLoaded &&
-            OnboardingTips.LEISURE !in uiState.seenTipIds &&
-            showLeisureActions
-        if (showLeisureTip) {
-            DismissibleTipCard(
-                text = stringResource(R.string.tip_leisure),
-                onDismiss = onDismissLeisureTip,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-            )
-        }
-
         if (!hasContent) {
             val isToddler = character.age <= 4
             EmptyStateCard(
@@ -421,10 +388,8 @@ fun ActionsScreen(
             )
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp)
             ) {
                 if (showPrisonActions || incarcerated) {
@@ -437,118 +402,145 @@ fun ActionsScreen(
                         }
                     }
                     item {
-                        DrillDownRow(
-                            title = stringResource(R.string.act_cat_prison_title),
-                            subtitle = stringResource(R.string.act_cat_prison_desc),
-                            icon = Icons.Rounded.Lock,
-                            iconTint = CoralNegative,
-                            trailingBadge = "Inmate",
-                            onClick = { activeActionSheet = ActionSheet.PRISON }
-                        )
+                        InsetCardContainer(title = stringResource(R.string.act_cat_prison_title)) {
+                            DrillDownRow(
+                                title = stringResource(R.string.act_cat_prison_title),
+                                subtitle = stringResource(R.string.act_cat_prison_desc),
+                                icon = Icons.Rounded.Lock,
+                                iconTint = CoralNegative,
+                                trailingBadge = "Inmate",
+                                insideContainer = true,
+                                onClick = { activeActionSheet = ActionSheet.PRISON }
+                            )
+                        }
                     }
                 } else {
                     if (character.age < 16) {
                         item {
-                            DrillDownRow(
-                                title = stringResource(R.string.act_cat_childhood_title),
-                                subtitle = stringResource(R.string.act_cat_childhood_desc),
-                                icon = Icons.Rounded.ChildCare,
-                                iconTint = LifeGreen,
-                                onClick = { activeActionSheet = ActionSheet.CHILDHOOD }
-                            )
+                            InsetCardContainer(title = stringResource(R.string.act_cat_childhood_title)) {
+                                DrillDownRow(
+                                    title = stringResource(R.string.act_cat_childhood_title),
+                                    subtitle = stringResource(R.string.act_cat_childhood_desc),
+                                    icon = Icons.Rounded.ChildCare,
+                                    iconTint = LifeGreen,
+                                    insideContainer = true,
+                                    onClick = { activeActionSheet = ActionSheet.CHILDHOOD }
+                                )
+                            }
                         }
                     }
 
                     item {
-                        DrillDownRow(
-                            title = stringResource(R.string.act_cat_mind_body_title),
-                            subtitle = stringResource(R.string.act_cat_mind_body_desc),
-                            icon = Icons.Rounded.Spa,
-                            iconTint = LifeGreen,
-                            onClick = { activeActionSheet = ActionSheet.MIND_BODY }
-                        )
-                    }
-
-                    item {
-                        DrillDownRow(
-                            title = stringResource(R.string.act_cat_doctor_health_title),
-                            subtitle = if (untreated.isNotEmpty()) "${untreated.size} untreated conditions" else stringResource(R.string.act_cat_doctor_health_desc),
-                            icon = Icons.Rounded.MedicalServices,
-                            iconTint = if (untreated.isNotEmpty()) CoralNegative else TealPrimary,
-                            trailingBadge = if (untreated.isNotEmpty()) "! ${untreated.size}" else null,
-                            onClick = { activeActionSheet = ActionSheet.DOCTOR_HEALTH }
-                        )
-                    }
-
-                    if (showSkillActions) {
-                        item {
+                        InsetCardContainer(title = "Health & Wellness") {
                             DrillDownRow(
-                                title = stringResource(R.string.act_cat_side_hustles_title),
-                                subtitle = "Practice, masterclasses & exhibitions",
-                                icon = Icons.Rounded.School,
-                                iconTint = GoldAccent,
-                                onClick = { activeActionSheet = ActionSheet.SKILLS_MASTERY }
-                            )
-                        }
-                    }
-
-                    if (showAdoptPetActions || showAdoptChild) {
-                        item {
-                            DrillDownRow(
-                                title = stringResource(R.string.act_cat_adoption_title),
-                                subtitle = stringResource(R.string.act_cat_adoption_desc),
-                                icon = Icons.Rounded.Pets,
-                                iconTint = TealPrimary,
-                                onClick = { activeActionSheet = ActionSheet.LOVE_FAMILY }
-                            )
-                        }
-                    }
-
-                    if (showJobsAndHustles || showSocialMediaActions || (character.alive && character.age >= CareerEngine.MIN_TALENT_TRAINING_AGE)) {
-                        item {
-                            DrillDownRow(
-                                title = stringResource(R.string.section_jobs_side_hustles),
-                                subtitle = if (character.socialMedia.hasAccount) "${character.socialMedia.followers} Followers" else "Social media, gigs & part-time jobs",
-                                icon = Icons.Rounded.Work,
+                                title = stringResource(R.string.act_cat_mind_body_title),
+                                subtitle = stringResource(R.string.act_cat_mind_body_desc),
+                                icon = Icons.Rounded.Spa,
                                 iconTint = LifeGreen,
-                                onClick = { activeActionSheet = ActionSheet.SIDE_HUSTLES }
+                                insideContainer = true,
+                                onClick = { activeActionSheet = ActionSheet.MIND_BODY }
+                            )
+
+                            InsetDivider()
+
+                            DrillDownRow(
+                                title = stringResource(R.string.act_cat_doctor_health_title),
+                                subtitle = if (untreated.isNotEmpty()) "${untreated.size} untreated conditions" else stringResource(R.string.act_cat_doctor_health_desc),
+                                icon = Icons.Rounded.MedicalServices,
+                                iconTint = if (untreated.isNotEmpty()) CoralNegative else TealPrimary,
+                                trailingBadge = if (untreated.isNotEmpty()) "! ${untreated.size}" else null,
+                                insideContainer = true,
+                                onClick = { activeActionSheet = ActionSheet.DOCTOR_HEALTH }
                             )
                         }
                     }
 
-                    if (showDrivingTest || showImmigrationOffice) {
+                    val hasHustles = showSkillActions || showJobsAndHustles || showSocialMediaActions || (character.alive && character.age >= CareerEngine.MIN_TALENT_TRAINING_AGE)
+                    if (hasHustles) {
                         item {
-                            DrillDownRow(
-                                title = stringResource(R.string.act_cat_relocate_title),
-                                subtitle = stringResource(R.string.act_cat_relocate_desc),
-                                icon = Icons.Rounded.Flight,
-                                iconTint = TealPrimary,
-                                onClick = { activeActionSheet = ActionSheet.LICENSES_RELOCATION }
-                            )
+                            InsetCardContainer(title = "Career & Side Hustles") {
+                                var hasFirst = false
+                                if (showJobsAndHustles || showSocialMediaActions || (character.alive && character.age >= CareerEngine.MIN_TALENT_TRAINING_AGE)) {
+                                    DrillDownRow(
+                                        title = stringResource(R.string.section_jobs_side_hustles),
+                                        subtitle = if (character.socialMedia.hasAccount) "${character.socialMedia.followers} Followers" else "Social media, gigs & part-time jobs",
+                                        icon = Icons.Rounded.Work,
+                                        iconTint = LifeGreen,
+                                        insideContainer = true,
+                                        onClick = { activeActionSheet = ActionSheet.SIDE_HUSTLES }
+                                    )
+                                    hasFirst = true
+                                }
+                                if (showSkillActions) {
+                                    if (hasFirst) InsetDivider()
+                                    DrillDownRow(
+                                        title = stringResource(R.string.act_cat_side_hustles_title),
+                                        subtitle = "Practice, masterclasses & exhibitions",
+                                        icon = Icons.Rounded.School,
+                                        iconTint = GoldAccent,
+                                        insideContainer = true,
+                                        onClick = { activeActionSheet = ActionSheet.SKILLS_MASTERY }
+                                    )
+                                }
+                            }
                         }
                     }
 
-                    if (showPhilanthropy || showBucketList) {
+                    val hasLifestyle = showAdoptPetActions || showAdoptChild || showDrivingTest || showImmigrationOffice || showPhilanthropy || showBucketList
+                    if (hasLifestyle) {
                         item {
-                            DrillDownRow(
-                                title = stringResource(R.string.act_cat_philanthropy_title),
-                                subtitle = stringResource(R.string.act_cat_philanthropy_desc),
-                                icon = Icons.Rounded.EmojiEvents,
-                                iconTint = GoldAccent,
-                                onClick = { activeActionSheet = ActionSheet.PHILANTHROPY_GOALS }
-                            )
+                            InsetCardContainer(title = "Lifestyle & Travel") {
+                                var dividerNeeded = false
+                                if (showAdoptPetActions || showAdoptChild) {
+                                    DrillDownRow(
+                                        title = stringResource(R.string.act_cat_adoption_title),
+                                        subtitle = stringResource(R.string.act_cat_adoption_desc),
+                                        icon = Icons.Rounded.Pets,
+                                        iconTint = TealPrimary,
+                                        insideContainer = true,
+                                        onClick = { activeActionSheet = ActionSheet.LOVE_FAMILY }
+                                    )
+                                    dividerNeeded = true
+                                }
+                                if (showDrivingTest || showImmigrationOffice) {
+                                    if (dividerNeeded) InsetDivider()
+                                    DrillDownRow(
+                                        title = stringResource(R.string.act_cat_relocate_title),
+                                        subtitle = stringResource(R.string.act_cat_relocate_desc),
+                                        icon = Icons.Rounded.Flight,
+                                        iconTint = TealPrimary,
+                                        insideContainer = true,
+                                        onClick = { activeActionSheet = ActionSheet.LICENSES_RELOCATION }
+                                    )
+                                    dividerNeeded = true
+                                }
+                                if (showPhilanthropy || showBucketList) {
+                                    if (dividerNeeded) InsetDivider()
+                                    DrillDownRow(
+                                        title = stringResource(R.string.act_cat_philanthropy_title),
+                                        subtitle = stringResource(R.string.act_cat_philanthropy_desc),
+                                        icon = Icons.Rounded.EmojiEvents,
+                                        iconTint = GoldAccent,
+                                        insideContainer = true,
+                                        onClick = { activeActionSheet = ActionSheet.PHILANTHROPY_GOALS }
+                                    )
+                                }
+                            }
                         }
                     }
 
                     if (showCrimeActions || showExpungement) {
                         item {
-                            DrillDownRow(
-                                title = stringResource(R.string.act_cat_crime_title),
-                                subtitle = stringResource(R.string.act_cat_crime_desc),
-                                icon = Icons.Rounded.Gavel,
-                                iconTint = CoralNegative,
-                                onClick = { activeActionSheet = ActionSheet.CRIME }
-                            )
+                            InsetCardContainer(title = "Crime & Legal") {
+                                DrillDownRow(
+                                    title = stringResource(R.string.act_cat_crime_title),
+                                    subtitle = stringResource(R.string.act_cat_crime_desc),
+                                    icon = Icons.Rounded.Gavel,
+                                    iconTint = CoralNegative,
+                                    insideContainer = true,
+                                    onClick = { activeActionSheet = ActionSheet.CRIME }
+                                )
+                            }
                         }
                     }
                 }

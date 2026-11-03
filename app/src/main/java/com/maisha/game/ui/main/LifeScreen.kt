@@ -91,6 +91,12 @@ import com.maisha.game.ui.components.CountryFlag
 import com.maisha.game.ui.components.DismissibleTipCard
 import com.maisha.game.ui.components.EmptyStateCard
 import com.maisha.game.ui.components.FloatingStatChangeLayer
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.HorizontalDivider
+import com.maisha.game.ui.components.LeftNavRail
+import com.maisha.game.ui.theme.BorderCardSlate
+import com.maisha.game.ui.theme.CanvasBg
+import com.maisha.game.ui.theme.DeepSlate
 import com.maisha.game.ui.components.MainTab
 import com.maisha.game.ui.components.MaishaBottomNav
 import com.maisha.game.ui.components.MaishaIcon
@@ -386,6 +392,19 @@ fun LifeScreen(
         }
     }
 
+    var showQuestsSheet by rememberSaveable { mutableStateOf(false) }
+
+    if (showQuestsSheet) {
+        YearQuestsSheet(
+            quests = uiState.yearQuests,
+            progress = uiState.yearQuestProgress,
+            weeklyChallenge = uiState.weeklyChallenge,
+            weeklyChallengeCompleted = uiState.weeklyChallengeCompleted,
+            countryCode = character.countryCode,
+            onDismiss = { showQuestsSheet = false }
+        )
+    }
+
     val eventActive = uiState.currentEvent != null
     Box(
         modifier = Modifier
@@ -400,34 +419,55 @@ fun LifeScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         containerColor = prisonBackground,
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            MaishaBottomNav(
+        topBar = {
+            GlobalHudHeader(
+                character = character,
+                expression = uiState.headerExpression,
+                netWorth = uiState.netWorth,
+                questCount = uiState.yearQuests.size,
+                questCompleted = uiState.yearQuestProgress.count { it.completed },
+                onViewCharacterStats = onViewCharacterStats,
+                onOpenSettings = onOpenSettings,
+                onOpenQuests = { showQuestsSheet = true }
+            )
+        }
+    ) { innerPadding ->
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            LeftNavRail(
                 selectedTab = selectedTab,
                 onTabSelected = { selectedTabOrdinal = it.ordinal },
                 disabledTabs = disabledTabs
             )
-        }
-    ) { innerPadding ->
-        AnimatedContent(
-            targetState = selectedTab,
-            transitionSpec = {
-                NavAnimations.tabEnter togetherWith NavAnimations.tabExit
-            },
-            label = "mainTabCrossfade"
-        ) { tab ->
-            when (tab) {
-            MainTab.LIFE -> LifeTabContent(
-                character = character,
-                uiState = uiState,
-                netWorth = uiState.netWorth,
-                onAgeUp = onAgeUp,
-                onViewCharacterStats = onViewCharacterStats,
-                onOpenSettings = onOpenSettings,
-                onStatDeltaFinished = onStatDeltaFinished,
-                onYearRecapDismissed = onYearRecapDismissed,
-                onDismissYearQuestsTip = onDismissYearQuestsTip,
-                modifier = Modifier.padding(innerPadding)
-            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) {
+                AnimatedContent(
+                    targetState = selectedTab,
+                    transitionSpec = {
+                        NavAnimations.tabEnter togetherWith NavAnimations.tabExit
+                    },
+                    label = "mainTabCrossfade"
+                ) { tab ->
+                    when (tab) {
+                    MainTab.LIFE -> LifeTabContent(
+                        character = character,
+                        uiState = uiState,
+                        netWorth = uiState.netWorth,
+                        onAgeUp = onAgeUp,
+                        onViewCharacterStats = onViewCharacterStats,
+                        onOpenSettings = onOpenSettings,
+                        onStatDeltaFinished = onStatDeltaFinished,
+                        onYearRecapDismissed = onYearRecapDismissed,
+                        onDismissYearQuestsTip = onDismissYearQuestsTip,
+                        modifier = Modifier.fillMaxSize()
+                    )
             MainTab.FAMILY -> FamilyScreen(
                 character = character,
                 uiState = uiState,
@@ -452,7 +492,7 @@ fun LifeScreen(
                 onDismissFamilyDatingTip = onDismissFamilyDatingTip,
                 onDismissFamilyDetailTip = onDismissFamilyDetailTip,
                 onThrowParty = onThrowParty,
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.fillMaxSize()
             )
             MainTab.CAREER -> CareerScreen(
                 character = character,
@@ -505,7 +545,7 @@ fun LifeScreen(
                 onQuitPartTimeJob = onQuitPartTimeJob,
                 onRestStudentEnergy = onRestStudentEnergy,
                 onCareerMessageDismissed = onCareerMessageDismissed,
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.fillMaxSize()
             )
             MainTab.ASSETS -> AssetsScreen(
                 character = character,
@@ -532,7 +572,7 @@ fun LifeScreen(
                 onPayMortgage = onPayMortgage,
                 carMakeCatalog = carMakeCatalog,
                 streetCatalog = streetCatalog,
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.fillMaxSize()
             )
             MainTab.ACTIONS -> ActionsScreen(
                 character = character,
@@ -570,12 +610,63 @@ fun LifeScreen(
                 onDropEndorsement = onDropEndorsement,
                 onActionMessageDismissed = onActionMessageDismissed,
                 onDismissLeisureTip = onDismissLeisureTip,
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.fillMaxSize()
             )
             }
         }
     }
     }
+    }
+}
+}
+
+private data class YearBlock(
+    val age: Int,
+    val entries: List<YearLogItem>
+)
+
+private data class YearLogItem(
+    val text: String,
+    val tone: EventLogTone,
+    val deltaBadge: String? = null
+)
+
+private fun parseYearBlocks(entries: List<String>, currentAge: Int): List<YearBlock> {
+    val blocks = mutableListOf<YearBlock>()
+    var curAge = currentAge
+    var curEntries = mutableListOf<YearLogItem>()
+
+    for (raw in entries) {
+        val trimmed = raw.trim()
+        if (trimmed.startsWith("── Age ") || (trimmed.startsWith("Age ") && trimmed.length <= 8 && trimmed.any { it.isDigit() })) {
+            if (curEntries.isNotEmpty()) {
+                blocks.add(YearBlock(age = curAge, entries = curEntries.toList()))
+                curEntries.clear()
+            }
+            val parsedAge = trimmed.filter { it.isDigit() }.toIntOrNull() ?: curAge
+            curAge = parsedAge
+        } else if (trimmed.isNotEmpty()) {
+            val tone = EventLogClassifier.classify(trimmed)
+            val deltaMatch = Regex("""\(([+\-]?\d+[^)]+)\)""").find(trimmed)
+            val deltaBadge = deltaMatch?.groups?.get(1)?.value
+            val cleanText = if (deltaBadge != null) {
+                trimmed.replace("($deltaBadge)", "").trim().trimEnd(',', ';')
+            } else {
+                trimmed
+            }
+            curEntries.add(
+                YearLogItem(
+                    text = cleanText,
+                    tone = tone,
+                    deltaBadge = deltaBadge
+                )
+            )
+        }
+    }
+    if (curEntries.isNotEmpty()) {
+        blocks.add(YearBlock(age = curAge, entries = curEntries.toList()))
+    }
+    return blocks
 }
 
 @Composable
@@ -585,18 +676,17 @@ private fun LifeTabContent(
     uiState: LifeUiState,
     netWorth: Int,
     onAgeUp: () -> Unit,
-    onViewCharacterStats: () -> Unit,
-    onOpenSettings: () -> Unit,
+    onViewCharacterStats: () -> Unit = {},
+    onOpenSettings: () -> Unit = {},
     onStatDeltaFinished: (Long) -> Unit,
     onYearRecapDismissed: () -> Unit,
-    onDismissYearQuestsTip: () -> Unit,
+    onDismissYearQuestsTip: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val journalEntries = remember(character.eventLog) {
         character.eventLog.filterNot { it.startsWith("::DEATH:") }
     }
     var journalExpanded by rememberSaveable { mutableStateOf(false) }
-    var showQuestsSheet by rememberSaveable { mutableStateOf(false) }
     val visibleJournal = if (journalExpanded || journalEntries.size <= JOURNAL_VISIBLE_CAP) {
         journalEntries
     } else {
@@ -604,33 +694,15 @@ private fun LifeTabContent(
     }
     val hiddenJournalCount = (journalEntries.size - JOURNAL_VISIBLE_CAP).coerceAtLeast(0)
 
-    if (showQuestsSheet) {
-        YearQuestsSheet(
-            quests = uiState.yearQuests,
-            progress = uiState.yearQuestProgress,
-            weeklyChallenge = uiState.weeklyChallenge,
-            weeklyChallengeCompleted = uiState.weeklyChallengeCompleted,
-            countryCode = character.countryCode,
-            onDismiss = { showQuestsSheet = false }
-        )
+    val yearBlocks = remember(visibleJournal, character.age) {
+        parseYearBlocks(visibleJournal, character.age)
     }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(CreamBg)
+            .background(CanvasBg)
     ) {
-        CompactLifeHeader(
-            character = character,
-            expression = uiState.headerExpression,
-            netWorth = netWorth,
-            questCount = uiState.yearQuests.size,
-            questCompleted = uiState.yearQuestProgress.count { it.completed },
-            onViewCharacterStats = onViewCharacterStats,
-            onOpenSettings = onOpenSettings,
-            onOpenQuests = { showQuestsSheet = true }
-        )
-
         val listState = rememberLazyListState()
         LaunchedEffect(character.age, character.eventLog.size) {
             if (character.eventLog.isNotEmpty()) {
@@ -643,8 +715,8 @@ private fun LifeTabContent(
                 state = listState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                    .padding(horizontal = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item { Spacer(modifier = Modifier.height(4.dp)) }
 
@@ -667,16 +739,8 @@ private fun LifeTabContent(
                         )
                     }
                 } else {
-                    itemsIndexed(visibleJournal) { index, entry ->
-                        if (entry.startsWith("── Age ") || (entry.startsWith("Age ") && entry.length <= 8)) {
-                            val ageNum = entry.filter { it.isDigit() }.toIntOrNull() ?: character.age
-                            YearLogHeader(age = ageNum)
-                        } else {
-                            EventLogStrip(
-                                entry = entry,
-                                ageTag = if (index == 0 && !visibleJournal.any { it.startsWith("── Age ") }) character.age else -1
-                            )
-                        }
+                    items(yearBlocks) { block ->
+                        YearTimelineCard(yearBlock = block)
                     }
                     if (!journalExpanded && hiddenJournalCount > 0) {
                         item {
@@ -724,12 +788,12 @@ private fun LifeTabContent(
             )
         }
 
-        // Docked Stat Strip + Age Up CTA directly above bottom navigation
+        // Docked bottom control deck with stat strip and 3D tactile Age Up button
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(CreamBg)
-                .padding(horizontal = 14.dp, vertical = 6.dp),
+                .background(CanvasBg)
+                .padding(horizontal = 10.dp, vertical = 6.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             DockedStatStrip(
@@ -753,7 +817,102 @@ private fun LifeTabContent(
 private const val JOURNAL_VISIBLE_CAP = 30
 
 @Composable
-private fun CompactLifeHeader(
+private fun YearTimelineCard(
+    yearBlock: YearBlock,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+        border = androidx.compose.foundation.BorderStroke(1.dp, BorderCardSlate),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(DeepSlate)
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = "AGE ${yearBlock.age}",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 11.sp,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    thickness = 1.dp,
+                    color = Hairline
+                )
+            }
+
+            yearBlock.entries.forEach { entry ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val dotColor = when (entry.tone) {
+                        EventLogTone.POSITIVE -> Color(0xFF10B981)
+                        EventLogTone.MILESTONE -> Color(0xFFF59E0B)
+                        EventLogTone.NEGATIVE -> Color(0xFFEF4444)
+                        EventLogTone.NEUTRAL -> Color(0xFF64748B)
+                    }
+                    Text(
+                        text = "•",
+                        color = dotColor,
+                        fontWeight = FontWeight.Black,
+                        fontSize = 15.sp,
+                        lineHeight = 16.sp,
+                        modifier = Modifier.padding(top = 1.dp)
+                    )
+                    Text(
+                        text = entry.text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = InkPrimary,
+                        fontSize = 13.sp,
+                        lineHeight = 18.sp,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (!entry.deltaBadge.isNullOrBlank()) {
+                        val isPositive = !entry.deltaBadge.startsWith("-")
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(if (isPositive) Color(0xFFDCFCE7) else Color(0xFFFEE2E2))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = entry.deltaBadge,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isPositive) Color(0xFF15803D) else Color(0xFFB91C1C),
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GlobalHudHeader(
     character: Character,
     expression: Expression,
     netWorth: Int,
@@ -766,11 +925,11 @@ private fun CompactLifeHeader(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 14.dp, vertical = 6.dp),
-        shape = RoundedCornerShape(18.dp),
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = PaperWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Hairline)
+        border = androidx.compose.foundation.BorderStroke(1.dp, BorderCardSlate)
     ) {
         Row(
             modifier = Modifier

@@ -53,6 +53,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import com.maisha.game.ui.components.DrillDownRow
+import com.maisha.game.ui.components.InsetCardContainer
+import com.maisha.game.ui.components.InsetDivider
 import com.maisha.game.ui.theme.AccentPink
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.NavyDeep
@@ -359,35 +361,11 @@ fun AssetsScreen(
         modifier = modifier
             .fillMaxSize()
             .background(CreamBg)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
-        TabPageHero(
-            title = stringResource(R.string.screen_assets),
-            subtitle = stringResource(R.string.assets_subtitle),
-            primaryChip = formatMoney(character.stats.money, character.countryCode)
-        )
-
-        CategoryFilterChipRow(
-            labels = chipLabels,
-            selectedIndex = selectedCategory,
-            onSelected = { selectedCategory = it },
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-        )
-
-        val showMarketsTip = uiState.tipsLoaded &&
-            OnboardingTips.ASSETS_MARKETS !in uiState.seenTipIds
-        if (showMarketsTip) {
-            DismissibleTipCard(
-                text = stringResource(R.string.tip_assets_markets),
-                onDismiss = onDismissAssetsMarketsTip,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-            )
-        }
-
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(MaishaSpacing.sm + 2.dp)
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             if (character.age < 16) {
                 item(key = "dependent_minor") {
@@ -438,16 +416,16 @@ fun AssetsScreen(
                     }
                 }
             } else {
-                if (show(AssetsCategory.OVERVIEW) || category == AssetsCategory.ALL) {
-                    val houses = character.assets.filter { it.type == AssetType.HOUSE }
-                    val vehicles = character.assets.filter {
-                        it.type == AssetType.CAR || it.type == AssetType.MOTORBIKE ||
-                            it.type == AssetType.BOAT || it.type == AssetType.PRIVATE_JET
-                    }
-                    val propertyEquity = houses.sumOf { (it.currentValue - it.mortgageBalance).coerceAtLeast(0) }
-                    val vehicleUpkeep = vehicles.sumOf { it.monthlyUpkeep * 12 }
+                val houses = character.assets.filter { it.type == AssetType.HOUSE }
+                val vehicles = character.assets.filter {
+                    it.type == AssetType.CAR || it.type == AssetType.MOTORBIKE ||
+                        it.type == AssetType.BOAT || it.type == AssetType.PRIVATE_JET
+                }
+                val propertyEquity = houses.sumOf { (it.currentValue - it.mortgageBalance).coerceAtLeast(0) }
+                val vehicleUpkeep = vehicles.sumOf { it.monthlyUpkeep * 12 }
 
-                    item(key = "drill_real_estate") {
+                item(key = "drill_assets_group") {
+                    InsetCardContainer(title = stringResource(R.string.screen_assets)) {
                         DrillDownRow(
                             title = stringResource(R.string.asset_cat_real_estate),
                             subtitle = if (houses.isNotEmpty()) {
@@ -459,11 +437,12 @@ fun AssetsScreen(
                             iconTint = LifeGreen,
                             trailingBadge = if (houses.isNotEmpty()) "${houses.size}" else null,
                             trailingBadgeColor = LifeGreen,
+                            insideContainer = true,
                             onClick = { activeAssetSheet = AssetSheet.REAL_ESTATE }
                         )
-                    }
 
-                    item(key = "drill_vehicles") {
+                        InsetDivider()
+
                         DrillDownRow(
                             title = stringResource(R.string.asset_cat_vehicles),
                             subtitle = if (vehicles.isNotEmpty()) {
@@ -475,32 +454,35 @@ fun AssetsScreen(
                             iconTint = TealPrimary,
                             trailingBadge = if (vehicles.isNotEmpty()) "${vehicles.size}" else null,
                             trailingBadgeColor = TealPrimary,
+                            insideContainer = true,
                             onClick = { activeAssetSheet = AssetSheet.VEHICLES }
                         )
-                    }
 
-                    item(key = "drill_markets") {
+                        InsetDivider()
+
                         DrillDownRow(
                             title = stringResource(R.string.asset_cat_markets),
                             subtitle = "Portfolio: ${formatMoney(character.investmentPortfolioValue, character.countryCode)} · Savings: ${formatMoney(character.savingsBalance, character.countryCode)}",
                             icon = Icons.Rounded.Savings,
                             iconTint = GoldAccent,
+                            insideContainer = true,
                             onClick = { activeAssetSheet = AssetSheet.MARKETS }
                         )
-                    }
 
-                    item(key = "drill_living") {
+                        InsetDivider()
+
                         DrillDownRow(
                             title = stringResource(R.string.asset_cat_living),
                             subtitle = "${character.lifestyle.livingStandard.name} · ${formatMoney(livingCost, character.countryCode)}/yr",
                             icon = Icons.Rounded.Apartment,
                             iconTint = AccentPink,
+                            insideContainer = true,
                             onClick = { activeAssetSheet = AssetSheet.LIVING_STANDARD }
                         )
-                    }
 
-                    if (willBeneficiaries.isNotEmpty() && character.alive) {
-                        item(key = "drill_will") {
+                        if (willBeneficiaries.isNotEmpty() && character.alive) {
+                            InsetDivider()
+
                             DrillDownRow(
                                 title = stringResource(R.string.asset_cat_will),
                                 subtitle = if (character.will != null) {
@@ -512,11 +494,13 @@ fun AssetsScreen(
                                 iconTint = NavyDeep,
                                 trailingBadge = if (character.will != null) "On File" else null,
                                 trailingBadgeColor = if (character.will != null) SuccessGreen else null,
+                                insideContainer = true,
                                 onClick = { showWillEditor = true }
                             )
                         }
                     }
                 }
+            }
 
             if (show(AssetsCategory.MARKETS)) {
                 item {
@@ -660,7 +644,6 @@ fun AssetsScreen(
             }
 
             item { Spacer(modifier = Modifier.height(16.dp)) }
-        }
         }
     }
 

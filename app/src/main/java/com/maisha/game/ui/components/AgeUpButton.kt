@@ -12,6 +12,8 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
@@ -65,10 +68,11 @@ fun AgeUpButton(
     )
 
     val buttonBrush = when {
-        !canPress -> Brush.horizontalGradient(listOf(CreamMuted, CreamMuted))
-        pressed -> Brush.horizontalGradient(listOf(LifeGreenPressed, LifeGreenPressed))
-        else -> Brush.horizontalGradient(listOf(LifeGreen, Color(0xFF16A34A)))
+        !canPress -> Brush.verticalGradient(listOf(Color(0xFFE2E8F0), Color(0xFFCBD5E1)))
+        pressed -> Brush.verticalGradient(listOf(LifeGreenPressed, Color(0xFF15803D)))
+        else -> Brush.verticalGradient(listOf(LifeGreen, Color(0xFF16A34A)))
     }
+    val lipColor = if (canPress) Color(0xFF15803D) else Color(0xFF94A3B8)
     val contentColor = if (canPress) Color.White else InkTertiary
 
     Box(
@@ -78,16 +82,11 @@ fun AgeUpButton(
             .scale(scale)
             .shadow(
                 elevation = if (canPress && !pressed) 4.dp else 0.dp,
-                shape = MaishaRadius.ageUpShape,
+                shape = RoundedCornerShape(18.dp),
                 spotColor = LifeGreen.copy(alpha = 0.35f)
             )
-            .clip(MaishaRadius.ageUpShape)
-            .background(buttonBrush)
-            .border(
-                width = 1.dp,
-                color = if (canPress) Color.White.copy(alpha = 0.2f) else Hairline,
-                shape = MaishaRadius.ageUpShape
-            )
+            .clip(RoundedCornerShape(18.dp))
+            .background(lipColor)
             .semantics { role = Role.Button }
             .pointerInput(canPress, onClick) {
                 if (!canPress) return@pointerInput
@@ -103,19 +102,35 @@ fun AgeUpButton(
                         pressed = false
                     }
                 }
-            },
-        contentAlignment = Alignment.Center
+            }
     ) {
-        Text(
-            text = when {
-                isLoading -> stringResource(R.string.btn_aging)
-                else -> stringResource(R.string.btn_live_another_year)
-            },
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp,
-            color = contentColor
-        )
+        // 3D tactile button face that pushes down onto the bottom lip
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp)
+                .padding(top = if (pressed && canPress) 4.dp else 0.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(buttonBrush)
+                .border(
+                    width = 1.dp,
+                    color = if (canPress) Color.White.copy(alpha = 0.25f) else Hairline,
+                    shape = RoundedCornerShape(18.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = when {
+                    isLoading -> stringResource(R.string.btn_aging)
+                    else -> stringResource(R.string.btn_live_another_year)
+                },
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = contentColor,
+                fontSize = 17.sp,
+                letterSpacing = 0.3.sp
+            )
+        }
     }
 }
 

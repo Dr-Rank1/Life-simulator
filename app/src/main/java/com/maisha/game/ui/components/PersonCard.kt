@@ -61,7 +61,8 @@ fun PersonCard(
     relationLabel: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    playerCountryCode: String? = null
+    playerCountryCode: String? = null,
+    insideContainer: Boolean = false
 ) {
     val expression = remember(person.id, person.relationshipLevel) {
         ExpressionResolver.resolvePersonExpression(person)
@@ -84,30 +85,11 @@ fun PersonCard(
         else -> BorderStroke(1.dp, Hairline)
     }
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .semantics(mergeDescendants = true) {
-                contentDescription = cardDescription
-                role = Role.Button
-            }
-            .clickable(onClick = onClick),
-        shape = MaishaRadius.cardShape,
-        colors = CardDefaults.cardColors(
-            containerColor = when (person.relation) {
-                RelationType.BEST_FRIEND -> GoldAccent.copy(alpha = 0.12f)
-                RelationType.ENEMY -> CoralNegative.copy(alpha = 0.10f)
-                else -> MaterialTheme.colorScheme.surface
-            }
-        ),
-        border = socialBorder,
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-
+    val rowContent = @Composable {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(MaishaSpacing.md),
+                .padding(horizontal = 14.dp, vertical = if (insideContainer) 10.dp else MaishaSpacing.md),
             horizontalArrangement = Arrangement.spacedBy(MaishaSpacing.md),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -217,6 +199,42 @@ fun PersonCard(
                     modifier = Modifier.size(18.dp)
                 )
             }
+        }
+    }
+
+    if (insideContainer) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .semantics(mergeDescendants = true) {
+                    contentDescription = cardDescription
+                    role = Role.Button
+                }
+                .clickable(onClick = onClick)
+        ) {
+            rowContent()
+        }
+    } else {
+        Card(
+            modifier = modifier
+                .fillMaxWidth()
+                .semantics(mergeDescendants = true) {
+                    contentDescription = cardDescription
+                    role = Role.Button
+                }
+                .clickable(onClick = onClick),
+            shape = MaishaRadius.cardShape,
+            colors = CardDefaults.cardColors(
+                containerColor = when (person.relation) {
+                    RelationType.BEST_FRIEND -> GoldAccent.copy(alpha = 0.12f)
+                    RelationType.ENEMY -> CoralNegative.copy(alpha = 0.10f)
+                    else -> MaterialTheme.colorScheme.surface
+                }
+            ),
+            border = socialBorder,
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            rowContent()
         }
     }
 }

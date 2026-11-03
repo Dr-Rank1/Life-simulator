@@ -11,10 +11,17 @@ val NavySurface = Color(0xFF152238)
 val NavyElevated = Color(0xFF1E2F4A)
 val NavyMid = Color(0xFF0F1E35)
 
-val CreamBg = Color(0xFFF8F9FA)
-val CreamMuted = Color(0xFFEFF1F5)
+val CanvasBg = Color(0xFFEEF2F6)
+val CreamBg = CanvasBg
+val CreamMuted = Color(0xFFE2E8F0)
 val SurfaceMuted = CreamMuted
 val PaperWhite = Color(0xFFFFFFFF)
+
+val DeepSlate = Color(0xFF0F172A)
+val DeepSlateCard = Color(0xFF1E293B)
+val BorderLipGreen = Color(0xFF15803D)
+val BorderCardSlate = Color(0xFFCBD5E1)
+val SlateDivider = Color(0xFFF1F5F9)
 
 val InkPrimary = Color(0xFF1E293B)
 val InkSecondary = Color(0xFF64748B)

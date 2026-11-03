@@ -85,7 +85,14 @@ fun resolveAvatarLayers(
 
 fun buildAvatarLayerStack(
     config: AvatarConfig,
-    ageStage: AgeStage
+    ageStage: AgeStage,
+    age: Int = when (ageStage) {
+        AgeStage.BABY -> 0
+        AgeStage.CHILD -> 7
+        AgeStage.TEEN -> 15
+        AgeStage.ADULT -> 25
+        AgeStage.SENIOR -> 65
+    }
 ): AvatarLayerStack {
     val safe = AvatarAssetMapper.sanitize(config)
     val skin = AvatarAssetMapper.skinTint(safe.skinTone)
@@ -113,11 +120,11 @@ fun buildAvatarLayerStack(
         visible(AvatarAssetMapper.getCheeksOverlay(ageStage))
     )
 
-    val isChildOrBaby = ageStage == AgeStage.BABY || ageStage == AgeStage.CHILD
+    val allowAdultFeatures = age >= 14 && ageStage != AgeStage.BABY && ageStage != AgeStage.CHILD
     val front = listOfNotNull(
-        // Dynamic accessories on the face, beneath front hair: beards and reading glasses hidden for children < 14
-        if (!isChildOrBaby) visible(AvatarAssetMapper.getFacialHairOverlay(safe.facialHair), hair) else null,
-        if (!isChildOrBaby || safe.eyewear != com.maisha.game.data.model.EyewearStyle.READING_GLASSES) {
+        // Dynamic accessories on the face, beneath front hair: beards and reading glasses hidden for age < 14
+        if (allowAdultFeatures) visible(AvatarAssetMapper.getFacialHairOverlay(safe.facialHair), hair) else null,
+        if (allowAdultFeatures || safe.eyewear != com.maisha.game.data.model.EyewearStyle.READING_GLASSES) {
             visible(AvatarAssetMapper.getEyewearOverlay(safe.eyewear))
         } else null,
         visible(AvatarAssetMapper.getAgingDetailsOverlay(safe.agingDetails, ageStage)),
@@ -242,8 +249,8 @@ private fun LayeredAvatarContent(
 ) {
     val stage = ageStageFor(age)
     val safeConfig = remember(config) { AvatarAssetMapper.sanitize(config) }
-    val stack = remember(safeConfig, stage) {
-        buildAvatarLayerStack(safeConfig, stage)
+    val stack = remember(safeConfig, stage, age) {
+        buildAvatarLayerStack(safeConfig, stage, age)
     }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

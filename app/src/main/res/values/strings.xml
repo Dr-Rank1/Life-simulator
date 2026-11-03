@@ -69,6 +69,7 @@
     <!-- Navigation -->
     <string name="nav_life">Life</string>
     <string name="nav_family">Relationships</string>
+    <string name="nav_people">People</string>
     <string name="nav_career">Career</string>
     <string name="nav_assets">Assets</string>
     <string name="nav_actions">Actions</string>
