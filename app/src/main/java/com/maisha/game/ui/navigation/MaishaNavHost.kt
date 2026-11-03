@@ -174,6 +174,10 @@ fun MaishaNavHost(
                 onCountrySelected = viewModel::onCountrySelected,
                 onCountrySearchChange = viewModel::onCountrySearchChange,
                 onRandomName = viewModel::onRandomName,
+                onCycleAvatar = viewModel::onCycleAvatar,
+                onRandomizeLife = viewModel::onRandomizeLife,
+                onStatsChange = viewModel::onStatsChange,
+                onStartLife = viewModel::onStartLife,
                 onContinueToAvatar = viewModel::onContinueToAvatarPicker
             )
         }

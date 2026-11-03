@@ -192,6 +192,7 @@
     <string name="format_died_at_age">Died at %s</string>
 
     <!-- Character creation -->
+    <string name="title_new_life">New Life</string>
     <string name="second_wind_bonus_active">Second Wind bonus active: %s on your new life!</string>
     <string name="label_your_name">Your name</string>
     <string name="label_whats_your_name">What\'s your name?</string>
@@ -203,6 +204,15 @@
     <string name="gender_male">Male</string>
     <string name="gender_female">Female</string>
     <string name="error_name_required">Please enter a name</string>
+    <string name="btn_randomize_life">Randomize Life</string>
+    <string name="btn_start_named_life">Start %1$s\'s Life</string>
+    <string name="custom_attributes_optional">Custom Attributes (Optional)</string>
+    <string name="custom_attributes_title">Starting Attributes</string>
+    <string name="custom_attributes_subtitle">Adjust your newborn character\'s starting stats (40–100)</string>
+    <string name="select_country_title">Select Country of Birth</string>
+    <string name="dice_random_name">Randomize Name</string>
+    <string name="cycle_avatar_hint">Tap to change appearance</string>
+    <string name="btn_done">Done</string>
 
     <!-- Life screen -->
     <string name="empty_no_character">No saved life found here.</string>

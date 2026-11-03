@@ -1,4 +1,3 @@
-// app/src/main/java/com/maisha/game/ui/charactercreation/CharacterCreationViewModel.kt (modified — country + avatar flow)
 package com.maisha.game.ui.charactercreation
 
 import android.content.Context
@@ -7,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maisha.game.R
 import com.maisha.game.data.CountryCatalog
+import com.maisha.game.data.NamePool
 import com.maisha.game.data.local.CharacterRepository
 import com.maisha.game.data.local.MAX_SLOTS
 import com.maisha.game.data.local.MetaBonusRepository
@@ -30,15 +30,16 @@ import kotlin.random.Random
 
 data class CharacterCreationUiState(
     val name: String = "",
+    val hasUserEditedName: Boolean = false,
     val selectedGender: Gender = Gender.MALE,
     val selectedCountryCode: String = "US",
     val countrySearchQuery: String = "",
-    val avatarConfig: AvatarConfig = AvatarConfig.random(),
+    val avatarConfig: AvatarConfig = AvatarConfig.random().copy(facialHair = null, eyewear = null),
     val selectedStats: Stats = Stats(
-        health = Random.nextInt(40, 71),
-        happiness = Random.nextInt(40, 71),
-        smarts = Random.nextInt(40, 71),
-        looks = Random.nextInt(40, 71),
+        health = Random.nextInt(50, 95),
+        happiness = Random.nextInt(50, 95),
+        smarts = Random.nextInt(50, 95),
+        looks = Random.nextInt(50, 95),
         money = 0,
         karma = 50
     ),
@@ -65,10 +66,28 @@ class CharacterCreationViewModel @Inject constructor(
         ?: 0
 
     private val _uiState = MutableStateFlow(
-        CharacterCreationUiState(
-            selectedCountryCode = resolveDefaultCountryCode(),
-            // keep default random stats
-        )
+        run {
+            val defaultCountry = resolveDefaultCountryCode()
+            val defaultGender = if (Random.nextBoolean()) Gender.MALE else Gender.FEMALE
+            val defaultName = NamePool.randomFullName(defaultGender, defaultCountry)
+            val defaultAvatar = AvatarConfig.random().copy(facialHair = null, eyewear = null)
+            val defaultStats = Stats(
+                health = Random.nextInt(50, 95),
+                happiness = Random.nextInt(50, 95),
+                smarts = Random.nextInt(50, 95),
+                looks = Random.nextInt(50, 95),
+                money = 0,
+                karma = 50
+            )
+            CharacterCreationUiState(
+                name = defaultName,
+                hasUserEditedName = false,
+                selectedGender = defaultGender,
+                selectedCountryCode = defaultCountry,
+                avatarConfig = defaultAvatar,
+                selectedStats = defaultStats
+            )
+        }
     )
     val uiState: StateFlow<CharacterCreationUiState> = _uiState.asStateFlow()
 
@@ -100,15 +119,29 @@ class CharacterCreationViewModel @Inject constructor(
 
     fun onNameChange(name: String) {
         val trimmed = name.take(MAX_NAME_LENGTH)
-        _uiState.update { it.copy(name = trimmed, nameError = null) }
+        _uiState.update { it.copy(name = trimmed, hasUserEditedName = true, nameError = null) }
     }
 
     fun onGenderSelected(gender: Gender) {
-        _uiState.update { it.copy(selectedGender = gender) }
+        _uiState.update { state ->
+            val newName = if (!state.hasUserEditedName) {
+                NamePool.randomFullName(gender, state.selectedCountryCode)
+            } else {
+                state.name
+            }
+            state.copy(selectedGender = gender, name = newName)
+        }
     }
 
     fun onCountrySelected(countryCode: String) {
-        _uiState.update { it.copy(selectedCountryCode = countryCode, countrySearchQuery = "") }
+        _uiState.update { state ->
+            val newName = if (!state.hasUserEditedName) {
+                NamePool.randomFullName(state.selectedGender, countryCode)
+            } else {
+                state.name
+            }
+            state.copy(selectedCountryCode = countryCode, name = newName, countrySearchQuery = "")
+        }
     }
 
     fun onCountrySearchChange(query: String) {
@@ -116,12 +149,33 @@ class CharacterCreationViewModel @Inject constructor(
     }
 
     fun onAvatarChange(config: AvatarConfig) {
-        _uiState.update { it.copy(avatarConfig = config) }
+        _uiState.update { it.copy(avatarConfig = config.copy(facialHair = null, eyewear = null)) }
+    }
+
+    fun onCycleAvatar() {
+        _uiState.update { state ->
+            val cur = state.avatarConfig
+            val nextSkin = (cur.skinTone + 1) % AvatarConfig.SKIN_TONE_COUNT
+            val nextHair = (cur.hairStyle + 1) % AvatarConfig.HAIR_STYLE_COUNT
+            val nextColor = (cur.hairColor + 1) % AvatarConfig.HAIR_COLOR_COUNT
+            state.copy(
+                avatarConfig = cur.copy(
+                    skinTone = nextSkin,
+                    hairStyle = nextHair,
+                    hairColor = nextColor,
+                    facialHair = null,
+                    eyewear = null
+                )
+            )
+        }
     }
 
     fun onRandomName() {
-        val requestId = ++randomNameGeneration
         val state = _uiState.value
+        val fallbackName = NamePool.randomFullName(state.selectedGender, state.selectedCountryCode)
+        _uiState.update { it.copy(name = fallbackName, hasUserEditedName = false, nameError = null) }
+
+        val requestId = ++randomNameGeneration
         viewModelScope.launch {
             val generated = randomNameService.fetchName(
                 gender = state.selectedGender,
@@ -131,9 +185,37 @@ class CharacterCreationViewModel @Inject constructor(
             _uiState.update {
                 it.copy(
                     name = generated.fullName.take(MAX_NAME_LENGTH),
+                    hasUserEditedName = false,
                     nameError = null
                 )
             }
+        }
+    }
+
+    fun onRandomizeLife() {
+        val country = CountryCatalog.all().random().code
+        val gender = if (Random.nextBoolean()) Gender.MALE else Gender.FEMALE
+        val name = NamePool.randomFullName(gender, country)
+        val avatar = AvatarConfig.random().copy(facialHair = null, eyewear = null)
+        val stats = Stats(
+            health = Random.nextInt(50, 95),
+            happiness = Random.nextInt(50, 95),
+            smarts = Random.nextInt(50, 95),
+            looks = Random.nextInt(50, 95),
+            money = 0,
+            karma = 50
+        )
+        _uiState.update {
+            it.copy(
+                selectedCountryCode = country,
+                selectedGender = gender,
+                name = name,
+                hasUserEditedName = false,
+                avatarConfig = avatar,
+                selectedStats = stats,
+                countrySearchQuery = "",
+                nameError = null
+            )
         }
     }
 
@@ -172,10 +254,8 @@ class CharacterCreationViewModel @Inject constructor(
 
     fun onStartLife() {
         val state = _uiState.value
-        val trimmedName = state.name.trim()
-        if (trimmedName.isEmpty()) {
-            _uiState.update { it.copy(nameError = context.getString(R.string.error_name_required)) }
-            return
+        val trimmedName = state.name.trim().ifEmpty {
+            NamePool.randomFullName(state.selectedGender, state.selectedCountryCode)
         }
         if (slotId !in 0 until MAX_SLOTS) return
 

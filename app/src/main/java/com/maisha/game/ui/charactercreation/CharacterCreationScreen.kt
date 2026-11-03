@@ -1,33 +1,27 @@
 // app/src/main/java/com/maisha/game/ui/charactercreation/CharacterCreationScreen.kt
 package com.maisha.game.ui.charactercreation
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.EaseOutCubic
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,28 +29,36 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.Shuffle
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -65,52 +67,35 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maisha.game.R
 import com.maisha.game.data.CountryCatalog
 import com.maisha.game.data.model.Country
 import com.maisha.game.data.model.Gender
+import com.maisha.game.data.model.Stats
+import com.maisha.game.ui.avatar.AvatarImage
 import com.maisha.game.ui.components.CountryFlag
-import com.maisha.game.ui.components.PersonAvatar
 import com.maisha.game.ui.theme.CreamBg
-import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.LifeGreenSoft
-
-import com.maisha.game.ui.theme.OutlineInk
 import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.StatHappiness
 import com.maisha.game.ui.theme.StatHealth
 import com.maisha.game.ui.theme.StatLooks
 import com.maisha.game.ui.theme.StatSmarts
 import com.maisha.game.ui.theme.TealPrimary
+import kotlin.math.roundToInt
 
-// Country backdrop colors — one vibrant gradient per country group
-private fun countryGradient(code: String): List<Color> = when (code) {
-    "KE" -> listOf(Color(0xFF006600), Color(0xFF000000), Color(0xFFBB0000))
-    "NG" -> listOf(Color(0xFF008751), Color(0xFF1A3A1A), Color(0xFF008751))
-    "ZA" -> listOf(Color(0xFF007A4D), Color(0xFF1A1A1A), Color(0xFFFFB612))
-    "US" -> listOf(Color(0xFF3C3B6E), Color(0xFF1A1A2E), Color(0xFFB22234))
-    "UK", "GB" -> listOf(Color(0xFF012169), Color(0xFF0A0A2E), Color(0xFFC8102E))
-    "IN" -> listOf(Color(0xFFFF6600), Color(0xFF1A0A00), Color(0xFF138808))
-    "BR" -> listOf(Color(0xFF009C3B), Color(0xFF001A0D), Color(0xFFF8C300))
-    "JP" -> listOf(Color(0xFFBC002D), Color(0xFF1A0008), Color(0xFFBC002D))
-    "CN" -> listOf(Color(0xFFDE2910), Color(0xFF1A0000), Color(0xFFFFDE00))
-    "DE" -> listOf(Color(0xFF000000), Color(0xFF1A1A00), Color(0xFFDD0000))
-    "FR" -> listOf(Color(0xFF002395), Color(0xFF000D2E), Color(0xFFED2939))
-    "MX" -> listOf(Color(0xFF006847), Color(0xFF001A12), Color(0xFFCE1126))
-    "CA" -> listOf(Color(0xFFFF0000), Color(0xFF1A0000), Color(0xFFFF0000))
-    "AU" -> listOf(Color(0xFF00008B), Color(0xFF000023), Color(0xFF8B0000))
-    "RU" -> listOf(Color(0xFF0039A6), Color(0xFF00001A), Color(0xFFD52B1E))
-    else -> listOf(Color(0xFF1A2A4A), Color(0xFF0B1628), Color(0xFF1E2F4A))
-}
-
+/**
+ * Ultra-minimal single-screen character creation inspired by BitLife's "New Life" screen.
+ * Pre-filled with randomized defaults and ready to start life in one tap.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CharacterCreationScreen(
     uiState: CharacterCreationUiState,
@@ -120,115 +105,126 @@ fun CharacterCreationScreen(
     onCountrySelected: (String) -> Unit,
     onCountrySearchChange: (String) -> Unit,
     onRandomName: () -> Unit,
-    onContinueToAvatar: () -> Unit
+    onCycleAvatar: () -> Unit = {},
+    onRandomizeLife: () -> Unit = {},
+    onStatsChange: (Stats) -> Unit = {},
+    onStartLife: () -> Unit = {},
+    onContinueToAvatar: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
-    val countriesToShow = if (uiState.countrySearchQuery.isBlank()) {
-        CountryCatalog.all()
-    } else {
-        filteredCountries
-    }
     val selectedCountry = CountryCatalog.getCountry(uiState.selectedCountryCode)
+
+    var showCountrySheet by remember { mutableStateOf(false) }
+    var showStatsSheet by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(CreamBg)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .imePadding()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(top = 48.dp, bottom = 32.dp),
+                .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            // ── App title ──────────────────────────────────────────────────
+            // ── Top Header & Title ──────────────────────────────────────────
             Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.ExtraBold,
+                text = stringResource(R.string.title_new_life),
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
                 color = InkPrimary,
-                letterSpacing = 1.sp
-            )
-            Text(
-                text = stringResource(R.string.tagline),
-                style = MaterialTheme.typography.bodyMedium,
-                color = InkSecondary,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(28.dp))
-
-            // ── Avatar preview (live, uses current gender + avatarConfig) ──
-            Box(
-                modifier = Modifier
-                    .size(112.dp)
-                    .clip(CircleShape)
-                    .background(PaperWhite)
-                    .border(2.dp, LifeGreenSoft, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                PersonAvatar(
-                    avatarConfig = uiState.avatarConfig,
-                    size = 104,
-                    age = 0
+            if (uiState.secondWindBonusLabel != null) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = uiState.secondWindBonusLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = LifeGreen,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // ── Birth stat preview bars ────────────────────────────────────
-            BirthStatPreviewRow()
+            // ── Centered 88dp Baby Avatar with Shuffle Badge ────────────────
+            val avatarCycleHint = stringResource(R.string.cycle_avatar_hint)
+            Box(
+                modifier = Modifier
+                    .size(92.dp)
+                    .clip(CircleShape)
+                    .clickable(onClick = onCycleAvatar)
+                    .semantics { contentDescription = avatarCycleHint },
+                contentAlignment = Alignment.Center
+            ) {
+                AvatarImage(
+                    config = uiState.avatarConfig,
+                    size = 88.dp,
+                    age = 0
+                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(28.dp)
+                        .clip(CircleShape)
+                        .background(PaperWhite)
+                        .border(1.dp, Hairline, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Shuffle,
+                        contentDescription = avatarCycleHint,
+                        tint = TealPrimary,
+                        modifier = Modifier.size(15.dp)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // ── Second wind bonus ──────────────────────────────────────────
-            uiState.secondWindBonusLabel?.let { bonusLabel ->
-                AnimatedVisibility(
-                    visible = true,
-                    enter = fadeIn() + scaleIn(initialScale = 0.9f)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(GoldAccent.copy(alpha = 0.18f))
-                            .border(1.dp, GoldAccent.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text("⭐", style = MaterialTheme.typography.titleMedium)
-                        Text(
-                            text = stringResource(R.string.second_wind_bonus_active, bonusLabel),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = GoldAccent,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            // ── Name field ────────────────────────────────────────────────
-            SectionLabel(text = stringResource(R.string.label_whats_your_name))
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
+            // ── Three Minimal Stacked Input Rows (12dp spacing) ─────────────
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // Row 1: Name Field with inline Dice button
                 OutlinedTextField(
                     value = uiState.name,
                     onValueChange = onNameChange,
-                    placeholder = { Text(stringResource(R.string.hint_enter_name), color = InkSecondary) },
+                    label = { Text(stringResource(R.string.label_your_name)) },
+                    placeholder = { Text(stringResource(R.string.hint_enter_name)) },
                     singleLine = true,
                     isError = uiState.nameError != null,
-                    supportingText = uiState.nameError?.let { err -> { Text(err, color = Color(0xFFFF8A80)) } },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Person,
+                            contentDescription = null,
+                            tint = InkTertiary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = onRandomName,
+                            modifier = Modifier.size(44.dp)
+                        ) {
+                            Text(
+                                text = "🎲",
+                                fontSize = 20.sp,
+                                modifier = Modifier.semantics {
+                                    contentDescription = "Randomize Name"
+                                }
+                            )
+                        }
+                    },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -236,394 +232,435 @@ fun CharacterCreationScreen(
                         unfocusedTextColor = InkPrimary,
                         focusedBorderColor = LifeGreen,
                         unfocusedBorderColor = Hairline,
-                        cursorColor = LifeGreen,
                         focusedContainerColor = PaperWhite,
                         unfocusedContainerColor = PaperWhite,
-                        errorBorderColor = Color(0xFFE53935),
-                        errorTextColor = InkPrimary
+                        cursorColor = LifeGreen
                     )
                 )
-                IconButton(
-                    onClick = onRandomName,
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(PaperWhite)
-                        .border(1.dp, Hairline, RoundedCornerShape(14.dp))
-                ) {
 
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = stringResource(R.string.btn_random_name),
-                        tint = GoldAccent,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ── Gender selector ───────────────────────────────────────────
-            SectionLabel(text = stringResource(R.string.label_gender))
-            Spacer(modifier = Modifier.height(8.dp))
-            GenderToggle(
-                selected = uiState.selectedGender,
-                onSelect = onGenderSelected
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // ── Country strip ─────────────────────────────────────────────
-            SectionLabel(text = stringResource(R.string.label_where_born))
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Selected country hero card
-            SelectedCountryCard(country = selectedCountry)
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Search bar (optional)
-            OutlinedTextField(
-                value = uiState.countrySearchQuery,
-                onValueChange = onCountrySearchChange,
-                placeholder = { Text(stringResource(R.string.hint_search_countries), color = InkSecondary) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = InkPrimary,
-                    unfocusedTextColor = InkPrimary,
-                    focusedBorderColor = LifeGreen,
-                    unfocusedBorderColor = Hairline,
-                    cursorColor = LifeGreen,
-                    focusedContainerColor = PaperWhite,
-                    unfocusedContainerColor = PaperWhite
-                )
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Horizontal country carousel
-            val lazyState = rememberLazyListState()
-            val selectedIndex = remember(uiState.selectedCountryCode, countriesToShow) {
-                countriesToShow.indexOfFirst { it.code == uiState.selectedCountryCode }.coerceAtLeast(0)
-            }
-            LaunchedEffect(selectedIndex) {
-                if (countriesToShow.isNotEmpty()) {
-                    lazyState.animateScrollToItem(selectedIndex)
-                }
-            }
-            if (countriesToShow.isEmpty()) {
-                Box(
+                // Row 2: Gender Segmented Pill Toggle
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    contentAlignment = Alignment.Center
+                        .height(54.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(PaperWhite)
+                        .border(1.dp, Hairline, RoundedCornerShape(16.dp))
+                        .padding(4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text(
-                        text = stringResource(R.string.no_countries_match),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = InkSecondary
-                    )
+                    val isMale = uiState.selectedGender == Gender.MALE
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (isMale) LifeGreenSoft else Color.Transparent)
+                            .clickable { onGenderSelected(Gender.MALE) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = "♂",
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isMale) LifeGreen else InkTertiary
+                            )
+                            Text(
+                                text = stringResource(R.string.gender_male),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (isMale) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isMale) InkPrimary else InkTertiary
+                            )
+                        }
+                    }
+
+                    val isFemale = uiState.selectedGender == Gender.FEMALE
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (isFemale) LifeGreenSoft else Color.Transparent)
+                            .clickable { onGenderSelected(Gender.FEMALE) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = "♀",
+                                fontSize = 17.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isFemale) LifeGreen else InkTertiary
+                            )
+                            Text(
+                                text = stringResource(R.string.gender_female),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (isFemale) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isFemale) InkPrimary else InkTertiary
+                            )
+                        }
+                    }
                 }
-            } else {
-                LazyRow(
-                    state = lazyState,
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
+
+                // Row 3: Country Selector (BitLife DrillDownRow style)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp)
+                        .clickable { showCountrySheet = true },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = PaperWhite),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                    border = BorderStroke(1.dp, Hairline)
                 ) {
-                    items(countriesToShow, key = { it.code }) { country ->
-                        CountryChip(
-                            country = country,
-                            selected = country.code == uiState.selectedCountryCode,
-                            onClick = { onCountrySelected(country.code) }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        CountryFlag(countryCode = selectedCountry.code, size = 28.dp)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = selectedCountry.displayName,
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = InkPrimary
+                            )
+                            Text(
+                                text = "${selectedCountry.currencyCode} (${selectedCountry.currencySymbol})",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = InkTertiary
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = null,
+                            tint = InkTertiary,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // ── CTA button ────────────────────────────────────────────────
-            Button(
-                onClick = onContinueToAvatar,
-                enabled = !uiState.isSaving,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(18.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = LifeGreen,
-                    contentColor = Color.White,
-                    disabledContainerColor = LifeGreen.copy(alpha = 0.4f),
-                    disabledContentColor = Color.White.copy(alpha = 0.5f)
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+            // ── Optional Custom Attributes Link ─────────────────────────────
+            TextButton(
+                onClick = { showStatsSheet = true },
+                modifier = Modifier.padding(vertical = 4.dp)
             ) {
-                Text(
-                    text = if (uiState.isSaving) {
-                        stringResource(R.string.btn_starting)
-                    } else {
-                        stringResource(R.string.btn_continue_avatar)
-                    },
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 0.5.sp
-                )
-            }
-        }
-    }
-}
-
-// ── Sub-components ─────────────────────────────────────────────────────────────
-
-@Composable
-private fun SectionLabel(text: String) {
-    Text(
-        text = text.uppercase(),
-        style = MaterialTheme.typography.labelSmall,
-        fontWeight = FontWeight.Bold,
-        color = InkSecondary,
-        letterSpacing = 1.5.sp,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-private fun GenderToggle(
-    selected: Gender,
-    onSelect: (Gender) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        GenderPill(
-            emoji = "♂",
-            label = stringResource(R.string.gender_male),
-            selected = selected == Gender.MALE,
-            selectedColor = Color(0xFF4B8EF0),
-            onClick = { onSelect(Gender.MALE) },
-            modifier = Modifier.weight(1f)
-        )
-        GenderPill(
-            emoji = "♀",
-            label = stringResource(R.string.gender_female),
-            selected = selected == Gender.FEMALE,
-            selectedColor = Color(0xFFE91E8C),
-            onClick = { onSelect(Gender.FEMALE) },
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun GenderPill(
-    emoji: String,
-    label: String,
-    selected: Boolean,
-    selectedColor: Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val bgColor by animateColorAsState(
-        targetValue = if (selected) selectedColor.copy(alpha = 0.15f) else PaperWhite,
-        animationSpec = tween(250, easing = EaseOutCubic),
-        label = "genderBg"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = if (selected) selectedColor else Hairline,
-        animationSpec = tween(250, easing = EaseOutCubic),
-        label = "genderBorder"
-    )
-    Box(
-        modifier = modifier
-            .height(52.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(bgColor)
-            .border(
-                width = if (selected) 2.dp else 1.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(14.dp)
-            )
-            .clickable(onClick = onClick)
-            .semantics { contentDescription = label },
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(emoji, style = MaterialTheme.typography.titleMedium)
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                color = InkPrimary
-            )
-            if (selected) {
                 Icon(
-                    Icons.Default.Check,
+                    imageVector = Icons.Rounded.Tune,
                     contentDescription = null,
-                    tint = selectedColor,
-                    modifier = Modifier.size(16.dp)
+                    tint = TealPrimary,
+                    modifier = Modifier.size(17.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.custom_attributes_optional),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TealPrimary
                 )
             }
-        }
-    }
-}
 
-@Composable
-private fun SelectedCountryCard(country: Country) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(PaperWhite)
-            .border(1.dp, Hairline, RoundedCornerShape(16.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
+            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        CountryFlag(countryCode = country.code, size = 44.dp)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = country.displayName,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = InkPrimary
-            )
-            Text(
-                text = "${country.currencySymbol}  ${country.currencyCode}",
-                style = MaterialTheme.typography.bodySmall,
-                color = InkSecondary
-            )
-        }
-        Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(GoldAccent),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                Icons.Default.Check,
-                contentDescription = null,
-                tint = InkPrimary,
-                modifier = Modifier.size(16.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun CountryChip(
-    country: Country,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val bgColor by animateColorAsState(
-        targetValue = if (selected) GoldAccent.copy(alpha = 0.2f) else PaperWhite,
-        animationSpec = tween(250),
-        label = "chipBg"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = if (selected) GoldAccent else OutlineInk.copy(alpha = 0.35f),
-        animationSpec = tween(250),
-        label = "chipBorder"
-    )
-    Row(
-        modifier = Modifier
-            .defaultMinSize(minWidth = 100.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(bgColor)
-            .border(
-                width = if (selected) 2.dp else 1.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(14.dp)
-            )
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp, horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        CountryFlag(countryCode = country.code, size = 28.dp)
-        Text(
-            text = country.displayName,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = InkPrimary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-/** Decorative mini-bars showing the stat range a new life can start with. */
-@Composable
-private fun BirthStatPreviewRow() {
-    val stats = listOf(
-        Triple("❤️", stringResource(R.string.stat_health), StatHealth),
-        Triple("😊", stringResource(R.string.stat_happiness), StatHappiness),
-        Triple("🧠", stringResource(R.string.stat_smarts), StatSmarts),
-        Triple("✨", stringResource(R.string.stat_looks), StatLooks)
-    )
-    val barProgress by animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = tween(durationMillis = 800, easing = EaseOutCubic),
-        label = "barsIn"
-    )
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        stats.forEach { (emoji, name, color) ->
+            // ── Action Footer ───────────────────────────────────────────────
             Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text(emoji, style = MaterialTheme.typography.titleSmall)
-                Box(
+                // Secondary Randomize Life Button
+                OutlinedButton(
+                    onClick = onRandomizeLife,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(PaperWhite)
+                        .height(50.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = PaperWhite,
+                        contentColor = InkPrimary
+                    ),
+                    border = BorderStroke(1.dp, Hairline)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.55f * barProgress)
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(3.dp))
-                            .drawBehind {
-                                drawRect(
-                                    Brush.horizontalGradient(
-                                        listOf(color.copy(alpha = 0.8f), color)
-                                    )
-                                )
-                            }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(text = "🎲", fontSize = 18.sp)
+                        Text(
+                            text = stringResource(R.string.btn_randomize_life),
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = InkPrimary
+                        )
+                    }
+                }
+
+                // Primary Start Life Button
+                val firstName = uiState.name.trim().split(" ").firstOrNull()?.ifBlank { null }
+                val startLabel = if (firstName != null) {
+                    stringResource(R.string.btn_start_named_life, firstName)
+                } else {
+                    stringResource(R.string.btn_start_life)
+                }
+                Button(
+                    onClick = onStartLife,
+                    enabled = !uiState.isSaving,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(54.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = LifeGreen,
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                ) {
+                    Text(
+                        text = startLabel,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
                     )
                 }
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = InkSecondary,
-                    fontSize = 9.sp
-                )
             }
         }
     }
-    Spacer(modifier = Modifier.height(4.dp))
-    Text(
-        text = stringResource(R.string.birth_stats_random_note),
-        style = MaterialTheme.typography.labelSmall,
-        color = InkTertiary,
-        textAlign = TextAlign.Center,
-        fontSize = 10.sp
-    )
+
+    // ── Country Picker Bottom Sheet ─────────────────────────────────────────
+    if (showCountrySheet) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showCountrySheet = false
+                onCountrySearchChange("")
+            },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = PaperWhite,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.select_country_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = InkPrimary
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                OutlinedTextField(
+                    value = uiState.countrySearchQuery,
+                    onValueChange = onCountrySearchChange,
+                    placeholder = { Text(stringResource(R.string.hint_search_countries), color = InkTertiary) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = LifeGreen,
+                        unfocusedBorderColor = Hairline,
+                        cursorColor = LifeGreen
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                val list = if (uiState.countrySearchQuery.isBlank()) {
+                    CountryCatalog.all()
+                } else {
+                    filteredCountries
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(340.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(list, key = { it.code }) { country ->
+                        val isSelected = country.code == uiState.selectedCountryCode
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) LifeGreenSoft else Color.Transparent)
+                                .clickable {
+                                    onCountrySelected(country.code)
+                                    showCountrySheet = false
+                                }
+                                .padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            CountryFlag(countryCode = country.code, size = 28.dp)
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = country.displayName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                    color = InkPrimary
+                                )
+                                Text(
+                                    text = "${country.currencyCode} (${country.currencySymbol})",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = InkTertiary
+                                )
+                            }
+                            if (isSelected) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Check,
+                                    contentDescription = null,
+                                    tint = LifeGreen,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+
+    // ── Custom Attributes Bottom Sheet ──────────────────────────────────────
+    if (showStatsSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showStatsSheet = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            containerColor = PaperWhite,
+            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.custom_attributes_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = InkPrimary
+                    )
+                    Text(
+                        text = stringResource(R.string.custom_attributes_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = InkTertiary
+                    )
+                }
+
+                // Health Slider
+                SimpleStatSlider(
+                    emoji = "❤️",
+                    name = stringResource(R.string.stat_health),
+                    value = uiState.selectedStats.health,
+                    accentColor = StatHealth,
+                    onValueChange = { onStatsChange(uiState.selectedStats.copy(health = it)) }
+                )
+
+                // Happiness Slider
+                SimpleStatSlider(
+                    emoji = "😊",
+                    name = stringResource(R.string.stat_happiness),
+                    value = uiState.selectedStats.happiness,
+                    accentColor = StatHappiness,
+                    onValueChange = { onStatsChange(uiState.selectedStats.copy(happiness = it)) }
+                )
+
+                // Smarts Slider
+                SimpleStatSlider(
+                    emoji = "🧠",
+                    name = stringResource(R.string.stat_smarts),
+                    value = uiState.selectedStats.smarts,
+                    accentColor = StatSmarts,
+                    onValueChange = { onStatsChange(uiState.selectedStats.copy(smarts = it)) }
+                )
+
+                // Looks Slider
+                SimpleStatSlider(
+                    emoji = "✨",
+                    name = stringResource(R.string.stat_looks),
+                    value = uiState.selectedStats.looks,
+                    accentColor = StatLooks,
+                    onValueChange = { onStatsChange(uiState.selectedStats.copy(looks = it)) }
+                )
+
+                Button(
+                    onClick = { showStatsSheet = false },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = LifeGreen)
+                ) {
+                    Text(
+                        text = stringResource(R.string.btn_done),
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun SimpleStatSlider(
+    emoji: String,
+    name: String,
+    value: Int,
+    accentColor: Color,
+    onValueChange: (Int) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(emoji, fontSize = 16.sp)
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = InkPrimary
+                )
+            }
+            Text(
+                text = "$value%",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = accentColor
+            )
+        }
+        Slider(
+            value = value.toFloat(),
+            onValueChange = { onValueChange(it.roundToInt().coerceIn(0, 100)) },
+            valueRange = 0f..100f,
+            colors = SliderDefaults.colors(
+                thumbColor = accentColor,
+                activeTrackColor = accentColor,
+                inactiveTrackColor = accentColor.copy(alpha = 0.2f)
+            )
+        )
+    }
 }
