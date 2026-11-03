@@ -25,6 +25,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.rounded.ChildCare
+import androidx.compose.material.icons.rounded.EmojiEvents
+import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.School
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.Storefront
+import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -458,266 +465,334 @@ fun CareerScreen(
                 }
             }
 
-            if (show(CareerCategory.SCHOOL)) {
-                item(
-                    key = "education",
-                    contentType = CareerListContentType.Education
-                ) {
-                    EducationSectionCard(
-                        education = character.education,
-                        countryCode = character.countryCode,
-                        character = character,
-                        onDropOut = { dropOutConfirm.request(Unit) },
-                        onSetStudyEffort = onSetStudyEffort,
-                        onExamPrepChoice = onExamPrepChoice,
-                        onSyncExamSchedule = onSyncExamSchedule
-                    )
-                }
-
-                item(key = "drill_classmates") {
-                    DrillDownRow(
-                        title = stringResource(R.string.section_school_life),
-                        subtitle = "Classmates, Teachers, Bully & Crush",
-                        icon = AppIcons.Relationship,
-                        iconTint = TealPrimary,
-                        trailingBadge = if (character.education.schoolPeople.isNotEmpty()) "${character.education.schoolPeople.size}" else null,
-                        onClick = { activeCareerSheet = CareerSheet.CLASSMATES }
-                    )
-                }
-
-                item(key = "drill_clubs") {
-                    DrillDownRow(
-                        title = stringResource(R.string.section_school_clubs),
-                        subtitle = character.education.schoolClub?.name ?: "Join a club or sports team",
-                        icon = AppIcons.Performance,
-                        iconTint = GoldAccent,
-                        trailingBadge = if (character.education.schoolClub != null) "Member" else null,
-                        onClick = { activeCareerSheet = CareerSheet.CLUBS }
-                    )
-                }
-
-                if (character.age >= 16 || character.education.stage == SchoolStage.UNIVERSITY) {
-                    item(key = "drill_university") {
-                        DrillDownRow(
-                            title = stringResource(R.string.section_university_dashboard),
-                            subtitle = character.education.universityMajor?.courseLabel ?: "Degrees, Tuition & Loans",
-                            icon = AppIcons.Education,
-                            iconTint = LifeGreen,
-                            onClick = { activeCareerSheet = CareerSheet.UNIVERSITY }
-                        )
+            if (character.age < 6) {
+                item(key = "early_childhood") {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp),
+                        shape = MaishaRadius.cardShape,
+                        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, com.maisha.game.ui.theme.Hairline)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(RoundedCornerShape(28.dp))
+                                    .background(LifeGreen.copy(alpha = 0.12f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.ChildCare,
+                                    contentDescription = null,
+                                    tint = LifeGreen,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+                            Text(
+                                text = stringResource(R.string.early_childhood_career_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = InkPrimary,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = stringResource(R.string.early_childhood_career_desc),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = InkTertiary,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
+            } else {
+                if (show(CareerCategory.SCHOOL)) {
+                    item(
+                        key = "education",
+                        contentType = CareerListContentType.Education
+                    ) {
+                        EducationSectionCard(
+                            education = character.education,
+                            countryCode = character.countryCode,
+                            character = character,
+                            onDropOut = { dropOutConfirm.request(Unit) },
+                            onSetStudyEffort = onSetStudyEffort,
+                            onExamPrepChoice = onExamPrepChoice,
+                            onSyncExamSchedule = onSyncExamSchedule
+                        )
+                    }
 
-                if (character.age >= 12) {
-                    item(key = "drill_fame") {
+                    item(key = "drill_classmates") {
                         DrillDownRow(
-                            title = stringResource(R.string.section_fame_talent_hub),
-                            subtitle = "Training, Gigs & Endorsements",
-                            icon = AppIcons.Looks,
+                            title = stringResource(R.string.section_school_life),
+                            subtitle = "Classmates, Teachers, Bully & Crush",
+                            icon = Icons.Rounded.Groups,
+                            iconTint = TealPrimary,
+                            trailingBadge = if (character.education.schoolPeople.isNotEmpty()) "${character.education.schoolPeople.size}" else null,
+                            onClick = { activeCareerSheet = CareerSheet.CLASSMATES }
+                        )
+                    }
+
+                    item(key = "drill_clubs") {
+                        DrillDownRow(
+                            title = stringResource(R.string.section_school_clubs),
+                            subtitle = character.education.schoolClub?.name ?: "Join a club or sports team",
+                            icon = Icons.Rounded.EmojiEvents,
                             iconTint = GoldAccent,
-                            onClick = { activeCareerSheet = CareerSheet.FAME }
+                            trailingBadge = if (character.education.schoolClub != null) "Member" else null,
+                            onClick = { activeCareerSheet = CareerSheet.CLUBS }
                         )
+                    }
+
+                    if (character.age >= 16 || character.education.stage == SchoolStage.UNIVERSITY) {
+                        item(key = "drill_university") {
+                            DrillDownRow(
+                                title = stringResource(R.string.section_university_dashboard),
+                                subtitle = character.education.universityMajor?.courseLabel ?: "Degrees, Tuition & Loans",
+                                icon = Icons.Rounded.School,
+                                iconTint = LifeGreen,
+                                onClick = { activeCareerSheet = CareerSheet.UNIVERSITY }
+                            )
+                        }
+                    }
+
+                    if (character.age >= 12) {
+                        item(key = "drill_fame") {
+                            DrillDownRow(
+                                title = stringResource(R.string.section_fame_talent_hub),
+                                subtitle = "Training, Gigs & Endorsements",
+                                icon = Icons.Rounded.Star,
+                                iconTint = GoldAccent,
+                                onClick = { activeCareerSheet = CareerSheet.FAME }
+                            )
+                        }
+                    }
+
+                    if (careerEngine.canWorkPartTime(character) || (character.alive && character.age >= CareerEngine.MIN_PART_TIME_AGE)) {
+                        item(key = "drill_jobs") {
+                            DrillDownRow(
+                                title = stringResource(R.string.section_part_time_marketplace),
+                                subtitle = character.career.activePartTimeJob?.name ?: "Campus jobs & side hustles",
+                                icon = Icons.Rounded.Work,
+                                iconTint = TealPrimary,
+                                onClick = { activeCareerSheet = CareerSheet.JOBS }
+                            )
+                        }
                     }
                 }
 
-                if (careerEngine.canWorkPartTime(character) || (character.alive && character.age >= CareerEngine.MIN_PART_TIME_AGE)) {
-                    item(key = "drill_jobs") {
+                if (show(CareerCategory.POLITICS)) {
+                    item(
+                        key = "politics",
+                        contentType = CareerListContentType.Politics
+                    ) {
+                        if (politicsEligible || character.politics.currentOffice != null) {
+                            PoliticsSection(
+                                character = character,
+                                selectedOffice = selectedOffice,
+                                onOfficeSelected = { selectedOffice = it },
+                                campaignInvestment = campaignInvestment,
+                                onLaunchCampaign = { campaignConfirm.request(selectedOffice) },
+                                onPassTaxPolicy = { taxPolicyConfirm.request(it) }
+                            )
+                        } else {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.section_politics),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = TealPrimary
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = stringResource(R.string.politics_locked_hint),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = InkTertiary
+                                )
+                            }
+                        }
+                    }
+                }
+
+                if (show(CareerCategory.WORK)) {
+                    when {
+                        isRetired -> {
+                            item(
+                                key = "retired",
+                                contentType = CareerListContentType.WorkState
+                            ) {
+                                RetiredStateCard(
+                                    pensionAmount = character.career.pensionAmount,
+                                    countryCode = character.countryCode
+                                )
+                            }
+                        }
+                        currentJob != null -> {
+                            item(
+                                key = "current_job",
+                                contentType = CareerListContentType.WorkState
+                            ) {
+                                CurrentJobCard(
+                                    character = character,
+                                    canRetire = character.age >= MIN_RETIREMENT_AGE,
+                                    retirementPensionEstimate = retirementPensionEstimate,
+                                    onQuitJob = onQuitJob,
+                                    onRetire = { retireConfirm.request(Unit) },
+                                    onSetWorkEffort = onSetWorkEffort,
+                                    onOfficeAction = onOfficeAction,
+                                    onWorkplaceAction = onWorkplaceAction
+                                )
+                            }
+                        }
+                    }
+
+                    item(key = "drill_work_job_listings") {
+                        val canWorkFullTime = character.age >= 18
+                        DrillDownRow(
+                            title = stringResource(R.string.section_job_listings),
+                            subtitle = if (!canWorkFullTime) {
+                                stringResource(R.string.full_time_locked_age)
+                            } else if (currentJob != null) {
+                                "Search for new career openings"
+                            } else {
+                                "Browse positions in ${character.countryCode}"
+                            },
+                            icon = Icons.Rounded.Work,
+                            iconTint = LifeGreen,
+                            enabled = canWorkFullTime,
+                            trailingBadge = if (canWorkFullTime && eligibleJobs.isNotEmpty()) "${eligibleJobs.size} Eligible" else null,
+                            onClick = { if (canWorkFullTime) activeCareerSheet = CareerSheet.JOB_LISTINGS }
+                        )
+                    }
+
+                    item(key = "drill_work_side_hustles") {
+                        val canWorkPartTime = character.age >= 16
                         DrillDownRow(
                             title = stringResource(R.string.section_part_time_marketplace),
-                            subtitle = character.career.activePartTimeJob?.name ?: "Campus jobs & side hustles",
-                            icon = AppIcons.Career,
+                            subtitle = if (!canWorkPartTime) {
+                                stringResource(R.string.part_time_locked_age)
+                            } else {
+                                character.career.activePartTimeJob?.name ?: "Part-time work & freelance side hustles"
+                            },
+                            icon = Icons.Rounded.Storefront,
                             iconTint = TealPrimary,
-                            onClick = { activeCareerSheet = CareerSheet.JOBS }
+                            enabled = canWorkPartTime,
+                            onClick = { if (canWorkPartTime) activeCareerSheet = CareerSheet.JOBS }
                         )
                     }
-                }
-            }
 
-            if (show(CareerCategory.POLITICS)) {
-                item(
-                    key = "politics",
-                    contentType = CareerListContentType.Politics
-                ) {
-                    if (politicsEligible || character.politics.currentOffice != null) {
-                        PoliticsSection(
-                            character = character,
-                            selectedOffice = selectedOffice,
-                            onOfficeSelected = { selectedOffice = it },
-                            campaignInvestment = campaignInvestment,
-                            onLaunchCampaign = { campaignConfirm.request(selectedOffice) },
-                            onPassTaxPolicy = { taxPolicyConfirm.request(it) }
-                        )
-                    } else {
+                    if (character.age >= 12) {
+                        item(key = "drill_work_fame") {
+                            DrillDownRow(
+                                title = stringResource(R.string.section_fame_talent_hub),
+                                subtitle = "Training, gigs & endorsements",
+                                icon = Icons.Rounded.Star,
+                                iconTint = GoldAccent,
+                                onClick = { activeCareerSheet = CareerSheet.FAME }
+                            )
+                        }
+                    }
+
+                    if (character.career.jobHistory.isNotEmpty()) {
+                        item(
+                            key = "job_history",
+                            contentType = CareerListContentType.JobHistory
+                        ) {
+                            Column {
+                                TextButton(onClick = { historyExpanded = !historyExpanded }) {
+                                    Text(
+                                        text = if (historyExpanded) {
+                                            stringResource(R.string.btn_collapse_job_history)
+                                        } else {
+                                            stringResource(R.string.btn_expand_job_history)
+                                        }
+                                    )
+                                }
+                                if (historyExpanded) {
+                                    Text(
+                                        text = stringResource(
+                                            R.string.format_job_history,
+                                            character.career.jobHistory.joinToString(", ")
+                                        ),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (show(CareerCategory.BUSINESS)) {
+                    item(
+                        key = "business_header",
+                        contentType = CareerListContentType.BusinessHeader
+                    ) {
                         Column {
                             Text(
-                                text = stringResource(R.string.section_politics),
+                                text = stringResource(R.string.section_my_businesses),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = TealPrimary
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(R.string.politics_locked_hint),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = InkTertiary
-                            )
-                        }
-                    }
-                }
-            }
-
-            if (show(CareerCategory.WORK)) {
-                when {
-                    isRetired -> {
-                        item(
-                            key = "retired",
-                            contentType = CareerListContentType.WorkState
-                        ) {
-                            RetiredStateCard(
-                                pensionAmount = character.career.pensionAmount,
-                                countryCode = character.countryCode
-                            )
-                        }
-                    }
-                    currentJob != null -> {
-                        item(
-                            key = "current_job",
-                            contentType = CareerListContentType.WorkState
-                        ) {
-                            CurrentJobCard(
-                                character = character,
-                                canRetire = character.age >= MIN_RETIREMENT_AGE,
-                                retirementPensionEstimate = retirementPensionEstimate,
-                                onQuitJob = onQuitJob,
-                                onRetire = { retireConfirm.request(Unit) },
-                                onSetWorkEffort = onSetWorkEffort,
-                                onOfficeAction = onOfficeAction,
-                                onWorkplaceAction = onWorkplaceAction
-                            )
-                        }
-                    }
-                }
-
-                item(key = "drill_work_job_listings") {
-                    DrillDownRow(
-                        title = stringResource(R.string.section_job_listings),
-                        subtitle = if (currentJob != null) "Search for new career openings" else "Browse positions in ${character.countryCode}",
-                        icon = AppIcons.Career,
-                        iconTint = LifeGreen,
-                        trailingBadge = if (eligibleJobs.isNotEmpty()) "${eligibleJobs.size} Eligible" else null,
-                        onClick = { activeCareerSheet = CareerSheet.JOB_LISTINGS }
-                    )
-                }
-
-                item(key = "drill_work_side_hustles") {
-                    DrillDownRow(
-                        title = stringResource(R.string.section_part_time_marketplace),
-                        subtitle = character.career.activePartTimeJob?.name ?: "Part-time work & freelance side hustles",
-                        icon = AppIcons.Performance,
-                        iconTint = TealPrimary,
-                        onClick = { activeCareerSheet = CareerSheet.JOBS }
-                    )
-                }
-
-                if (character.age >= 12) {
-                    item(key = "drill_work_fame") {
-                        DrillDownRow(
-                            title = stringResource(R.string.section_fame_talent_hub),
-                            subtitle = "Training, gigs & endorsements",
-                            icon = AppIcons.Looks,
-                            iconTint = GoldAccent,
-                            onClick = { activeCareerSheet = CareerSheet.FAME }
-                        )
-                    }
-                }
-
-                if (character.career.jobHistory.isNotEmpty()) {
-                    item(
-                        key = "job_history",
-                        contentType = CareerListContentType.JobHistory
-                    ) {
-                        Column {
-                            TextButton(onClick = { historyExpanded = !historyExpanded }) {
+                            if (character.businesses.isEmpty()) {
+                                Spacer(modifier = Modifier.height(MaishaSpacing.sm))
                                 Text(
-                                    text = if (historyExpanded) {
-                                        stringResource(R.string.btn_collapse_job_history)
+                                    text = if (character.age < BusinessEngine.MIN_BUSINESS_AGE) {
+                                        stringResource(R.string.full_time_locked_age)
                                     } else {
-                                        stringResource(R.string.btn_expand_job_history)
-                                    }
-                                )
-                            }
-                            if (historyExpanded) {
-                                Text(
-                                    text = stringResource(
-                                        R.string.format_job_history,
-                                        character.career.jobHistory.joinToString(", ")
-                                    ),
+                                        stringResource(R.string.empty_businesses)
+                                    },
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
                     }
-                }
-            }
 
-            if (show(CareerCategory.BUSINESS)) {
-                item(
-                    key = "business_header",
-                    contentType = CareerListContentType.BusinessHeader
-                ) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.section_my_businesses),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = TealPrimary
-                        )
-                        if (character.businesses.isEmpty()) {
-                            Spacer(modifier = Modifier.height(MaishaSpacing.sm))
-                            Text(
-                                text = stringResource(R.string.empty_businesses),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                    if (character.businesses.isNotEmpty()) {
+                        items(
+                            items = character.businesses,
+                            key = { it.id },
+                            contentType = { CareerListContentType.BusinessCard }
+                        ) { business ->
+                            BusinessCard(
+                                business = business,
+                                countryCode = character.countryCode,
+                                onSell = { sellBusinessConfirm.request(business) }
                             )
                         }
                     }
-                }
 
-                if (character.businesses.isNotEmpty()) {
-                    items(
-                        items = character.businesses,
-                        key = { it.id },
-                        contentType = { CareerListContentType.BusinessCard }
-                    ) { business ->
-                        BusinessCard(
-                            business = business,
-                            countryCode = character.countryCode,
-                            onSell = { sellBusinessConfirm.request(business) }
-                        )
-                    }
-                }
-
-                if (canStartBusiness) {
-                    item(
-                        key = "start_business",
-                        contentType = CareerListContentType.StartBusiness
-                    ) {
-                        Button(
-                            onClick = {
-                                businessName = ""
-                                businessIndustry = BusinessIndustry.TECH
-                                businessInvestment = tiers.first()
-                                startBusinessConfirm.request(Unit)
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(14.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
+                    if (canStartBusiness) {
+                        item(
+                            key = "start_business",
+                            contentType = CareerListContentType.StartBusiness
                         ) {
-                            Text(
-                                text = stringResource(R.string.btn_start_business),
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            Button(
+                                onClick = {
+                                    businessName = ""
+                                    businessIndustry = BusinessIndustry.TECH
+                                    businessInvestment = tiers.first()
+                                    startBusinessConfirm.request(Unit)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.btn_start_business),
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
                     }
                 }

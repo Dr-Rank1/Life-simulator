@@ -11,6 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.SentimentSatisfied
+import androidx.compose.material.icons.rounded.SentimentVeryDissatisfied
+import androidx.compose.material.icons.rounded.Toys
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +43,7 @@ import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.theme.AccentPink
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.CoralNegative
+import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
@@ -468,96 +474,186 @@ fun PersonDetailSheet(
                     iconTint = CoralNegative,
                     onClick = { onInteraction(InteractionType.DISCIPLINE, null) }
                 )
-            } else {
-                if (!isAdultChild) {
-                    SheetSectionTitle(stringResource(R.string.section_bond_actions))
-                    DetailSheetButton(
-                        text = if (isChild) {
-                            stringResource(R.string.btn_play_together)
-                        } else {
-                            stringResource(R.string.btn_spend_time)
-                        },
-                        onClick = { onInteraction(InteractionType.SPEND_TIME, null) }
-                    )
-                } else {
-                    SheetSectionTitle(stringResource(R.string.section_bond_actions))
-                }
+            } else if (playerAge < 3) {
+                // INFANT / TODDLER ACTIONS (Ages 0-2)
+                SheetSectionTitle(stringResource(R.string.section_bond_actions))
+                val cuddleDone = member.interactedTypesThisYear.contains(InteractionType.SPEND_TIME.name)
                 DetailSheetButton(
-                    text = stringResource(R.string.btn_compliment),
+                    text = stringResource(R.string.btn_cuddle_bond),
+                    subtitle = if (cuddleDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !cuddleDone,
+                    icon = Icons.Rounded.Favorite,
+                    iconTint = AccentPink,
+                    onClick = { onInteraction(InteractionType.SPEND_TIME, null) }
+                )
+                val babbleDone = member.interactedTypesThisYear.contains(InteractionType.COMPLIMENT.name)
+                DetailSheetButton(
+                    text = stringResource(R.string.btn_babble_smile),
+                    subtitle = if (babbleDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !babbleDone,
+                    icon = Icons.Rounded.SentimentSatisfied,
+                    iconTint = GoldAccent,
                     onClick = { onInteraction(InteractionType.COMPLIMENT, null) }
                 )
+                val tantrumDone = member.interactedTypesThisYear.contains(InteractionType.ARGUE.name)
+                DetailSheetButton(
+                    text = stringResource(R.string.btn_throw_tantrum),
+                    subtitle = if (tantrumDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !tantrumDone,
+                    icon = Icons.Rounded.SentimentVeryDissatisfied,
+                    iconTint = CoralNegative,
+                    onClick = { onInteraction(InteractionType.ARGUE, null) }
+                )
+            } else if (playerAge in 3..5) {
+                // YOUNG CHILD (Ages 3-5)
+                SheetSectionTitle(stringResource(R.string.section_bond_actions))
+                val playDone = member.interactedTypesThisYear.contains(InteractionType.SPEND_TIME.name)
+                DetailSheetButton(
+                    text = stringResource(R.string.btn_play_together),
+                    subtitle = if (playDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !playDone,
+                    icon = Icons.Rounded.Toys,
+                    iconTint = LifeGreen,
+                    onClick = { onInteraction(InteractionType.SPEND_TIME, null) }
+                )
+                val complimentDone = member.interactedTypesThisYear.contains(InteractionType.COMPLIMENT.name)
+                DetailSheetButton(
+                    text = stringResource(R.string.btn_compliment),
+                    subtitle = if (complimentDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !complimentDone,
+                    icon = Icons.Rounded.Favorite,
+                    iconTint = AccentPink,
+                    onClick = { onInteraction(InteractionType.COMPLIMENT, null) }
+                )
+                val tantrumDone = member.interactedTypesThisYear.contains(InteractionType.ARGUE.name)
+                DetailSheetButton(
+                    text = stringResource(R.string.btn_throw_tantrum),
+                    subtitle = if (tantrumDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !tantrumDone,
+                    icon = Icons.Rounded.SentimentVeryDissatisfied,
+                    iconTint = CoralNegative,
+                    onClick = { onInteraction(InteractionType.ARGUE, null) }
+                )
+            } else {
+                // AGES 6+ (Primary, Secondary, Adult)
+                SheetSectionTitle(stringResource(R.string.section_bond_actions))
+                val spendTimeDone = member.interactedTypesThisYear.contains(InteractionType.SPEND_TIME.name)
+                DetailSheetButton(
+                    text = if (isChild) stringResource(R.string.btn_play_together) else stringResource(R.string.btn_spend_time),
+                    subtitle = if (spendTimeDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !spendTimeDone,
+                    onClick = { onInteraction(InteractionType.SPEND_TIME, null) }
+                )
+                val complimentDone = member.interactedTypesThisYear.contains(InteractionType.COMPLIMENT.name)
+                DetailSheetButton(
+                    text = stringResource(R.string.btn_compliment),
+                    subtitle = if (complimentDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !complimentDone,
+                    onClick = { onInteraction(InteractionType.COMPLIMENT, null) }
+                )
+                val adviceDone = member.interactedTypesThisYear.contains(InteractionType.ASK_FOR_ADVICE.name)
                 DetailSheetButton(
                     text = stringResource(R.string.btn_ask_advice),
+                    subtitle = if (adviceDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !adviceDone,
                     onClick = { onInteraction(InteractionType.ASK_FOR_ADVICE, null) }
                 )
 
-                SheetSectionTitle(stringResource(R.string.section_spend_actions))
-                DetailSheetButton(
-                    text = "${stringResource(R.string.btn_gift_small)} (${formatMoney(giftCost(GiftTier.SMALL), playerCountryCode)})",
-                    onClick = { pendingGiftTier.request(GiftTier.SMALL) },
-                    enabled = playerMoney >= giftCost(GiftTier.SMALL)
-                )
-                DetailSheetButton(
-                    text = "${stringResource(R.string.btn_gift_medium)} (${formatMoney(giftCost(GiftTier.MEDIUM), playerCountryCode)})",
-                    onClick = { pendingGiftTier.request(GiftTier.MEDIUM) },
-                    enabled = playerMoney >= giftCost(GiftTier.MEDIUM)
-                )
-                DetailSheetButton(
-                    text = "${stringResource(R.string.btn_gift_large)} (${formatMoney(giftCost(GiftTier.LARGE), playerCountryCode)})",
-                    onClick = { pendingGiftTier.request(GiftTier.LARGE) },
-                    enabled = playerMoney >= giftCost(GiftTier.LARGE)
-                )
-                DetailSheetButton(
-                    text = "${stringResource(R.string.btn_travel_together)} (${formatMoney(travelCost, playerCountryCode)})",
-                    onClick = { pendingTravel.request(Unit) },
-                    enabled = travelEnabled && playerMoney >= travelCost
-                )
-                if (!travelEnabled && isIncarcerated) {
-                    Text(
-                        text = stringResource(R.string.travel_blocked_incarcerated),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                if (playerAge >= 16) {
+                    SheetSectionTitle(stringResource(R.string.section_spend_actions))
+                    val giftSmallCost = giftCost(GiftTier.SMALL)
+                    val giftSmallAffordable = playerMoney >= giftSmallCost
+                    DetailSheetButton(
+                        text = "${stringResource(R.string.btn_gift_small)} (${formatMoney(giftSmallCost, playerCountryCode)})",
+                        subtitle = if (!giftSmallAffordable) stringResource(R.string.insufficient_funds) else null,
+                        onClick = { pendingGiftTier.request(GiftTier.SMALL) },
+                        enabled = giftSmallAffordable
                     )
-                } else if (!travelEnabled) {
-                    Text(
-                        text = stringResource(R.string.travel_requires_quality_time),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    val giftMedCost = giftCost(GiftTier.MEDIUM)
+                    val giftMedAffordable = playerMoney >= giftMedCost
+                    DetailSheetButton(
+                        text = "${stringResource(R.string.btn_gift_medium)} (${formatMoney(giftMedCost, playerCountryCode)})",
+                        subtitle = if (!giftMedAffordable) stringResource(R.string.insufficient_funds) else null,
+                        onClick = { pendingGiftTier.request(GiftTier.MEDIUM) },
+                        enabled = giftMedAffordable
                     )
+                    val giftLargeCost = giftCost(GiftTier.LARGE)
+                    val giftLargeAffordable = playerMoney >= giftLargeCost
+                    DetailSheetButton(
+                        text = "${stringResource(R.string.btn_gift_large)} (${formatMoney(giftLargeCost, playerCountryCode)})",
+                        subtitle = if (!giftLargeAffordable) stringResource(R.string.insufficient_funds) else null,
+                        onClick = { pendingGiftTier.request(GiftTier.LARGE) },
+                        enabled = giftLargeAffordable
+                    )
+                    val travelAffordable = playerMoney >= travelCost
+                    DetailSheetButton(
+                        text = "${stringResource(R.string.btn_travel_together)} (${formatMoney(travelCost, playerCountryCode)})",
+                        subtitle = if (!travelAffordable) stringResource(R.string.insufficient_funds) else null,
+                        onClick = { pendingTravel.request(Unit) },
+                        enabled = travelEnabled && travelAffordable
+                    )
+                    if (!travelEnabled && isIncarcerated) {
+                        Text(
+                            text = stringResource(R.string.travel_blocked_incarcerated),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else if (!travelEnabled) {
+                        Text(
+                            text = stringResource(R.string.travel_requires_quality_time),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
                 SheetSectionTitle(stringResource(R.string.section_fun_risk_actions))
+                val prankDone = member.interactedTypesThisYear.contains(InteractionType.PRANK.name)
                 DetailSheetButton(
                     text = stringResource(R.string.btn_prank),
+                    subtitle = if (prankDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !prankDone,
                     onClick = { onInteraction(InteractionType.PRANK, null) }
                 )
-                if (canSetUpDate) {
+                if (canSetUpDate && playerAge >= 16) {
+                    val dateDone = member.interactedTypesThisYear.contains(InteractionType.SET_UP_ON_DATE.name)
                     DetailSheetButton(
                         text = stringResource(R.string.btn_set_up_date),
+                        subtitle = if (dateDone) stringResource(R.string.interaction_done_this_year) else null,
+                        enabled = !dateDone,
                         onClick = { onInteraction(InteractionType.SET_UP_ON_DATE, null) }
                     )
                 }
+                val argueDone = member.interactedTypesThisYear.contains(InteractionType.ARGUE.name)
                 DetailSheetButton(
                     text = if (isChild) stringResource(R.string.btn_scold) else stringResource(R.string.btn_argue),
+                    subtitle = if (argueDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !argueDone,
                     icon = AppIcons.Argue,
                     iconTint = CoralNegative,
                     onClick = { onInteraction(InteractionType.ARGUE, null) }
                 )
+                val insultDone = member.interactedTypesThisYear.contains(InteractionType.INSULT.name)
                 DetailSheetButton(
                     text = stringResource(R.string.btn_insult),
+                    subtitle = if (insultDone) stringResource(R.string.interaction_done_this_year) else null,
+                    enabled = !insultDone,
                     icon = AppIcons.Insult,
                     iconTint = CoralNegative,
                     onClick = { onInteraction(InteractionType.INSULT, null) }
                 )
-                if (canAskForMoney) {
+                if (canAskForMoney && playerAge >= 6) {
+                    val moneyDone = member.interactedTypesThisYear.contains(InteractionType.ASK_FOR_MONEY.name)
+                    val moneyUnlocked = member.relationshipLevel > 60
                     DetailSheetButton(
-                        text = if (member.relationshipLevel > 60) {
+                        text = if (moneyUnlocked) {
                             stringResource(R.string.btn_ask_for_money)
                         } else {
                             stringResource(R.string.btn_ask_for_money_locked)
                         },
+                        subtitle = if (moneyDone) stringResource(R.string.interaction_done_this_year) else null,
                         onClick = { onInteraction(InteractionType.ASK_FOR_MONEY, null) },
-                        enabled = member.relationshipLevel > 60
+                        enabled = moneyUnlocked && !moneyDone
                     )
                 }
             }

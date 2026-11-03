@@ -357,7 +357,8 @@ Newest first:
 
 | Commit | Meaning |
 |--------|---------|
-| *HEAD* | BitLife / Another Life Simulator overhaul Part 2: Complete `DrillDownRow` & bottom sheets across all tabs (Actions, Career, Assets, Family), journal auto-scroll & milestone pills, childhood & youth action density (ages 0–15), university social life (mixers, office hours, crams, pranks), and tactile 44.1kHz audio synthesis & haptics |
+| *HEAD* | Early game age-gating & balance overhaul: Character creation UI polish (Goatee & Random chip wrapping fixed, under-14 facial hair/glasses suppressed, redundant sliders removed), strict age gates across all tabs (infant-only interactions, minor asset blocker, preschool career card, part-time/full-time locks), relationship farming cap (interactedTypesThisYear), 35% prank backfire risk, newborn debt stress & economic spam elimination, and Material 3 Icons.Rounded polish |
+| `b75fa73` | BitLife / Another Life Simulator overhaul Part 2: Complete `DrillDownRow` & bottom sheets across all tabs (Actions, Career, Assets, Family), journal auto-scroll & milestone pills, childhood & youth action density (ages 0–15), university social life (mixers, office hours, crams, pranks), and tactile 44.1kHz audio synthesis & haptics |
 | `06a54e4` | Overhaul UI design system: Material 3 polish, refined cards, modern hero header, and sleek components |
 | `e133e66` | Add Play Games Services, localization tooling, and snapshot UI updates; real estate mortgages & luxury vehicles |
 | `c316e89` | Prefetch public flavor APIs into Room so gameplay can use real streets, art, quotes, and news offline |
@@ -395,19 +396,12 @@ Use `git log` / `git show <sha>` for exact diffs when continuing related work.
 These are **known unfinished** areas. Do not claim they are done.
 
 ### Product depth still thin
-- Wave 4 was largely **content + gates**, not full new mechanic UIs for every fantasy (jobs/hobbies/crime/love systems beyond events)  
-- New skill / crime **enums and loops** beyond existing types  
-- Relationship **stages**, addiction, multi-year story arcs as first-class systems  
-- Dedicated polished UI for **weekly challenges** (engine exists)  
-- Even more “always something to do” density between age-ups  
+- Dedicated polished UI for **weekly challenges** (engine exists)
+- Expanded narrative story arcs & long-tail event chains across specific career tracks
 
 ### Store / production prep (from historical README)
-- Production AdMob IDs (still test units in `AdUnitConfig`)  
-- Real sound assets (many silent placeholders)  
-- Final avatar/illustration art pass (Canvas + DiceBear + raster mix)  
-- Firebase/Analytics deliberately deprioritized historically  
-- Release minify / signing / Play Store listing polish  
-- Some older education flags (e.g. expulsion set only by certain paths) may still be sparse  
+- Production AdMob IDs (still test units in `AdUnitConfig`)
+- Release minify / signing / Play Store listing polish
 
 ### Docs debt
 - On 2026-08-25 the user deleted the previous `docs/` corpus (architecture, QA plan, Play Store drafts, etc.).  
@@ -432,11 +426,9 @@ These are **known unfinished** areas. Do not claim they are done.
 
 In priority order that matches recent player feedback:
 
-1. **University social life** — classmates/office hours depth while enrolled in university  
-2. **Weekly challenges UI** — surface `WeeklyChallengeEngine` clearly  
-3. **Childhood / teen action density** — more Actions for ages where career is empty  
-4. **Wave 4 love/crime systems** — deepen beyond event packs where still thin  
-5. **Production prep** only when asked (ads, audio, store listing)
+1. **Weekly challenges UI** — surface `WeeklyChallengeEngine` clearly in a dedicated card or sheet
+2. **Additional narrative storylines** — multi-year story arcs for specific career paths and countries
+3. **Production prep** only when asked (AdMob production IDs, store listing assets)
 
 Always confirm with the user’s latest message if the request is ambiguous.
 

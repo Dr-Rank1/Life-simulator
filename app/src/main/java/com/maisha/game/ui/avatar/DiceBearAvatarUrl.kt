@@ -71,12 +71,14 @@ object DiceBearAvatarUrl {
         params["hairColor"] = hairColorHex(safe, stage)
         params["hairVariant"] = hairVariant(safe.hairStyle)
         params["mouthVariant"] = mouthVariant(expression)
-        params["beardProbability"] = if (safe.facialHair != null) "100" else "0"
-        if (safe.facialHair != null) {
+        val allowBeard = safe.facialHair != null && age >= 14 && stage != AgeStage.BABY && stage != AgeStage.CHILD
+        params["beardProbability"] = if (allowBeard) "100" else "0"
+        if (allowBeard) {
             params["beardVariant"] = beardVariant(safe.facialHair)
         }
-        params["glassesProbability"] = if (safe.eyewear != null) "100" else "0"
-        if (safe.eyewear != null) {
+        val allowGlasses = safe.eyewear != null && (age >= 14 || safe.eyewear != com.maisha.game.data.model.EyewearStyle.READING_GLASSES)
+        params["glassesProbability"] = if (allowGlasses) "100" else "0"
+        if (allowGlasses) {
             params["glassesVariant"] = glassesVariant(safe.eyewear)
         }
         // Freckles / feature accent when facialFeature is set.

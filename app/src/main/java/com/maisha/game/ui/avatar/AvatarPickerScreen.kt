@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -225,6 +227,7 @@ private fun expressionEmoji(expression: Expression): String = when (expression) 
     Expression.SURPRISED -> "😮"
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun <T> OptionalEnumRow(
     label: String,
@@ -241,9 +244,10 @@ private fun <T> OptionalEnumRow(
             fontWeight = FontWeight.SemiBold,
             color = InkPrimary
         )
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FilterChip(
                 selected = selected == null,
@@ -288,6 +292,7 @@ private fun eyewearLabel(style: EyewearStyle): String = when (style) {
     EyewearStyle.READING_GLASSES -> stringResource(R.string.eyewear_reading_glasses)
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun OptionalFeatureRow(
     label: String,
@@ -303,7 +308,11 @@ private fun OptionalFeatureRow(
             fontWeight = FontWeight.SemiBold,
             color = InkPrimary
         )
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             FilterChip(
                 selected = selected == null,
                 onClick = { onSelect(null) },

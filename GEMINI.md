@@ -173,6 +173,11 @@ The UI has undergone a comprehensive **Material 3 modernization**:
    - **Workplace Roster & Office Agency (`WorkplaceRosterSheet.kt`, `CareerEngine.kt`)**: Active jobs generate a supervisor and coworkers with strictness/competence stats, enabling actions like Schmooze, Ask for Raise/Promotion, Collaborate, Prank, and HR reporting.
    - **Crime Specialization & Prison Life (`CrimeEngine.kt`)**: Target selection across Burglary, GTA, and Armed Heist tiers with criminal notoriety scaling; prison yard gangs, parole petitions, and escape attempts.
    - **Tombstone Ribbons & Heir Picker (`LifeArchetypeEngine.kt`, `LifeSummaryScreen.kt`, `HeirSelectionScreen.kt`)**: BitLife-style silk-sash tombstone ribbons (Loaded, Academic, Cunning, Saint, Scandalous, Fame Icon, Family Anchor, Workaholic, Mediocre) and polished heir succession cards.
+9. **Early Game Age-Gating, Infant Balancing & Character Creation Polish**:
+   - **Character Creation UI Polish**: Accurate stat note, horizontal country pill cards with empty state search, `FlowRow` preventing chip clipping/squishing, and suppression of adult beards/glasses for characters under 14.
+   - **Strict Age-Gating Across All Tabs**: Infants (0–2) only access baby interactions (Cuddle/Bond, Babble/Smile, Tantrum); school stage features clean `EarlyChildhoodCard` for `< 6`; part-time jobs lock until 16, full-time career and businesses lock until 18; minors `< 16` see `DependentMinorCard` on Assets; independent health insurance gated to `18+`.
+   - **Anti-Exploit & Balance Fixes**: Track `interactedTypesThisYear` per NPC to prevent infinite relationship farming; add 35% prank backfire risk; eliminate newborn debt stress drain and macroeconomic log spam for assetless minors.
+   - **Visual Consistency**: Distinct Material 3 `Icons.Rounded` icons throughout all tabs replacing placeholder graphics.
 
 ---
 
@@ -180,17 +185,12 @@ The UI has undergone a comprehensive **Material 3 modernization**:
 
 When picking up development or proposing next steps, prioritize these areas:
 
-1. **University Social Life & Campus Events Expansion**:
-   - Deepen university years with campus events, sororities/fraternities, college rivalries, and professor networking.
-2. **Dedicated UI for Weekly Challenges**:
-   - `WeeklyChallengeEngine` is fully functional in domain code, but needs a dedicated, prominent UI card/tab to let players see their weekly objectives, time remaining, and exclusive badges.
-3. **Childhood & Teen Action Density**:
-   - Ages 0–15 currently have fewer interactive actions compared to adulthood. Adding childhood hobbies, chores, playground activities, and teen part-time gigs will balance early-game pacing.
-4. **Wave 4 Deepening (Crime, Love & Hobbies Surfaces)**:
-   - Wave 4 added massive JSON event packs, but several areas (e.g. detailed dating minigames, specialized criminal syndicates, detailed hobby mastery) can be elevated with dedicated UI dashboards.
-5. **Production Release Polish**:
+1. **Dedicated UI for Weekly Challenges**:
+   - `WeeklyChallengeEngine` is fully functional in domain code; elevate with a dedicated, prominent weekly challenge card/sheet with countdown timers and exclusive dynasty badges.
+2. **Additional Narrative Packs & Story Arcs**:
+   - Expand multi-year storyline event packs across under-represented countries and specific career branches (e.g. politics, space exploration, professional athletics).
+3. **Production Release Polish**:
    - Swap test AdMob IDs in `AdUnitConfig` with production IDs before launch.
-   - Replace placeholder silent audio `.wav` files with tactile sound effects.
    - Configure official Google Play Games App ID in Google Play Console.
 
 ---

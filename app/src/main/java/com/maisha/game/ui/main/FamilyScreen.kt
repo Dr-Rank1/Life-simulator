@@ -170,6 +170,7 @@ fun FamilyScreen(
     )
     val friendCount = character.family.count { it.alive && it.isPlatonicAlly() }
     val canHostParty = character.alive &&
+        character.age >= 16 &&
         character.family.any {
             it.alive && (it.isPlatonicAlly() || it.relation == RelationType.SIBLING)
         }

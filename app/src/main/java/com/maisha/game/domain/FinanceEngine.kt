@@ -1017,7 +1017,7 @@ class FinanceEngine @Inject constructor(
         val updated = character.copy(
             economicState = EconomicState(climate = climate, marketModifier = modifier),
             assets = updatedAssets,
-            eventLog = if (climate == EconomicClimate.NEUTRAL) {
+            eventLog = if (climate == EconomicClimate.NEUTRAL || (character.age < 18 && character.assets.isEmpty())) {
                 character.eventLog
             } else {
                 EventLogCap.prepend(character.eventLog, logEntry)

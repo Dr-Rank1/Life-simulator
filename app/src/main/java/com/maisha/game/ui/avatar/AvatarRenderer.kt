@@ -113,10 +113,13 @@ fun buildAvatarLayerStack(
         visible(AvatarAssetMapper.getCheeksOverlay(ageStage))
     )
 
+    val isChildOrBaby = ageStage == AgeStage.BABY || ageStage == AgeStage.CHILD
     val front = listOfNotNull(
-        // Dynamic accessories on the face, beneath front hair
-        visible(AvatarAssetMapper.getFacialHairOverlay(safe.facialHair), hair),
-        visible(AvatarAssetMapper.getEyewearOverlay(safe.eyewear)),
+        // Dynamic accessories on the face, beneath front hair: beards and reading glasses hidden for children < 14
+        if (!isChildOrBaby) visible(AvatarAssetMapper.getFacialHairOverlay(safe.facialHair), hair) else null,
+        if (!isChildOrBaby || safe.eyewear != com.maisha.game.data.model.EyewearStyle.READING_GLASSES) {
+            visible(AvatarAssetMapper.getEyewearOverlay(safe.eyewear))
+        } else null,
         visible(AvatarAssetMapper.getAgingDetailsOverlay(safe.agingDetails, ageStage)),
         // 4. Front hair
         visible(

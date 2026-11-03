@@ -199,7 +199,7 @@
     <string name="label_gender">Gender</string>
     <string name="label_where_born">Where are you born?</string>
     <string name="hint_search_countries">Search countries…</string>
-    <string name="birth_stats_random_note">Stats are randomly assigned at birth</string>
+    <string name="birth_stats_random_note">Customize your starting attributes in Step 3</string>
     <string name="gender_male">Male</string>
     <string name="gender_female">Female</string>
     <string name="error_name_required">Please enter a name</string>
@@ -1994,4 +1994,22 @@
     <string name="ribbon_mediocre">MEDIOCRE</string>
     <string name="ribbon_mediocre_desc">Lived a quiet, ordinary life without too much fanfare.</string>
     <string name="btn_close">Close</string>
+
+    <!-- Early childhood & Age gating -->
+    <string name="btn_cuddle_bond">Cuddle / Bond</string>
+    <string name="btn_babble_smile">Babble / Smile</string>
+    <string name="btn_throw_tantrum">Throw Tantrum</string>
+    <string name="msg_interaction_already_done">You\'ve already done this with %1$s this year! Try again next year.</string>
+    <string name="interaction_done_this_year">Done this year</string>
+    <string name="insufficient_funds">Insufficient funds</string>
+    <string name="early_childhood_career_title">Early Childhood</string>
+    <string name="early_childhood_career_desc">You are still a young child. Primary school begins at age 6!</string>
+    <string name="early_childhood_career_cta">Explore Activities</string>
+    <string name="part_time_locked_age">Unlocks at age 16</string>
+    <string name="full_time_locked_age">Unlocks at age 18 or secondary school graduation</string>
+    <string name="assets_minor_title">Dependent Minor</string>
+    <string name="assets_minor_desc">You live with your parents. Real estate and vehicle financing unlock at age 16+.</string>
+    <string name="health_insurance_minor_desc">Minors are covered under their parents\' policy until age 18.</string>
+    <string name="health_insurance_minor_blocked">Health insurance unlocks at age 18.</string>
+    <string name="no_countries_match">No countries match your search.</string>
 </resources>

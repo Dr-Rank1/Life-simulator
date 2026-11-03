@@ -21,6 +21,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ChildCare
+import androidx.compose.material.icons.rounded.EmojiEvents
+import androidx.compose.material.icons.rounded.Flight
+import androidx.compose.material.icons.rounded.Gavel
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.MedicalServices
+import androidx.compose.material.icons.rounded.Pets
+import androidx.compose.material.icons.rounded.School
+import androidx.compose.material.icons.rounded.Spa
+import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -429,7 +440,7 @@ fun ActionsScreen(
                         DrillDownRow(
                             title = stringResource(R.string.act_cat_prison_title),
                             subtitle = stringResource(R.string.act_cat_prison_desc),
-                            icon = AppIcons.CrimePickpocket,
+                            icon = Icons.Rounded.Lock,
                             iconTint = CoralNegative,
                             trailingBadge = "Inmate",
                             onClick = { activeActionSheet = ActionSheet.PRISON }
@@ -441,7 +452,7 @@ fun ActionsScreen(
                             DrillDownRow(
                                 title = stringResource(R.string.act_cat_childhood_title),
                                 subtitle = stringResource(R.string.act_cat_childhood_desc),
-                                icon = AppIcons.Smarts,
+                                icon = Icons.Rounded.ChildCare,
                                 iconTint = LifeGreen,
                                 onClick = { activeActionSheet = ActionSheet.CHILDHOOD }
                             )
@@ -452,7 +463,7 @@ fun ActionsScreen(
                         DrillDownRow(
                             title = stringResource(R.string.act_cat_mind_body_title),
                             subtitle = stringResource(R.string.act_cat_mind_body_desc),
-                            icon = AppIcons.Happiness,
+                            icon = Icons.Rounded.Spa,
                             iconTint = LifeGreen,
                             onClick = { activeActionSheet = ActionSheet.MIND_BODY }
                         )
@@ -462,7 +473,7 @@ fun ActionsScreen(
                         DrillDownRow(
                             title = stringResource(R.string.act_cat_doctor_health_title),
                             subtitle = if (untreated.isNotEmpty()) "${untreated.size} untreated conditions" else stringResource(R.string.act_cat_doctor_health_desc),
-                            icon = AppIcons.Health,
+                            icon = Icons.Rounded.MedicalServices,
                             iconTint = if (untreated.isNotEmpty()) CoralNegative else TealPrimary,
                             trailingBadge = if (untreated.isNotEmpty()) "! ${untreated.size}" else null,
                             onClick = { activeActionSheet = ActionSheet.DOCTOR_HEALTH }
@@ -474,7 +485,7 @@ fun ActionsScreen(
                             DrillDownRow(
                                 title = stringResource(R.string.act_cat_side_hustles_title),
                                 subtitle = "Practice, masterclasses & exhibitions",
-                                icon = AppIcons.Smarts,
+                                icon = Icons.Rounded.School,
                                 iconTint = GoldAccent,
                                 onClick = { activeActionSheet = ActionSheet.SKILLS_MASTERY }
                             )
@@ -486,7 +497,7 @@ fun ActionsScreen(
                             DrillDownRow(
                                 title = stringResource(R.string.act_cat_adoption_title),
                                 subtitle = stringResource(R.string.act_cat_adoption_desc),
-                                icon = AppIcons.Family,
+                                icon = Icons.Rounded.Pets,
                                 iconTint = TealPrimary,
                                 onClick = { activeActionSheet = ActionSheet.LOVE_FAMILY }
                             )
@@ -498,7 +509,7 @@ fun ActionsScreen(
                             DrillDownRow(
                                 title = stringResource(R.string.section_jobs_side_hustles),
                                 subtitle = if (character.socialMedia.hasAccount) "${character.socialMedia.followers} Followers" else "Social media, gigs & part-time jobs",
-                                icon = AppIcons.Career,
+                                icon = Icons.Rounded.Work,
                                 iconTint = LifeGreen,
                                 onClick = { activeActionSheet = ActionSheet.SIDE_HUSTLES }
                             )
@@ -510,7 +521,7 @@ fun ActionsScreen(
                             DrillDownRow(
                                 title = stringResource(R.string.act_cat_relocate_title),
                                 subtitle = stringResource(R.string.act_cat_relocate_desc),
-                                icon = AppIcons.Travel,
+                                icon = Icons.Rounded.Flight,
                                 iconTint = TealPrimary,
                                 onClick = { activeActionSheet = ActionSheet.LICENSES_RELOCATION }
                             )
@@ -522,7 +533,7 @@ fun ActionsScreen(
                             DrillDownRow(
                                 title = stringResource(R.string.act_cat_philanthropy_title),
                                 subtitle = stringResource(R.string.act_cat_philanthropy_desc),
-                                icon = AppIcons.Achievements,
+                                icon = Icons.Rounded.EmojiEvents,
                                 iconTint = GoldAccent,
                                 onClick = { activeActionSheet = ActionSheet.PHILANTHROPY_GOALS }
                             )
@@ -534,7 +545,7 @@ fun ActionsScreen(
                             DrillDownRow(
                                 title = stringResource(R.string.act_cat_crime_title),
                                 subtitle = stringResource(R.string.act_cat_crime_desc),
-                                icon = AppIcons.CrimePickpocket,
+                                icon = Icons.Rounded.Gavel,
                                 iconTint = CoralNegative,
                                 onClick = { activeActionSheet = ActionSheet.CRIME }
                             )
@@ -1964,14 +1975,27 @@ private fun LifestyleActionCard(
         LifestyleOption.THERAPIST -> character.lifestyle.hasTherapist
         LifestyleOption.HEALTH_INSURANCE -> character.lifestyle.hasHealthInsurance
     }
+    val isMinorInsurance = option == LifestyleOption.HEALTH_INSURANCE && character.age < 18
+    val desc = if (isMinorInsurance) {
+        stringResource(R.string.health_insurance_minor_desc)
+    } else {
+        stringResource(descriptionRes)
+    }
+    val canAfford = character.stats.money >= yearlyCost || active
+    val isEnabled = !isMinorInsurance && canAfford
     ActionCard(
         icon = icon,
         title = stringResource(if (active) activeTitleRes else inactiveTitleRes),
-        description = stringResource(descriptionRes),
-        metaLabel = stringResource(
-            R.string.format_yearly_cost,
-            formatMoney(yearlyCost, character.countryCode)
-        ),
+        description = desc,
+        metaLabel = if (isMinorInsurance) {
+            stringResource(R.string.full_time_locked_age)
+        } else {
+            stringResource(
+                R.string.format_yearly_cost,
+                formatMoney(yearlyCost, character.countryCode)
+            )
+        },
+        enabled = isEnabled,
         accent = ActionCardAccent.CARE,
         questHint = questHint,
         onClick = { onToggle(!active) }

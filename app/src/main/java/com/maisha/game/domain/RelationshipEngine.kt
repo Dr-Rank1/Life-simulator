@@ -293,7 +293,8 @@ class RelationshipEngine @Inject constructor(
             decayed.copy(
                 age = person.age + 1,
                 complimentsThisYear = 0,
-                interactedThisYear = false
+                interactedThisYear = false,
+                interactedTypesThisYear = emptyList()
             ).coerceRelationship()
         }
         return FamilyYearTickResult(
@@ -354,6 +355,7 @@ class RelationshipEngine @Inject constructor(
      * (scaled with budget size).
      */
     fun throwParty(character: Character, budget: Int): PartyResult {
+        if (character.age < 16) return PartyResult.InvalidBudget
         if (budget <= 0) return PartyResult.InvalidBudget
         if (character.stats.money < budget) return PartyResult.InsufficientFunds
         val guests = character.family.filter {
@@ -683,6 +685,31 @@ class RelationshipEngine @Inject constructor(
         }
 
         val member = character.family[memberIndex]
+        if (member.interactedTypesThisYear.contains(interactionType.name)) {
+            return FamilyInteractionResult(
+                character = character,
+                messageKey = "msg_interaction_already_done",
+                messageArgs = listOf(member.name)
+            )
+        }
+        if (character.age < 3) {
+            val allowedForInfant = interactionType == InteractionType.SPEND_TIME ||
+                interactionType == InteractionType.COMPLIMENT ||
+                interactionType == InteractionType.ARGUE
+            if (!allowedForInfant) {
+                return FamilyInteractionResult(character, "msg_interaction_too_young")
+            }
+        } else if (character.age < 6) {
+            val allowedForToddler = interactionType == InteractionType.SPEND_TIME ||
+                interactionType == InteractionType.COMPLIMENT ||
+                interactionType == InteractionType.ARGUE
+            if (!allowedForToddler) {
+                return FamilyInteractionResult(character, "msg_interaction_too_young")
+            }
+        }
+        if (interactionType == InteractionType.TRAVEL_TOGETHER && character.age < 16) {
+            return FamilyInteractionResult(character, "msg_travel_requires_age_16")
+        }
         if (interactionType == InteractionType.TRAVEL_TOGETHER &&
             character.criminalRecord.currentlyIncarcerated
         ) {
@@ -1296,12 +1323,11 @@ class RelationshipEngine @Inject constructor(
         memberIndex: Int,
         member: Person
     ): FamilyInteractionResult {
-        val landedWell = Random.nextFloat() < 0.55f
-        val (relDelta, happyDelta, messageKey) = if (landedWell) {
-            Triple(8, 6, "msg_prank_success")
-        } else {
-            Triple(-6, 2, "msg_prank_backfired")
-        }
+        val backfired = Random.nextFloat() < 0.35f
+        val relDelta = if (!backfired) 6 else -8
+        val happyDelta = if (!backfired) 4 else -2
+        val karmaDelta = if (!backfired) 0 else -2
+        val messageKey = if (!backfired) "msg_prank_success" else "msg_prank_backfired"
         val updatedMember = member.copy(
             relationshipLevel = clampRelationshipLevel(member.relationshipLevel + relDelta)
         ).coerceRelationship()
@@ -1311,7 +1337,8 @@ class RelationshipEngine @Inject constructor(
                 interactionType = InteractionType.PRANK
             ).copy(
                 stats = character.stats.copy(
-                    happiness = clampStat(character.stats.happiness + happyDelta)
+                    happiness = clampStat(character.stats.happiness + happyDelta),
+                    karma = clampStat(character.stats.karma + karmaDelta)
                 )
             ),
             messageKey = messageKey,
@@ -1610,7 +1637,11 @@ class RelationshipEngine @Inject constructor(
         giftTier: GiftTier? = null,
         recordFirstQualityTime: Boolean = false
     ): Character {
-        var person = updatedMember.copy(interactedThisYear = true)
+        val nextInteractedTypes = (updatedMember.interactedTypesThisYear + interactionType.name).distinct()
+        var person = updatedMember.copy(
+            interactedThisYear = true,
+            interactedTypesThisYear = nextInteractedTypes
+        )
         val milestones = person.milestones.toMutableList()
         if (recordFirstQualityTime && milestones.none { it.kind == MilestoneKind.QUALITY_TIME.name }) {
             milestones += RelationshipMilestone.fromKind(

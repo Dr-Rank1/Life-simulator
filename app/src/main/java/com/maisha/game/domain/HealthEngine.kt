@@ -296,6 +296,21 @@ class HealthEngine @Inject constructor() {
         option: LifestyleOption,
         enabled: Boolean
     ): Character {
+        if (enabled) {
+            val yearlyCost = when (option) {
+                LifestyleOption.GYM -> scaledLifestyleCost(GYM_YEARLY_COST, character.countryCode)
+                LifestyleOption.DIET -> scaledLifestyleCost(DIET_YEARLY_COST, character.countryCode)
+                LifestyleOption.THERAPIST -> scaledLifestyleCost(THERAPIST_YEARLY_COST, character.countryCode)
+                LifestyleOption.HEALTH_INSURANCE -> scaledLifestyleCost(HEALTH_INSURANCE_YEARLY_COST, character.countryCode)
+            }
+            if (option == LifestyleOption.HEALTH_INSURANCE && character.age < 18) {
+                return character
+            }
+            if (character.stats.money < yearlyCost) {
+                return character
+            }
+        }
+
         val lifestyle = when (option) {
             LifestyleOption.GYM -> character.lifestyle.copy(hasGymMembership = enabled)
             LifestyleOption.DIET -> character.lifestyle.copy(isVegan = enabled)
@@ -431,10 +446,12 @@ class HealthEngine @Inject constructor() {
     }
 
     private fun applyChronicStress(character: Character): Character {
+        if (character.age < 6) return character
+
         var healthDrain = 0
         var happinessDrain = 0
 
-        if (character.stats.money <= HIGH_DEBT_MONEY_THRESHOLD) {
+        if (character.age >= 18 && character.stats.money < 0) {
             healthDrain += DEBT_STRESS_HEALTH
             happinessDrain += DEBT_STRESS_HAPPINESS
         }

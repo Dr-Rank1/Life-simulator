@@ -3190,7 +3190,24 @@ class LifeViewModel @Inject constructor(
 
     private fun appendStatDeltas(deltas: List<StatDeltaEvent>) {
         if (deltas.isEmpty()) return
-        _uiState.update { it.copy(pendingStatDeltas = it.pendingStatDeltas + deltas) }
+        _uiState.update { state ->
+            val existing = state.pendingStatDeltas
+            val merged = (existing + deltas)
+                .groupBy { it.type }
+                .mapNotNull { (type, events) ->
+                    val totalDelta = events.sumOf { it.delta }
+                    if (totalDelta != 0) {
+                        val lastEvent = events.last()
+                        StatDeltaEvent(
+                            type = type,
+                            delta = totalDelta,
+                            id = lastEvent.id,
+                            displayText = if (events.size == 1) lastEvent.displayText else null
+                        )
+                    } else null
+                }
+            state.copy(pendingStatDeltas = merged)
+        }
     }
 
     private fun buildStatDeltas(before: Stats, after: Stats): List<StatDeltaEvent> {

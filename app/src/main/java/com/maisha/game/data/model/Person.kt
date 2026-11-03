@@ -66,7 +66,9 @@ data class Person(
     /** Drama / volatility index (0–100). Higher values reject prenups and cause relationship friction. */
     val crazy: Int = 20,
     /** Current romantic relationship progression stage. */
-    val stage: RelationshipStage = RelationshipStage.CASUAL
+    val stage: RelationshipStage = RelationshipStage.CASUAL,
+    /** Interaction types already performed with this person in the current year. Reset on age-up. */
+    val interactedTypesThisYear: List<String> = emptyList()
 ) {
     fun coerceRelationship(): Person = copy(
         relationshipLevel = clampRelationshipLevel(relationshipLevel)

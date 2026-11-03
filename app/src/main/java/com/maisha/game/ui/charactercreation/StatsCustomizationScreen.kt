@@ -12,6 +12,8 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,8 +34,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -114,6 +114,7 @@ private fun maxAllowedValue(field: StatField, stats: Stats): Int {
     return (MIN_STAT + (EXTRA_BUDGET - otherExtra)).coerceIn(MIN_STAT, MAX_STAT)
 }
 
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun StatsCustomizationScreen(
     uiState: CharacterCreationUiState,
@@ -200,11 +201,12 @@ fun StatsCustomizationScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            LazyRow(
+            FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                items(STAT_PRESETS, key = { it.labelRes }) { preset ->
+                STAT_PRESETS.forEach { preset ->
                     FilterChip(
                         selected = selectedPresetRes == preset.labelRes,
                         onClick = {
@@ -240,33 +242,31 @@ fun StatsCustomizationScreen(
                         )
                     )
                 }
-                item(key = "random") {
-                    FilterChip(
-                        selected = selectedPresetRes == R.string.stats_preset_random,
-                        onClick = {
-                            selectedPresetRes = R.string.stats_preset_random
-                            applyStats(randomValidStats())
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(R.string.stats_preset_random),
-                                fontWeight = FontWeight.Medium
-                            )
-                        },
-                        colors = FilterChipDefaults.filterChipColors(
-                            selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
-                            selectedLabelColor = InkPrimary,
-                            containerColor = Color.White,
-                            labelColor = InkPrimary.copy(alpha = 0.75f)
-                        ),
-                        border = FilterChipDefaults.filterChipBorder(
-                            enabled = true,
-                            selected = selectedPresetRes == R.string.stats_preset_random,
-                            borderColor = InkPrimary.copy(alpha = 0.12f),
-                            selectedBorderColor = TealPrimary
+                FilterChip(
+                    selected = selectedPresetRes == R.string.stats_preset_random,
+                    onClick = {
+                        selectedPresetRes = R.string.stats_preset_random
+                        applyStats(randomValidStats())
+                    },
+                    label = {
+                        Text(
+                            text = stringResource(R.string.stats_preset_random),
+                            fontWeight = FontWeight.Medium
                         )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
+                        selectedLabelColor = InkPrimary,
+                        containerColor = Color.White,
+                        labelColor = InkPrimary.copy(alpha = 0.75f)
+                    ),
+                    border = FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = selectedPresetRes == R.string.stats_preset_random,
+                        borderColor = InkPrimary.copy(alpha = 0.12f),
+                        selectedBorderColor = TealPrimary
                     )
-                }
+                )
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -428,7 +428,6 @@ private fun StatAdjustCard(
     val statEmoji = field.type.emoji()
     val decreaseDescription = stringResource(R.string.stats_decrease, label)
     val increaseDescription = stringResource(R.string.stats_increase, label)
-    val sliderEnabled = maxValue > MIN_STAT || value > MIN_STAT
 
     Column(
         modifier = Modifier
@@ -497,7 +496,7 @@ private fun StatAdjustCard(
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             StatRepeatButton(
                 sign = "−",
@@ -505,21 +504,11 @@ private fun StatAdjustCard(
                 contentDescription = decreaseDescription,
                 onRepeat = onDecrease
             )
-            Slider(
-                value = value.toFloat(),
-                onValueChange = { onValueChange(it.roundToInt()) },
-                enabled = sliderEnabled,
-                valueRange = MIN_STAT.toFloat()..maxValue.toFloat(),
-                steps = (maxValue - MIN_STAT - 1).coerceAtLeast(0),
-                modifier = Modifier.weight(1f),
-                colors = SliderDefaults.colors(
-                    thumbColor = statColor,
-                    activeTrackColor = statColor,
-                    inactiveTrackColor = statColor.copy(alpha = 0.18f),
-                    disabledThumbColor = InkPrimary.copy(alpha = 0.25f),
-                    disabledActiveTrackColor = InkPrimary.copy(alpha = 0.12f),
-                    disabledInactiveTrackColor = InkPrimary.copy(alpha = 0.08f)
-                )
+            StatBar(
+                type = field.type,
+                value = value,
+                showIcon = false,
+                modifier = Modifier.weight(1f)
             )
             StatRepeatButton(
                 sign = "+",
@@ -530,29 +519,6 @@ private fun StatAdjustCard(
                 onRepeat = onIncrease
             )
         }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = MIN_STAT.toString(),
-                style = MaterialTheme.typography.labelSmall,
-                color = InkPrimary.copy(alpha = 0.4f)
-            )
-            Text(
-                text = maxValue.toString(),
-                style = MaterialTheme.typography.labelSmall,
-                color = InkPrimary.copy(alpha = 0.4f)
-            )
-        }
-
-        StatBar(
-            type = field.type,
-            value = value,
-            showIcon = false,
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
 

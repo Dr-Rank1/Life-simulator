@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -314,17 +315,33 @@ fun CharacterCreationScreen(
                     lazyState.animateScrollToItem(selectedIndex)
                 }
             }
-            LazyRow(
-                state = lazyState,
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
-            ) {
-                items(countriesToShow, key = { it.code }) { country ->
-                    CountryChip(
-                        country = country,
-                        selected = country.code == uiState.selectedCountryCode,
-                        onClick = { onCountrySelected(country.code) }
+            if (countriesToShow.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_countries_match),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = InkSecondary
                     )
+                }
+            } else {
+                LazyRow(
+                    state = lazyState,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(horizontal = 2.dp, vertical = 4.dp)
+                ) {
+                    items(countriesToShow, key = { it.code }) { country ->
+                        CountryChip(
+                            country = country,
+                            selected = country.code == uiState.selectedCountryCode,
+                            onClick = { onCountrySelected(country.code) }
+                        )
+                    }
                 }
             }
 
@@ -519,9 +536,9 @@ private fun CountryChip(
         animationSpec = tween(250),
         label = "chipBorder"
     )
-    Column(
+    Row(
         modifier = Modifier
-            .width(76.dp)
+            .defaultMinSize(minWidth = 100.dp)
             .clip(RoundedCornerShape(14.dp))
             .background(bgColor)
             .border(
@@ -530,20 +547,18 @@ private fun CountryChip(
                 shape = RoundedCornerShape(14.dp)
             )
             .clickable(onClick = onClick)
-            .padding(vertical = 10.dp, horizontal = 6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+            .padding(vertical = 10.dp, horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        CountryFlag(countryCode = country.code, size = 32.dp)
+        CountryFlag(countryCode = country.code, size = 28.dp)
         Text(
             text = country.displayName,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
             color = InkPrimary,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center,
-            fontSize = 10.sp
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
