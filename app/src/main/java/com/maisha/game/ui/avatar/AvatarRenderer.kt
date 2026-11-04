@@ -247,29 +247,12 @@ private fun LayeredAvatarContent(
     age: Int,
     expression: Expression
 ) {
-    val stage = ageStageFor(age)
-    val safeConfig = remember(config) { AvatarAssetMapper.sanitize(config) }
-    val stack = remember(safeConfig, stage, age) {
-        buildAvatarLayerStack(safeConfig, stage, age)
-    }
-
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        stack.behindExpression.forEach { layer ->
-            AvatarLayerImage(layer = layer)
-        }
-        Crossfade(
-            targetState = expression,
-            animationSpec = tween(durationMillis = EXPRESSION_CROSSFADE_MS),
-            label = "avatarExpression"
-        ) { face ->
-            AvatarLayerImage(
-                layer = AvatarLayer(AvatarAssetMapper.getExpressionOverlay(face))
-            )
-        }
-        stack.inFrontOfExpression.forEach { layer ->
-            AvatarLayerImage(layer = layer)
-        }
-    }
+    ProceduralAvatarPortrait(
+        config = config,
+        age = age,
+        expression = expression,
+        modifier = Modifier.fillMaxSize()
+    )
 }
 
 @Composable
@@ -304,28 +287,106 @@ fun expressionAccessibilityLabel(expression: Expression): String = when (express
     Expression.SURPRISED -> stringResource(R.string.a11y_expression_surprised)
 }
 
-@Preview(showBackground = true, name = "Avatar layer grid")
+@Preview(showBackground = true, name = "Avatar Procedural Showcase")
 @Composable
 private fun AvatarLayerPreviewGrid() {
     MaishaTheme {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Row 1: Age Progression & Expressions (36dp, 48dp, 64dp, 88dp)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Baby at 36dp
                 AvatarImage(
-                    config = AvatarConfig(skinTone = 2, hairStyle = 1, hairColor = 0, outfitColor = 0),
-                    size = 72.dp,
+                    config = AvatarConfig(skinTone = 3, hairStyle = 0, hairColor = 1, outfitColor = 2),
+                    size = 36.dp,
                     age = 1,
-                    expression = Expression.NEUTRAL,
-                    useDiceBear = false
+                    expression = Expression.HAPPY
                 )
+                // Child at 48dp
                 AvatarImage(
-                    config = AvatarConfig(skinTone = 4, hairStyle = 4, hairColor = 1, outfitColor = 2),
-                    size = 72.dp,
-                    age = 70,
-                    expression = Expression.NEUTRAL,
-                    useDiceBear = false
+                    config = AvatarConfig(skinTone = 2, hairStyle = 2, hairColor = 0, outfitColor = 3),
+                    size = 48.dp,
+                    age = 8,
+                    expression = Expression.NEUTRAL
+                )
+                // Teen with Bob & Glasses at 64dp
+                AvatarImage(
+                    config = AvatarConfig(
+                        skinTone = 1,
+                        hairStyle = 4,
+                        hairColor = 2,
+                        outfitColor = 0,
+                        eyewear = com.maisha.game.data.model.EyewearStyle.GLASSES
+                    ),
+                    size = 64.dp,
+                    age = 16,
+                    expression = Expression.SURPRISED
+                )
+                // Adult with Beard at 88dp
+                AvatarImage(
+                    config = AvatarConfig(
+                        skinTone = 4,
+                        hairStyle = 1,
+                        hairColor = 0,
+                        outfitColor = 1,
+                        facialHair = com.maisha.game.data.model.FacialHairStyle.BEARD
+                    ),
+                    size = 88.dp,
+                    age = 28,
+                    expression = Expression.HAPPY
+                )
+            }
+
+            // Row 2: Seniors & Sunglasses
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Senior with gray hair & wrinkles
+                AvatarImage(
+                    config = AvatarConfig(
+                        skinTone = 5,
+                        hairStyle = 5,
+                        hairColor = 1,
+                        outfitColor = 4,
+                        eyewear = com.maisha.game.data.model.EyewearStyle.READING_GLASSES
+                    ),
+                    size = 64.dp,
+                    age = 72,
+                    expression = Expression.NEUTRAL
+                )
+                // Cool sunglasses adult
+                AvatarImage(
+                    config = AvatarConfig(
+                        skinTone = 3,
+                        hairStyle = 3,
+                        hairColor = 0,
+                        outfitColor = 5,
+                        eyewear = com.maisha.game.data.model.EyewearStyle.SUNGLASSES,
+                        facialHair = com.maisha.game.data.model.FacialHairStyle.GOATEE
+                    ),
+                    size = 64.dp,
+                    age = 32,
+                    expression = Expression.HAPPY
+                )
+                // Sad expression
+                AvatarImage(
+                    config = AvatarConfig(skinTone = 0, hairStyle = 7, hairColor = 3, outfitColor = 6),
+                    size = 64.dp,
+                    age = 24,
+                    expression = Expression.SAD
+                )
+                // Angry expression
+                AvatarImage(
+                    config = AvatarConfig(skinTone = 6, hairStyle = 6, hairColor = 0, outfitColor = 7),
+                    size = 64.dp,
+                    age = 22,
+                    expression = Expression.ANGRY
                 )
             }
         }

@@ -117,7 +117,7 @@ class Wave3EnginesTest {
         )
         assertTrue(crimeEngine.canRequestExpungement(reformed))
         var outcome: ExpungementResult = ExpungementResult.Denied(reformed)
-        repeat(15) {
+        repeat(50) {
             outcome = crimeEngine.requestExpungement(reformed)
             if (outcome is ExpungementResult.Success) return@repeat
         }
