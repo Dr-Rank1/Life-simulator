@@ -1,0 +1,343 @@
+# Maisha — Master Game Overview & Design Specification
+
+> **Document Type:** Master Game Design & Technical Systems Overview  
+> **Package:** `com.maisha.game`  
+> **Platform:** Android (minSdk 26, targetSdk 35)  
+> **Primary Audience:** Game designers, developers, AI agents, and contributors.
+
+---
+
+## 1. Executive Summary & Design Pillars
+
+**Maisha** (Swahili for *life*) is a rich, offline-first, single-player life simulation mobile game for Android in the BitLife / Age Sim genre. Players create a custom human character and guide them year-by-year from birth to death, making decisions across education, career, relationships, finances, crime, fame, and legacy. When a character passes away, the player receives a detailed obituary, an archetype tombstone ribbon, and can continue their family dynasty as one of their surviving children.
+
+### Core Design Pillars
+
+1. **Player Agency Between Age-Ups:** Rather than relying exclusively on passive random event cards, Maisha provides deep, interactive agency across five core tabs (Life, Actions, Family, Career, Assets). Every year gives players meaningful things to *do* — schmoozing bosses, asking out dating candidates, practicing in school clubs, or buying real estate.
+2. **True Global Flavor:** The game natively supports **15 countries** (Kenya, Nigeria, South Africa, Egypt, USA, Canada, UK, France, Germany, India, Japan, Philippines, Indonesia, Brazil, Mexico). Rather than swapping flags over a US template, each country features customized currencies, authentic name catalogs, national exam systems, real transport modes, mobile money apps, holidays, and localized economy baselines.
+3. **Offline-First Resilience:** 100% of core narrative packs and game engines run locally on the device with zero network dependence. Network operations (like background flavor data prefetching) are purely optional and fail gracefully.
+4. **Clean Domain Purity:** Business logic is isolated in pure Kotlin domain engines with no Android dependencies (`Context`, `Bitmap`, `View`, `Compose`). ViewModels orchestrate data streams via `StateFlow`, while Jetpack Compose powers the UI.
+
+---
+
+## 2. Life Stages & Progression Model
+
+A character's journey is divided into seven structured life stages, each with tailored mechanics, unlocked agency, and strict age gating:
+
+```mermaid
+flowchart LR
+    Infancy[Infancy\nAges 0-2] --> EarlyChildhood[Early Childhood\nAges 3-5]
+    EarlyChildhood --> Primary[Primary School\nAges 6-12]
+    Primary --> Secondary[Secondary School\nAges 13-17]
+    Secondary --> University[University / Higher Ed\nAges 18-22+]
+    Secondary --> Adulthood[Adult Career & Independence\nAges 18-59]
+    University --> Adulthood
+    Adulthood --> Elderhood[Elderhood & Retirement\nAges 60-100+]
+    Elderhood --> Mortality[Death & Dynasty Legacy]
+```
+
+### Stage 1: Infancy (Ages 0–2)
+- **Mechanics:** Characters are helpless newborns/toddlers. Minors at this stage are completely shielded from macroeconomic stress, taxation, and inflation spam.
+- **Available Actions:** Specially gated infant interactions: *Cuddle & Bond with Parents*, *Babble & Smile*, and *Throw Tantrums*.
+- **Visuals:** Avatar displays infant chubby cheeks and no hair/minimal baby tufts. Facial hair and accessories are strictly forbidden.
+
+### Stage 2: Early Childhood (Ages 3–5)
+- **Mechanics:** Exploration of the home environment and preschool.
+- **Available Actions:** Playing with toys, spending time with parents, early sibling rivalries, and adopting domestic pets.
+- **Career/School Tab:** Displays a clean `EarlyChildhoodCard` informing the player that school enrollment begins at age 6.
+
+### Stage 3: Primary School (Ages 6–12)
+- **Mechanics:** Automatic enrollment into local primary school. Academic GPA (0.0–4.0) tracking begins.
+- **Agency:**
+  - *Study Effort:* Slacker, Normal, or Grind.
+  - *School People Roster:* Dynamic Classmates, Best Classmate, Teachers, and School Bully.
+  - *School Activities:* Limited to 1 academic and 1 social activity per year (Study groups, library cram, teacher consultation, confronting bullies, social hangouts).
+  - *Discipline:* Misbehavior leads to detention, principal hearings, and disciplinary records.
+  - *Childhood Actions:* Ask parents for allowance, do chores, explore hobbies.
+- **National Milestone:** Primary School Leaving Exam (e.g. KCPE in Kenya, DepEd NAT in Philippines).
+
+### Stage 4: Secondary / High School (Ages 13–17)
+- **Mechanics:** Transition to secondary school. Unlocks deeper social and extracurricular dynamics.
+- **School Clubs:** Join Debate, Football/Soccer, Drama, Coding, or Music clubs. Progress through ranks (*Member* &rarr; *Officer* &rarr; *Captain*), set practice intensity (*Light*, *Normal*, *Intense*), lead club fundraisers, and compete in cross-school rivalry matches.
+- **Social Agency:** School Crushes appear, attend the School Dance, sneak out after curfew, mall hangouts, gaming marathons.
+- **Student Part-Time Jobs:** Unlocks at age 16. Characters manage energy levels while balancing hard study and earning their first paychecks.
+- **National Milestone:** High school graduation exams (e.g. KCSE, WAEC, SAT, GCSE, Abitur, Baccalauréat).
+
+### Stage 5: University & Higher Education (Ages 18–22+)
+- **Mechanics:** Optional post-secondary education across 7 specialized majors:
+  - Computer Science, Law, Medicine, Business, Communications, Engineering, Nursing.
+- **Funding Models:** Cash upfront, merit-based Scholarships, or Student Loans with annual interest accrual.
+- **Campus Life:** Greek life / campus mixers, professor office hours, all-nighter exam crams, campus rivalry pranks, campus work-study jobs, and corporate internships.
+- **Graduation Honors:** *Cum Laude*, *Magna Cum Laude*, or *Summa Cum Laude*, unlocking direct corporate career track offers.
+
+### Stage 6: Adulthood & Career Independence (Ages 18–59)
+- **Full Independence:** Gated adult systems unlock: full-time job applications, starting businesses, political campaigns, real estate mortgages, luxury vehicle purchases, dating app matchmaking, marriage, prenups, having children, and independent health insurance.
+- **Corporate Ladders:** Climb through 6 corporate ranks from Entry-Level to C-Suite Executive.
+- **Workplace Roster:** Manage relationships with Supervisors (Strictness & Competence) and Coworkers (Schmoozing, Raises, Promotions, HR reporting, Pranks).
+- **Alternative Pathways:** Professional athletics, music entertainment, military service, startup entrepreneurship, or criminal enterprises.
+
+### Stage 7: Elderhood, Retirement & Mortality (Ages 60–100+)
+- **Mechanics:** Retirement pensions, senior health challenges, social security, grandparenthood.
+- **Estate Planning:** Executing wills and testaments.
+- **Mortality:** Annual mortality checks scaling with age, health, and lifestyle hazards.
+- **Legacy:** Silk-sash tombstone ribbons awarded; option to continue dynasty as an adult child heir.
+
+---
+
+## 3. Complete Domain Engine Inventory
+
+All business rules reside in pure Kotlin engines within `com.maisha.game.domain.*`:
+
+```
+com.maisha.game.domain/
+  ├── GameEngine.kt               (Central coordinator and yearly tick facade)
+  ├── EducationEngine.kt          (Primary, secondary, university, clubs, exams, rosters)
+  ├── CareerEngine.kt             (Jobs, corporate ladders, workplace agency, talent tracks)
+  ├── RelationshipEngine.kt       (Family, matchmaking, dating, marriage, prenups, pets)
+  ├── FinanceEngine.kt            (Cash flow, taxes, mortgages, assets, student loans, wills)
+  ├── HealthEngine.kt             (Illness rolls, deterioration, clinics, lifestyle health)
+  ├── CrimeEngine.kt              (Targeted crimes, trials, lawyers, prison yards, escapes)
+  ├── LeisureEngine.kt            (Hobbies, gym, meditation, vacations, yacht & jet trips)
+  ├── BusinessEngine.kt           (Founding startups, employees, valuation, scaling, exits)
+  ├── PoliticsEngine.kt           (Campaigns, municipal/national office, taxation policies)
+  ├── RelocationEngine.kt         (Emigration, work visas, residency, expat mechanics)
+  ├── SkillEngine.kt              (Athletic, musical, technical skill meters)
+  ├── SocialMediaEngine.kt        (Followers, content creation, brand sponsorships)
+  ├── AchievementEngine.kt        (Dynamic milestone unlocks & trophy tracking)
+  ├── LegacyEngine.kt             (Ancestry trees, heir inheritance, generational tracking)
+  ├── MortalityEngine.kt          (Natural and accidental death calculations)
+  ├── MilestoneEngine.kt          (Life achievement milestones and timeline pins)
+  ├── YearQuestEngine.kt          (Annual player quests and reward streaks)
+  ├── WeeklyChallengeEngine.kt    (Themed multi-requirement community challenges)
+  ├── BucketListEngine.kt         (Player life goals and bucket list items)
+  └── LifeArchetypeEngine.kt      (Silk-sash tombstone ribbon resolution)
+```
+
+### Detailed Engine Specifications
+
+#### 1. `GameEngine`
+- **Role:** Central orchestrator for the entire game simulation.
+- **Key Responsibilities:**
+  - Ticks the yearly loop: `advanceYear(character): YearlyTickResult`.
+  - Sequentially invokes sub-engines: Education &rarr; Career &rarr; Finance &rarr; Relationships &rarr; Health &rarr; Crime &rarr; Mortality &rarr; Milestones.
+  - Resolves eligible narrative events via `EventRepository`.
+  - Exposes clean facade methods for ViewModel interactions.
+
+#### 2. `EducationEngine`
+- **Role:** Manages academic lifecycle from kindergarten through postgraduate programs.
+- **Key Systems:**
+  - `ensureSchoolRoster`: Generates unique Classmates, Bully, Teachers, and Crush with dynamic personality stats.
+  - `tickSchoolYear`: Ages school NPCs, decays unmaintained bonds, resets yearly action flags, rolls exam outcomes.
+  - `performSchoolActivity`: Processes study groups, library study, teacher help, social hangouts, bully confrontations, skipping class, and school dances.
+  - `SchoolClubs`: Manages membership, practice intensity, officer promotions, rivalry challenges, fundraisers, letter jackets, and leadership responsibilities (`leadClubStrategy` for tactical advantage and `mentorClubJunior` for grooming underclassmen and boosting school reputation).
+  - `UniversitySystem`: Handles application gates, tuition billing, student loan interest, campus jobs, internships, honors, and post-grad career track offers.
+
+#### 3. `CareerEngine`
+- **Role:** Drives employment, corporate ladders, office politics, and fame pathways.
+- **Key Systems:**
+  - Country-specific job market listings with qualifications and interview tests.
+  - Corporate ladder hierarchy: Entry &rarr; Mid &rarr; Senior &rarr; Lead &rarr; Director &rarr; Executive.
+  - `WorkplaceRoster`: Generates Boss/Supervisor (Strictness, Competence) and Coworkers.
+  - Workplace agency: Schmoozing boss, asking for raises/promotions, collaborating, pranking, reporting to HR, asking coworkers for mentorship (`MENTOR_REQUEST`), and pitching innovative projects (`PITCH_PROJECT`).
+  - Workplace anti-farming: Coworkers track `interactedThisYear` with badge indicators to prevent repeated exploitation.
+  - Office politics: Performance Improvement Plans (PIP), credit-stealing, burnout, and severance.
+  - PIP Counter-moves: Dedicated `PipAlertCard` in the career dashboard allowing players to focus on deliverables (`workPipDeliverable`, ensuring clearance if finished) or formally appeal unfair assessments with HR (`rebutPipWithHR`).
+  - Student part-time jobs & side hustles (balancing energy and study).
+  - Talent & Fame Hub: Athletic and musical pathways, gigs, idle fame decay, paparazzi, and endorsements.
+
+#### 4. `FinanceEngine`
+- **Role:** Manages wealth, cash flow, debt, assets, and estate planning.
+- **Key Systems:**
+  - Annual income tax calculations and living expenses scaling with country economy tiers.
+  - **Mortgage Engine:** 20–50% down payment, 30-year fixed amortization, annual principal/interest payments, equity recovery upon sale.
+  - **Principal Prepayments:** `prepayMortgagePrincipal` enables players to make lump-sum principal paydowns, immediately lowering remaining mortgage debt and proportionally reducing annual payments.
+  - **Luxury Assets & Preventative Servicing:** Cars, speedboats, yachts, and private jets with realistic depreciation and monthly maintenance; `serviceAsset` provides preventative upkeep that restores condition and grants full immunity against annual wear and critical breakdown events.
+  - Student loan interest accrual and repayment schedules.
+  - Estate planning: Wills (Spouse, Equal Split, Favorite Child, Charity).
+
+#### 5. `RelationshipEngine`
+- **Role:** Governs family, romance, social networks, and domestic pets.
+- **Key Systems:**
+  - Generates realistic parents, siblings, children, friends, and enemies.
+  - **Interactive Matchmaking:** `DatingMatchSheet` candidate profiles (Age, Occupation, Looks, Smarts, Crazy/Drama %).
+  - Relationship progression: Casual Dating &rarr; Exclusive &rarr; Engaged &rarr; Married.
+  - Weddings & Prenups: Courthouse, Local Venue, Luxury Destination venues; prenuptial agreement reactions driven by partner Crazy/Karma.
+  - Anti-Farming Shield: `interactedTypesThisYear` prevents spamming interactions on the same NPC in a single turn across infancy (0–2), childhood (3–5), adult children, and romantic partners.
+  - Pet adoption, veterinary healthcare, feeding, walking, training, and mortality.
+
+#### 6. `HealthEngine`
+- **Role:** Models physical and mental wellness, illnesses, and healthcare treatments.
+- **Key Systems:**
+  - Natural health deterioration scaling with age.
+  - Acute illnesses (common cold, food poisoning, pneumonia) and chronic conditions (asthma, hypertension, depression).
+  - Healthcare tiers: Public Community Clinics, Private Specialists, and Alternative Medicine Healers.
+  - Diets, gym memberships, plastic surgery, and mental health therapy.
+
+#### 7. `CrimeEngine`
+- **Role:** Simulates petty theft, organized crime, criminal justice, and incarceration.
+- **Key Systems:**
+  - Targeted crime specializations with minor age-gates: Petty crimes (14+ for shoplifting and pickpocketing), Burglary & GTA (16+), and Armed Heists (18+).
+  - **Crime Planning & Casing:** `caseTarget` allows criminals to scope out security measures prior to striking (+20% success boost on the next attempt, +5 Heat).
+  - **Police Heat System:** Dynamic `heatLevel` [0–100] meter with color-coded risk bar; high heat penalizes success rates across all underworld activities. Players can manage heat by laying low (`layLow`) or bribing police informants (`bribeInformant`).
+  - Police apprehension rolls based on character Smarts, crime tier difficulty, and police heat.
+  - Legal representation: Public Defenders vs High-Priced Elite Defense Attorneys.
+  - Prison yard life: Gang affiliations, prison jobs, parole board hearings, and escape attempts.
+
+#### 8. `LeisureEngine`, `BusinessEngine`, `PoliticsEngine`, `RelocationEngine`
+- **Leisure:** Hobbies, gym workouts, meditation, vacations, yacht days, private jet trips.
+- **Business:** Founding startups, funding rounds, hiring staff, scaling revenue, selling companies.
+- **Politics:** Running for school council, municipal mayor, parliament/congress, or head of state.
+- **Relocation:** Applying for tourist visas, work permits, permanent residency, or naturalized citizenship across 15 countries.
+
+#### 9. `LifeArchetypeEngine`
+- **Role:** Resolves BitLife-style silk-sash tombstone ribbons upon player death.
+- **Archetypes:**
+  - 🏅 *Loaded:* Net worth in the top economic percentile.
+  - 🎓 *Academic:* High GPA, advanced degrees, intellectual mastery.
+  - 🎭 *Fame Icon:* Celebrity status in pro sports or entertainment.
+  - 🕊️ *Saint:* Maximum karma, charitable donations, pristine relationships.
+  - 👑 *Family Anchor:* Devoted parent/spouse, raised large family.
+  - 💼 *Workaholic:* Reached executive corporate leadership.
+  - 🕵️ *Cunning:* High-notoriety criminal who executed successful heists.
+  - ⚡ *Scandalous:* High drama, prison sentences, public infamy.
+  - 🍃 *Mediocre:* Ordinary, low-risk, quiet life.
+
+---
+
+## 4. Character Stats, Formulas & Attribute Models
+
+Characters are defined by five core attributes clamped to integer ranges `[0, 100]`:
+
+| Attribute | Primary Drivers | Degraded By | Impact on Gameplay |
+|:---|:---|:---|:---|
+| **Happiness** | Leisure, vacations, promotions, good relationships | Illness, debt, breakups, prison, burnout | Emotional expression, depression risk, suicide risk |
+| **Health** | Gym, clean diet, doctor treatments, meditation | Old age, chronic disease, crime injuries, smoking | Mortality rolls, physical appearance, energy capacity |
+| **Smarts** | Studying, reading, library visits, university degrees | Skipping school, head trauma, hard drugs | Academic GPA, job hiring, promotion odds, criminal success |
+| **Looks** | Gym, grooming, spa treatments, plastic surgery | Aging (50+), severe illnesses, poor diet | Dating app candidates, marriage odds, fame progression |
+| **Karma** | Helping others, charity, honesty, complimenting | Crimes, cheating, pranking, insults, betrayals | Random event outcomes, near-death survivals, prenups |
+
+### Expression & Avatar Resolution
+The procedural 2D portrait engine dynamically resolves expressions from live stats:
+- **`HAPPY`**: Happiness $\ge 70$, Health $\ge 40$.
+- **`NEUTRAL`**: Happiness $40–69$, Health $\ge 40$.
+- **`SAD` / `DEPRESSED`**: Happiness $< 40$.
+- **`SICK` / `INJURED`**: Health $< 35$.
+- **`STRESSED` / `BURNED_OUT`**: High work/study grind + Happiness $< 50$.
+
+---
+
+## 5. 15-Country Matrix & Economy Scaling
+
+Maisha avoids the generic "one-size-fits-all" trap by grounding every country in authentic local data:
+
+| Country | Code | Currency | Transport Mode | Exam System | Banking / Money App | Holiday Flavor | Economy Factor |
+|:---|:---:|:---:|:---|:---|:---|:---|:---:|
+| **Kenya** | `KE` | KSh | Matatu | KCPE / KCSE | M-Pesa | Jamhuri Day, Madaraka | 0.85 |
+| **Nigeria** | `NG` | ₦ | Danfo | WAEC / NECO | OPay / PalmPay | Independence Day | 0.80 |
+| **South Africa** | `ZA` | R | Minibus Taxi | Matric (NSC) | Capitec Bank App | Freedom Day, Heritage Day | 0.90 |
+| **Egypt** | `EG` | E£ | Microbus | Thanaweya Amma | InstaPay / Vodafone Cash | Revolution Day, Sham Ennessim | 0.80 |
+| **United States** | `US` | $ | Subway / Yellow Cab | SAT / ACT | Venmo / Cash App | Thanksgiving, 4th of July | 1.30 |
+| **Canada** | `CA` | CA$ | Streetcar / Transit Bus | Provincial Diplomas | Interac e-Transfer | Canada Day, Victoria Day | 1.25 |
+| **United Kingdom** | `GB` | £ | Double-decker Bus / Tube | GCSE / A-Levels | Monzo / Revolut | Guy Fawkes, Bank Holidays | 1.25 |
+| **France** | `FR` | € | Métro | Baccalauréat | Lydia | Bastille Day, Fête de la Musique | 1.20 |
+| **Germany** | `DE` | € | U-Bahn / S-Bahn | Abitur | N26 / Sparkasse App | Tag der Deutschen Einheit | 1.20 |
+| **India** | `IN` | ₹ | Auto Rickshaw | CBSE / ICSE Boards | UPI (PhonePe / GPay) | Diwali, Holi, Republic Day | 0.75 |
+| **Japan** | `JP` | ¥ | Shinkansen / Commuter Train | Kyotsu Test (Common Test) | PayPay | Golden Week, Obon | 1.25 |
+| **Philippines** | `PH` | ₱ | Jeepney / Tricycle | DepEd NAT | GCash / Maya | Independence Day, Rizal Day | 0.75 |
+| **Indonesia** | `ID` | Rp | Angkot / Ojek | UTBK / SNBT | GoPay / OVO | Hari Kemerdekaan | 0.75 |
+| **Brazil** | `BR` | R$ | Ônibus / Metrô | ENEM (Exame Nacional) | Pix (Nubank) | Carnaval, Dia da Independência | 0.85 |
+| **Mexico** | `MX` | MX$ | Colectivo / Metrobus | EXANI / CENEVAL | Coppel / BBVA México | Día de los Muertos, Grito | 0.85 |
+
+---
+
+## 6. Challenge & Quest Progression Systems
+
+To ensure continuous engagement between age-ups, Maisha provides layered short-term, annual, and weekly goals:
+
+### 1. Dedicated Weekly Challenges (`WeeklyChallengeEngine`)
+- **Deterministic 7-Day Cycle:** Rotates through 8 themed challenges aligned with real-world calendar weeks (`nowMillis / MILLIS_PER_WEEK % size`).
+- **Multi-Step Objective Checklists:** Each challenge requires satisfying 3 distinct life conditions evaluated live against the active character state:
+  1. *Medical Residency:* Graduate in Medicine/Nursing, reach Medical Residency Level 2, maintain 80%+ Health.
+  2. *Legal Partner:* Graduate with a Law degree, reach Senior Associate Level 2, maintain 80%+ Smarts.
+  3. *Adoptive Parent:* Adopt a child, build an 80%+ relationship bond, own a residential house.
+  4. *Home Improver:* Own a home, complete a property renovation, amass $100,000+ Net Worth.
+  5. *Clean Slate:* Expunge criminal record, restore Karma to 75%+, maintain steady career employment.
+  6. *The Scholar:* Graduate with GPA 3.5+, achieve 85%+ Smarts, earn academic honors or club letter jacket.
+  7. *Teen Hustler:* Work a part-time job or side hustle, save $5,000 in cash, hold a 2.5+ GPA.
+  8. *Portfolio Pro:* Grow portfolio to $100,000+, achieve $250,000+ Net Worth, hold $20,000+ in savings.
+- **Completion Rewards:** Country-scaled cash bonuses (via `EconomyScaler.scaleAmount`), Karma & Happiness boosts, collectible silk ribbons (`ribbon_healer`, `ribbon_counsel`, `ribbon_investor`, etc.), and unlockable titles (`title_master_healer`, `title_legal_ace`, etc.).
+- **Persistence:** App-wide claim state is persisted in `DataStore` via `SettingsRepository` (`claimedChallengeIds`), ensuring one reward claim per real-world challenge period.
+- **UI Experience:**
+  - `WeeklyChallengeCard`: Prominent, compact card positioned in the primary `LifeScreen` journal feed with live status pills (`Ready to Claim`, `In Progress`, `Claimed`), countdown readout, and progress bar.
+  - `WeeklyChallengeSheet`: Rich `ModalBottomSheet` providing objective checklist rows with live counters/bars, scaled reward previews, and a vibrant tactile Claim CTA.
+
+### 2. Annual Year Quests (`YearQuestEngine`)
+- 1–3 age-appropriate objectives generated each game year (e.g., join a school club, get a raise, pass driving test, throw a party, buy a car).
+- Rewarded instantly upon age-up with cash and stat boosts.
+
+### 3. Bucket Lists (`BucketListEngine`)
+- Player-selected long-term life aspirations (e.g., climb Mt. Kilimanjaro, buy a private jet, visit every continent, marry a millionaire).
+
+### 4. Achievements System (`AchievementEngine`)
+- 50+ tiered accomplishments with Google Play Games Services sync and local badge gallery.
+
+---
+
+## 7. UI Architecture & Design Language
+
+Maisha has undergone a complete **Material 3 modernization**:
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   Top App Status Bar                   │
+├────────────────────────────────────────────────────────┤
+│ Hero Header:                                           │
+│  [76dp Procedural Avatar]  [Flag + Age Pill]           │
+│  [Cash: $15,400]           [Net Worth: $120,500]       │
+│  [Happiness: 85%] [Health: 92%] [Smarts: 78%] [Looks]  │
+├────────────────────────────────────────────────────────┤
+│ Connected Year Journal Timeline                        │
+│  • Age 18: Graduated High School with Honors 🎓        │
+│  • Age 18: Enrolled in CS at National University       │
+│  • Age 19: Started Corporate Internship                │
+│  • Age 20: Promoted to Junior Developer 🎉             │
+├────────────────────────────────────────────────────────┤
+│ [ 3D Tactile Age Up Button (Spring Physics & Haptic) ] │
+├────────────────────────────────────────────────────────┤
+│ Bottom Navigation / LeftNavRail (Responsive Layout)    │
+│  [ Life ] [ Actions ] [ Family ] [ Career ] [ Assets ] │
+└────────────────────────────────────────────────────────┘
+```
+
+### Modern Components
+1. **`ProceduralAvatarPortrait`:** Over 1,180 lines of custom 2D Canvas rendering that procedurally composes skin tones, hair textures, facial features, expressions, and accessories without requiring external network calls.
+2. **`LeftNavRail`:** Adaptive navigation rail that automatically activates on tablets, foldables, and landscape orientations, leaving the bottom bar for compact phones.
+3. **`InsetCardContainer`:** Elevated card surfaces utilizing warm neutral canvas backgrounds (`#F8F9FA`), pure paper white cards (`#FFFFFF`), and refined 1dp hairline outlines (`#E2E8F0`).
+4. **`DrillDownRow` List Architecture:** Eliminates overwhelming nested card walls on 360dp screens by presenting clean, discoverable drill-down lists that open dedicated `ModalBottomSheet`s.
+5. **Tactile `3D AgeUpButton`:** Custom 3D button with layered depth, gradient face, spring depression physics, and synchronized audio-haptic feedback.
+
+---
+
+## 8. Data, Persistence & Offline Architecture
+
+- **Multi-Slot Room Database:** Supports 3 independent character save slots. Game state is saved transactionally with versioned JSON blobs for nested structures (EducationState, CareerState, AssetList, RelationshipRoster), allowing new fields with defaults to be added without breaking legacy saves.
+- **DataStore Preferences:** Stores app-level configuration (audio toggle, haptics intensity, language preference, onboarding status, contextual tooltips, weekly challenge claimed IDs).
+- **Google Play Games Services v2:** Cloud save snapshots (`SnapshotsClient`) and global leaderboards (Net Worth, Longest Life, Generations, Happiness).
+- **AdMob Wrappers:** Banners on character slot picker, interstitials on periodic age-ups, and rewarded videos for the "Second Wind" revive mechanic upon premature death.
+
+---
+
+## 9. Summary Table of Gameplay Agency
+
+| Category | Typical Age Range | Primary Actions & Systems |
+|:---|:---:|:---|
+| **Early Life** | 0–5 | Cuddle parents, babble, throw tantrums, play with toys, bond with pets |
+| **Childhood** | 6–12 | Primary school, homework effort, allowances, chores, hobbies, bully confrontations |
+| **Teens** | 13–17 | Secondary school, school clubs (Debate/Soccer/Drama), exams, student part-time jobs, school dance |
+| **Higher Ed** | 18–22+ | 7 university majors, scholarships, student loans, work-study, internships, honors |
+| **Workplace** | 18–65 | Corporate ladder, supervisor schmoozing, raises, promotions, pranks, HR reporting, PIPs |
+| **Romance** | 14+ | Dating app candidates (`DatingMatchSheet`), dating, weddings, prenups, having children |
+| **Finances** | 18+ | 30-year amortized mortgages, luxury cars, yachts, private jets, crypto portfolios, wills |
+| **Underworld**| 14+ | Pickpocketing, shoplifting, GTA, armed heists, defense lawyers, prison yard life |
+| **Wellness** | All | Public/private doctors, diets, gym memberships, plastic surgery, meditation |
+| **Legacy** | Death | Silk-sash tombstone ribbons, obituary recaps, dynasty succession as an adult child |

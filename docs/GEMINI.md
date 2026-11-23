@@ -1,6 +1,6 @@
 # Maisha (Life Simulator) — Project Overview & Gemini Context
 
-> **Last Updated:** 2026-11-02  
+> **Last Updated:** 2026-11-23  
 > **Package:** `com.maisha.game`  
 > **Repository:** `https://github.com/stewiriffin/Life-simulator` (`origin/main`)  
 > **Target Platform:** Android (minSdk 26, targetSdk / compileSdk 35)  
@@ -16,15 +16,15 @@ Players create a custom character and guide them year-by-year from birth to deat
 1. **Age Up:** Each year starts with an "Age Up" tick where time advances, life events trigger, and core engine calculations run.
 2. **Yearly Choices & Events:** The character faces rich contextual narrative events with meaningful trade-offs (affecting happiness, health, smarts, looks, karma, money, and relationships).
 3. **Player Agency Between Age-Ups:** Rather than simply tapping "Age Up", players have extensive agency across five core tabs:
-   - **Life:** Character status header, cash/net worth, yearly recap, live quests, Age Up primary button.
-   - **Actions:** Activities categorized into leisure, crime, lifestyle, health/wellness, childhood play, and financial decisions.
-   - **Family & Relationships:** Parents, siblings, romantic partners, spouses, children, friends, enemies, and pets.
-   - **Career & School:** Primary school, secondary school, school clubs, university degrees, student jobs, side hustles, corporate career ladders, fame/talent hubs, military, businesses, and politics.
-   - **Assets:** Real estate (purchased cash or mortgage), luxury vehicles (cars, speedboats, yachts, private jets), investments, living standards, and wills/testaments.
-4. **Mortality & Dynasty Legacy:** Characters die naturally or through misfortune. Players can inherit their accumulated wealth and continue the family dynasty as one of their children.
+   - **Life:** Character status header, cash/net worth, connected year journal timeline, live quests, tactile 3D Age Up primary button.
+   - **Actions:** Activities categorized into childhood play, leisure, wellness, crime & underworld, lifestyle, finances, and international relocation.
+   - **Family & Relationships:** Parents, siblings, romantic partners, spouses, children, friends, enemies, and pets with interactive candidate matchmaking (`DatingMatchSheet`).
+   - **Career & School:** Primary school, secondary school, school clubs (ranks, rivalry matches, letter jackets), 7 university majors (loans, work-study, honors), student part-time jobs, side hustles, corporate career ladders with workplace agency (`WorkplaceRosterSheet`), fame/talent hubs, military, businesses, and politics.
+   - **Assets:** Real estate (purchased cash or 30-year amortized mortgage), luxury vehicles (cars, speedboats, yachts, private jets), investments, living standards, and wills/testaments.
+4. **Mortality & Dynasty Legacy:** Characters die naturally or through misfortune. They receive BitLife-style silk-sash tombstone ribbons (*Loaded*, *Academic*, *Saint*, *Scandalous*, *Fame Icon*, *Cunning*, *Family Anchor*, *Workaholic*, *Mediocre*). Players can inherit accumulated wealth and continue the family dynasty as one of their surviving children.
 
 ### Core Design Philosophy
-- **True Global Flavor:** The game natively supports **15 countries** (Kenya, Nigeria, South Africa, Egypt, USA, Canada, UK, France, Germany, India, Japan, Philippines, Indonesia, Brazil, Mexico). It is not a US template with flags swapped: countries have custom currencies, real name catalogs, localized exam systems (e.g., KCSE, SAT, GCSE, Abitur, Baccalauréat), realistic holiday schedules, and country-tailored economy scaling.
+- **True Global Flavor:** The game natively supports **15 countries** (Kenya, Nigeria, South Africa, Egypt, USA, Canada, UK, France, Germany, India, Japan, Philippines, Indonesia, Brazil, Mexico). It is not a US template with flags swapped: countries have custom currencies, real name catalogs, localized exam systems (e.g., KCSE, WAEC, SAT, GCSE, Abitur, Baccalauréat), realistic transport modes, mobile money apps (M-Pesa, OPay, Venmo, Pix, UPI), holidays, and country-tailored economies.
 - **Offline-First:** All core narrative packs and game engines run 100% locally on the device without requiring an internet connection.
 - **Player Agency Over Randomness:** The game prioritizes interactive systems, actions, and NPC relationships over pure passive random event generation.
 
@@ -36,6 +36,8 @@ Players create a custom character and guide them year-by-year from birth to deat
 ┌──────────────────────────────────────────────────────────┐
 │                   Jetpack Compose UI                     │
 │  LifeScreen | ActionsScreen | FamilyScreen | Career...   │
+│  LeftNavRail | InsetCardContainer | 3D AgeUpButton       │
+│  ProceduralAvatarPortrait (Offline Canvas Engine)        │
 └────────────────────────────┬─────────────────────────────┘
                              │ StateFlow
 ┌────────────────────────────▼─────────────────────────────┐
@@ -59,7 +61,7 @@ Players create a custom character and guide them year-by-year from birth to deat
 │             Data & Persistence Layer                     │
 │  • Room Database (Multi-slot saves & Room entities)      │
 │  • DataStore Preferences (Audio, haptics, settings)      │
-│  • EventRepository (JSON event packs in assets)          │
+│  • EventRepository (13+ JSON event packs in assets)      │
 │  • PlayGamesService (Cloud saves & Leaderboards)         │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -77,7 +79,7 @@ Players create a custom character and guide them year-by-year from birth to deat
 | **Background Tasks** | AndroidX WorkManager | Contextual daily notifications and retention nudges. |
 | **Cloud & Social** | Google Play Games Services v2 | Cloud save snapshots (`SnapshotsClient`) and global leaderboards. |
 | **Monetization** | Google Mobile Ads (AdMob) | Interstitial on age-ups, banner on slot picker, rewarded Second Wind revive. |
-| **Unit Testing** | JUnit 4, Kotlin Test, Mockito | High-coverage domain tests for all engines (`app/src/test/`). |
+| **Unit Testing** | JUnit 4, Kotlin Test | High-coverage domain tests for all engines (`app/src/test/`). |
 
 ---
 
@@ -98,7 +100,8 @@ All business rules live in `app/src/main/java/com/maisha/game/domain/`.
 3. **`CareerEngine`**:
    - Country job pools, qualifications, hiring tests, promotions, and firings.
    - Corporate ladder progression (Entry &rarr; Mid &rarr; Senior &rarr; Lead &rarr; Director &rarr; Executive).
-   - Office politics: Performance Improvement Plans (PIP), credit-stealing, burnout, and networking.
+   - Workplace agency (`WorkplaceRosterSheet`): Supervisor (strictness & competence) and Coworkers; schmoozing, raises, promotions, collaborating, pranks (35% backfire risk), HR reporting.
+   - Office hazards: Performance Improvement Plans (PIP), credit-stealing, burnout, and networking.
    - Student part-time jobs (energy and study balance).
    - Youth and adult side hustles.
    - Fame and talent pathways: Pro sports / entertainment tracks, training, street gigs, exhibitions, paparazzi, and endorsements.
@@ -109,100 +112,82 @@ All business rules live in `app/src/main/java/com/maisha/game/domain/`.
    - Student loan interest accrual and repayment.
 5. **`RelationshipEngine`**:
    - Family (parents, siblings, children), dating, proposals, weddings, prenups, affairs, and divorces.
+   - **Interactive Matchmaking:** `DatingMatchSheet` candidate profiles (age, occupation, Looks, Smarts, Crazy/Drama %).
+   - Relationship progression: Casual &rarr; Exclusive &rarr; Engaged &rarr; Married; prenups driven by partner Crazy/Karma.
+   - Anti-farming protection (`interactedTypesThisYear`).
    - Pet adoption, veterinary care, feeding, training, and mortality.
-   - Dynamic relationship tiers and annual bond decay.
 6. **`HealthEngine`**:
-   - Health deterioration, acute diseases, chronic illnesses, and medical treatment tiers.
+   - Health deterioration, acute diseases, chronic illnesses, and medical treatment tiers (Free, Private, Alternative).
 7. **`CrimeEngine`**:
-   - Petty crime, grand theft, drug running, arrests, lawyer representation, trials, prison sentences, and escape attempts.
+   - Targeted crime specializations: Shoplifting, Pickpocketing, Grand Theft Auto (GTA), Burglary, Armed Heists.
+   - Lawyer representation (Public Defender vs Elite Attorney), trials, prison yard life (gangs, jobs, parole), and escape attempts.
 8. **`LeisureEngine`**:
    - Hobbies, gym, meditation, vacations, yacht days, and private jet trips.
 9. **`BusinessEngine` & `PoliticsEngine`**:
    - Founding, funding, and managing startups; political campaigns, municipal/national office, and tax policy.
 10. **`RelocationEngine`**:
     - Emigration, work visas, permanent residency, and expat restrictions across 15 countries.
-11. **`AchievementEngine`, `MilestoneEngine`, `YearQuestEngine`, `WeeklyChallengeEngine`, `LegacyEngine`**:
-    - Player progression, dynamic yearly goals, heir inheritance, and family dynasty trees.
+11. **`AchievementEngine`, `MilestoneEngine`, `YearQuestEngine`, `WeeklyChallengeEngine`, `LegacyEngine`, `LifeArchetypeEngine`**:
+    - Player progression, dynamic yearly goals, silk-sash tombstone ribbons, heir succession, and family dynasty trees.
 
 ---
 
 ## 4. UI System & Design Language
 
-The UI has undergone a comprehensive **Material 3 modernization**:
+The UI features a modern **Material 3 simulator aesthetic**:
 - **Palette (`Color.kt`):**
   - Canvas: Warm crisp neutral `CanvasBg = #F8F9FA` / `SurfaceMuted = #EFF1F5`.
   - Cards: Pure elevated `PaperWhite = #FFFFFF`.
   - Typography: High-contrast slate hierarchy (`#1E293B`, `#64748B`, `#94A3B8`).
-  - Outlines: Elegant 1dp hairlines (`#E2E8F0` / `#CBD5E1`) replacing dated heavy comic borders.
+  - Outlines: Elegant 1dp hairlines (`#E2E8F0` / `#CBD5E1`).
   - Primary Accent: Fresh emerald `LifeGreen = #22C55E`, `LifeGreenDark = #16A34A`, `LifeGreenSoft = #DCFCE7`.
   - Stat Tokens: Happiness (Amber `#F59E0B`), Health (Emerald `#10B981`), Smarts (Indigo `#6366F1`), Looks (Fuchsia `#D946EF`), Karma (Violet `#8B5CF6`).
 - **Components:**
-  - **Hero Header (`LifeScreen.kt`):** 76dp avatar with status ring, country flag + age pill, cash & net worth counters, and a 2x2 grid of micro-progress chips (`ModernStatChip`).
-  - **Age Up Button (`AgeUpButton.kt`):** Full-width emerald gradient button with smooth spring press scale animation and tactile shadow.
-  - **Bottom Navigation (`BottomNav.kt`):** Floating modern pill selection indicator with crisp vector icons and badge counters.
-  - **Action & Person Cards (`ActionCard.kt`, `PersonCard.kt`):** Elevated white cards with category-tinted circular icon badges and clear descriptions.
+  - **Procedural 2D Avatar (`ProceduralAvatarPortrait.kt`):** 100% offline Canvas-rendered portraits compositing skin, hair, facial features, expressions, and accessories with age and emotional progression.
+  - **Hero Header (`LifeScreen.kt`):** 76dp avatar with status ring, country flag + age pill, cash & net worth counters, and a 2x2 grid of micro-progress chips.
+  - **Connected Year Timeline (`LifeScreen.kt`):** Chronological event log with vertical milestone tracks and auto-scrolling.
+  - **3D Age Up Button (`AgeUpButton.kt`):** Full-width emerald 3D gradient button with spring press physics, layered depth, and tactile haptic feedback.
+  - **Adaptive Navigation:** `LeftNavRail` for tablets/foldables/landscape alongside `BottomNav` for phones.
+  - **DrillDownRow List Pattern:** Eliminates nested card sprawl by opening dedicated `ModalBottomSheet`s for actions, family, career, and assets.
 
 ---
 
-## 5. Recent Progress (What Has Shipped)
+## 5. Recent Architecture & Feature Additions
 
-1. **Complete Material 3 UI Overhaul (`06a54e4`)**:
-   - Fully transformed every screen (Life, Career, Actions, Family, Assets, Character Creation, Dialogs) from harsh comic borders to an elegant modern simulator aesthetic.
-2. **Google Play Games Services v2 Integration (`e133e66`)**:
-   - Added `PlayGamesService.kt` for cloud save snapshots and real-time leaderboard score submissions.
-   - Configured `LeaderboardIds.kt` for Net Worth, Longest Life, Generations, and Happiness.
-3. **Mortgage & Luxury Vehicles Engine (`e133e66`)**:
-   - Added full mortgage financing to `FinanceEngine.kt` and `Asset.kt`.
-   - Added Speedboat, Yacht, and Private Jet with custom leisure activities (`YACHT_DAY`, `PRIVATE_JET_TRIP`).
-4. **Multilingual Backfill Tooling (`scripts/backfill_translations.py`)**:
-   - Automated script using the Gemini API to scan `values/strings.xml` and generate consistent translations across Spanish, French, Hindi, Swahili, and Portuguese while preserving format specifiers.
-5. **Deep School & University Experience (`58a2ca7`, `84ced90`)**:
-   - Roster of classmates and teachers with individual relationships.
-   - Comprehensive university system: majors, student loans, work-study, internships, and post-grad tracks.
-6. **Career Ladders & Office Politics (`145411b`, `f809b30`)**:
-   - Multi-step corporate promotion ladders, burnout, PIP, and alternative fame/talent career paths.
-7. **BitLife & Another Life Simulator Architecture Overhaul**:
-   - Complete `DrillDownRow` list pattern and `ModalBottomSheet` drill-down architecture across all 5 main tabs (Actions, Career, Assets, Family, Life), eliminating giant stacked card walls for 360dp mobile screens.
-   - Main `LifeScreen` journal auto-scroll (`animateScrollToItem(0)`) with gold milestone pills and chronological intra-year log grouping.
-   - Childhood & teen action density (Ages 0–15): toys, tantrums, allowances, hobbies, chores, sneaking out, mall hangouts, gaming marathons.
-   - University social life & academic agency: campus mixers & Greek life, professor office hours, all-nighter exam crams, campus rivalry pranks.
-   - High-fidelity 16-bit 44.1kHz audio synthesis replacing placeholder silent `.wav` files with tactile sound effects, plus multi-waveform haptic vibration patterns.
-8. **Deep Gameplay Systems, Matchmaking, Workplace Agency & Endgame Polish**:
-   - **Interactive Matchmaking & Dating App Sheet (`DatingMatchSheet.kt`)**: Replaced blind RNG dating with realistic candidates featuring age, occupation badge, Looks, Smarts, and Crazy/Drama % stat bars with Pass and Ask Out actions.
-   - **Relationship Progression & Wedding Tiers (`RelationshipEngine.kt`)**: Casual -> Exclusive -> Engaged -> Married progression, Courthouse/Local/Destination wedding venues, and prenuptial agreement reactions driven by partner Crazy/Karma.
-   - **Workplace Roster & Office Agency (`WorkplaceRosterSheet.kt`, `CareerEngine.kt`)**: Active jobs generate a supervisor and coworkers with strictness/competence stats, enabling actions like Schmooze, Ask for Raise/Promotion, Collaborate, Prank, and HR reporting.
-   - **Crime Specialization & Prison Life (`CrimeEngine.kt`)**: Target selection across Burglary, GTA, and Armed Heist tiers with criminal notoriety scaling; prison yard gangs, parole petitions, and escape attempts.
-   - **Tombstone Ribbons & Heir Picker (`LifeArchetypeEngine.kt`, `LifeSummaryScreen.kt`, `HeirSelectionScreen.kt`)**: BitLife-style silk-sash tombstone ribbons (Loaded, Academic, Cunning, Saint, Scandalous, Fame Icon, Family Anchor, Workaholic, Mediocre) and polished heir succession cards.
-9. **Early Game Age-Gating, Infant Balancing & Character Creation Polish**:
-   - **Character Creation UI Polish**: Accurate stat note, horizontal country pill cards with empty state search, `FlowRow` preventing chip clipping/squishing, and suppression of adult beards/glasses for characters under 14.
-   - **Strict Age-Gating Across All Tabs**: Infants (0–2) only access baby interactions (Cuddle/Bond, Babble/Smile, Tantrum); school stage features clean `EarlyChildhoodCard` for `< 6`; part-time jobs lock until 16, full-time career and businesses lock until 18; minors `< 16` see `DependentMinorCard` on Assets; independent health insurance gated to `18+`.
-   - **Anti-Exploit & Balance Fixes**: Track `interactedTypesThisYear` per NPC to prevent infinite relationship farming; add 35% prank backfire risk; eliminate newborn debt stress drain and macroeconomic log spam for assetless minors.
-   - **Visual Consistency**: Distinct Material 3 `Icons.Rounded` icons throughout all tabs replacing placeholder graphics.
+1. **Procedural Illustrated 2D Portrait Engine (`0d4d2f0`)**:
+   - Completely replaces external vector URLs with a local, 100% offline Canvas-rendered portrait compositor (`ProceduralAvatarPortrait.kt`). Supports custom hair textures, colors, skin tones, facial features, facial hair, accessories, and emotional/age progression.
+2. **Visual HUD Overhaul (`cb19c03`)**:
+   - Added responsive `LeftNavRail` for larger screens and landscape orientation.
+   - Implemented `InsetCardContainer` with elevated card styling.
+   - Connected Year Timeline with milestone pins and auto-scroll in `LifeScreen.kt`.
+   - Tactile `3D AgeUpButton` with spring physics and audio-haptic sync.
+3. **BitLife-Style Single-Screen Character Creation (`f16e794`)**:
+   - Redesigned `CharacterCreationScreen.kt` to an all-in-one flow: Name input + Randomizer, Gender, Country selection cards with flags, 140-point Stats budget stepper/presets, and instant procedural avatar preview.
+4. **Early Game Age-Gating, Infant Balancing & Character Polish (`c4596bf`)**:
+   - Infancy (0–2): Exclusively baby interactions (*Cuddle*, *Babble*, *Tantrum*); shielded from debt stress and macroeconomic inflation spam.
+   - Strict age locks: Part-time jobs (16+), full-time careers & businesses (18+), independent health insurance (18+), minor asset blocker (`DependentMinorCard`).
+   - Anti-exploit protection: `interactedTypesThisYear` stops infinite relationship farming.
+   - Pranks carry a 35% backfire risk.
+   - Under-14 minors strictly protected from adult facial hair or eyeglasses.
+5. **DrillDownRow Architecture, Matchmaking & Workplace Agency (`b75fa73`)**:
+   - Transformed all 5 tabs to clean `DrillDownRow` list pattern opening `ModalBottomSheet`s.
+   - Interactive dating candidate cards (`DatingMatchSheet.kt`) with occupation, Looks, Smarts, and Crazy/Drama % rating.
+   - `WorkplaceRosterSheet.kt`: Supervisor and coworkers with schmoozing, raises, promotions, pranks, and HR reports.
+   - Targeted crime specializations (Burglary, GTA, Heists), lawyers, trials, prison yard gangs, and parole petitions.
+   - Silk-sash tombstone ribbons (*Loaded*, *Academic*, *Saint*, *Scandalous*, etc.) and multi-generational dynasty succession.
+   - 16-bit 44.1kHz synthesized audio and multi-waveform haptic vibration patterns.
 
 ---
 
-## 6. What Is Needed Next (Active Roadmap)
-
-When picking up development or proposing next steps, prioritize these areas:
-
-1. **Dedicated UI for Weekly Challenges**:
-   - `WeeklyChallengeEngine` is fully functional in domain code; elevate with a dedicated, prominent weekly challenge card/sheet with countdown timers and exclusive dynasty badges.
-2. **Additional Narrative Packs & Story Arcs**:
-   - Expand multi-year storyline event packs across under-represented countries and specific career branches (e.g. politics, space exploration, professional athletics).
-3. **Production Release Polish**:
-   - Swap test AdMob IDs in `AdUnitConfig` with production IDs before launch.
-   - Configure official Google Play Games App ID in Google Play Console.
-
----
-
-## 7. Guidelines for AI Assistants & Gemini Pair Programmers
+## 6. Guidelines for AI Assistants & Gemini Pair Programmers
 
 1. **Respect Domain Engine Purity:** Never import Android framework classes (`Context`, `Bitmap`, `View`, `Compose`) inside `app/src/main/java/com/maisha/game/domain/`.
 2. **State Flows and ViewModels:** The UI reads state exclusively through `StateFlow` from ViewModels. Never mutate engine models directly from Composables.
 3. **Strings and Localization:** Always place user-facing copy in `res/values/strings.xml` with appropriate translation keys. Never hardcode strings in UI composables.
-4. **Country Neutrality:** Default logic must remain country-agnostic or draw from country catalogs. Restrict Kenya-specific or nation-specific logic to `restrictedToCountry` or catalog parameters.
+4. **Country Neutrality:** Default logic must remain country-agnostic or draw from country catalogs. Restrict nation-specific logic to `restrictedToCountry` or catalog parameters.
 5. **Content Authoring:** When adding narrative events to `assets/data/events/`, always register them in `EventRepository.kt` and add them to `GlobalContentCoverageTest.kt`.
-6. **Verification Commands:** Always verify code changes with:
+6. **Documentation Location:** All project documentation is centralized in the root `docs/` folder. Keep `README.md`, `GAME_OVERVIEW.md`, `GEMINI.md`, `AI_CONTINUITY_PROMPT.md`, `EVENTS_SYSTEM.md`, and `PRIVACY_POLICY.md` updated and in sync.
+7. **Verification Commands:** Always verify code changes with:
    ```bash
    ./gradlew assembleDebug
    ./gradlew testDebugUnitTest

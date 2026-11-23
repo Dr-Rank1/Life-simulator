@@ -13,7 +13,11 @@ object SerializationUtils {
 
     const val TAG = "SerializationUtils"
 
-    val json: Json = Json { ignoreUnknownKeys = true }
+    val json: Json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+        encodeDefaults = true
+    }
 
     inline fun <reified T> safeDeserialize(
         raw: String,

@@ -8,6 +8,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -90,6 +91,8 @@ import com.maisha.game.ui.components.AppLoadingIndicator
 import com.maisha.game.ui.components.CountryFlag
 import com.maisha.game.ui.components.DismissibleTipCard
 import com.maisha.game.ui.components.EmptyStateCard
+import com.maisha.game.ui.components.WeeklyChallengeCard
+import com.maisha.game.ui.components.WeeklyChallengeSheet
 import com.maisha.game.ui.components.FloatingStatChangeLayer
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
@@ -277,7 +280,20 @@ fun LifeScreen(
     onProfessorOfficeHours: () -> Unit = {},
     onExamAllNighter: () -> Unit = {},
     onCampusRivalryPrank: () -> Unit = {},
-    onPayMortgage: (String) -> Unit = {}
+    onPayMortgage: (String) -> Unit = {},
+    onOpenWeeklyChallenge: () -> Unit = {},
+    onDismissWeeklyChallenge: () -> Unit = {},
+    onClaimWeeklyChallenge: () -> Unit = {},
+    onWeeklyChallengeClaimSuccessDismissed: () -> Unit = {},
+    onWorkPipDeliverable: () -> Unit = {},
+    onRebutPipWithHR: () -> Unit = {},
+    onLeadClubStrategy: () -> Unit = {},
+    onMentorClubJunior: () -> Unit = {},
+    onPrepayMortgagePrincipal: (String, Int) -> Unit = { _, _ -> },
+    onServiceAsset: (String) -> Unit = {},
+    onCaseCrimeTarget: (com.maisha.game.data.model.CrimeTarget) -> Unit = {},
+    onLayLowCrime: () -> Unit = {},
+    onBribeInformantCrime: () -> Unit = {}
 ) {
     if (uiState.isLoading) {
         Column(
@@ -392,6 +408,13 @@ fun LifeScreen(
         }
     }
 
+    LaunchedEffect(uiState.weeklyChallengeClaimSuccessMessage) {
+        uiState.weeklyChallengeClaimSuccessMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            onWeeklyChallengeClaimSuccessDismissed()
+        }
+    }
+
     var showQuestsSheet by rememberSaveable { mutableStateOf(false) }
 
     if (showQuestsSheet) {
@@ -405,49 +428,55 @@ fun LifeScreen(
         )
     }
 
+    if (uiState.showWeeklyChallengeSheet) {
+        uiState.weeklyChallengeProgress?.let { progress ->
+            WeeklyChallengeSheet(
+                progress = progress,
+                countryCode = character.countryCode,
+                onClaim = onClaimWeeklyChallenge,
+                onDismiss = onDismissWeeklyChallenge
+            )
+        }
+    }
+
     val eventActive = uiState.currentEvent != null
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .background(if (incarcerated) NavyDeep else MaterialTheme.colorScheme.background)
     ) {
-    Scaffold(
-        modifier = Modifier.then(
-            if (eventActive) Modifier.blur(16.dp) else Modifier
-        ),
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        containerColor = prisonBackground,
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            GlobalHudHeader(
-                character = character,
-                expression = uiState.headerExpression,
-                netWorth = uiState.netWorth,
-                questCount = uiState.yearQuests.size,
-                questCompleted = uiState.yearQuestProgress.count { it.completed },
-                onViewCharacterStats = onViewCharacterStats,
-                onOpenSettings = onOpenSettings,
-                onOpenQuests = { showQuestsSheet = true }
-            )
-        }
-    ) { innerPadding ->
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            LeftNavRail(
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTabOrdinal = it.ordinal },
-                disabledTabs = disabledTabs
-            )
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-            ) {
+        val isWideLayout = maxWidth >= 600.dp
+        Scaffold(
+            modifier = Modifier.then(
+                if (eventActive) Modifier.blur(16.dp) else Modifier
+            ),
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            containerColor = prisonBackground,
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            topBar = {
+                GlobalHudHeader(
+                    character = character,
+                    expression = uiState.headerExpression,
+                    netWorth = uiState.netWorth,
+                    questCount = uiState.yearQuests.size,
+                    questCompleted = uiState.yearQuestProgress.count { it.completed },
+                    onViewCharacterStats = onViewCharacterStats,
+                    onOpenSettings = onOpenSettings,
+                    onOpenQuests = { showQuestsSheet = true }
+                )
+            },
+            bottomBar = {
+                if (!isWideLayout && !eventActive) {
+                    MaishaBottomNav(
+                        selectedTab = selectedTab,
+                        onTabSelected = { selectedTabOrdinal = it.ordinal },
+                        disabledTabs = disabledTabs
+                    )
+                }
+            }
+        ) { innerPadding ->
+            val tabContent = @Composable {
                 AnimatedContent(
                     targetState = selectedTab,
                     transitionSpec = {
@@ -463,6 +492,7 @@ fun LifeScreen(
                         onAgeUp = onAgeUp,
                         onViewCharacterStats = onViewCharacterStats,
                         onOpenSettings = onOpenSettings,
+                        onOpenWeeklyChallenge = onOpenWeeklyChallenge,
                         onStatDeltaFinished = onStatDeltaFinished,
                         onYearRecapDismissed = onYearRecapDismissed,
                         onDismissYearQuestsTip = onDismissYearQuestsTip,
@@ -544,6 +574,10 @@ fun LifeScreen(
                 onExecuteSideHustle = onExecuteSideHustle,
                 onQuitPartTimeJob = onQuitPartTimeJob,
                 onRestStudentEnergy = onRestStudentEnergy,
+                onWorkPipDeliverable = onWorkPipDeliverable,
+                onRebutPipWithHR = onRebutPipWithHR,
+                onLeadClubStrategy = onLeadClubStrategy,
+                onMentorClubJunior = onMentorClubJunior,
                 onCareerMessageDismissed = onCareerMessageDismissed,
                 modifier = Modifier.fillMaxSize()
             )
@@ -570,6 +604,8 @@ fun LifeScreen(
                 onDismissAssetsMarketsTip = onDismissAssetsMarketsTip,
                 onPerformLeisure = onPerformLeisure,
                 onPayMortgage = onPayMortgage,
+                onPrepayMortgagePrincipal = onPrepayMortgagePrincipal,
+                onServiceAsset = onServiceAsset,
                 carMakeCatalog = carMakeCatalog,
                 streetCatalog = streetCatalog,
                 modifier = Modifier.fillMaxSize()
@@ -580,6 +616,9 @@ fun LifeScreen(
                 snackbarHostState = snackbarHostState,
                 onAttemptCrime = onAttemptCrime,
                 onAttemptTargetedCrime = onAttemptTargetedCrime,
+                onCaseCrimeTarget = onCaseCrimeTarget,
+                onLayLowCrime = onLayLowCrime,
+                onBribeInformantCrime = onBribeInformantCrime,
                 onVisitDoctor = onVisitDoctor,
                 onSetLifestyleOption = onSetLifestyleOption,
                 onExecuteSideHustle = onExecuteSideHustle,
@@ -615,7 +654,36 @@ fun LifeScreen(
             }
         }
     }
-    }
+
+        if (isWideLayout) {
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                LeftNavRail(
+                    selectedTab = selectedTab,
+                    onTabSelected = { selectedTabOrdinal = it.ordinal },
+                    disabledTabs = disabledTabs
+                )
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
+                    tabContent()
+                }
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                tabContent()
+            }
+        }
     }
 }
 }
@@ -678,6 +746,7 @@ private fun LifeTabContent(
     onAgeUp: () -> Unit,
     onViewCharacterStats: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
+    onOpenWeeklyChallenge: () -> Unit = {},
     onStatDeltaFinished: (Long) -> Unit,
     onYearRecapDismissed: () -> Unit,
     onDismissYearQuestsTip: () -> Unit = {},
@@ -725,6 +794,15 @@ private fun LifeTabContent(
                         YearRecapCard(
                             lines = uiState.yearRecapLines,
                             onDismiss = onYearRecapDismissed
+                        )
+                    }
+                }
+
+                uiState.weeklyChallengeProgress?.let { progress ->
+                    item {
+                        WeeklyChallengeCard(
+                            progress = progress,
+                            onClick = onOpenWeeklyChallenge
                         )
                     }
                 }
@@ -967,6 +1045,7 @@ private fun GlobalHudHeader(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
+                        modifier = Modifier.weight(1f, fill = false),
                         text = character.name,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
@@ -1009,6 +1088,7 @@ private fun GlobalHudHeader(
                         color = InkTertiary
                     )
                     Text(
+                        modifier = Modifier.weight(1f, fill = false),
                         text = stringResource(R.string.label_net_worth) + ": " + formatMoney(netWorth, character.countryCode),
                         style = MaterialTheme.typography.labelSmall,
                         color = InkSecondary,

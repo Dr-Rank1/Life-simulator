@@ -42,28 +42,42 @@ fun ProceduralAvatarPortrait(
     expression: Expression,
     modifier: Modifier = Modifier
 ) {
-    val stage = ageStageFor(age)
+    val stage = remember(age) { ageStageFor(age) }
     val safeConfig = remember(config) { AvatarAssetMapper.sanitize(config) }
 
-    val rawSkinColor = AvatarAssetMapper.skinTint(safeConfig.skinTone)
-    val rawHairColor = AvatarAssetMapper.hairTint(safeConfig.hairColor, stage, safeConfig.agingDetails)
-    val rawOutfitColor = AvatarAssetMapper.outfitTint(safeConfig.outfitColor)
-
-    // Blend hair towards silver/slate-gray for seniors or aging config
-    val isSeniorOrGray = stage == AgeStage.SENIOR ||
-        safeConfig.agingDetails == AgingDetails.GRAYING ||
-        safeConfig.agingDetails == AgingDetails.WRINKLES_AND_GRAYING ||
-        age >= 60
-
-    val effectiveHairColor = if (isSeniorOrGray) {
-        lerpColor(rawHairColor, Color(0xFF94A3B8), 0.75f)
-    } else {
-        rawHairColor
+    val rawSkinColor = remember(safeConfig.skinTone) {
+        AvatarAssetMapper.skinTint(safeConfig.skinTone)
+    }
+    val rawHairColor = remember(safeConfig.hairColor, stage, safeConfig.agingDetails) {
+        AvatarAssetMapper.hairTint(safeConfig.hairColor, stage, safeConfig.agingDetails)
+    }
+    val rawOutfitColor = remember(safeConfig.outfitColor) {
+        AvatarAssetMapper.outfitTint(safeConfig.outfitColor)
     }
 
-    val allowAdultFeatures = age >= 14 && stage != AgeStage.BABY && stage != AgeStage.CHILD
-    val allowGlasses = stage != AgeStage.BABY &&
-        (allowAdultFeatures || safeConfig.eyewear != EyewearStyle.READING_GLASSES)
+    // Blend hair towards silver/slate-gray for seniors or aging config
+    val isSeniorOrGray = remember(stage, safeConfig.agingDetails, age) {
+        stage == AgeStage.SENIOR ||
+            safeConfig.agingDetails == AgingDetails.GRAYING ||
+            safeConfig.agingDetails == AgingDetails.WRINKLES_AND_GRAYING ||
+            age >= 60
+    }
+
+    val effectiveHairColor = remember(rawHairColor, isSeniorOrGray) {
+        if (isSeniorOrGray) {
+            lerpColor(rawHairColor, Color(0xFF94A3B8), 0.75f)
+        } else {
+            rawHairColor
+        }
+    }
+
+    val allowAdultFeatures = remember(age, stage) {
+        age >= 14 && stage != AgeStage.BABY && stage != AgeStage.CHILD
+    }
+    val allowGlasses = remember(stage, allowAdultFeatures, safeConfig.eyewear) {
+        stage != AgeStage.BABY &&
+            (allowAdultFeatures || safeConfig.eyewear != EyewearStyle.READING_GLASSES)
+    }
 
     Canvas(
         modifier = modifier

@@ -113,9 +113,10 @@ class EventRepository private constructor(
         val wave4Children = loadEventsFromAsset(context, "data/events/wave4_children_events.json")
         val wave4Crime = loadEventsFromAsset(context, "data/events/wave4_crime_events.json")
         val schoolLife = loadEventsFromAsset(context, "data/events/school_life_events.json")
+        val narrativeArcs = loadEventsFromAsset(context, "data/events/narrative_arcs_events.json")
 
         return starter + education + career + finance + relationship + general + midlife + holidays + crime + wave3 +
-            wave4Workplace + wave4Hobbies + wave4SideHustles + wave4Love + wave4Children + wave4Crime + schoolLife
+            wave4Workplace + wave4Hobbies + wave4SideHustles + wave4Love + wave4Children + wave4Crime + schoolLife + narrativeArcs
     }
 
     private fun loadEventsFromAsset(context: Context, path: String): List<LifeEvent> {
@@ -134,6 +135,7 @@ class EventRepository private constructor(
         }
         return ageCandidates.filter { event ->
             (ONE_TIME_TAG !in event.tags || event.id !in usedIds) &&
+                passesPrerequisiteEventGate(event, usedIds) &&
                 EducationEngine.EXAM_SYSTEM_TAG !in event.tags &&
                 CareerEngine.CAREER_SYSTEM_TAG !in event.tags &&
                 RelocationEngine.RELOCATION_SYSTEM_TAG !in event.tags &&
@@ -372,6 +374,16 @@ class EventRepository private constructor(
         return stage == com.maisha.game.data.model.SchoolStage.PRIMARY ||
             stage == com.maisha.game.data.model.SchoolStage.SECONDARY ||
             stage == com.maisha.game.data.model.SchoolStage.UNIVERSITY
+    }
+
+    private fun passesPrerequisiteEventGate(event: LifeEvent, usedIds: Set<String>): Boolean {
+        val requirePrefix = "requires_event_"
+        val conflictPrefix = "conflicts_with_event_"
+        val prereqs = event.tags.filter { it.startsWith(requirePrefix) }.map { it.removePrefix(requirePrefix) }
+        if (prereqs.isNotEmpty() && !prereqs.all { it in usedIds }) return false
+        val conflicts = event.tags.filter { it.startsWith(conflictPrefix) }.map { it.removePrefix(conflictPrefix) }
+        if (conflicts.isNotEmpty() && conflicts.any { it in usedIds }) return false
+        return true
     }
 
     fun pickRandomEvent(

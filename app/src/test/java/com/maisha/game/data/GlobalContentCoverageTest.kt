@@ -26,6 +26,7 @@ class GlobalContentCoverageTest {
         "data/events/finance_events.json",
         "data/events/relationship_events.json",
         "data/events/general_events.json",
+        "data/events/midlife_events.json",
         "data/events/holiday_events.json",
         "data/events/crime_events.json",
         "data/events/wave3_events.json",
@@ -35,7 +36,8 @@ class GlobalContentCoverageTest {
         "data/events/wave4_love_sex_events.json",
         "data/events/wave4_children_events.json",
         "data/events/wave4_crime_events.json",
-        "data/events/school_life_events.json"
+        "data/events/school_life_events.json",
+        "data/events/narrative_arcs_events.json"
     )
 
     @Test
@@ -175,6 +177,44 @@ class GlobalContentCoverageTest {
             val items = json.decodeFromString<List<String>>(file.readText())
             assertTrue("$name.json is empty", items.size >= 4)
             assertTrue(items.all { it.isNotBlank() })
+        }
+    }
+
+    @Test
+    fun `all event ids are globally unique across all packs`() {
+        val events = loadAllEvents()
+        val ids = events.map { it.id }
+        val duplicates = ids.groupBy { it }.filter { it.value.size > 1 }.keys
+        assertTrue("Duplicate event IDs found: $duplicates", duplicates.isEmpty())
+    }
+
+    @Test
+    fun `all events have valid age bounds and non-empty choices`() {
+        val events = loadAllEvents()
+        events.forEach { event ->
+            assertTrue("minAge > maxAge in ${event.id}", event.minAge <= event.maxAge)
+            assertTrue("minAge < 0 in ${event.id}", event.minAge >= 0)
+            assertTrue("choices empty in ${event.id}", event.choices.isNotEmpty())
+            event.choices.forEach { choice ->
+                assertTrue("blank label in ${event.id}", choice.label.isNotBlank())
+                assertTrue("blank resultText in ${event.id}", choice.resultText.isNotBlank())
+            }
+        }
+    }
+
+    @Test
+    fun `all prerequisite event tags point to existing events`() {
+        val events = loadAllEvents()
+        val allIds = events.map { it.id }.toSet()
+        val prefix = "requires_event_"
+        events.forEach { event ->
+            val prereqs = event.tags.filter { it.startsWith(prefix) }.map { it.removePrefix(prefix) }
+            prereqs.forEach { prereqId ->
+                assertTrue(
+                    "Prerequisite event '$prereqId' referenced by '${event.id}' does not exist in event pool",
+                    allIds.contains(prereqId)
+                )
+            }
         }
     }
 

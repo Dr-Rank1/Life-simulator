@@ -114,7 +114,7 @@ class GameEngine @Inject constructor(
         var updatedCharacter = character.copy(
             age = nextAge,
             yearsInCurrentCountry = character.yearsInCurrentCountry + 1,
-            criminalRecord = character.criminalRecord.copy(crimeAttemptsThisYear = 0),
+            criminalRecord = crimeEngine.coolDownYear(character).criminalRecord,
             career = character.career.copy(
                 sideHustleDoneThisYear = false,
                 workEffortThisYear = null,
@@ -848,6 +848,18 @@ class GameEngine @Inject constructor(
     ): Pair<Character, WorkplaceActionResult> =
         careerEngine.handleWorkplaceAction(character, personId, action)
 
+    fun workPipDeliverable(character: Character): Pair<Character, WorkplaceActionResult> =
+        careerEngine.workPipDeliverable(character)
+
+    fun rebutPipWithHR(character: Character): Pair<Character, WorkplaceActionResult> =
+        careerEngine.rebutPipWithHR(character)
+
+    fun leadClubStrategy(character: Character): ClubActivityResult =
+        educationEngine.leadClubStrategy(character)
+
+    fun mentorClubJunior(character: Character): ClubActivityResult =
+        educationEngine.mentorClubJunior(character)
+
     fun setPlannedStudyEffort(character: Character, effort: StudyEffort): Character =
         educationEngine.setPlannedStudyEffort(character, effort)
 
@@ -1036,6 +1048,12 @@ class GameEngine @Inject constructor(
         return financeEngine.repairAsset(character, assetId)
     }
 
+    fun prepayMortgagePrincipal(character: Character, assetId: String, amount: Int): Character =
+        financeEngine.prepayMortgagePrincipal(character, assetId, amount)
+
+    fun serviceAsset(character: Character, assetId: String): Character =
+        financeEngine.serviceAsset(character, assetId)
+
     /** Delegates to [FinanceEngine.calculateNetWorth]. */
     fun calculateNetWorth(character: Character): Int {
         return financeEngine.calculateNetWorth(character)
@@ -1151,6 +1169,15 @@ class GameEngine @Inject constructor(
 
     fun attemptTargetedCrime(character: Character, target: com.maisha.game.data.model.CrimeTarget): CrimeResult =
         crimeEngine.attemptTargetedCrime(character, target)
+
+    fun caseCrimeTarget(character: Character, target: com.maisha.game.data.model.CrimeTarget): Character =
+        crimeEngine.caseTarget(character, target)
+
+    fun layLowCrime(character: Character): Character =
+        crimeEngine.layLow(character)
+
+    fun bribeInformantCrime(character: Character): Character =
+        crimeEngine.bribeInformant(character)
 
     /** Delegates to [CrimeEngine.goToTrial]. */
     fun goToTrial(

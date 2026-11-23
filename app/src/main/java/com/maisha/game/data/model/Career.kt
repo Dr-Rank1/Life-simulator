@@ -105,7 +105,13 @@ data class CareerState(
     /** Street busk / exhibition match used this year. */
     val talentGigDoneThisYear: Boolean = false,
     /** Years since last fame-boosting action (training, gig, track practice). */
-    val fameIdleYears: Int = 0
+    val fameIdleYears: Int = 0,
+    /** Active Performance Improvement Plan (PIP) at work. */
+    val onPip: Boolean = false,
+    /** Completed critical PIP work milestone this year. */
+    val pipDeliverableCompletedThisYear: Boolean = false,
+    /** Rebutted or appealed PIP to HR this year. */
+    val pipAppealedThisYear: Boolean = false
 )
 
 @Serializable
@@ -117,7 +123,8 @@ data class WorkplacePerson(
     val competence: Int = 50,
     val strictness: Int = 50,
     val isSupervisor: Boolean = false,
-    val avatarConfig: AvatarConfig = AvatarConfig.DEFAULT
+    val avatarConfig: AvatarConfig = AvatarConfig.DEFAULT,
+    val interactedThisYear: Boolean = false
 )
 
 @Serializable
@@ -128,7 +135,9 @@ enum class WorkplaceAction {
     COLLABORATE,
     PRANK,
     REPORT_HR,
-    OFFICE_ROMANCE
+    OFFICE_ROMANCE,
+    MENTOR_REQUEST,
+    PITCH_PROJECT
 }
 
 @Serializable

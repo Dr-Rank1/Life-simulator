@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -176,6 +177,7 @@ fun EventDialogStyled(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .widthIn(max = 480.dp)
                         .heightIn(max = 640.dp),
                     shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(
@@ -197,6 +199,7 @@ fun EventDialogStyled(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .weight(1f, fill = false)
                                 .verticalScroll(rememberScrollState())
                                 .padding(horizontal = 20.dp, vertical = 16.dp)
                         ) {

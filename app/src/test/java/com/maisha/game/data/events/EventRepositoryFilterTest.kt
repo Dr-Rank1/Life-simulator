@@ -69,6 +69,46 @@ class EventRepositoryFilterTest {
         assertTrue(eligible.contains("player_career_evt"))
     }
 
+    @Test
+    fun getEligibleEvents_handlesMultiStepNarrativeArcs() {
+        val step1 = event("arc_step_1", tags = listOf(EventRepository.ONE_TIME_TAG))
+        val step2 = event("arc_step_2", tags = listOf(EventRepository.ONE_TIME_TAG, "requires_event_arc_step_1"))
+        val step3 = event("arc_step_3", tags = listOf(EventRepository.ONE_TIME_TAG, "requires_event_arc_step_2"))
+        val repo = EventRepository.forTesting(FinanceEngine(), listOf(step1, step2, step3))
+        val character = TestFixtures.character(age = 25)
+
+        // Initially only step 1 is eligible
+        val initial = repo.getEligibleEvents(25, emptySet(), character).map { it.id }
+        assertEquals(listOf("arc_step_1"), initial)
+
+        // After step 1 is triggered (present in usedIds), step 1 is excluded and step 2 becomes eligible
+        val afterStep1 = repo.getEligibleEvents(25, setOf("arc_step_1"), character).map { it.id }
+        assertEquals(listOf("arc_step_2"), afterStep1)
+
+        // After step 2 is triggered, step 3 becomes eligible
+        val afterStep2 = repo.getEligibleEvents(25, setOf("arc_step_1", "arc_step_2"), character).map { it.id }
+        assertEquals(listOf("arc_step_3"), afterStep2)
+
+        // When all are completed, none are eligible
+        val allDone = repo.getEligibleEvents(25, setOf("arc_step_1", "arc_step_2", "arc_step_3"), character).map { it.id }
+        assertTrue(allDone.isEmpty())
+    }
+
+    @Test
+    fun getEligibleEvents_excludesConflictingBranchEvents() {
+        val eventA = event("branch_a", tags = listOf(EventRepository.ONE_TIME_TAG, "conflicts_with_event_branch_b"))
+        val repo = EventRepository.forTesting(FinanceEngine(), listOf(eventA))
+        val character = TestFixtures.character(age = 25)
+
+        // If branch_b was triggered, eventA should not be eligible
+        val blocked = repo.getEligibleEvents(25, setOf("branch_b"), character).map { it.id }
+        assertTrue(blocked.isEmpty())
+
+        // If branch_b was not triggered, eventA is eligible
+        val allowed = repo.getEligibleEvents(25, emptySet(), character).map { it.id }
+        assertEquals(listOf("branch_a"), allowed)
+    }
+
     private fun event(
         id: String,
         restrictedToCountry: String? = null,

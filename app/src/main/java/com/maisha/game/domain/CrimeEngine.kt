@@ -60,43 +60,61 @@ class CrimeEngine @Inject constructor() {
         val chance = successChance(character, crimeType, attemptsSoFar)
         val result = if (Random.nextFloat() < chance) {
             val moneyGained = moneyReward(crimeType, character.countryCode)
+            val updatedHeat = (record.heatLevel + 8).coerceIn(0, 100)
             val updated = character.copy(
                 stats = character.stats.copy(
                     money = character.stats.money + moneyGained
-                )
+                ),
+                criminalRecord = record.copy(heatLevel = updatedHeat)
             )
             CrimeResult.Success(updated, moneyGained)
         } else {
-            CrimeResult.Caught(processArrest(character, crimeType))
+            val arrested = processArrest(character, crimeType)
+            val updatedHeat = (arrested.criminalRecord.heatLevel + 30).coerceIn(0, 100)
+            CrimeResult.Caught(arrested.copy(criminalRecord = arrested.criminalRecord.copy(heatLevel = updatedHeat)))
         }
         return recordCrimeAttempt(result)
     }
 
     /**
      * Executes a specialized crime target (Burglary, GTA, Heist).
-     * Success scales with smarts and prior notoriety.
+     * Success scales with smarts, notoriety, and prior casing reconnaissance.
      */
     fun attemptTargetedCrime(character: Character, target: CrimeTarget): CrimeResult {
         val record = character.criminalRecord
-        if (record.currentlyIncarcerated || record.awaitingTrial || character.age < MIN_CRIME_AGE) {
+        val minAge = when (target.category) {
+            "Armed Heist" -> 18
+            else -> 16
+        }
+        if (record.currentlyIncarcerated || record.awaitingTrial || character.age < minAge) {
             return CrimeResult.Caught(character)
         }
 
         val smartsFactor = character.stats.smarts / 100f * 0.35f
         val notorietyFactor = (record.notoriety / 100f) * 0.15f
         val attemptPenalty = (record.crimeAttemptsThisYear * 0.15f)
-        val chance = (1.0f - target.difficulty + smartsFactor + notorietyFactor - attemptPenalty).coerceIn(0.08f, 0.90f)
+        val heatPenalty = (record.heatLevel / 100f * 0.25f)
+        val casedBonus = if (record.casedTarget == target) 0.20f else 0.0f
+        val chance = (1.0f - target.difficulty + smartsFactor + notorietyFactor + casedBonus - attemptPenalty - heatPenalty).coerceIn(0.08f, 0.90f)
+
+        val heatGain = when (target.category) {
+            "Armed Heist" -> 30
+            else -> 15
+        }
 
         val result = if (Random.nextFloat() < chance) {
             val reward = EconomyScaler.scaleAmount(target.baseReward, character.countryCode)
             val updatedNotoriety = (record.notoriety + target.notorietyGain).coerceIn(0, 100)
+            val updatedHeat = (record.heatLevel + heatGain).coerceIn(0, 100)
             val updated = character.copy(
                 stats = character.stats.copy(
                     money = character.stats.money + reward,
                     happiness = clampStat(character.stats.happiness + 8)
                 ),
                 criminalRecord = record.copy(
-                    notoriety = updatedNotoriety
+                    notoriety = updatedNotoriety,
+                    heatLevel = updatedHeat,
+                    casedTarget = null
                 ),
                 eventLog = EventLogCap.prepend(
                     character.eventLog,
@@ -106,8 +124,13 @@ class CrimeEngine @Inject constructor() {
             CrimeResult.Success(updated, reward)
         } else {
             val arrested = processArrest(character, CrimeType.FRAUD)
+            val updatedHeat = (arrested.criminalRecord.heatLevel + 40).coerceIn(0, 100)
             CrimeResult.Caught(
                 arrested.copy(
+                    criminalRecord = arrested.criminalRecord.copy(
+                        heatLevel = updatedHeat,
+                        casedTarget = null
+                    ),
                     eventLog = EventLogCap.prepend(
                         arrested.eventLog,
                         "Caught during attempted ${target.category}! The police surrounded the scene."
@@ -116,6 +139,92 @@ class CrimeEngine @Inject constructor() {
             )
         }
         return recordCrimeAttempt(result)
+    }
+
+    /**
+     * Cases out a specialized target in advance, mapping security to increase execution odds.
+     */
+    fun caseTarget(character: Character, target: CrimeTarget): Character {
+        val record = character.criminalRecord
+        val minAge = when (target.category) {
+            "Armed Heist" -> 18
+            else -> 16
+        }
+        if (record.currentlyIncarcerated || record.awaitingTrial || character.age < minAge) {
+            return character
+        }
+        val updatedHeat = (record.heatLevel + 5).coerceIn(0, 100)
+        return character.copy(
+            criminalRecord = record.copy(
+                casedTarget = target,
+                heatLevel = updatedHeat
+            ),
+            eventLog = EventLogCap.prepend(
+                character.eventLog,
+                "Cased out the ${target.category} target (${target.name.lowercase().replace('_', ' ')}). Security rhythms mapped (+Planning bonus, +5 Heat)."
+            )
+        )
+    }
+
+    /**
+     * Burns off police heat by staying off the streets in a safehouse.
+     */
+    fun layLow(character: Character): Character {
+        val record = character.criminalRecord
+        if (record.currentlyIncarcerated || record.awaitingTrial || record.heatActionDoneThisYear) {
+            return character
+        }
+        val cooledHeat = (record.heatLevel - 35).coerceAtLeast(0)
+        return character.copy(
+            criminalRecord = record.copy(
+                heatLevel = cooledHeat,
+                heatActionDoneThisYear = true
+            ),
+            eventLog = EventLogCap.prepend(
+                character.eventLog,
+                "Laid low in a safehouse off the radar. Police heat cooled down (-35 Heat)."
+            )
+        )
+    }
+
+    /**
+     * Bribes an underworld informant to scrub tips and misdirect police inquiries.
+     */
+    fun bribeInformant(character: Character): Character {
+        val record = character.criminalRecord
+        if (record.currentlyIncarcerated || record.awaitingTrial || record.heatActionDoneThisYear) {
+            return character
+        }
+        val bribeCost = EconomyScaler.scaleAmount(12_000, character.countryCode)
+        if (character.stats.money < bribeCost) return character
+
+        val cooledHeat = (record.heatLevel - 60).coerceAtLeast(0)
+        return character.copy(
+            stats = character.stats.copy(money = character.stats.money - bribeCost),
+            criminalRecord = record.copy(
+                heatLevel = cooledHeat,
+                heatActionDoneThisYear = true
+            ),
+            eventLog = EventLogCap.prepend(
+                character.eventLog,
+                "Bribed an underworld informant with ${formatMoney(bribeCost, character.countryCode)} to misdirect police investigations (-60 Heat)."
+            )
+        )
+    }
+
+    /**
+     * Cools down heat and resets yearly crime limits at age-up.
+     */
+    fun coolDownYear(character: Character): Character {
+        val record = character.criminalRecord
+        val newHeat = (record.heatLevel - 20).coerceAtLeast(0)
+        return character.copy(
+            criminalRecord = record.copy(
+                heatLevel = newHeat,
+                heatActionDoneThisYear = false,
+                crimeAttemptsThisYear = 0
+            )
+        )
     }
 
     private fun recordCrimeAttempt(result: CrimeResult): CrimeResult {
@@ -543,7 +652,8 @@ class CrimeEngine @Inject constructor() {
             else -> 0f
         }
         val repeatRisk = REPEAT_ATTEMPT_RISK_BASE.pow(priorAttemptsThisYear)
-        return (base / repeatRisk - karmaPenalty).coerceIn(MIN_SUCCESS_CHANCE, MAX_SUCCESS_CHANCE)
+        val heatPenalty = (character.criminalRecord.heatLevel / 100f * 0.20f)
+        return (base / repeatRisk - karmaPenalty - heatPenalty).coerceIn(MIN_SUCCESS_CHANCE, MAX_SUCCESS_CHANCE)
     }
 
     private fun moneyReward(crimeType: CrimeType, countryCode: String): Int {

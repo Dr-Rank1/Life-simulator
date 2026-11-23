@@ -12,6 +12,7 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +34,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maisha.game.R
@@ -78,7 +80,7 @@ fun AgeUpButton(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(58.dp)
+            .heightIn(min = 58.dp)
             .scale(scale)
             .shadow(
                 elevation = if (canPress && !pressed) 4.dp else 0.dp,
@@ -108,7 +110,7 @@ fun AgeUpButton(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp)
+                .heightIn(min = 54.dp)
                 .padding(top = if (pressed && canPress) 4.dp else 0.dp)
                 .clip(RoundedCornerShape(18.dp))
                 .background(buttonBrush)
@@ -116,7 +118,8 @@ fun AgeUpButton(
                     width = 1.dp,
                     color = if (canPress) Color.White.copy(alpha = 0.25f) else Hairline,
                     shape = RoundedCornerShape(18.dp)
-                ),
+                )
+                .padding(horizontal = 16.dp, vertical = 6.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -128,7 +131,9 @@ fun AgeUpButton(
                 fontWeight = FontWeight.Bold,
                 color = contentColor,
                 fontSize = 17.sp,
-                letterSpacing = 0.3.sp
+                letterSpacing = 0.3.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

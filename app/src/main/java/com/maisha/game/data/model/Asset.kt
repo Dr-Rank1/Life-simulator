@@ -43,5 +43,7 @@ data class Asset(
     /** Outstanding mortgage principal; 0 means fully owned. */
     val mortgageBalance: Int = 0,
     /** Fixed annual mortgage payment (principal + interest); 0 when no mortgage. */
-    val annualMortgagePayment: Int = 0
+    val annualMortgagePayment: Int = 0,
+    /** Preventative maintenance / servicing performed this year. */
+    val servicedThisYear: Boolean = false
 )

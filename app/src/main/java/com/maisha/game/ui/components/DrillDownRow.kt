@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -160,7 +161,7 @@ fun DrillDownRow(
         Box(
             modifier = modifier
                 .fillMaxWidth()
-                .height(58.dp)
+                .heightIn(min = 58.dp)
                 .semantics { role = Role.Button }
                 .clickable(enabled = enabled, onClick = onClick),
             contentAlignment = Alignment.CenterStart
@@ -171,7 +172,7 @@ fun DrillDownRow(
         Card(
             modifier = modifier
                 .fillMaxWidth()
-                .height(64.dp)
+                .heightIn(min = 64.dp)
                 .semantics { role = Role.Button }
                 .clickable(enabled = enabled, onClick = onClick),
             shape = RoundedCornerShape(16.dp),

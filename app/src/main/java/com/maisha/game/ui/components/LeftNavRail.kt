@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -66,7 +68,7 @@ fun LeftNavRail(
 ) {
     Column(
         modifier = modifier
-            .width(58.dp)
+            .widthIn(min = 60.dp, max = 76.dp)
             .fillMaxHeight()
             .background(DeepSlate)
             .drawBehind {
@@ -90,7 +92,8 @@ fun LeftNavRail(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .heightIn(min = 56.dp)
+                    .padding(vertical = 2.dp)
                     .semantics { role = Role.Tab }
                     .clickable(enabled = !disabled) { onTabSelected(item.tab) },
                 contentAlignment = Alignment.Center

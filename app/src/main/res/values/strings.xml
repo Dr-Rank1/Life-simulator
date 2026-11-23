@@ -1838,6 +1838,62 @@
     <string name="challenge_status_in_progress">In Progress</string>
     <string name="challenge_status_completed">Completed</string>
 
+    <!-- Weekly Challenges Overhaul -->
+    <string name="challenge_card_badge_ready">Ready to Claim</string>
+    <string name="challenge_card_badge_claimed">Claimed</string>
+    <string name="challenge_card_badge_in_progress">In Progress</string>
+    <string name="challenge_checklist_title">Challenge Checklist</string>
+    <string name="challenge_rewards_title">Completion Rewards</string>
+    <string name="challenge_time_left">Time Left: %1$s</string>
+    <string name="challenge_claim_button">Claim Rewards</string>
+    <string name="challenge_claimed_button">Reward Claimed ✓</string>
+    <string name="challenge_reward_cash">Cash Bonus: +%1$s</string>
+    <string name="challenge_reward_ribbon">Silk Ribbon: %1$s</string>
+    <string name="challenge_reward_karma">Karma: +%1$d</string>
+    <string name="challenge_reward_happiness">Happiness: +%1$d</string>
+    <string name="challenge_reward_title_label">Title: %1$s</string>
+    <string name="msg_weekly_challenge_claimed">Weekly Challenge completed! Claimed %1$s cash reward and silk ribbon!</string>
+
+    <string name="req_medical_degree_title">Graduate in Medicine or Nursing</string>
+    <string name="req_medical_track_title">Reach Medical Residency (Level 2)</string>
+    <string name="req_medical_health_title">Maintain at least 80% Health</string>
+
+    <string name="req_law_degree_title">Graduate with a Law Degree</string>
+    <string name="req_legal_track_title">Reach Senior Associate (Level 2)</string>
+    <string name="req_legal_smarts_title">Maintain at least 80% Smarts</string>
+
+    <string name="req_adopt_child_title">Adopt a Child into Your Family</string>
+    <string name="req_adopt_bond_title">Build an 80%+ Bond with Your Child</string>
+    <string name="req_own_home_title">Own a Residential House</string>
+
+    <string name="req_renovate_home_title">Complete a Property Renovation</string>
+    <string name="req_net_worth_100k_title">Achieve $100,000+ Net Worth</string>
+
+    <string name="req_expunged_record_title">Expunge Your Criminal Record</string>
+    <string name="req_high_karma_title">Restore Karma to 75%+</string>
+    <string name="req_employed_title">Hold a Steady Career Job</string>
+
+    <string name="req_high_gpa_title">Graduate with GPA 3.5+</string>
+    <string name="req_scholar_smarts_title">Achieve 85%+ Smarts</string>
+    <string name="req_academic_honors_title">Earn Academic Honors or Club Letter</string>
+
+    <string name="req_work_hustle_title">Work a Part-Time Job or Side Hustle</string>
+    <string name="req_youth_savings_title">Save $5,000 in Cash</string>
+    <string name="req_pass_grades_title">Maintain at least a 2.5 GPA</string>
+
+    <string name="req_portfolio_100k_title">Grow Portfolio Value to $100,000+</string>
+    <string name="req_net_worth_250k_title">Achieve $250,000+ Net Worth</string>
+    <string name="req_hold_savings_title">Hold $20,000+ in Savings</string>
+
+    <string name="title_master_healer">Master Healer</string>
+    <string name="title_legal_ace">Legal Ace</string>
+    <string name="title_devoted_guardian">Devoted Guardian</string>
+    <string name="title_property_mogul">Property Mogul</string>
+    <string name="title_redeemed_soul">Redeemed Soul</string>
+    <string name="title_valedictorian">Valedictorian</string>
+    <string name="title_young_entrepreneur">Young Entrepreneur</string>
+    <string name="title_master_investor">Master Investor</string>
+
     <!-- Part 2 — Childhood & Youth Actions -->
     <string name="leisure_play_toys_title">Play with Toys</string>
     <string name="leisure_play_toys_desc">Build worlds and play with your favorite toys</string>
@@ -2023,4 +2079,50 @@
     <string name="health_insurance_minor_desc">Minors are covered under their parents\' policy until age 18.</string>
     <string name="health_insurance_minor_blocked">Health insurance unlocks at age 18.</string>
     <string name="no_countries_match">No countries match your search.</string>
+
+    <!-- Agency Expansion: Workplace & PIP -->
+    <string name="action_mentor_request">Request Mentorship</string>
+    <string name="action_mentor_request_desc">Learn trade secrets and boost performance from a senior colleague</string>
+    <string name="action_pitch_project">Pitch High-Impact Project</string>
+    <string name="action_pitch_project_desc">Propose an initiative for major performance and recognition</string>
+    <string name="badge_interacted_this_year">Interacted</string>
+    <string name="msg_already_interacted_this_year">You have already interacted with %1$s this year.</string>
+    <string name="pip_alert_title">Performance Improvement Plan (PIP)</string>
+    <string name="pip_alert_desc">You have been placed on a formal PIP. Improve metrics before year-end or risk termination.</string>
+    <string name="btn_work_pip_deliverable">Deliver Work Milestone</string>
+    <string name="desc_work_pip_deliverable">Work overtime to deliver key results and secure your position</string>
+    <string name="btn_rebut_pip">Appeal Review to HR</string>
+    <string name="desc_rebut_pip">Dispute unfair metrics with Human Resources</string>
+    <string name="pip_deliverable_completed_badge">Milestone Submitted</string>
+
+    <!-- Agency Expansion: School & Club Leadership -->
+    <string name="btn_club_strategy">Lead Strategic Workshop</string>
+    <string name="desc_club_strategy">Hold a tactics and prep session for the club (+Skill, +Prestige)</string>
+    <string name="btn_club_mentoring">Mentor Junior Members</string>
+    <string name="desc_club_mentoring">Coach younger club peers and build campus respect (+Reputation)</string>
+    <string name="msg_club_strategy_already_done">You already ran a strategic workshop this year.</string>
+    <string name="msg_club_strategy_ineligible">Only club Officers and Captains can lead strategy sessions.</string>
+    <string name="msg_club_mentoring_already_done">You already mentored junior members this year.</string>
+    <string name="msg_club_mentoring_ineligible">Only club Officers and Captains can conduct junior mentoring.</string>
+
+    <!-- Agency Expansion: Underworld & Heat -->
+    <string name="police_heat_meter_title">Police Heat Level</string>
+    <string name="police_heat_meter_desc">Active police surveillance on you. High heat drastically lowers crime success.</string>
+    <string name="btn_case_target">Case Target</string>
+    <string name="btn_cased_target_badge">Cased (+20% Success)</string>
+    <string name="btn_lay_low">Lay Low in Safehouse</string>
+    <string name="desc_lay_low">Stay off the streets to cool down police heat (-35 Heat)</string>
+    <string name="btn_bribe_informant">Bribe Underworld Informant</string>
+    <string name="desc_bribe_informant">Pay off street informants to misdirect police investigations (-60 Heat)</string>
+    <string name="msg_crime_cased">Cased out the %1$s target! Planning bonus active for execution.</string>
+    <string name="msg_crime_laid_low">Laid low in a safehouse. Police heat reduced!</string>
+    <string name="msg_crime_bribed_informant">Paid off informant. Police attention misdirected!</string>
+
+    <!-- Agency Expansion: Assets & Mortgage -->
+    <string name="btn_prepay_mortgage_principal">Prepay Principal (%1$s)</string>
+    <string name="desc_prepay_mortgage_principal">Pay down extra loan principal to lower ongoing yearly payments</string>
+    <string name="msg_mortgage_principal_prepaid">Mortgage principal prepaid successfully!</string>
+    <string name="btn_service_asset">Preventative Servicing (%1$s)</string>
+    <string name="desc_service_asset">Scheduled maintenance to improve condition and prevent breakdowns</string>
+    <string name="msg_asset_serviced">Asset serviced and maintained successfully!</string>
 </resources>

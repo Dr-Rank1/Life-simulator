@@ -1,455 +1,225 @@
 # Maisha / Life-simulator — AI Continuity Prompt
 
-> **Purpose:** Paste this document (or point an AI agent at it) at the start of any new session so the assistant understands **what Maisha is**, **what has already been built**, **what just shipped**, **what is still missing**, and **how to work in this repo without undoing progress**.
+> **Purpose:** Read this document at the start of any new session so the assistant or developer understands **what Maisha is**, **what has already been built**, **what just shipped**, **what is still missing**, and **how to work in this repo without undoing progress**.
 >
-> **Last updated:** 2026-11-03 (BitLife Overhaul: DrillDownRow & ModalBottomSheet architecture, Matchmaking, Workplace Agency, Targeted Crime & Prison, Tombstone Ribbons, Audio & Haptics)  
-> **Repo path:** `/home/ian/Documents/Apps/Life-simulator`  
-> **Remote:** `https://github.com/stewiriffin/Life-simulator` (`origin/main`)  
+> **Last updated:** 2026-11-23 (Procedural 2D Portrait Engine, Visual HUD & LeftNavRail, Single-Screen New Life Creation, Early-Game Balance & Age-Gates, DrillDownRow & ModalBottomSheet Architecture, Matchmaking & Dating App Sheets, Workplace Roster & Agency, Targeted Crime & Prison Yards, Tombstone Ribbons & Heir Succession, Synthesized 44.1kHz Audio & Haptics)  
+> **Repository:** `https://github.com/stewiriffin/Life-simulator` (`origin/main`)  
 > **Package:** `com.maisha.game`
 
 ---
 
-## 1. One-paragraph product summary
+## 1. One-Paragraph Product Summary
 
-**Maisha** (Swahili for *life*) is a single-player Android **life simulation** game in the BitLife / Age Sim genre. The player creates a character, ages **one year at a time**, and makes choices across school, career, relationships, crime, health, finance, politics, leisure, and legacy. The game is **offline-first**: narrative content lives in JSON under `app/src/main/assets/data/events/`, and game rules live in pure Kotlin **domain engines**. It targets mid-range phones (**~360dp width**, **minSdk 26**). The product is intentionally **worldwide** across **15 countries**, not Kenya-only — though the project started as a Kenya prototype and some Kenya-specific events remain behind `restrictedToCountry: "KE"`.
+**Maisha** (Swahili for *life*) is a single-player Android **life simulation** game in the BitLife / Age Sim genre. The player creates a character, ages **one year at a time**, and makes active choices across education, career, relationships, finances, crime, health, politics, leisure, and legacy. The game is **offline-first**: narrative content lives in 13+ JSON packs under `app/src/main/assets/data/events/`, and game rules live in pure Kotlin **domain engines**. It targets mid-range phones (**~360dp width**, **minSdk 26**, **targetSdk 35**) while supporting adaptive layouts (`LeftNavRail`) for tablets and foldables. The product is natively localized for **15 countries** (Kenya, Nigeria, South Africa, Egypt, USA, Canada, UK, France, Germany, India, Japan, Philippines, Indonesia, Brazil, Mexico) with real currencies, names, exam systems, transport modes, and money apps.
 
-**Design north star:** every year should feel like there is something meaningful to *do* (actions, NPCs, systems), not only a random event card. Recent work has pushed hard on character creation UX, BitLife-style art, depth waves of content, and a full **school life** rewrite with classmates and activities.
-
----
-
-## 2. How you (the AI) should behave in this repo
-
-1. **Read code before rewriting.** Prefer extending existing engines/screens over inventing parallel systems.
-2. **Domain engines stay pure.** No `Context`, Room, Compose, or Android APIs inside `domain/`. Engines take immutable models and return new copies.
-3. **UI reads StateFlow only.** ViewModels (`@HiltViewModel`) own orchestration; screens call ViewModel methods.
-4. **Small, focused diffs.** Match existing Compose patterns, Maisha theme tokens (`TealPrimary`, `GoldAccent`, `MaishaRadius`, etc.), and `strings.xml` for user-facing copy.
-5. **Events are content + gates.** New JSON must be wired in `EventRepository.loadAllFromAssets` and listed in `GlobalContentCoverageTest`.
-6. **School NPCs are not family.** Classmates/teachers live on `education.schoolPeople` (`SchoolPerson`), not `Character.family`.
-7. **Git:** commit **only when asked**; push **only when asked**; install with `./gradlew :app:installDebug` when asked. Do not force-push, amend others’ commits, or update git config.
-8. **Docs:** This continuity file is the primary handoff doc. Older docs under `docs/` were deleted on 2026-08-25; do not assume `ARCHITECTURE.md`, `PROJECT_OVERVIEW.md`, etc. still exist unless recreated.
-9. **Country bias:** Prefer catalogs + `{placeholders}` over hardcoding Kenya as the default experience.
-10. **Prefer player agency.** When the user asks for “more to do,” prefer actions, NPCs, yearly choices, and UI surfaces — not only dumping more event JSON.
+**Design north star:** Every year should feel like there is something meaningful to *do* (interactive systems, NPC actions, career agency, asset management), not only a passive random event card.
 
 ---
 
-## 3. Tech stack
+## 2. Rules of Engagement for AI Assistants
+
+1. **Read code before rewriting:** Prefer extending existing engines, viewmodels, and screens over inventing parallel systems.
+2. **Domain engines stay pure:** No `Context`, `Bitmap`, `View`, `Room`, `Compose`, or Android framework classes inside `app/src/main/java/com/maisha/game/domain/`. Engines take immutable models and return updated copies.
+3. **UI reads StateFlow only:** ViewModels (`@HiltViewModel`) own orchestration; Compose screens observe `StateFlow` and send user intents to ViewModel methods.
+4. **Small, focused diffs:** Match existing Compose patterns, Maisha theme tokens (`LifeGreen`, `PaperWhite`, `CanvasBg`, `StatTokens`), and `strings.xml` for user-facing copy.
+5. **Events are content + gates:** New JSON events must be wired in `EventRepository.loadAllFromAssets` and registered in `GlobalContentCoverageTest`.
+6. **School NPCs are not family:** Classmates/teachers live on `education.schoolPeople` (`SchoolPerson`), not `Character.family`.
+7. **Git:** Commit and push **only when asked**. Do not force-push, amend commits, or change git config without instructions.
+8. **Documentation Location:** All project documentation lives in the root `docs/` folder (`README.md`, `GAME_OVERVIEW.md`, `GEMINI.md`, `AI_CONTINUITY_PROMPT.md`, `EVENTS_SYSTEM.md`, `PRIVACY_POLICY.md`). Keep them synchronized.
+9. **Country neutrality:** Prefer country catalogs + `{placeholders}` over hardcoding Kenya or any specific country as the default experience.
+10. **Prefer player agency:** When asked for "more things to do," prefer interactive actions, bottom sheets, NPC mechanics, and UI surfaces over dumping static event text.
+
+---
+
+## 3. Tech Stack & Useful Commands
 
 | Technology | Role |
-|------------|------|
-| **Kotlin 2.0** | App language |
-| **Jetpack Compose + Material 3** | UI |
-| **MVVM + Hilt** | DI + ViewModels |
-| **Room** | Multi-slot character saves (stats + JSON blobs) |
-| **DataStore** | Preferences (sound, haptics, language, onboarding, tips) |
-| **Kotlinx Serialization** | Event JSON + serialized nested state |
-| **WorkManager** | Daily reminders / contextual nudges |
-| **Google Mobile Ads** | Banner, interstitial, rewarded (Second Wind) — **test IDs in dev** |
-| **JUnit 4** | Domain unit tests under `app/src/test/` |
+|---|---|
+| **Kotlin 2.0+** | App programming language (Java 17 bytecode) |
+| **Jetpack Compose + Material 3** | Modern declarative UI, spring physics, adaptive layouts |
+| **MVVM + Dagger Hilt** | Dependency injection & ViewModel lifecycle management |
+| **Room Database** | Multi-slot character saves (versioned JSON state blobs) |
+| **DataStore Preferences** | App settings (sound, haptics, language, onboarding, tips) |
+| **Kotlinx Serialization** | Event JSON parsing & deep state serialization |
+| **AndroidX WorkManager** | Contextual daily retention reminders |
+| **Google Mobile Ads (AdMob)** | Interstitial on age-ups, banner on slot picker, rewarded Second Wind |
+| **Google Play Games Services v2** | Cloud save snapshots (`SnapshotsClient`) & global leaderboards |
+| **JUnit 4 & Kotlin Test** | Domain unit tests under `app/src/test/` |
 
-**Build targets:** `compileSdk` / `targetSdk` **35**, `minSdk` **26**, JDK **17**, AGP ~8.7.
-
-**Useful commands:**
+**Useful Gradle Commands:**
 
 ```bash
+# Build debug APK
 ./gradlew assembleDebug
+
+# Install debug on connected device/emulator
 ./gradlew :app:installDebug
+
+# Run all domain and content unit tests
 ./gradlew testDebugUnitTest
+
+# Run specific engine test
 ./gradlew :app:testDebugUnitTest --tests "com.maisha.game.domain.EducationEngineTest"
 ```
 
-Primary physical QA devices seen in development: **itel A665L**, **TECNO LI6** (360dp-class Android 13 phones).
-
 ---
 
-## 4. Architecture
+## 4. Architecture & Data Flow
 
 ```
 Compose Screens / Tabs
         ↓
-  ViewModels (StateFlow)   e.g. LifeViewModel
+  ViewModels (StateFlow)   e.g. LifeViewModel, CharacterCreationViewModel
         ↓
-  GameEngine (orchestrates yearly tick + facades)
+  GameEngine (central yearly tick coordinator + facades)
         ↓
-  Feature engines (Education, Career, Relationship, …)
+  Feature Engines (Education, Career, Relationship, Finance, Health, Crime, ...)
         ↓
-  Repositories (Room / DataStore / EventRepository + assets)
+  Repositories (Room / DataStore / EventRepository + JSON assets)
 ```
 
-### Age-up loop (conceptual)
-
-1. Player taps **Age Up** on the Life tab.
-2. `GameEngine` advances age, ticks school year / relationships / finance / health / crime / jobs, etc.
-3. `EventRepository.getEligibleEvents` filters JSON + system events by age, tags, and character gates.
-4. Player may get **NoEvent**, **SingleEvent**, or **MultipleEvents**.
-5. Choices apply `statEffects` and specialty fields (GPA, relationships, crime triggers, relocation, university course, etc.).
-6. UI shows event dialog, floating stat deltas, celebrations, ads (interstitial every N age-ups), and updates header expression / net worth.
-
-### Persistence
-
-- **Room:** durable per-slot character state.
-- **DataStore:** app settings that should survive character resets without schema migrations.
-- Nested game objects (education, family, career, assets, school people, etc.) are typically stored as **serialized JSON blobs** inside Room entities — adding fields with **defaults** is preferred so old saves still load without a hard migration when possible.
+### The Yearly Age-Up Loop
+1. Player taps the tactile **3D AgeUpButton** on the Life tab.
+2. `GameEngine.advanceYear` increments age and ticks sub-engines in sequence:
+   - `EducationEngine.tickSchoolYear`: School stage, grades, classmate/teacher bond decay, club ranks.
+   - `CareerEngine.tick`: Job performance, promotion/raise evaluations, PIPs, part-time pay, side hustle yields, fame decay.
+   - `FinanceEngine.tick`: Tax liabilities, living expenses, mortgage amortization, vehicle upkeep, student loan interest, crypto yields.
+   - `RelationshipEngine.tick`: Annual bond decay, family aging, partner status, pet health and mortality.
+   - `HealthEngine.tick`: Age-based physical deterioration, chronic condition progress, sickness rolls.
+   - `CrimeEngine.tick`: Parole board reviews, gang standing, sentence counters.
+   - `MortalityEngine.checkMortality`: Age and health-based natural and accidental mortality odds.
+3. `EventRepository.getEligibleEvents` filters JSON narrative events by age, career status, education gates, and country.
+4. If an event fires, the player sees an `EventDialogStyled` modal with meaningful choices.
+5. Choice outcomes apply immediate deltas (`statEffects`, GPA, relationships, money, crime flags, relocation).
+6. The event log in `LifeScreen` updates with connected vertical milestone tracks and auto-scrolls to the top.
 
 ---
 
-## 5. Project layout
+## 5. Project Layout Map
 
 ```
 app/src/main/java/com/maisha/game/
-  domain/           # Pure game engines (rules)
-  data/             # Catalogs, repositories, EventRepository
-  data/model/       # Character, Person, EducationState, LifeEvent, …
-  data/events/      # EventRepository
-  data/local/       # Room
-  ui/main/          # LifeScreen, CareerScreen, FamilyScreen, ActionsScreen, AssetsScreen, LifeViewModel
-  ui/charactercreation/  # Creation flow + stats picker
-  ui/avatar/        # AvatarImage, DiceBear, ExpressionResolver
-  ui/components/    # Shared Compose widgets
-  ui/theme/         # Colors, radius, spacing
-  ui/navigation/    # MaishaNavHost
-  di/               # Hilt modules
-  notifications/    # WorkManager
-  feedback/         # Sound / haptics
-  ads/              # AdMob wrappers
-  util/             # clampStat, formatMoney, etc.
+  domain/                  # Pure game engines (18 engines, pure Kotlin)
+  data/                    # Catalogs (Country, Job, Name), EventRepository
+  data/model/              # Character, Person, EducationState, Career, Finance, Asset, Crime...
+  data/events/             # EventRepository implementation
+  data/local/              # Room database, DAOs, TypeConverters
+  ui/main/                 # LifeScreen, ActionsScreen, FamilyScreen, CareerScreen, AssetsScreen, LifeViewModel
+  ui/charactercreation/     # BitLife-style single-screen New Life creation flow
+  ui/avatar/               # ProceduralAvatarPortrait (Canvas engine), ExpressionResolver
+  ui/components/           # 3D AgeUpButton, DrillDownRow, InsetCardContainer, LeftNavRail, sheets
+  ui/theme/                # Colors (CanvasBg, LifeGreen, StatTokens), Type, Shape
+  ui/navigation/           # MaishaNavHost
+  di/                      # Hilt modules (AppModule, DatabaseModule)
+  notifications/          # WorkManager daily retention reminders
+  feedback/                # FeedbackManager (44.1kHz audio synthesis + multi-waveform haptics)
+  ads/                     # AdMob wrappers (AdUnitConfig)
+  util/                    # Extensions, formatMoney, clampStat
 
-app/src/main/assets/data/events/   # Narrative event JSON packs
-app/src/test/java/com/maisha/game/ # Domain + content coverage tests
-docs/                              # Continuity / product docs (this file)
+app/src/main/assets/data/events/  # 18 JSON narrative event packs (multi-year story arcs, country flavor)
+app/src/test/java/com/maisha/game/ # Domain unit tests & content coverage tests
+docs/                              # Centralized project documentation
 ```
 
 ---
 
-## 6. Main UI map
+## 6. Core UI & Navigation System
 
-### Navigation / tabs (`MainTab`)
+### Main Navigation (`MainTab`)
+The game layout adapts dynamically: compact phones use bottom navigation; tablets, foldables, and landscape mode automatically switch to `LeftNavRail`.
 
-| Tab | Screen | What the player does |
-|-----|--------|----------------------|
-| **LIFE** | `LifeTabContent` / Life tab | Age Up, year quests, recap, live status |
-| **ACTIONS** | `ActionsScreen` | Categorized action board (leisure, crime, lifestyle, childhood actions, etc.) |
-| **FAMILY** | `FamilyScreen` | Family, dating, pets, bond interactions, parties |
-| **CAREER** | `CareerScreen` | Jobs, **school** (education + school life + clubs), business, politics, career tracks |
-| **ASSETS** | `AssetsScreen` | Homes/cars/etc., investments, living standard, will, portfolio |
+| Tab | Key Surfaces & Responsibilities |
+|---|---|
+| **LIFE** | 76dp avatar hero header, cash & net worth counters, stat chips, connected year journal timeline, live quests, 3D Age Up Button |
+| **ACTIONS** | Drill-down rows: Childhood play (0–15), Leisure & Wellness, Health & Doctors, Crime & Underworld, Financial moves, Relocation |
+| **FAMILY** | Family list, dynamic dating candidate sheets (`DatingMatchSheet`), relationship progression, weddings & prenups, pet care |
+| **CAREER** | School (Primary/Secondary, exams, roster, clubs), 7 University majors (loans, work-study, honors), Jobs, Corporate Ladders, Workplace agency (`WorkplaceRosterSheet`), Fame/Talent Hub, Businesses, Politics |
+| **ASSETS** | Real estate (cash or 30-year amortized mortgage), Luxury vehicles (cars, yachts, speedboats, private jets), Investments, Living tiers, Wills |
 
-Other flows: splash, onboarding, slot picker, character creation → avatar → **stats allocation**, settings, achievements, life summary / share card, arrest/trial dialogs, event dialogs.
-
-### Career → School (important)
-
-School is **not** its own bottom tab. It lives under **Career**, category **SCHOOL**:
-
-1. **Education** card — stage, GPA, study effort, drop out  
-2. **School life** card — reputation, classmates/teachers, activities  
-3. **School clubs** card — Debate / Football / Drama / Coding / Music with ranks, skill/prestige/fame bars, Light/Normal/Intense practice, rival challenges, letter jacket, officer fundraisers, captain major events, awards/scholarship resume  
-4. **Jobs & Side Hustles / marketplace** — part-time market cards (wage, energy/hours, Apply Now), active hustle management, youth hustles  
-5. **Fame & Talent Hub** — athleticism / musical talent / fame meters, gym & music training, street busk / exhibition match gigs, idle fame decay, leave pathway, endorsements, pro athlete & entertainment pathways  
- 
-6. Career tracks, jobs, business, politics elsewhere in the same screen  
+### Procedural 2D Avatar Portrait Engine (`ProceduralAvatarPortrait.kt`)
+Completely offline Canvas drawing engine (1,180+ lines):
+- Renders face shapes, dynamic skin tones, layered hairstyles & colors, eyes, expressive eyebrows, noses, dynamic mouths, facial hair (beards, goatees, mustaches), and accessories (glasses, hats, earrings, necklaces, collars).
+- Life stage progression from chubby-cheeked infants to wrinkled elders with graying hair.
+- Live expressions reflecting character mental/physical state: Happy, Neutral, Sad/Depressed, Sick/Injured, Stressed/Burned out.
+- Under-14 minors are strictly protected from adult facial hair or eyeglasses.
 
 ---
 
-## 7. Domain engines inventory
+## 7. Deep Systems Inventory
 
-These are the rule brains. Prefer editing the right engine instead of stuffing logic into ViewModels.
+### Education & School Life
+- Primary (6–12) and Secondary (13–17) with country exam names (KCSE, WAEC, SAT, GCSE, Abitur, etc.).
+- Slacker / Normal / Grind study effort modes.
+- Dynamic school roster: Classmates, Best Classmate, Bully, Teachers, School Crush.
+- Yearly activities limit: 1 academic + 1 social action per year.
+- School clubs: Debate, Football/Soccer, Drama, Coding, Music with ranks (*Member* &rarr; *Officer* &rarr; *Captain*), practice intensity, letter jackets, and rivalry matches.
+- Club leadership agency: Strategy sessions (`leadClubStrategy`) trading stress for prestige/skills, and junior mentorship (`mentorClubJunior`) building reputation and classmate bonds.
+- Misbehavior, detention, rebel achievements, principal appeals, expulsion hearings.
 
-| Engine | Responsibility |
-|--------|----------------|
-| `GameEngine` | Age-up orchestration, facades into other engines |
-| `EducationEngine` | Enroll, grades, exams, university, clubs, **school roster + activities**, study effort |
-| `CareerEngine` | Jobs, performance, promotions, tracks, military, student part-time + energy, side hustles, fame/talent/endorsements, `requires_job` gates |
-| `RelationshipEngine` | Family/dating/friends/enemies, interactions, gates (`requires_spouse`, etc.) |
-| `FinanceEngine` | Money, assets, rentals, portfolio tags |
-| `CrimeEngine` | Crimes, arrest, incarceration, trial-related rules |
-| `HealthEngine` | Illness, doctor visits, lifestyle health effects |
-| `BusinessEngine` | Start/sell businesses |
-| `PoliticsEngine` | Campaigns, offices, tax policy |
-| `RelocationEngine` | Move countries, visas, expat gates |
-| `LeisureEngine` | Leisure / lifestyle actions |
-| `SkillEngine` | Skills progression |
-| `SocialMediaEngine` | Social media loop |
-| `AchievementEngine` | Achievements / unlocks |
-| `LegacyEngine` | Heir continuation, ancestry |
-| `MortalityEngine` | Death checks |
-| `MilestoneEngine` | Life milestones |
-| `YearQuestEngine` | Yearly quests / streaks |
-| `WeeklyChallengeEngine` | Weekly challenges (engine exists; dedicated UI may still be thin) |
-| `BucketListEngine` | Bucket list goals |
-| `LifeArchetypeEngine` | Life archetypes (Wave 2) |
+### University & Higher Education
+- 7 Majors: CS, Law, Medicine, Business, Communications, Engineering, Nursing.
+- Funding: Cash, Student Loans (with real interest and amortization), or Merit Scholarships.
+- Campus life: Mixers, professor office hours, all-nighter crams, campus rivalry pranks, work-study jobs, corporate internships.
+- Honors (*Cum Laude*, *Magna Cum Laude*, *Summa Cum Laude*) unlocking corporate fast-track offers.
 
----
+### Workplace Agency & Corporate Ladders
+- Corporate ranks: Entry &rarr; Mid &rarr; Senior &rarr; Lead &rarr; Director &rarr; Executive.
+- `WorkplaceRosterSheet`: Supervisor (Strictness & Competence) and diverse Coworkers.
+- Player actions: Schmooze boss, ask for raise/promotion, collaborate, prank (35% backfire risk), report to HR, request mentorship (`MENTOR_REQUEST`), and pitch innovative projects (`PITCH_PROJECT`).
+- Workplace anti-farming: Coworkers track `interactedThisYear` with badge indicators to prevent repeated exploitation.
+- Workplace hazards & PIP counter-moves: Performance Improvement Plans (PIPs), credit stealing, burnout, and layoffs. `PipAlertCard` provides interactive recovery via `workPipDeliverable` (+20% performance, guaranteed clearance) and `rebutPipWithHR` (HR appeal).
 
-## 8. Feature inventory (what is already built)
+### Romance, Matchmaking & Weddings
+- `DatingMatchSheet`: Browse dating app candidates with occupation, age, Looks bar, Smarts bar, and Crazy/Drama % rating.
+- Progression: Casual Dating &rarr; Exclusive &rarr; Engaged &rarr; Married.
+- Venues: Courthouse, Local Venue, Luxury Destination.
+- Prenup agreements: Partner reaction driven by Crazy and Karma attributes.
+- Anti-farming: `interactedTypesThisYear` prevents spamming interactions on the same NPC in a single turn across infants, toddlers, young children, adult children, and spouses.
 
-### Core loop
-- Multi-slot saves (3 slots) with overwrite confirmation  
-- Yearly Age Up + event dialogs + event log  
-- Floating stat deltas, celebrations (graduation, marriage, milestones)  
-- Life summary on death + share card  
-- Onboarding + contextual tips  
-- Daily reminders / nudges  
+### Targeted Crime & Incarceration
+- Specializations with minor age-gates: Petty crimes (14+ shoplifting/pickpocketing), Burglary & GTA (16+), Armed Heists (18+).
+- Crime planning: Target casing (`caseTarget`) grants a +20% success boost on the subsequent crime at the cost of +5 Heat.
+- Police Heat system: Dynamic `heatLevel` [0–100] meter with color-coded risk bar; active penalties on criminal operations; countermeasures via `layLow` and `bribeInformant`.
+- Trials: Public Defender vs Elite Defense Attorney.
+- Prison life: Prison gangs, prison jobs, parole board hearings, escape attempts.
 
-### Character creation (recently heavily polished)
-1. Country / identity setup  
-2. **Avatar** setup — DiceBear faces; simplified / white-minimal avatar page  
-3. **Stats picker** — budget allocation with **EXTRA_BUDGET 140**, presets that spend the full budget, sliders, hold-to-repeat controls, BitLife-style emoji icons  
-4. Starting stats **feed into engines** (not cosmetic)  
+### Assets & Mortgages
+- Real estate: 30-year amortized mortgages with 20–50% down payments, equity recovery upon sale.
+- Mortgage Principal Prepayments: `prepayMortgagePrincipal` directly reduces remaining loan balance and recalculates annual mortgage payments downwards.
+- Preventative Asset Servicing: `serviceAsset` restores condition, marks `servicedThisYear`, and shields vehicles/properties from annual wear and critical breakdown failure events.
+- Luxury vehicles: Cars, speedboats, yachts, private jets with realistic depreciation and upkeep. Dedicated leisure activities (`YACHT_DAY`, `PRIVATE_JET_TRIP`).
 
-Relevant commits: `c8e955c`, `21b94db`, `0cbf506`, `eaf0adf`, `d811187`, `222589e`, `b010245`
-
-### Family & relationships
-- Generated parents/siblings; dating, marriage, children, divorce  
-- Multiple interaction types (spend time, gift, travel, argue, etc.)  
-- Relationship tiers, annual decay, milestones  
-- Friends / enemies; mixed-heritage children  
-- Pet care depth on Relationships/Family surfaces  
-
-### Education (classic pipeline + new school life)
-- Primary → secondary → university with country-flavored exam names  
-- Study effort (slack / normal / hard)  
-- Clubs, GPA, dropout / expelled flags  
-- **NEW:** school people roster + reputation + yearly school activities (see §10)  
-
-### Career & money
-- Country job pools; education gates; performance / promotion / firing  
-- **Student part-time jobs** (16+, secondary/university): demand levels, `energyLevel`, year-end paycheck, Hard-study balance in `EducationEngine`  
-- Youth side hustles (crafts / streaming / script coding) on Actions · Earn and Career  
-- Businesses, politics, career tracks (entertainment / pro sports)  
-- Assets, upkeep, investments, living standard, portfolio strategies, wills  
-- Side hustles / leisure / skills  
-
-### Crime & health
-- Crime attempts, arrest, incarceration, lawyer tiers / trial UI  
-- Illness rolls, doctor care tiers, chronic illness depth (Wave 3)  
-
-### Wave 3 systems (examples)
-Medical/legal tracks, adoption, prenup, expungement, renovation, portfolio, chronic illness, weekly challenges, avatar polish  
-
-### Wave 4 content packs (events-first depth)
-Files under `assets/data/events/`:
-
-- `wave4_workplace_events.json`  
-- `wave4_hobbies_events.json`  
-- `wave4_side_hustle_events.json`  
-- `wave4_love_sex_events.json`  
-- `wave4_children_events.json`  
-- `wave4_crime_events.json`  
-
-Also: `CareerEngine.REQUIRES_JOB_TAG = "requires_job"` + `EventRepository.passesCareerGate`  
-
-Commit: `d043fa7`
-
-### Worldwide / localization
-- 15 countries: KE, NG, ZA, EG, US, CA, GB, FR, DE, IN, JP, PH, ID, BR, MX  
-- Name pools, jobs, assets, exams, holidays, economy scaling  
-- Flavor placeholders in events: `{transportMode}`, `{secondaryExam}`, `{moneyApp}`, etc.  
-- UI strings: English + Swahili (`values-sw`); event narrative JSON is English  
-
-### Monetization / polish
-- Banner on slot picker; interstitial on age-ups; rewarded Second Wind  
-- BitLife-style illustrated raster art / heroes / launcher icon (globe-and-heart)  
-- Sound/haptics placeholders still silent `.wav`s in places  
-
-### Legacy
-- Continue as adult child heir; ancestry timeline; generation numbering; money split  
+### Mortality & Dynasty Legacy
+- Natural and accidental mortality checks.
+- BitLife-style silk-sash tombstone ribbons (*Loaded*, *Academic*, *Saint*, *Scandalous*, *Fame Icon*, *Cunning*, *Family Anchor*, *Workaholic*, *Mediocre*).
+- Continue dynasty as an adult child heir, inheriting wealth per the character's will.
 
 ---
 
-## 9. Event system (authoring rules)
+## 8. Commit Timeline (Recent Highlights)
 
-Events live in `app/src/main/assets/data/events/`. Loaded by `EventRepository`.
-
-### Core packs
-`starter_events.json`, `education_events.json`, `career_events.json`, `finance_events.json`, `relationship_events.json`, `general_events.json`, `holiday_events.json`, `midlife_events.json`, `crime_events.json`, `wave3_events.json`, Wave 4 packs, **`school_life_events.json`**
-
-### Schema essentials
-- Root: `{ "events": [ ... ] }`  
-- Each event: `id`, `minAge`, `maxAge`, `text`, `choices[]`, optional `weight`, `tags`, `restrictedToCountry`  
-- Choices: `label`, `resultText`, `statEffects`, plus optional specialty fields (`gpaEffect`, relationship deltas, `triggersCrime`, `universityCourse`, `relocateToCountry`, …)  
-
-### Important tags / gates
-- `one_time` — once per life  
-- `education` — only while enrolled (PRIMARY / SECONDARY / UNIVERSITY) via `passesEducationGate`  
-- `requires_job` — employed gate  
-- Relationship requirement tags (`requires_spouse`, `requires_child`, …)  
-- `positive` / `negative` — karma weight bias  
-- System tags excluded from random pool (`exam_system`, `career_system`, etc.)  
-
-### When adding events
-1. Create/update JSON pack  
-2. Add load line in `EventRepository.loadAllFromAssets`  
-3. Add path to `GlobalContentCoverageTest` event asset list  
-4. Use gates so events don’t fire for ineligible characters  
-
-More schema detail: `app/src/main/assets/data/events/README.md`
-
----
-
-## 10. Latest major feature — School life rewrite (`56091a4`)
-
-This is the **most recent gameplay system** and must not be casually reverted.
-
-### Why it was built
-Players asked to **rewrite the school feature** with more things to do and people to interact with. School previously felt thin compared to family/career.
-
-### Models (`data/model/Education.kt`)
-- `SchoolRole`: CLASSMATE, BEST_CLASSMATE, BULLY, TEACHER, CRUSH  
-- `SchoolPerson`: id, name, role, gender, age, relationshipLevel, subject?, avatarConfig, interactedThisYear  
-- `SchoolActivity`: STUDY_GROUP, LIBRARY_STUDY, ASK_TEACHER_HELP, HANG_OUT, CONFRONT_BULLY, SKIP_CLASS, SCHOOL_DANCE, CLUB_PRACTICE, GROUP_PROJECT  
-- `EducationState` additions: `schoolPeople`, `schoolReputation`, `academicActionDoneThisYear`, `socialActionDoneThisYear`, `detentionYears` (defaults keep old saves loadable)
-
-### Engine (`EducationEngine`)
-- Generate roster on primary enroll, secondary transition, university enroll (`ensureSchoolRoster`)  
-- Clear roster on dropout / expulsion / graduation  
-- `tickSchoolYear` — age NPCs, decay unattended bonds, reset yearly action flags (called from `GameEngine` age-up before enroll)  
-- `availableSchoolActivities` / `performSchoolActivity` → `SchoolActionResult` (Success / Ineligible / AlreadyDone / PersonNotFound)  
-- **Limits:** one academic + one social activity per year  
-  - Social set includes hang out, confront bully, skip class, school dance  
-- Activities can boost GPA, smarts, happiness, reputation, health, and person bond  
-
-### UI wiring
-- `LifeViewModel.onPerformSchoolActivity`  
-- `LifeScreen` + `MaishaNavHost` pass callback  
-- `CareerScreen.SchoolLifeSectionCard` — reputation bar, people list, activity buttons, person picker dialog  
-
-### Content
-- `school_life_events.json` — classmate secrets, group projects, crush, bully, detention rumor, club showcase, exam week, transfer student, university office hours, etc.  
-- Tagged `education` so they only appear while enrolled  
-
-### Tests
-- `EducationEngineTest`: roster on enroll; library study raises GPA and blocks second academic; hang out uses social slot  
-
-### Player-facing path
-Create/load life → enroll in school (auto at age 6+) → **Career tab → School** → see people → do activities → Age Up for new year / new flags / events  
-
----
-
-## 10b. Latest major feature — University & higher education
-
-Structured university majors with tuition funding, student loans, multi-year programs, graduation honors, campus jobs/internships, and a Career-tab dashboard.
-
-### Models
-- `UniversityMajor` (CS, Law, Medicine, Business, Communications, Engineering, Nursing) with `programYears` + `careerTrack`
-- `UniversityFunding` (`CASH` / `LOAN` / `SCHOLARSHIP`), `GraduationHonors`
-- `EducationState`: major/funding/loan/tuition/scholarship/honors + `campusJobDoneThisYear`, `internshipDoneThisYear`, `internshipYearsCompleted`, `pendingCareerTrackOffer`
-- `StudentFinance` / `StudentLiabilitySnapshot` in `data/model/Finance.kt`
-- Career tracks: `SOFTWARE`, `CORPORATE` added beside MEDICAL / LEGAL / etc.
-- `EventChoice.careerTrackStart` for post-grad track offers
-
-### Engines
-- `EducationEngine.enrollInUniversity` + eligibility per major; tuition billing each year; honors on graduate
-- Campus work-study + major internship (year 2+); graduation career-track Age Up event
-- Age-up + KCSE result enrollment events offer major × funding choices
-- `FinanceEngine.tickStudentLoan` + `repayStudentLoan`; loans reduce net worth
-- `CareerEngine` track gates use majors (CS→SOFTWARE, Law→LEGAL, Medicine→MEDICAL, Business→CORPORATE, Comms→ENTERTAINMENT)
-
-### UI
-- **University Dashboard** on Career → School: major, year progress, funding/tuition, campus job, internship, loan repay buttons, locked-major hints, post-grad track CTA
-- Wired through `LifeViewModel` → `GameEngine` → engines
-
-### Player-facing path
-Finish secondary → enroll (Age Up or Career) with cash/loan/scholarship → campus job / internship during years → graduate with honors → career track offer → repay loans  
-
----
-
-## 11. Recent commit timeline (high signal)
-
-Newest first:
-
-| Commit | Meaning |
-|--------|---------|
-| *HEAD* | Early game age-gating & balance overhaul: Character creation UI polish (Goatee & Random chip wrapping fixed, under-14 facial hair/glasses suppressed, redundant sliders removed), strict age gates across all tabs (infant-only interactions, minor asset blocker, preschool career card, part-time/full-time locks), relationship farming cap (interactedTypesThisYear), 35% prank backfire risk, newborn debt stress & economic spam elimination, and Material 3 Icons.Rounded polish |
-| `b75fa73` | BitLife / Another Life Simulator overhaul Part 2: Complete `DrillDownRow` & bottom sheets across all tabs (Actions, Career, Assets, Family), journal auto-scroll & milestone pills, childhood & youth action density (ages 0–15), university social life (mixers, office hours, crams, pranks), and tactile 44.1kHz audio synthesis & haptics |
-| `06a54e4` | Overhaul UI design system: Material 3 polish, refined cards, modern hero header, and sleek components |
-| `e133e66` | Add Play Games Services, localization tooling, and snapshot UI updates; real estate mortgages & luxury vehicles |
+| Commit | Summary |
+|---|---|
+| `0d4d2f0` | Overhaul avatar vector compositor into procedural illustrated 2D portrait engine (`ProceduralAvatarPortrait.kt`) |
+| `cb19c03` | Overhaul visual HUD: LeftNavRail, InsetCardContainer, connected Year Timeline, and 3D AgeUpButton |
+| `f16e794` | Redesign Character Creation to BitLife-style single-screen New Life flow |
+| `c4596bf` | Fix early game bugs: age-gates, character creation polish, infant balance, relationship anti-farming |
+| `b75fa73` | BitLife overhaul: DrillDownRow sheets, matchmaking, workplace roster, crime specializations, tombstone ribbons, 44.1kHz audio & haptics |
+| `06a54e4` | Overhaul UI design system: Material 3 polish, refined cards, modern hero header, sleek components |
+| `e133e66` | Add Play Games Services, localization tooling, snapshot UI updates, mortgages & luxury vehicles |
 | `c316e89` | Prefetch public flavor APIs into Room so gameplay can use real streets, art, quotes, and news offline |
 | `8aeb4d0` | Expand country job and name catalogs and fetch optional random names from Random User |
-| `a292c19` | Rewrite the README as a product page for GitHub |
-| `a9eb222` | Replace stub events and test placeholders with real game content |
-| `4b16211` | Career UI polish: university major grid + funding sheet, corporate dashboard, part-time marketplace |
-| `dd3170e` | Fame & Talent Hub: athleticism/musicalTalent/fame, pathways, busk/match gigs, idle decay, leave track, endorsements, paparazzi |
-| `f0bbc8a` | Student part-time + youth side hustles: energy, Hard-study balance, year-end pay, rest/quit, Jobs & Side Hustles UI |
-| `30b316a` | Career ladder, office politics (PIP/credit/burnout/network), Career dashboard |
-| `74ec22c` | University majors, loans, campus jobs, internships, grad track, Career dashboard |
-| `c68bf45` | Detention deepen: serve hall, principal appeal, transfer hearing, rebel achievements |
-| `57bcd1e` | Misbehavior & detention: rebel activities, expulsion hearing, discipline badge |
-| `68a1124` | Clubs: rivalry matches, letter jacket, fame, scout whispers, achievements |
-| `40f57ac` | School clubs BitLife depth: ranks, intensity, awards, fundraisers, scholarships |
-| `1633d57` | Gamified exams: prep, stress, cheat stakes |
-| `5546774` | BitLife-style school person profiles and interactions |
 | `56091a4` | School life rewrite: classmates, activities, events, Career UI |
-| `d043fa7` | Wave 4 depth events (work, love, crime, family/hobbies/hustles) |
-| `b010245` … `eaf0adf` | Stats picker UX (icons, sliders, presets, budget) |
-| `21b94db` | Starting stats shape core outcomes |
-| `c8e955c` | Avatar simplify + stat allocation flow |
-| `afa94bd` | Wave 3 + avatar polish |
-| `315c619` | Reduce Kenya-default bias; redesign post-age event card |
-| `f29cd6a` / `af77230` | BitLife-style art + official launcher icon |
-| `b1f55aa` | Wave 2: clubs, tracks, prison, archetypes |
-| `c01684b` | Wave 1 life-stage / UI depth |
-
-Use `git log` / `git show <sha>` for exact diffs when continuing related work.
+| `feature` | Weekly Challenges overhaul: multi-step objective checklist, countdown timer, country-scaled rewards, `WeeklyChallengeCard`, `WeeklyChallengeSheet`, DataStore claim persistence |
+| `feature` | Player Agency Expansion: Workplace anti-farming/mentorship/pitches, PIP recovery & HR rebuttals, Club strategy/mentoring, Crime heat/casing & age gates, Mortgage prepayment & preventative servicing |
+| `feature` | Multi-Year Narrative Story Arcs & 15-Country Events: `narrative_arcs_events.json`, `requires_event_<id>` / `conflicts_with_event_<id>` gating, 6 multi-step arcs, and authentic universal life stage events |
+| `feature` | Compose UI/UX Ergonomics & Adaptive Navigation Pass: Adaptive `BoxWithConstraints` (bottom bar for <600dp compact phones vs `LeftNavRail` for >=600dp wide layouts), memoized `ProceduralAvatarPortrait`, bounded `EventDialogStyled` & `HeirSelectionScreen`, flexible font-scaling on `DrillDownRow` & `AgeUpButton`, and insets polish |
+| `hardening` | Persistence, Engine Edge-Cases, AdMob/Play Games & Release Configuration Audit: Kotlinx Serialization null/default coercion (`coerceInputValues = true`), net worth mortgage liability deduction, extreme lifecycle age-gates (0, 13, 14, 16, 18, 60, 100+), zero/multi-heir and estate insolvency guards, Play Games v2 init, and 507 unit tests |
 
 ---
 
-## 12. Known gaps / deferred work (honest backlog)
+## 9. Known Backlog & Suggested Next Steps
 
-These are **known unfinished** areas. Do not claim they are done.
-
-### Product depth still thin
-- Dedicated polished UI for **weekly challenges** (engine exists)
-- Expanded narrative story arcs & long-tail event chains across specific career tracks
-
-### Store / production prep (from historical README)
-- Production AdMob IDs (still test units in `AdUnitConfig`)
-- Release minify / signing / Play Store listing polish
-
-### Docs debt
-- On 2026-08-25 the user deleted the previous `docs/` corpus (architecture, QA plan, Play Store drafts, etc.).  
-- **This continuity prompt replaces that as the AI onboarding source of truth** until more docs are rewritten on purpose.
-
----
-
-## 13. Coding conventions specific to Maisha
-
-- User-facing strings → `app/src/main/res/values/strings.xml` (and `values-sw` when localizing)  
-- Money formatting → `formatMoney(..., countryCode)`  
-- Stat clamping → `clampStat` / `clampGpa` / `clampRelationshipLevel`  
-- Event log growth → `EventLogCap.prepend` patterns  
-- Prefer `@Composable` private section cards inside tab screens (see `CareerScreen`) matching existing Card / GoldAccent label style  
-- Confirm destructive actions with existing confirm dialogs (`ConfirmableActionHost`, etc.)  
-- When adding ViewModel actions: update UI state `careerMessage` / snackbars consistently with nearby handlers  
-- Keep Kenya-only content behind `restrictedToCountry` or country catalogs  
-
----
-
-## 14. Suggested next work directions (if user says “continue” without specifics)
-
-In priority order that matches recent player feedback:
-
-1. **Weekly challenges UI** — surface `WeeklyChallengeEngine` clearly in a dedicated card or sheet
-2. **Additional narrative storylines** — multi-year story arcs for specific career paths and countries
-3. **Production prep** only when asked (AdMob production IDs, store listing assets)
-
-Always confirm with the user’s latest message if the request is ambiguous.
-
----
-
-## 15. Quick “start of session” checklist for the AI
-
-1. Read this file.  
-2. `git status` + `git log -10 --oneline` to see if HEAD moved.  
-3. Locate the engine + screen for the requested feature.  
-4. Implement with tests for domain changes.  
-5. Wire events into repository + coverage test if adding JSON.  
-6. Compile / targeted unit tests.  
-7. Install / commit / push **only if the user asks**.  
-
----
-
-## 16. Copy-paste short briefing (for tiny context windows)
-
-> Maisha is an Android BitLife-style life sim (Compose, Hilt, Room, pure domain engines). Worldwide 15 countries. Latest: BitLife Overhaul Parts 1–3 (`DrillDownRow` list pattern, `ModalBottomSheet` drill-down architecture across all 5 main tabs, dating matchmaking sheets, workplace roster & schmoozing, targeted crimes & prison gang/parole, tombstone ribbons, high-fidelity audio & multi-waveform haptics). Prefer agency/UI/systems over event spam. Commit/push/install only on request.
-
----
-
-*End of AI continuity prompt.*
+1. **Additional Narrative Packs & Story Arcs:** Expand multi-year storyline event chains across under-represented countries and specific career tracks (e.g. space exploration, politics, pro athletics).
+2. **Production Release Prep:** Replace AdMob test IDs in `AdUnitConfig` with production IDs and finalize Google Play Console app assets.
+3. **Advanced Analytics & Sound Tuning:** Fine-tune audio latency on lower-end Android Go devices and verify custom haptic cues across Android 12–15.

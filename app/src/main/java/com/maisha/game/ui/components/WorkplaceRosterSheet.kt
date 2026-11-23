@@ -246,6 +246,20 @@ private fun WorkplacePersonCard(
                             )
                         }
                     }
+                    if (person.interactedThisYear) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Text(
+                                text = stringResource(R.string.badge_interacted_this_year),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
                 }
 
                 Text(
@@ -367,13 +381,53 @@ private fun WorkplacePersonActionSheet(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        if (person.interactedThisYear) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = CoralNegative.copy(alpha = 0.12f),
+                border = androidx.compose.foundation.BorderStroke(1.dp, CoralNegative.copy(alpha = 0.35f)),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.msg_already_interacted_this_year, person.name),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = CoralNegative,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        val canInteract = !person.interactedThisYear
+
         // Action Buttons
         WorkplaceActionButton(
             label = stringResource(R.string.action_schmooze),
             subtitle = stringResource(R.string.action_schmooze_desc),
             icon = Icons.Default.ThumbUp,
             tint = LifeGreen,
+            enabled = canInteract,
             onClick = { onAction(WorkplaceAction.SCHMOOZE) }
+        )
+
+        WorkplaceActionButton(
+            label = stringResource(R.string.action_mentor_request),
+            subtitle = stringResource(R.string.action_mentor_request_desc),
+            icon = Icons.Default.MilitaryTech,
+            tint = GoldAccent,
+            enabled = canInteract,
+            onClick = { onAction(WorkplaceAction.MENTOR_REQUEST) }
+        )
+
+        WorkplaceActionButton(
+            label = stringResource(R.string.action_pitch_project),
+            subtitle = stringResource(R.string.action_pitch_project_desc),
+            icon = Icons.Default.Work,
+            tint = TealPrimary,
+            enabled = canInteract,
+            onClick = { onAction(WorkplaceAction.PITCH_PROJECT) }
         )
 
         if (person.isSupervisor) {
@@ -382,6 +436,7 @@ private fun WorkplacePersonActionSheet(
                 subtitle = stringResource(R.string.action_ask_raise_desc),
                 icon = Icons.Default.Work,
                 tint = GoldAccent,
+                enabled = canInteract,
                 onClick = { onAction(WorkplaceAction.ASK_RAISE) }
             )
 
@@ -390,6 +445,7 @@ private fun WorkplacePersonActionSheet(
                 subtitle = stringResource(R.string.action_ask_promotion_desc),
                 icon = Icons.Default.MilitaryTech,
                 tint = TealPrimary,
+                enabled = canInteract,
                 onClick = { onAction(WorkplaceAction.ASK_PROMOTION) }
             )
         } else {
@@ -398,6 +454,7 @@ private fun WorkplacePersonActionSheet(
                 subtitle = stringResource(R.string.action_collaborate_desc),
                 icon = Icons.Default.Work,
                 tint = TealPrimary,
+                enabled = canInteract,
                 onClick = { onAction(WorkplaceAction.COLLABORATE) }
             )
 
@@ -406,6 +463,7 @@ private fun WorkplacePersonActionSheet(
                 subtitle = stringResource(R.string.action_office_romance_desc),
                 icon = Icons.Default.Favorite,
                 tint = CoralNegative,
+                enabled = canInteract,
                 onClick = { onAction(WorkplaceAction.OFFICE_ROMANCE) }
             )
         }
@@ -415,6 +473,7 @@ private fun WorkplacePersonActionSheet(
             subtitle = stringResource(R.string.action_office_prank_desc),
             icon = Icons.Default.Person,
             tint = GoldAccent,
+            enabled = canInteract,
             onClick = { onAction(WorkplaceAction.PRANK) }
         )
 
@@ -423,10 +482,11 @@ private fun WorkplacePersonActionSheet(
             subtitle = stringResource(R.string.action_report_hr_desc),
             icon = Icons.Default.Report,
             tint = CoralNegative,
+            enabled = canInteract,
             onClick = { onAction(WorkplaceAction.REPORT_HR) }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
@@ -465,14 +525,17 @@ private fun WorkplaceActionButton(
     subtitle: String,
     icon: ImageVector,
     tint: Color,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+        colors = CardDefaults.cardColors(
+            containerColor = if (enabled) PaperWhite else SurfaceMuted.copy(alpha = 0.5f)
+        ),
         border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(

@@ -252,6 +252,67 @@ class FinanceEngine @Inject constructor(
     }
 
     /**
+     * Prepays an extra principal lump sum against an asset's mortgage balance.
+     * Recalculates the annual mortgage payment downwards proportionally.
+     */
+    fun prepayMortgagePrincipal(character: Character, assetId: String, amount: Int): Character {
+        if (amount <= 0) return character
+        val asset = character.assets.find { it.id == assetId } ?: return character
+        if (asset.mortgageBalance <= 0) return character
+        val actualPayment = minOf(amount, asset.mortgageBalance)
+        if (character.stats.money < actualPayment) return character
+
+        val remainingBalance = asset.mortgageBalance - actualPayment
+        val newAnnualPayment = if (remainingBalance <= 0) {
+            0
+        } else {
+            (asset.annualMortgagePayment * (remainingBalance.toDouble() / asset.mortgageBalance.toDouble()))
+                .roundToInt().coerceAtLeast(1)
+        }
+
+        val updatedAssets = character.assets.map {
+            if (it.id == assetId) it.copy(
+                mortgageBalance = remainingBalance,
+                annualMortgagePayment = newAnnualPayment
+            ) else it
+        }
+        val message = if (remainingBalance <= 0) {
+            "Prepaid remaining principal on ${asset.name} (${formatMoney(actualPayment, character.countryCode)}). Mortgage fully cleared!"
+        } else {
+            "Prepaid ${formatMoney(actualPayment, character.countryCode)} toward ${asset.name}'s mortgage principal (Remaining: ${formatMoney(remainingBalance, character.countryCode)})."
+        }
+        return character.copy(
+            stats = character.stats.copy(money = character.stats.money - actualPayment),
+            assets = updatedAssets,
+            eventLog = EventLogCap.prependToCurrentYear(character.eventLog, message, character.age)
+        )
+    }
+
+    /**
+     * Preventative maintenance / professional servicing for a vehicle or property.
+     * Restores condition and marks [Asset.servicedThisYear] to cut degradation and prevent critical failures.
+     */
+    fun serviceAsset(character: Character, assetId: String): Character {
+        val asset = character.assets.find { it.id == assetId } ?: return character
+        if (asset.isHeirloom || asset.servicedThisYear) return character
+        val serviceCost = (calculateRepairCost(asset, character.countryCode) * 0.4f).roundToInt().coerceAtLeast(1_500)
+        if (character.stats.money < serviceCost) return character
+
+        val updatedCondition = (asset.condition + 15).coerceIn(0, 100)
+        val serviced = recalculateValue(
+            asset.copy(condition = updatedCondition, servicedThisYear = true),
+            character.economicState.marketModifier
+        )
+        val updatedAssets = character.assets.map { if (it.id == assetId) serviced else it }
+        val message = "Performed scheduled preventative servicing on ${asset.name} (${formatMoney(serviceCost, character.countryCode)}). Condition is now $updatedCondition%."
+        return character.copy(
+            stats = character.stats.copy(money = character.stats.money - serviceCost),
+            assets = updatedAssets,
+            eventLog = EventLogCap.prependToCurrentYear(character.eventLog, message, character.age)
+        )
+    }
+
+    /**
      * Deducts annual upkeep (12× monthly, with multi-asset discount and economic climate).
      * If money goes negative, floors at 0 and applies a happiness penalty.
      */
@@ -598,14 +659,16 @@ class FinanceEngine @Inject constructor(
         return EconomyScaler.scaleAmount(rawCost, countryCode)
     }
 
-    /** Cash, assets, businesses, savings, and investment portfolio, minus student loans. */
+    /** Cash, assets, businesses, savings, and investment portfolio, minus student loans and mortgages. */
     fun calculateNetWorth(character: Character): Int {
         val assetValue = character.assets.sumOf { it.currentValue }
         val businessValue = character.businesses.sumOf { it.valuation }
+        val totalMortgages = character.assets.sumOf { it.mortgageBalance.coerceAtLeast(0) }
         return character.stats.money + assetValue + businessValue +
             character.investmentPortfolioValue.coerceAtLeast(0) +
             character.savingsBalance.coerceAtLeast(0) -
-            character.education.studentLoanBalance.coerceAtLeast(0)
+            character.education.studentLoanBalance.coerceAtLeast(0) -
+            totalMortgages
     }
 
     fun studentLiabilitySnapshot(character: Character) =
@@ -1166,14 +1229,18 @@ class FinanceEngine @Inject constructor(
     }
 
     private fun applyConditionDegradation(asset: Asset, marketModifier: Float): Asset {
-        val base = Random.nextInt(MIN_DEGRADATION, MAX_DEGRADATION + 1)
+        val base = if (asset.servicedThisYear) {
+            Random.nextInt(1, 4)
+        } else {
+            Random.nextInt(MIN_DEGRADATION, MAX_DEGRADATION + 1)
+        }
         val rentalWear = if (asset.isRentedOut) RENTED_EXTRA_DEGRADATION else 0
         val newCondition = clampCondition(asset.condition - base - rentalWear)
-        return recalculateValue(asset.copy(condition = newCondition), marketModifier)
+        return recalculateValue(asset.copy(condition = newCondition, servicedThisYear = false), marketModifier)
     }
 
     private fun rollCriticalFailure(asset: Asset, marketModifier: Float): Asset {
-        if (asset.isHeirloom) return asset
+        if (asset.isHeirloom || asset.servicedThisYear) return asset
         if (asset.condition >= CRITICAL_CONDITION_THRESHOLD) return asset
         if (Random.nextFloat() >= CRITICAL_FAILURE_CHANCE) return asset
         return recalculateValue(asset.copy(condition = 0), marketModifier)

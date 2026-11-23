@@ -82,7 +82,7 @@ class MortalityEngineTest {
 
         var lowDeaths = 0
         var highDeaths = 0
-        repeat(600) {
+        repeat(3000) {
             if (engine.checkDeath(lowKarma) is DeathResult.Died) lowDeaths++
             if (engine.checkDeath(highKarma) is DeathResult.Died) highDeaths++
         }

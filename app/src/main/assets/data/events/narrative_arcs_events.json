@@ -1,0 +1,628 @@
+{
+  "events": [
+    {
+      "id": "arc_school_science_fair_1",
+      "minAge": 10,
+      "maxAge": 13,
+      "text": "Your science teacher announces a regional innovation competition. Students commute by {transportMode} to the district exhibition with their inventions.",
+      "weight": 5,
+      "tags": ["one_time", "education", "positive"],
+      "choices": [
+        {
+          "label": "Build a solar-powered water filtration kit with a classmate",
+          "statEffects": { "smarts": 3, "happiness": 2 },
+          "familyRelationshipEffect": 2,
+          "resultText": "Your prototype wins first place at the district fair! You and your partner are featured in the regional school bulletin."
+        },
+        {
+          "label": "Assemble a high-efficiency circuit board solo after hours",
+          "statEffects": { "smarts": 4, "health": -1, "happiness": 1 },
+          "resultText": "You take second place, earning praise from the head examiner for your solo technical mastery."
+        },
+        {
+          "label": "Cheer on your classmates and help test their setups",
+          "statEffects": { "karma": 2, "happiness": 2 },
+          "resultText": "You enjoy the exhibition and learn a great deal about hands-on scientific design."
+        }
+      ]
+    },
+    {
+      "id": "arc_school_science_fair_2",
+      "minAge": 14,
+      "maxAge": 17,
+      "text": "A regional technology accelerator discovers your early science fair patent and offers to sponsor your lab bench before the upcoming {secondaryExam}.",
+      "weight": 8,
+      "tags": ["one_time", "education", "requires_event_arc_school_science_fair_1"],
+      "choices": [
+        {
+          "label": "Accept the fellowship while balancing {secondaryExam} preparation",
+          "statEffects": { "smarts": 3 },
+          "gpaEffect": 0.1,
+          "performanceEffect": 5,
+          "resultText": "You split your evenings between library study and prototype testing, earning academic honors."
+        },
+        {
+          "label": "Pitch a commercial micro-license and collect early royalties via {moneyApp}",
+          "statEffects": { "money": 3500, "happiness": 2, "smarts": 2 },
+          "resultText": "The incubator licenses your sensor design, sending your first royalty payment straight to {moneyApp}."
+        },
+        {
+          "label": "Form a high school robotics team to open-source the project",
+          "statEffects": { "karma": 4, "smarts": 2, "happiness": 3 },
+          "resultText": "Your school club becomes renowned across the district, inspiring younger students to build hardware."
+        }
+      ]
+    },
+    {
+      "id": "arc_school_science_fair_3",
+      "minAge": 18,
+      "maxAge": 24,
+      "text": "Years after your student prototype, an international venture fund offers a term sheet to commercialize your clean technology patent.",
+      "weight": 10,
+      "tags": ["one_time", "requires_event_arc_school_science_fair_2"],
+      "choices": [
+        {
+          "label": "Incorporate a clean-tech startup and accept seed equity capital",
+          "statEffects": { "money": 25000, "smarts": 3, "happiness": 4 },
+          "resultText": "You sign the incorporation charter as founder and chief architect. Seed funding arrives to scale production!"
+        },
+        {
+          "label": "Sell the patent portfolio outright to an engineering conglomerate",
+          "statEffects": { "money": 75000, "smarts": 2, "happiness": 3 },
+          "resultText": "The acquisition closes smoothly. You secure significant financial freedom before age twenty-five."
+        },
+        {
+          "label": "License the technology to municipal utilities while keeping educational rights",
+          "statEffects": { "money": 15000, "smarts": 3, "karma": 5 },
+          "resultText": "Public infrastructure adopts your tech, earning you civic honors and steady royalty income."
+        }
+      ]
+    },
+    {
+      "id": "arc_corporate_whistleblower_1",
+      "minAge": 22,
+      "maxAge": 30,
+      "text": "While reconciling vendor payouts on the corporate ledger, you uncover duplicated invoices routing company funds to an offshore entity.",
+      "weight": 5,
+      "tags": ["one_time", "requires_job", "career"],
+      "choices": [
+        {
+          "label": "Create an encrypted backup copy and submit a confidential audit report",
+          "statEffects": { "smarts": 2, "karma": 3, "happiness": -2 },
+          "resultText": "You quietly archive the financial records. A tense silence falls over the finance department."
+        },
+        {
+          "label": "Confront the senior finance director discreetly in their office",
+          "statEffects": { "smarts": 1, "happiness": -3 },
+          "performanceEffect": -5,
+          "resultText": "The director turns pale, offering vague promises while secretly viewing you as a liability."
+        },
+        {
+          "label": "Shred your personal review notes and focus on your daily tasks",
+          "statEffects": { "karma": -3, "happiness": 1 },
+          "resultText": "You keep your head down to protect your job, but the ethical unease lingers."
+        }
+      ]
+    },
+    {
+      "id": "arc_corporate_whistleblower_2",
+      "minAge": 25,
+      "maxAge": 35,
+      "text": "Regulatory inspectors launch an unannounced investigation into your firm. An enforcement officer leaves a secure contact card on your desk.",
+      "weight": 8,
+      "tags": ["one_time", "requires_job", "requires_event_arc_corporate_whistleblower_1"],
+      "choices": [
+        {
+          "label": "Deliver the encrypted ledger records under formal whistleblower protection",
+          "statEffects": { "karma": 6, "smarts": 2, "happiness": 2 },
+          "resultText": "Your evidence forms the backbone of the state's investigation. Corrupt executives are promptly suspended."
+        },
+        {
+          "label": "Hire an independent employment attorney before giving a deposition",
+          "statEffects": { "money": -2500, "smarts": 3, "karma": 3 },
+          "resultText": "Your attorney secures ironclad legal immunity and severance protection before you address prosecutors."
+        },
+        {
+          "label": "Claim ignorance of the files and request an immediate departmental transfer",
+          "statEffects": { "karma": -4, "happiness": -2 },
+          "performanceEffect": 5,
+          "resultText": "You avoid the legal storm, but colleagues whisper about your silence."
+        }
+      ]
+    },
+    {
+      "id": "arc_corporate_whistleblower_3",
+      "minAge": 28,
+      "maxAge": 42,
+      "text": "The landmark corporate fraud trial concludes with extensive forfeitures. The court reviews petitions for statutory restitution awards.",
+      "weight": 10,
+      "tags": ["one_time", "requires_event_arc_corporate_whistleblower_2"],
+      "choices": [
+        {
+          "label": "Accept the official whistleblower restitution bounty payout",
+          "statEffects": { "money": 60000, "happiness": 5, "karma": 3 },
+          "resultText": "The treasury wires a substantial statutory whistleblower award to your account. Standing for the truth pays off."
+        },
+        {
+          "label": "Leverage your compliance reputation to become Head of Governance at a rival firm",
+          "statEffects": { "money": 20000, "smarts": 4, "happiness": 4 },
+          "performanceEffect": 20,
+          "resultText": "Top industry firms compete to hire you as Head of Governance, boosting your salary and standing."
+        },
+        {
+          "label": "Publish an investigative book recounting the corporate scandal",
+          "statEffects": { "money": 18000, "smarts": 2, "happiness": 3, "karma": 4 },
+          "resultText": "Your book becomes a commercial bestseller, solidifying your reputation as an advocate for institutional ethics."
+        }
+      ]
+    },
+    {
+      "id": "arc_romance_first_love_1",
+      "minAge": 15,
+      "maxAge": 18,
+      "text": "After the school festival, your childhood sweetheart walks with you to the {transportMode} stop and says: '{greeting}, let us promise to meet here again in ten years.'",
+      "weight": 5,
+      "tags": ["one_time", "education", "relationship"],
+      "choices": [
+        {
+          "label": "Exchange engraved keepsake tokens and seal the pledge",
+          "statEffects": { "happiness": 4, "looks": 1 },
+          "siblingRelationshipEffect": 1,
+          "resultText": "You press the keepsake into their palm with a tender smile. The memory stays etched in your heart."
+        },
+        {
+          "label": "Laugh warmly and promise to remain cherished lifelong friends",
+          "statEffects": { "karma": 2, "happiness": 2, "smarts": 1 },
+          "resultText": "You share a heartfelt laugh, cementing a genuine and uncomplicated bond."
+        },
+        {
+          "label": "Embrace them under the awning as your {transportMode} arrives",
+          "statEffects": { "happiness": 5, "looks": 2 },
+          "resultText": "A sweet parting embrace leaves you smiling all the way home."
+        }
+      ]
+    },
+    {
+      "id": "arc_romance_first_love_2",
+      "minAge": 24,
+      "maxAge": 28,
+      "text": "Ten years have passed since the high school promise. Near the central transit plaza, a familiar figure catches your eye during morning rush hour.",
+      "weight": 8,
+      "tags": ["one_time", "relationship", "requires_event_arc_romance_first_love_1"],
+      "choices": [
+        {
+          "label": "Approach them and produce the keepsake from your school days",
+          "statEffects": { "happiness": 6, "looks": 1 },
+          "spouseRelationshipEffect": 5,
+          "resultText": "Their eyes widen with wonder and delight. That timeless connection rekindles instantly."
+        },
+        {
+          "label": "Invite them for lunch at a nearby café to share your life stories",
+          "statEffects": { "happiness": 3, "smarts": 2, "karma": 2 },
+          "resultText": "Over coffee, you marvel at how much you both have grown while celebrating each other's achievements."
+        },
+        {
+          "label": "Send a courteous message via {moneyApp} or social chat wishing them well",
+          "statEffects": { "happiness": 2, "karma": 2 },
+          "resultText": "You exchange kind pleasantries and celebrate the enduring beauty of youthful memories."
+        }
+      ]
+    },
+    {
+      "id": "arc_romance_first_love_3",
+      "minAge": 27,
+      "maxAge": 35,
+      "text": "Your re-established connection with your old sweetheart has matured into a deep bond. Together, you consider building a shared future.",
+      "weight": 10,
+      "tags": ["one_time", "relationship", "requires_event_arc_romance_first_love_2"],
+      "choices": [
+        {
+          "label": "Combine your savings to purchase a shared family residence",
+          "statEffects": { "money": -5000, "happiness": 8, "looks": 2 },
+          "spouseRelationshipEffect": 15,
+          "resultText": "You pool your savings and move into a sunlit home together, opening a joyous new chapter."
+        },
+        {
+          "label": "Co-found a joint creative studio and business enterprise",
+          "statEffects": { "money": 8000, "smarts": 3, "happiness": 5 },
+          "resultText": "Your joint venture flourishes! Building something lasting alongside someone who understands you brings great pride."
+        },
+        {
+          "label": "Plan an unforgettable holiday voyage to celebrate your reunion",
+          "statEffects": { "money": -3000, "happiness": 7, "health": 3 },
+          "resultText": "A scenic coastal holiday deepens your gratitude for life's serendipitous turns."
+        }
+      ]
+    },
+    {
+      "id": "arc_crime_smuggler_heist_1",
+      "minAge": 17,
+      "maxAge": 24,
+      "text": "A shadowy broker approaches you near a commercial {transportMode} depot with a scheme: help divert an untracked shipping container of electronics.",
+      "weight": 5,
+      "tags": ["one_time", "crime"],
+      "choices": [
+        {
+          "label": "Assist the warehouse crew and take an illicit cash cut",
+          "statEffects": { "money": 12000, "karma": -6, "happiness": 2 },
+          "triggersCrime": "FRAUD",
+          "resultText": "The container disappears in the night. Your cut of the cash is delivered inside an unmarked envelope."
+        },
+        {
+          "label": "Tip off the depot customs inspector anonymously",
+          "statEffects": { "money": 2000, "karma": 6, "smarts": 2, "happiness": 3 },
+          "resultText": "Customs agents seize the contraband. You collect a quiet civic tipster reward."
+        },
+        {
+          "label": "Decline the offer and warn your neighborhood friends to stay away",
+          "statEffects": { "karma": 4, "smarts": 1 },
+          "resultText": "You reject the underworld offer and keep your name entirely clear."
+        }
+      ]
+    },
+    {
+      "id": "arc_crime_smuggler_heist_2",
+      "minAge": 21,
+      "maxAge": 29,
+      "text": "Years after the depot incident, a regional crime syndicate traces you down, demanding a settlement payment via {moneyApp} or full compliance.",
+      "weight": 8,
+      "tags": ["one_time", "requires_event_arc_crime_smuggler_heist_1"],
+      "choices": [
+        {
+          "label": "Transfer a severance buyout via {moneyApp} to cut all ties forever",
+          "statEffects": { "money": -8000, "happiness": 2, "karma": 2 },
+          "resultText": "You send the payment. The syndicate cuts communication, and you finally regain complete peace of mind."
+        },
+        {
+          "label": "Cooperate with the anti-racketeering unit to dismantle the crew",
+          "statEffects": { "happiness": 3, "karma": 7, "smarts": 3 },
+          "resultText": "Working with investigators, you provide crucial timestamps. The entire racketeering cell is arrested!"
+        },
+        {
+          "label": "Stand your ground with trusted neighborhood friends",
+          "statEffects": { "health": -4, "looks": -2, "happiness": 3, "karma": 1 },
+          "resultText": "A tense confrontation sends an unmistakable signal: you will not be bullied or extorted."
+        }
+      ]
+    },
+    {
+      "id": "arc_crime_smuggler_heist_3",
+      "minAge": 26,
+      "maxAge": 38,
+      "text": "Having left the underworld far behind, your firsthand experience with port security makes you a sought-after commercial advisor.",
+      "weight": 10,
+      "tags": ["one_time", "requires_event_arc_crime_smuggler_heist_2"],
+      "choices": [
+        {
+          "label": "Found a licensed cargo logistics and freight assurance firm",
+          "statEffects": { "money": 30000, "smarts": 4, "happiness": 5, "karma": 4 },
+          "resultText": "Your security expertise earns contracts with major shipping lines. Honest enterprise brings wealth and respect."
+        },
+        {
+          "label": "Direct a community mentorship program steering youth away from street crime",
+          "statEffects": { "karma": 10, "happiness": 6, "smarts": 2 },
+          "resultText": "You mentor teenagers across urban centers, guiding them toward education and productive trades."
+        },
+        {
+          "label": "Purchase commercial real estate and enjoy quiet, honest rental returns",
+          "statEffects": { "money": 20000, "happiness": 4, "karma": 2 },
+          "resultText": "You invest in suburban retail storefronts, living comfortably on respectable commercial rents."
+        }
+      ]
+    },
+    {
+      "id": "arc_finance_heritage_estate_1",
+      "minAge": 24,
+      "maxAge": 34,
+      "text": "A family elder hands you the historical title deed to an ancestral town property facing overdue municipal property taxes payable via {moneyApp}.",
+      "weight": 5,
+      "tags": ["one_time", "finance"],
+      "choices": [
+        {
+          "label": "Pay the back taxes through {moneyApp} and register the deed in your name",
+          "statEffects": { "money": -4500, "happiness": 3, "karma": 4 },
+          "resultText": "You settle the arrears at the registry. The ancestral estate is officially certified under your legal ownership!"
+        },
+        {
+          "label": "Subdivide the parcel among siblings to distribute registration expenses",
+          "statEffects": { "money": -2000, "happiness": 1 },
+          "familyRelationshipEffect": 4,
+          "resultText": "The family joins hands to settle the bill, reinforcing harmony and mutual responsibility."
+        },
+        {
+          "label": "Relinquish the parcel to city auction and receive a statutory relocation fee",
+          "statEffects": { "money": 8000, "karma": -2 },
+          "resultText": "You pocket immediate cash, though some older relatives mourn the loss of the family homestead."
+        }
+      ]
+    },
+    {
+      "id": "arc_finance_heritage_estate_2",
+      "minAge": 28,
+      "maxAge": 42,
+      "text": "City transit planners announce a major rapid-transit terminal adjacent to your ancestral property. Commercial developers submit competitive development offers.",
+      "weight": 8,
+      "tags": ["one_time", "finance", "requires_event_arc_finance_heritage_estate_1"],
+      "choices": [
+        {
+          "label": "Construct modern studio apartments to secure long-term rental income",
+          "statEffects": { "money": -15000, "smarts": 3, "happiness": 4 },
+          "performanceEffect": 5,
+          "resultText": "The apartment complex opens to full occupancy, providing reliable and growing rental yields."
+        },
+        {
+          "label": "Sign a long-term commercial ground lease with an international retail chain",
+          "statEffects": { "money": 45000, "happiness": 5 },
+          "resultText": "The retail tenant pays substantial upfront ground rent while funding all building improvements."
+        },
+        {
+          "label": "Restore the compound as a community cultural conservatory and arts center",
+          "statEffects": { "money": 5000, "karma": 6, "smarts": 2, "happiness": 4 },
+          "resultText": "Civic cultural grants support your restoration, creating an acclaimed landmark that honors your heritage."
+        }
+      ]
+    },
+    {
+      "id": "arc_finance_heritage_estate_3",
+      "minAge": 35,
+      "maxAge": 55,
+      "text": "Decades of urban expansion have elevated your ancestral parcel into a landmark city asset with exceptional valuation.",
+      "weight": 10,
+      "tags": ["one_time", "finance", "requires_event_arc_finance_heritage_estate_2"],
+      "choices": [
+        {
+          "label": "Establish a perpetual family education and healthcare endowment trust",
+          "statEffects": { "happiness": 6, "karma": 8 },
+          "familyRelationshipEffect": 8,
+          "resultText": "You sign the endowment indenture. Every descendant in your dynasty will have university tuition guaranteed!"
+        },
+        {
+          "label": "Accept an institutional buyout from an international investment consortium",
+          "statEffects": { "money": 120000, "happiness": 6 },
+          "resultText": "The sale closes with record-breaking proceeds. Your family's multi-generational wealth is secured."
+        },
+        {
+          "label": "Endow a public scholarship pavilion and heritage garden at the site",
+          "statEffects": { "happiness": 7, "karma": 10, "looks": 2 },
+          "resultText": "The mayor inaugurates the public pavilion in your family's honor, celebrating your civic generosity."
+        }
+      ]
+    },
+    {
+      "id": "arc_expat_journey_1",
+      "minAge": 18,
+      "maxAge": 28,
+      "text": "You are selected for an international fellowship abroad! Relatives gather at the departure gate with homemade treats and wish you '{greeting}' before your flight.",
+      "weight": 5,
+      "tags": ["one_time", "positive"],
+      "choices": [
+        {
+          "label": "Embark on the adventure and promise to send monthly remittances via {moneyApp}",
+          "statEffects": { "smarts": 3, "happiness": 4 },
+          "familyRelationshipEffect": 3,
+          "resultText": "You board with high hopes! Your international career begins with ambition and family blessings."
+        },
+        {
+          "label": "Dedicate yourself to rigorous technical training and career development",
+          "statEffects": { "smarts": 5, "health": -1, "happiness": 2 },
+          "resultText": "You arrive overseas driven to excel, spending long evenings mastering advanced skills."
+        },
+        {
+          "label": "Immerse yourself in multicultural student and professional communities",
+          "statEffects": { "happiness": 5, "karma": 3, "looks": 1 },
+          "resultText": "You form friendships with peers from around the globe, expanding your perspective immensely."
+        }
+      ]
+    },
+    {
+      "id": "arc_expat_journey_2",
+      "minAge": 25,
+      "maxAge": 38,
+      "text": "Living across continents, family messages arrive with updates on home renovations and neighborhood milestones.",
+      "weight": 8,
+      "tags": ["one_time", "requires_event_arc_expat_journey_1"],
+      "choices": [
+        {
+          "label": "Send a construction remittance through {moneyApp} for your parents' dream home",
+          "statEffects": { "money": -6000, "happiness": 5, "karma": 5 },
+          "familyRelationshipEffect": 6,
+          "resultText": "Your family sends back photos of the roof installation with tears of deep gratitude and pride."
+        },
+        {
+          "label": "Sponsor family visits and show your siblings your adopted city",
+          "statEffects": { "money": -2500, "happiness": 4 },
+          "familyRelationshipEffect": 4,
+          "resultText": "Hosting your family abroad creates unforgettable moments and bridges your two worlds."
+        },
+        {
+          "label": "Reinvest your foreign earnings in cross-border diversified portfolios",
+          "statEffects": { "money": 8000, "smarts": 2 },
+          "resultText": "Your investment discipline pays off, building resilient international savings."
+        }
+      ]
+    },
+    {
+      "id": "arc_expat_journey_3",
+      "minAge": 32,
+      "maxAge": 52,
+      "text": "With decades of international leadership, you have become a respected bridge between your homeland and global markets.",
+      "weight": 10,
+      "tags": ["one_time", "requires_event_arc_expat_journey_2"],
+      "choices": [
+        {
+          "label": "Establish a bilateral trade and technical training exchange academy",
+          "statEffects": { "money": 25000, "smarts": 4, "karma": 6, "happiness": 6 },
+          "resultText": "Your academy equips hundreds of young graduates with high-demand cross-border skills."
+        },
+        {
+          "label": "Return home to construct an expansive family estate with local artisans",
+          "statEffects": { "money": -15000, "happiness": 7, "looks": 2 },
+          "familyRelationshipEffect": 8,
+          "resultText": "Neighbors and elders welcome you back with a festive homecoming banquet."
+        },
+        {
+          "label": "Serve as a keynote ambassador at international trade summits",
+          "statEffects": { "money": 35000, "smarts": 3, "looks": 3, "happiness": 5 },
+          "resultText": "Your speeches on sustainable global development draw standing ovations across international halls."
+        }
+      ]
+    },
+    {
+      "id": "country_commute_exam_prep",
+      "minAge": 7,
+      "maxAge": 12,
+      "text": "On your morning {transportMode} ride, older students are earnestly quizzing one another on sample questions for the {primaryExam}.",
+      "weight": 4,
+      "tags": ["education", "positive"],
+      "choices": [
+        {
+          "label": "Join in and answer questions to test your own knowledge",
+          "statEffects": { "smarts": 2, "happiness": 1 },
+          "resultText": "You impress the older students with your quick answers on the {transportMode}."
+        },
+        {
+          "label": "Read quietly in your seat and review your notebooks",
+          "statEffects": { "smarts": 1, "happiness": 1 },
+          "resultText": "You enjoy a peaceful commute while strengthening your academic focus."
+        },
+        {
+          "label": "Share your morning snack with a nervous classmate",
+          "statEffects": { "karma": 2, "happiness": 2 },
+          "resultText": "Your kindness calms their nerves, earning you a loyal friend at school."
+        }
+      ]
+    },
+    {
+      "id": "country_teen_sports_championship",
+      "minAge": 13,
+      "maxAge": 17,
+      "text": "Your school enters the regional championship. Hundreds of supporters arrive on {transportMode} convoys waving school banners.",
+      "weight": 4,
+      "tags": ["education"],
+      "choices": [
+        {
+          "label": "Play your heart out on the field for the championship trophy",
+          "statEffects": { "health": 2, "happiness": 3, "looks": 1 },
+          "resultText": "Your team scores a decisive victory! You are hoisted on shoulders amidst deafening cheers."
+        },
+        {
+          "label": "Lead the chanting squad with drums and spirited school anthems",
+          "statEffects": { "happiness": 3, "karma": 1 },
+          "resultText": "Your chants echo across the stadium, rallying the student body to high spirits."
+        },
+        {
+          "label": "Focus on studying your {secondaryExam} flashcards in the bleachers",
+          "statEffects": { "smarts": 2, "happiness": -1 },
+          "resultText": "You tune out the noise and master two difficult chapters before halftime."
+        }
+      ]
+    },
+    {
+      "id": "country_workplace_commute_delight",
+      "minAge": 19,
+      "maxAge": 60,
+      "text": "During your morning ride on the {transportMode}, a street musician strikes up a spirited melody. Passengers smile and greet one another with '{greeting}'.",
+      "weight": 4,
+      "tags": ["requires_job", "positive"],
+      "choices": [
+        {
+          "label": "Tip the performer generously using {moneyApp}",
+          "statEffects": { "money": -200, "happiness": 3, "karma": 2 },
+          "resultText": "The musician thanks you warmly. The entire {transportMode} enjoys a joyful morning ride."
+        },
+        {
+          "label": "Clap along with the rhythm and chat with fellow passengers",
+          "statEffects": { "happiness": 2, "looks": 1 },
+          "resultText": "The shared laughter brightens your morning and puts you in high spirits for work."
+        },
+        {
+          "label": "Review your daily meeting agenda on your phone",
+          "statEffects": { "smarts": 1 },
+          "performanceEffect": 3,
+          "resultText": "You organize your tasks neatly before reaching the office."
+        }
+      ]
+    },
+    {
+      "id": "country_holiday_multigenerational_feast",
+      "minAge": 10,
+      "maxAge": 85,
+      "text": "As {holidayName} arrives, relatives from across the province gather for a grand festive meal with traditional dishes.",
+      "weight": 5,
+      "tags": ["holiday", "relationship", "positive"],
+      "choices": [
+        {
+          "label": "Cook traditional recipes alongside family elders all morning",
+          "statEffects": { "happiness": 4, "karma": 3 },
+          "familyRelationshipEffect": 5,
+          "resultText": "You master ancestral cooking techniques while elders recount tales of family history."
+        },
+        {
+          "label": "Organize games, music, and group photographs for everyone",
+          "statEffects": { "happiness": 5, "looks": 1 },
+          "siblingRelationshipEffect": 3,
+          "resultText": "Your festive entertainment keeps both children and grandparents laughing all afternoon."
+        },
+        {
+          "label": "Send holiday gifts and pocket money to younger cousins via {moneyApp}",
+          "statEffects": { "money": -1500, "happiness": 3, "karma": 4 },
+          "familyRelationshipEffect": 4,
+          "resultText": "The children cheer when the transfer notifications ping on their parents' phones."
+        }
+      ]
+    },
+    {
+      "id": "country_neighborhood_civic_initiative",
+      "minAge": 21,
+      "maxAge": 70,
+      "text": "Local community elders organize a civic cleanup and solar streetlight fund for your neighborhood, collecting contributions through {moneyApp}.",
+      "weight": 4,
+      "tags": ["finance", "positive"],
+      "choices": [
+        {
+          "label": "Contribute a generous donation through {moneyApp}",
+          "statEffects": { "money": -1200, "happiness": 3, "karma": 5 },
+          "resultText": "New solar streetlights illuminate the avenues, making the streets safe and vibrant at night."
+        },
+        {
+          "label": "Volunteer your weekend labor to plant shade trees and pave pathways",
+          "statEffects": { "health": 2, "happiness": 4, "karma": 4 },
+          "resultText": "Working side by side with neighbors builds deep community solidarity."
+        },
+        {
+          "label": "Greet the committee with '{greeting}' and contribute a small token",
+          "statEffects": { "money": -300, "happiness": 1, "karma": 1 },
+          "resultText": "You show support for neighborhood progress within your current budget."
+        }
+      ]
+    },
+    {
+      "id": "country_elder_wisdom_storytelling",
+      "minAge": 60,
+      "maxAge": 95,
+      "text": "On a tranquil evening, grandchildren and neighborhood youth gather at your veranda, eager to hear stories about how life used to be.",
+      "weight": 5,
+      "tags": ["requires_child", "positive"],
+      "choices": [
+        {
+          "label": "Share stories about taking the {transportMode} to school in your youth",
+          "statEffects": { "happiness": 5, "smarts": 2 },
+          "childRelationshipEffect": 6,
+          "resultText": "The children listen wide-eyed as you describe the old days, marveling at how the city has transformed."
+        },
+        {
+          "label": "Teach them a cherished proverb and give them small treats via {moneyApp}",
+          "statEffects": { "money": -500, "happiness": 4, "karma": 4 },
+          "childRelationshipEffect": 5,
+          "resultText": "They beam with delight, memorizing your wise words and thanking you with warm hugs."
+        },
+        {
+          "label": "Lead an evening song under the starlit sky",
+          "statEffects": { "happiness": 6, "health": 1 },
+          "childRelationshipEffect": 4,
+          "resultText": "Your home resonates with melody, cementing precious memories for the next generation."
+        }
+      ]
+    }
+  ]
+}

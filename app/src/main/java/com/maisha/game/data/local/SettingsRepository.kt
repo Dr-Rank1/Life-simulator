@@ -87,13 +87,27 @@ class SettingsRepository @Inject constructor(
         prefs[EARNED_RIBBONS_KEY] ?: emptySet()
     }
 
+    val claimedChallengeIds: Flow<Set<String>> = preferencesFlow().map { prefs ->
+        prefs[CLAIMED_CHALLENGES_KEY] ?: emptySet()
+    }
+
     suspend fun getEarnedRibbonsSnapshot(): Set<String> =
         preferencesFlow().first()[EARNED_RIBBONS_KEY] ?: emptySet()
+
+    suspend fun getClaimedChallengesSnapshot(): Set<String> =
+        preferencesFlow().first()[CLAIMED_CHALLENGES_KEY] ?: emptySet()
 
     suspend fun awardRibbon(ribbonId: String) {
         dataStore.edit { prefs ->
             val current = prefs[EARNED_RIBBONS_KEY] ?: emptySet()
             prefs[EARNED_RIBBONS_KEY] = current + ribbonId
+        }
+    }
+
+    suspend fun recordChallengeClaimed(challengeId: String) {
+        dataStore.edit { prefs ->
+            val current = prefs[CLAIMED_CHALLENGES_KEY] ?: emptySet()
+            prefs[CLAIMED_CHALLENGES_KEY] = current + challengeId
         }
     }
 
@@ -181,6 +195,7 @@ class SettingsRepository @Inject constructor(
             prefs.remove(FIRST_AGE_UP_KEY)
             prefs.remove(FLAG_EMOJI_FALLBACK_KEY)
             prefs.remove(EARNED_RIBBONS_KEY)
+            prefs.remove(CLAIMED_CHALLENGES_KEY)
         }
         LocaleManager.applyLocale(LocaleManager.systemDefaultLanguage())
     }
@@ -197,5 +212,6 @@ class SettingsRepository @Inject constructor(
         private val FIRST_AGE_UP_KEY = booleanPreferencesKey("first_age_up_recorded")
         private val FLAG_EMOJI_FALLBACK_KEY = booleanPreferencesKey("flag_emoji_fallback")
         private val EARNED_RIBBONS_KEY = stringSetPreferencesKey("earned_ribbon_ids")
+        private val CLAIMED_CHALLENGES_KEY = stringSetPreferencesKey("claimed_challenge_ids")
     }
 }

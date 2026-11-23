@@ -89,6 +89,8 @@ import com.maisha.game.domain.QuitPartTimeResult
 import com.maisha.game.domain.StudentEnergyRestResult
 import com.maisha.game.domain.RenovateResult
 import com.maisha.game.domain.WeeklyChallengeEngine
+import com.maisha.game.domain.WeeklyChallengeProgress
+import com.maisha.game.domain.ClaimWeeklyChallengeResult
 import com.maisha.game.data.model.PartTimeJob
 import com.maisha.game.data.model.PortfolioStrategy
 import com.maisha.game.domain.BusinessFailure
@@ -157,6 +159,10 @@ data class LifeUiState(
     val yearQuestProgress: List<YearQuestProgress> = emptyList(),
     val weeklyChallenge: com.maisha.game.domain.WeeklyChallenge? = null,
     val weeklyChallengeCompleted: Boolean = false,
+    val weeklyChallengeProgress: com.maisha.game.domain.WeeklyChallengeProgress? = null,
+    val showWeeklyChallengeSheet: Boolean = false,
+    val weeklyChallengeClaimed: Boolean = false,
+    val weeklyChallengeClaimSuccessMessage: String? = null,
     val dynastyScore: Int = 0,
     val dynastyTitleKey: String = "dynasty_title_seedling",
     /** Ephemeral Life-tab toast (quest progress, etc.). */
@@ -190,6 +196,9 @@ class LifeViewModel @Inject constructor(
 
     private var triggeredEventIds: Set<String> = emptySet()
 
+    /** App-wide claimed challenge IDs cached from SettingsRepository. */
+    private var claimedChallengesSnapshot: Set<String> = emptySet()
+
     /** Character stats at the start of the current quest year (in-memory only). */
     private var yearStartSnapshot: Character? = null
 
@@ -203,6 +212,27 @@ class LifeViewModel @Inject constructor(
         viewModelScope.launch {
             val seenTips = settingsRepository.getSeenTipsSnapshot()
             _uiState.update { it.copy(seenTipIds = seenTips, tipsLoaded = true) }
+        }
+        viewModelScope.launch {
+            settingsRepository.claimedChallengeIds.collect { claimedSet ->
+                claimedChallengesSnapshot = claimedSet
+                val current = _uiState.value.character ?: return@collect
+                val challenge = _uiState.value.weeklyChallenge ?: weeklyChallengeEngine.currentChallenge()
+                val isClaimed = challenge.id in claimedSet
+                val progress = weeklyChallengeEngine.evaluateProgress(
+                    character = current,
+                    challenge = challenge,
+                    isClaimed = isClaimed
+                )
+                _uiState.update {
+                    it.copy(
+                        weeklyChallenge = challenge,
+                        weeklyChallengeProgress = progress,
+                        weeklyChallengeClaimed = isClaimed,
+                        weeklyChallengeCompleted = progress.isAllCompleted
+                    )
+                }
+            }
         }
         viewModelScope.launch {
             when (val result = characterRepository.loadGame(slotId)) {
@@ -737,6 +767,40 @@ class LifeViewModel @Inject constructor(
         }
     }
 
+    fun onPrepayMortgagePrincipal(assetId: String, amount: Int) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            val updated = gameEngine.prepayMortgagePrincipal(character, assetId, amount)
+            persist(updated)
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    assetsMessage = context.getString(R.string.msg_mortgage_principal_prepaid),
+                    netWorth = financeEngine.calculateNetWorth(updated)
+                )
+            }
+            enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+        }
+    }
+
+    fun onServiceAsset(assetId: String) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            val updated = gameEngine.serviceAsset(character, assetId)
+            persist(updated)
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    assetsMessage = context.getString(R.string.msg_asset_serviced),
+                    netWorth = financeEngine.calculateNetWorth(updated)
+                )
+            }
+            enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+        }
+    }
+
     fun willBeneficiaries(): List<com.maisha.game.data.model.Person> {
         val character = _uiState.value.character ?: return emptyList()
         return gameEngine.willBeneficiaries(character)
@@ -939,6 +1003,58 @@ class LifeViewModel @Inject constructor(
             if (result is com.maisha.game.domain.WorkplaceActionResult.Success) {
                 enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
             } else if (result is com.maisha.game.domain.WorkplaceActionResult.Denied) {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.WARNING))
+            }
+        }
+    }
+
+    fun onWorkPipDeliverable() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            val (updated, result) = gameEngine.workPipDeliverable(character)
+            persist(updated)
+            val msg = when (result) {
+                is com.maisha.game.domain.WorkplaceActionResult.Success -> result.message
+                is com.maisha.game.domain.WorkplaceActionResult.Denied -> result.message
+                is com.maisha.game.domain.WorkplaceActionResult.Ineligible -> null
+            }
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    careerMessage = msg,
+                    netWorth = financeEngine.calculateNetWorth(updated)
+                )
+            }
+            if (result is com.maisha.game.domain.WorkplaceActionResult.Success) {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+            } else {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.WARNING))
+            }
+        }
+    }
+
+    fun onRebutPipWithHR() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            val (updated, result) = gameEngine.rebutPipWithHR(character)
+            persist(updated)
+            val msg = when (result) {
+                is com.maisha.game.domain.WorkplaceActionResult.Success -> result.message
+                is com.maisha.game.domain.WorkplaceActionResult.Denied -> result.message
+                is com.maisha.game.domain.WorkplaceActionResult.Ineligible -> null
+            }
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    careerMessage = msg,
+                    netWorth = financeEngine.calculateNetWorth(updated)
+                )
+            }
+            if (result is com.maisha.game.domain.WorkplaceActionResult.Success) {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+            } else {
                 enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.WARNING))
             }
         }
@@ -1147,6 +1263,70 @@ class LifeViewModel @Inject constructor(
                 else -> {
                     _uiState.update {
                         it.copy(careerMessage = context.getString(R.string.msg_club_rivalry_ineligible))
+                    }
+                }
+            }
+        }
+    }
+
+    fun onLeadClubStrategy() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            when (val result = gameEngine.leadClubStrategy(character)) {
+                is ClubActivityResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character),
+                            headerExpression = ExpressionResolver.resolveExpression(result.character, null)
+                        )
+                    }
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+                }
+                ClubActivityResult.AlreadyDone -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_club_strategy_already_done))
+                    }
+                }
+                else -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_club_strategy_ineligible))
+                    }
+                }
+            }
+        }
+    }
+
+    fun onMentorClubJunior() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            when (val result = gameEngine.mentorClubJunior(character)) {
+                is ClubActivityResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character),
+                            headerExpression = ExpressionResolver.resolveExpression(result.character, null)
+                        )
+                    }
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+                }
+                ClubActivityResult.AlreadyDone -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_club_mentoring_already_done))
+                    }
+                }
+                else -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_club_mentoring_ineligible))
                     }
                 }
             }
@@ -2516,6 +2696,57 @@ class LifeViewModel @Inject constructor(
         }
     }
 
+    fun onCaseCrimeTarget(target: com.maisha.game.data.model.CrimeTarget) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive || character.criminalRecord.currentlyIncarcerated) return
+        viewModelScope.launch {
+            val updated = gameEngine.caseCrimeTarget(character, target)
+            persist(updated)
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    actionMessage = context.getString(R.string.msg_crime_cased, target.category),
+                    netWorth = financeEngine.calculateNetWorth(updated)
+                )
+            }
+            enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.LIGHT_TAP))
+        }
+    }
+
+    fun onLayLowCrime() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive || character.criminalRecord.currentlyIncarcerated) return
+        viewModelScope.launch {
+            val updated = gameEngine.layLowCrime(character)
+            persist(updated)
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    actionMessage = context.getString(R.string.msg_crime_laid_low),
+                    netWorth = financeEngine.calculateNetWorth(updated)
+                )
+            }
+            enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+        }
+    }
+
+    fun onBribeInformantCrime() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive || character.criminalRecord.currentlyIncarcerated) return
+        viewModelScope.launch {
+            val updated = gameEngine.bribeInformantCrime(character)
+            persist(updated)
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    actionMessage = context.getString(R.string.msg_crime_bribed_informant),
+                    netWorth = financeEngine.calculateNetWorth(updated)
+                )
+            }
+            enqueueFeedback(FeedbackCue(sound = SoundEffect.PURCHASE, haptic = HapticType.SUCCESS))
+        }
+    }
+
     fun onGoToTrial(lawyerTier: LawyerTier) {
         val character = _uiState.value.character ?: return
         if (!character.criminalRecord.awaitingTrial) return
@@ -3393,12 +3624,19 @@ class LifeViewModel @Inject constructor(
         val newlyDone = progress.filter { it.completed && it.quest.kind !in previousDone }
         _uiState.update { state ->
             val challenge = weeklyChallengeEngine.currentChallenge()
-            val challengeDone = weeklyChallengeEngine.isComplete(current, challenge)
+            val isClaimed = challenge.id in claimedChallengesSnapshot
+            val challengeProgress = weeklyChallengeEngine.evaluateProgress(
+                character = current,
+                challenge = challenge,
+                isClaimed = isClaimed
+            )
             state.copy(
                 yearQuests = quests,
                 yearQuestProgress = progress,
                 weeklyChallenge = challenge,
-                weeklyChallengeCompleted = challengeDone,
+                weeklyChallengeCompleted = challengeProgress.isAllCompleted,
+                weeklyChallengeProgress = challengeProgress,
+                weeklyChallengeClaimed = isClaimed,
                 lifePulseMessage = when {
                     newlyDone.isEmpty() || state.isAgingUp -> state.lifePulseMessage
                     else -> context.getString(
@@ -3407,6 +3645,75 @@ class LifeViewModel @Inject constructor(
                     )
                 }
             )
+        }
+    }
+
+    fun onOpenWeeklyChallenge() {
+        val character = _uiState.value.character ?: return
+        val challenge = weeklyChallengeEngine.currentChallenge()
+        val isClaimed = challenge.id in claimedChallengesSnapshot
+        val progress = weeklyChallengeEngine.evaluateProgress(
+            character = character,
+            challenge = challenge,
+            isClaimed = isClaimed
+        )
+        _uiState.update {
+            it.copy(
+                weeklyChallenge = challenge,
+                weeklyChallengeProgress = progress,
+                weeklyChallengeClaimed = isClaimed,
+                weeklyChallengeCompleted = progress.isAllCompleted,
+                showWeeklyChallengeSheet = true
+            )
+        }
+    }
+
+    fun onDismissWeeklyChallenge() {
+        _uiState.update { it.copy(showWeeklyChallengeSheet = false) }
+    }
+
+    fun onWeeklyChallengeClaimSuccessDismissed() {
+        _uiState.update { it.copy(weeklyChallengeClaimSuccessMessage = null) }
+    }
+
+    fun onClaimWeeklyChallenge() {
+        val character = _uiState.value.character ?: return
+        val challenge = _uiState.value.weeklyChallenge ?: weeklyChallengeEngine.currentChallenge()
+        val isClaimed = challenge.id in claimedChallengesSnapshot
+        when (val result = weeklyChallengeEngine.claimReward(character, challenge, isClaimed)) {
+            is ClaimWeeklyChallengeResult.Success -> {
+                viewModelScope.launch {
+                    settingsRepository.recordChallengeClaimed(challenge.id)
+                    settingsRepository.awardRibbon(result.ribbonKey)
+                    persist(result.character)
+                    val updatedProgress = weeklyChallengeEngine.evaluateProgress(
+                        character = result.character,
+                        challenge = challenge,
+                        isClaimed = true
+                    )
+                    val rewardMsg = context.getString(
+                        R.string.msg_weekly_challenge_claimed,
+                        formatMoney(result.scaledCashAwarded, result.character.countryCode)
+                    )
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            netWorth = financeEngine.calculateNetWorth(result.character),
+                            weeklyChallengeProgress = updatedProgress,
+                            weeklyChallengeClaimed = true,
+                            weeklyChallengeCompleted = true,
+                            weeklyChallengeClaimSuccessMessage = rewardMsg,
+                            pendingCelebrationQueue = it.pendingCelebrationQueue + CelebrationType.ACHIEVEMENT,
+                            pendingFeedbackCues = it.pendingFeedbackCues + FeedbackCue(
+                                sound = SoundEffect.ACHIEVEMENT_UNLOCK,
+                                haptic = HapticType.SUCCESS
+                            )
+                        )
+                    }
+                }
+            }
+            ClaimWeeklyChallengeResult.AlreadyClaimed,
+            ClaimWeeklyChallengeResult.Ineligible -> Unit
         }
     }
 

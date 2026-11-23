@@ -29,6 +29,7 @@ class HealthEngine @Inject constructor() {
      * @return A new [HealthCondition] or null if roll fails or character already has untreated illness.
      */
     fun rollForIllness(character: Character): HealthCondition? {
+        if (character.age < 3) return null
         if (character.activeConditions.any { !it.treated && !it.isChronic }) {
             return null
         }

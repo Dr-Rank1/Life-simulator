@@ -33,7 +33,13 @@ data class CriminalRecord(
     /** Record cleared via legal expungement — hire penalty waived. */
     val recordExpunged: Boolean = false,
     /** Criminal street reputation / infamy (0–100). Unlocks high-tier heists and prison crew standing. */
-    val notoriety: Int = 0
+    val notoriety: Int = 0,
+    /** Police heat level (0–100). Higher heat dramatically raises arrest risk. */
+    val heatLevel: Int = 0,
+    /** Targeted crime currently cased and prepared for execution. */
+    val casedTarget: CrimeTarget? = null,
+    /** Heat mitigation action (lay low / bribe) used this year. */
+    val heatActionDoneThisYear: Boolean = false
 )
 
 @Serializable

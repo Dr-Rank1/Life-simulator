@@ -60,18 +60,23 @@ class MaishaApplication : Application(), Configuration.Provider {
 
         // AdMob SDK init is deferred off the main thread to avoid cold-start hitching.
         applicationScope.launch(Dispatchers.IO) {
-            MobileAds.initialize(this@MaishaApplication)
+            runCatching { MobileAds.initialize(this@MaishaApplication) }
         }
 
         applicationScope.launch(Dispatchers.Default) {
-            eventRepository.ensureLoaded()
+            runCatching { eventRepository.ensureLoaded() }
         }
 
         applicationScope.launch(Dispatchers.IO) {
-            contentPrefetcher.hydrateFromDisk()
+            runCatching { contentPrefetcher.hydrateFromDisk() }
         }
-        contentCacheScheduler.enqueueStartupRefresh()
-        contentCacheScheduler.enqueuePeriodicRefresh()
+        runCatching {
+            com.google.android.gms.games.PlayGamesSdk.initialize(this@MaishaApplication)
+        }
+        runCatching {
+            contentCacheScheduler.enqueueStartupRefresh()
+            contentCacheScheduler.enqueuePeriodicRefresh()
+        }
 
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
             override fun onDestroy(owner: LifecycleOwner) {

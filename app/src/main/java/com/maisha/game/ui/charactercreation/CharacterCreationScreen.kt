@@ -372,8 +372,7 @@ fun CharacterCreationScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // ── Action Footer ───────────────────────────────────────────────
             Column(

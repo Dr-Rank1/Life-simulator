@@ -16,9 +16,9 @@ class SocialMediaEngineTest {
         val lowStats = accountHolder(looks = 20, smarts = 20)
         val highStats = accountHolder(looks = 90, smarts = 90)
 
-        var lowGrowth = 0
-        var highGrowth = 0
-        repeat(80) {
+        var lowGrowth = 0L
+        var highGrowth = 0L
+        repeat(400) {
             when (val low = engine.postContent(lowStats)) {
                 is SocialMediaResult.Success -> lowGrowth += low.followersGained
                 is SocialMediaResult.Failed -> error("Expected post success for low stats")
@@ -29,7 +29,7 @@ class SocialMediaEngineTest {
             }
         }
 
-        assertTrue(highGrowth > lowGrowth)
+        assertTrue("High stats growth ($highGrowth) should exceed low stats growth ($lowGrowth)", highGrowth > lowGrowth)
         assertTrue(lowGrowth > 0)
     }
 

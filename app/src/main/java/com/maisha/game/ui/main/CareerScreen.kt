@@ -47,6 +47,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -218,6 +219,10 @@ fun CareerScreen(
     onQuitPartTimeJob: () -> Unit = {},
     onRestStudentEnergy: () -> Unit = {},
     onWorkplaceAction: (String, WorkplaceAction) -> Unit = { _, _ -> },
+    onWorkPipDeliverable: () -> Unit = {},
+    onRebutPipWithHR: () -> Unit = {},
+    onLeadClubStrategy: () -> Unit = {},
+    onMentorClubJunior: () -> Unit = {},
     onCareerMessageDismissed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -640,7 +645,9 @@ fun CareerScreen(
                                     onRetire = { retireConfirm.request(Unit) },
                                     onSetWorkEffort = onSetWorkEffort,
                                     onOfficeAction = onOfficeAction,
-                                    onWorkplaceAction = onWorkplaceAction
+                                    onWorkplaceAction = onWorkplaceAction,
+                                    onWorkPipDeliverable = onWorkPipDeliverable,
+                                    onRebutPipWithHR = onRebutPipWithHR
                                 )
                             }
                         }
@@ -840,6 +847,8 @@ fun CareerScreen(
                             onClaimClubMajorEvent = onClaimClubMajorEvent,
                             onHostClubFundraiser = onHostClubFundraiser,
                             onChallengeRivalSchool = onChallengeRivalSchool,
+                            onLeadClubStrategy = onLeadClubStrategy,
+                            onMentorClubJunior = onMentorClubJunior,
                             onLeaveSchoolClub = onLeaveSchoolClub
                         )
                     }
@@ -2872,6 +2881,8 @@ private fun SchoolClubSectionCard(
     onClaimClubMajorEvent: () -> Unit,
     onHostClubFundraiser: () -> Unit,
     onChallengeRivalSchool: () -> Unit,
+    onLeadClubStrategy: () -> Unit = {},
+    onMentorClubJunior: () -> Unit = {},
     onLeaveSchoolClub: () -> Unit
 ) {
     val eligible = character.age in EducationEngine.SCHOOL_CLUB_MIN_AGE..EducationEngine.SCHOOL_CLUB_MAX_AGE &&
@@ -3069,6 +3080,36 @@ private fun SchoolClubSectionCard(
                                         stringResource(R.string.btn_club_fundraiser_done)
                                     } else {
                                         stringResource(R.string.btn_club_fundraiser)
+                                    }
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
+                            OutlinedButton(
+                                onClick = onLeadClubStrategy,
+                                enabled = !character.education.clubStrategyDoneThisYear,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    if (character.education.clubStrategyDoneThisYear) {
+                                        stringResource(R.string.msg_club_strategy_already_done)
+                                    } else {
+                                        stringResource(R.string.btn_club_strategy)
+                                    }
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(6.dp))
+                            OutlinedButton(
+                                onClick = onMentorClubJunior,
+                                enabled = !character.education.clubMentoringDoneThisYear,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    if (character.education.clubMentoringDoneThisYear) {
+                                        stringResource(R.string.msg_club_mentoring_already_done)
+                                    } else {
+                                        stringResource(R.string.btn_club_mentoring)
                                     }
                                 )
                             }
@@ -3549,7 +3590,9 @@ private fun CurrentJobCard(
     onRetire: () -> Unit,
     onSetWorkEffort: (com.maisha.game.data.model.WorkEffort) -> Unit,
     onOfficeAction: (OfficeAction) -> Unit,
-    onWorkplaceAction: (String, WorkplaceAction) -> Unit = { _, _ -> }
+    onWorkplaceAction: (String, WorkplaceAction) -> Unit = { _, _ -> },
+    onWorkPipDeliverable: () -> Unit = {},
+    onRebutPipWithHR: () -> Unit = {}
 ) {
     val job = character.career.currentJob ?: return
     val resources = LocalContext.current.resources
@@ -3686,6 +3729,15 @@ private fun CurrentJobCard(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
+
+            if (character.career.onPip) {
+                PipAlertCard(
+                    character = character,
+                    onWorkDeliverable = onWorkPipDeliverable,
+                    onRebutPip = onRebutPipWithHR
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+            }
 
             var showRosterSheet by remember { mutableStateOf(false) }
             val activeRoster = if (character.career.workplaceRoster.isNotEmpty()) {
@@ -4367,4 +4419,91 @@ private fun formatEducationRequirement(stage: SchoolStage): String = when (stage
     SchoolStage.UNIVERSITY -> stringResource(R.string.edu_req_university)
     SchoolStage.GRADUATED -> stringResource(R.string.edu_req_degree)
     SchoolStage.NONE -> stringResource(R.string.edu_req_none)
+}
+
+@Composable
+private fun PipAlertCard(
+    character: Character,
+    onWorkDeliverable: () -> Unit,
+    onRebutPip: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = CoralNegative.copy(alpha = 0.08f)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, CoralNegative.copy(alpha = 0.4f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = CoralNegative
+                ) {
+                    Text(
+                        text = "PIP ACTIVE",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = androidx.compose.ui.graphics.Color.White,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.pip_alert_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = CoralNegative
+                )
+            }
+            Text(
+                text = stringResource(R.string.pip_alert_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onWorkDeliverable,
+                    enabled = !character.career.pipDeliverableCompletedThisYear,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = CoralNegative),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = if (character.career.pipDeliverableCompletedThisYear) {
+                            stringResource(R.string.pip_deliverable_completed_badge)
+                        } else {
+                            stringResource(R.string.btn_work_pip_deliverable)
+                        },
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = onRebutPip,
+                    enabled = !character.career.pipAppealedThisYear,
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = stringResource(R.string.btn_rebut_pip),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
 }

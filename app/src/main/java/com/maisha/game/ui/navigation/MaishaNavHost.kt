@@ -400,7 +400,20 @@ fun MaishaNavHost(
                 onDismissAssetsMarketsTip = viewModel::onDismissAssetsMarketsTip,
                 carMakeCatalog = viewModel.carMakeCatalog,
                 streetCatalog = viewModel.streetCatalog,
-                onThrowParty = viewModel::onThrowParty
+                onThrowParty = viewModel::onThrowParty,
+                onOpenWeeklyChallenge = viewModel::onOpenWeeklyChallenge,
+                onDismissWeeklyChallenge = viewModel::onDismissWeeklyChallenge,
+                onClaimWeeklyChallenge = viewModel::onClaimWeeklyChallenge,
+                onWeeklyChallengeClaimSuccessDismissed = viewModel::onWeeklyChallengeClaimSuccessDismissed,
+                onWorkPipDeliverable = viewModel::onWorkPipDeliverable,
+                onRebutPipWithHR = viewModel::onRebutPipWithHR,
+                onLeadClubStrategy = viewModel::onLeadClubStrategy,
+                onMentorClubJunior = viewModel::onMentorClubJunior,
+                onPrepayMortgagePrincipal = viewModel::onPrepayMortgagePrincipal,
+                onServiceAsset = viewModel::onServiceAsset,
+                onCaseCrimeTarget = viewModel::onCaseCrimeTarget,
+                onLayLowCrime = viewModel::onLayLowCrime,
+                onBribeInformantCrime = viewModel::onBribeInformantCrime
             )
 
             NotificationPermissionEffect(

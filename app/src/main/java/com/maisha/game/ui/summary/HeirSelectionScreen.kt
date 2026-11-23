@@ -3,11 +3,14 @@ package com.maisha.game.ui.summary
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,6 +68,10 @@ fun HeirSelectionDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .widthIn(max = 480.dp)
+                .heightIn(max = 520.dp),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
@@ -84,7 +91,9 @@ fun HeirSelectionDialog(
                 )
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f, fill = false)
                 ) {
                     items(heirs, key = { it.id }) { heir ->
                         HeirOptionCard(
@@ -168,6 +177,7 @@ private fun HeirOptionCard(
             }
             Button(
                 onClick = onSelect,
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = GoldAccent,

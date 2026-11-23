@@ -271,6 +271,10 @@ data class EducationState(
     val clubFundraiserDoneThisYear: Boolean = false,
     /** Inter-school rivalry / scrimmage used this year. */
     val clubRivalryDoneThisYear: Boolean = false,
+    /** Officer+ leadership strategy session used this year. */
+    val clubStrategyDoneThisYear: Boolean = false,
+    /** Officer+ mentoring junior members used this year. */
+    val clubMentoringDoneThisYear: Boolean = false,
     /** Extracurricular fame from wins and showcases (0–100); persists on resume. */
     val clubFame: Int = 0,
     /** Letter jacket / varsity mark earned through strong club performance. */

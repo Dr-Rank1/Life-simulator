@@ -117,9 +117,9 @@ class Wave3EnginesTest {
         )
         assertTrue(crimeEngine.canRequestExpungement(reformed))
         var outcome: ExpungementResult = ExpungementResult.Denied(reformed)
-        repeat(50) {
+        for (i in 0 until 50) {
             outcome = crimeEngine.requestExpungement(reformed)
-            if (outcome is ExpungementResult.Success) return@repeat
+            if (outcome is ExpungementResult.Success) break
         }
         assertTrue(outcome is ExpungementResult.Success)
         val after = (outcome as ExpungementResult.Success).character
@@ -199,9 +199,17 @@ class Wave3EnginesTest {
     @Test
     fun weeklyChallenge_medicalCompleteAtTrackLevel2() {
         val challenge = WeeklyChallengeEngine.CHALLENGES.first { it.id == "medical_residency" }
-        val incomplete = TestFixtures.character(age = 30).let {
+        val incomplete = TestFixtures.character(
+            age = 30,
+            stats = Stats(health = 90)
+        ).let {
             careerEngine.startCareerTrack(
-                it.copy(education = EducationState(courseOfStudy = "Medicine")),
+                it.copy(
+                    education = EducationState(
+                        stage = SchoolStage.GRADUATED,
+                        universityMajor = com.maisha.game.data.model.UniversityMajor.MEDICINE
+                    )
+                ),
                 CareerTrack.MEDICAL
             )
         }

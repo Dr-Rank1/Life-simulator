@@ -336,6 +336,8 @@ class EducationEngine @Inject constructor(
             clubMajorEventReady = false,
             clubFundraiserDoneThisYear = false,
             clubRivalryDoneThisYear = false,
+            clubStrategyDoneThisYear = false,
+            clubMentoringDoneThisYear = false,
             clubResumeClub = resume,
             schoolReputation = schoolReputation
         )
@@ -953,6 +955,73 @@ class EducationEngine @Inject constructor(
         }
     }
 
+    /**
+     * Officer / Captain leadership action — conducts a tactical strategy workshop.
+     * Raises club skill and prestige while adding minor study pressure.
+     */
+    fun leadClubStrategy(character: Character): ClubActivityResult {
+        if (!isSchoolClubEligible(character)) return ClubActivityResult.Ineligible
+        val club = character.education.schoolClub ?: return ClubActivityResult.Ineligible
+        if (character.education.clubRank == ClubRank.MEMBER) return ClubActivityResult.Ineligible
+        if (character.education.clubStrategyDoneThisYear) return ClubActivityResult.AlreadyDone
+
+        val message = "You led a strategic workshop for the ${clubDisplayName(club)}, rallying the team (+Skill, +Prestige)."
+        val updated = character.copy(
+            education = character.education.copy(
+                clubStrategyDoneThisYear = true,
+                clubSkill = (character.education.clubSkill + 5).coerceIn(0, 100),
+                clubPrestige = (character.education.clubPrestige + 6).coerceIn(0, 100),
+                examStress = (character.education.examStress + 4).coerceIn(0, 100)
+            ),
+            stats = character.stats.copy(
+                smarts = clampStat(character.stats.smarts + 1),
+                happiness = clampStat(character.stats.happiness + 2)
+            ),
+            eventLog = EventLogCap.prepend(character.eventLog, message)
+        )
+        return ClubActivityResult.Success(updated, message)
+    }
+
+    /**
+     * Officer / Captain mentorship action — mentors junior members of the club.
+     * Deepens school standing and improves relationship with a school classmate.
+     */
+    fun mentorClubJunior(character: Character): ClubActivityResult {
+        if (!isSchoolClubEligible(character)) return ClubActivityResult.Ineligible
+        val club = character.education.schoolClub ?: return ClubActivityResult.Ineligible
+        if (character.education.clubRank == ClubRank.MEMBER) return ClubActivityResult.Ineligible
+        if (character.education.clubMentoringDoneThisYear) return ClubActivityResult.AlreadyDone
+
+        val roster = character.education.schoolPeople
+        val classmateIndex = roster.indexOfFirst { it.role == SchoolRole.CLASSMATE || it.role == SchoolRole.BEST_CLASSMATE }
+        val updatedRoster = if (classmateIndex != -1) {
+            val peer = roster[classmateIndex]
+            val updatedPeer = peer.copy(
+                relationshipLevel = (peer.relationshipLevel + 12).coerceIn(0, 100),
+                interactedThisYear = true
+            )
+            roster.toMutableList().apply { set(classmateIndex, updatedPeer) }
+        } else {
+            roster
+        }
+
+        val peerName = if (classmateIndex != -1) roster[classmateIndex].name else "junior members"
+        val message = "You mentored $peerName in ${clubDisplayName(club)}, building team morale and campus respect."
+        val updated = character.copy(
+            education = character.education.copy(
+                clubMentoringDoneThisYear = true,
+                clubPrestige = (character.education.clubPrestige + 4).coerceIn(0, 100),
+                schoolReputation = (character.education.schoolReputation + 4).coerceIn(0, 100),
+                schoolPeople = updatedRoster
+            ),
+            stats = character.stats.copy(
+                happiness = clampStat(character.stats.happiness + 4)
+            ),
+            eventLog = EventLogCap.prepend(character.eventLog, message)
+        )
+        return ClubActivityResult.Success(updated, message)
+    }
+
     private fun clubMajorWinChance(character: Character): Float {
         val skill = character.education.clubSkill / 100f
         val prestige = character.education.clubPrestige / 100f
@@ -1051,6 +1120,8 @@ class EducationEngine @Inject constructor(
                 clubActivityDoneThisYear = false,
                 clubFundraiserDoneThisYear = false,
                 clubRivalryDoneThisYear = false,
+                clubStrategyDoneThisYear = false,
+                clubMentoringDoneThisYear = false,
                 clubYearsAsCaptain = captainYears,
                 clubResumeClub = club,
                 clubMajorEventReady = character.education.clubRank == ClubRank.CAPTAIN

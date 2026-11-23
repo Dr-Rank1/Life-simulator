@@ -3,6 +3,7 @@ package com.maisha.game.ui.main
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,12 +33,16 @@ import androidx.compose.material.icons.rounded.Pets
 import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.Work
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -120,6 +125,7 @@ import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
 import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.SurfaceMuted
 import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
 
@@ -175,6 +181,9 @@ fun ActionsScreen(
     snackbarHostState: SnackbarHostState,
     onAttemptCrime: (CrimeType) -> Unit,
     onAttemptTargetedCrime: (CrimeTarget) -> Unit = {},
+    onCaseCrimeTarget: (CrimeTarget) -> Unit = {},
+    onLayLowCrime: () -> Unit = {},
+    onBribeInformantCrime: () -> Unit = {},
     onVisitDoctor: (String, CareType) -> Unit,
     onSetLifestyleOption: (LifestyleOption, Boolean) -> Unit,
     onExecuteSideHustle: (HustleType) -> Unit,
@@ -1198,6 +1207,22 @@ fun ActionsScreen(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     if (showCrimeActions) {
+                        if (character.criminalRecord.heatLevel > 0) {
+                            PoliceHeatMeterCard(
+                                heatLevel = character.criminalRecord.heatLevel,
+                                heatActionDone = character.criminalRecord.heatActionDoneThisYear,
+                                onLayLow = {
+                                    activeActionSheet = ActionSheet.NONE
+                                    onLayLowCrime()
+                                },
+                                onBribeInformant = {
+                                    activeActionSheet = ActionSheet.NONE
+                                    onBribeInformantCrime()
+                                }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
                         ActionCard(
                             icon = AppIcons.CrimePickpocket,
                             title = stringResource(R.string.crime_pickpocket_title),
@@ -1238,7 +1263,9 @@ fun ActionsScreen(
                         // Specialized Crime Targets (Burglary, GTA, Heists)
                         CrimeTarget.entries.forEach { target ->
                             val scaledReward = EconomyScaler.scaleAmount(target.baseReward, character.countryCode)
+                            val isCased = character.criminalRecord.casedTarget == target
                             val riskLabel = when {
+                                isCased -> stringResource(R.string.btn_cased_target_badge)
                                 target.difficulty >= 0.75f -> "Extreme Risk"
                                 target.difficulty >= 0.50f -> "High Risk"
                                 else -> "Moderate Risk"
@@ -1246,7 +1273,8 @@ fun ActionsScreen(
                             ActionCard(
                                 icon = AppIcons.CrimePickpocket,
                                 title = "${target.category}: ${target.name.lowercase().replace('_', ' ').replaceFirstChar { it.titlecase() }}",
-                                description = "Take: ~${formatMoney(scaledReward, character.countryCode)} · Notoriety: +${target.notorietyGain}%",
+                                description = "Take: ~${formatMoney(scaledReward, character.countryCode)} · Notoriety: +${target.notorietyGain}%" +
+                                    if (isCased) " [Cased: +20% Odds]" else "",
                                 metaLabel = riskLabel,
                                 accent = ActionCardAccent.RISK,
                                 onClick = {
@@ -1254,6 +1282,20 @@ fun ActionsScreen(
                                     pendingAction.request(PendingAction.TargetedCrime(target))
                                 }
                             )
+
+                            if (!isCased && character.criminalRecord.heatLevel < 85) {
+                                ActionCard(
+                                    icon = AppIcons.CrimeFraud,
+                                    title = "Case ${target.name.lowercase().replace('_', ' ').replaceFirstChar { it.titlecase() }}",
+                                    description = "Scope out guards and security before moving (+Planning bonus, +5 Heat)",
+                                    metaLabel = stringResource(R.string.btn_case_target),
+                                    accent = ActionCardAccent.RISK,
+                                    onClick = {
+                                        activeActionSheet = ActionSheet.NONE
+                                        onCaseCrimeTarget(target)
+                                    }
+                                )
+                            }
                         }
                     }
                     if (showExpungement) {
@@ -2089,6 +2131,113 @@ private fun ActionCategorySheet(
             Spacer(modifier = Modifier.height(2.dp))
             content()
             Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun PoliceHeatMeterCard(
+    heatLevel: Int,
+    heatActionDone: Boolean,
+    onLayLow: () -> Unit,
+    onBribeInformant: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = CoralNegative.copy(alpha = 0.08f)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, CoralNegative.copy(alpha = 0.4f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = CoralNegative
+                    ) {
+                        Text(
+                            text = "HEAT $heatLevel%",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = androidx.compose.ui.graphics.Color.White,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.police_heat_meter_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = CoralNegative
+                    )
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(SurfaceMuted)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(fraction = (heatLevel / 100f).coerceIn(0f, 1f))
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(CoralNegative)
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.police_heat_meter_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = onLayLow,
+                    enabled = !heatActionDone,
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = CoralNegative),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = stringResource(R.string.btn_lay_low),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                OutlinedButton(
+                    onClick = onBribeInformant,
+                    enabled = !heatActionDone,
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = stringResource(R.string.btn_bribe_informant),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
     }
 }

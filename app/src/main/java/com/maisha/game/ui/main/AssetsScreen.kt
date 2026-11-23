@@ -136,6 +136,8 @@ fun AssetsScreen(
     onDismissAssetsMarketsTip: () -> Unit = {},
     onPerformLeisure: (com.maisha.game.domain.LeisureActivity) -> Unit = {},
     onPayMortgage: (String) -> Unit = {},
+    onPrepayMortgagePrincipal: (String, Int) -> Unit = { _, _ -> },
+    onServiceAsset: (String) -> Unit = {},
     carMakeCatalog: com.maisha.game.data.content.CarMakeCatalog =
         com.maisha.game.data.content.FallbackCarMakeCatalog,
     streetCatalog: com.maisha.game.data.content.StreetCatalog =
@@ -984,6 +986,38 @@ fun AssetsScreen(
                             val id = asset.id
                             selectedAssetForAction = null
                             onPayMortgage(id)
+                        }
+                    )
+
+                    val prepayChunk = minOf(asset.mortgageBalance / 4, character.stats.money).coerceAtLeast(1_000)
+                    if (character.stats.money >= prepayChunk && prepayChunk < asset.mortgageBalance) {
+                        DrillDownRow(
+                            title = stringResource(R.string.btn_prepay_mortgage_principal, formatMoney(prepayChunk, character.countryCode)),
+                            subtitle = stringResource(R.string.desc_prepay_mortgage_principal),
+                            icon = AppIcons.Money,
+                            iconTint = GoldAccent,
+                            enabled = true,
+                            onClick = {
+                                val id = asset.id
+                                selectedAssetForAction = null
+                                onPrepayMortgagePrincipal(id, prepayChunk)
+                            }
+                        )
+                    }
+                }
+
+                if (!asset.isHeirloom && !asset.servicedThisYear) {
+                    val serviceFee = (financeEngine.calculateRepairCost(asset, character.countryCode) * 0.4f).toInt().coerceAtLeast(1_500)
+                    DrillDownRow(
+                        title = stringResource(R.string.btn_service_asset, formatMoney(serviceFee, character.countryCode)),
+                        subtitle = stringResource(R.string.desc_service_asset),
+                        icon = AppIcons.Health,
+                        iconTint = TealPrimary,
+                        enabled = character.stats.money >= serviceFee,
+                        onClick = {
+                            val id = asset.id
+                            selectedAssetForAction = null
+                            onServiceAsset(id)
                         }
                     )
                 }
