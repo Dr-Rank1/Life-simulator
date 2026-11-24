@@ -110,7 +110,7 @@
     <string name="share_preview_subtitle">Pré-visualize a aparência do seu cartão</string>
     <string name="btn_share">Compartilhar</string>
     <string name="share_chooser_title">Compartilhe seu cartão de vida</string>
-    <string name="share_default_caption">Eu simplesmente vivi uma vida inteira! Você pode vencer minhas estatísticas? 🌍</string>
+    <string name="share_default_caption">Eu simplesmente vivi uma vida inteira! Você pode vencer minhas estatísticas?</string>
     <string name="share_error">Não foi possível compartilhar seu cartão de vida. Por favor, tente novamente.</string>
     <string name="share_card_life_span">%1$d – %2$d</string>
     <string name="share_card_footer">Jogado em Maisha — viva sua história</string>

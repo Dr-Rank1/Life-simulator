@@ -110,7 +110,7 @@
     <string name="share_preview_subtitle">Prévisualisez à quoi ressemblera votre carte</string>
     <string name="btn_share">Partager</string>
     <string name="share_chooser_title">Partagez votre carte de vie</string>
-    <string name="share_default_caption">Je viens de vivre toute une vie ! Pouvez-vous battre mes statistiques ? 🌍</string>
+    <string name="share_default_caption">Je viens de vivre toute une vie ! Pouvez-vous battre mes statistiques ?</string>
     <string name="share_error">Impossible de partager votre carte de vie. Veuillez réessayer.</string>
     <string name="share_card_life_span">%1$d – %2$d</string>
     <string name="share_card_footer">Joué sur &lt;&lt;MARQUE&gt;&gt; — vivez votre histoire</string>

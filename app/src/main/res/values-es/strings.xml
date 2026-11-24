@@ -110,7 +110,7 @@
     <string name="share_preview_subtitle">Obtenga una vista previa de cómo se verá su tarjeta</string>
     <string name="btn_share">Compartir</string>
     <string name="share_chooser_title">Comparte tu tarjeta de vida</string>
-    <string name="share_default_caption">¡Acabo de vivir toda una vida! ¿Puedes superar mis estadísticas? 🌍</string>
+    <string name="share_default_caption">¡Acabo de vivir toda una vida! ¿Puedes superar mis estadísticas?</string>
     <string name="share_error">No se pudo compartir tu tarjeta de vida. Por favor inténtalo de nuevo.</string>
     <string name="share_card_life_span">%1$d – %2$d</string>
     <string name="share_card_footer">Reproducido en Maisha — vive tu historia</string>

@@ -219,14 +219,6 @@ private fun HairStyleRow(
     }
 }
 
-private fun expressionEmoji(expression: Expression): String = when (expression) {
-    Expression.NEUTRAL -> "🙂"
-    Expression.HAPPY -> "😄"
-    Expression.SAD -> "🙁"
-    Expression.ANGRY -> "😠"
-    Expression.SURPRISED -> "😮"
-}
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun <T> OptionalEnumRow(

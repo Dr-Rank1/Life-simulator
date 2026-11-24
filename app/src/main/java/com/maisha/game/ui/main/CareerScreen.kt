@@ -420,7 +420,10 @@ fun CareerScreen(
             onDismissRequest = { activePivotBusiness = null },
             title = { Text(stringResource(R.string.dialog_pivot_title)) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     Text(stringResource(R.string.dialog_pivot_desc, formatMoney(cost, character.countryCode)))
                     BusinessIndustry.entries.filter { it != biz.industry }.forEach { industry ->
                         FilterChip(
@@ -1273,7 +1276,10 @@ private fun StartBusinessDialog(
             )
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.dialog_start_business_description),
                     style = MaterialTheme.typography.bodySmall
@@ -2719,7 +2725,10 @@ private fun SchoolLifeSectionCard(
                 if (candidates.isEmpty()) {
                     Text(stringResource(R.string.msg_school_person_missing))
                 } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Column(
+                        modifier = Modifier.verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         candidates.forEach { person ->
                             TextButton(
                                 onClick = {

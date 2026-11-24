@@ -1627,7 +1627,10 @@ private fun WillEditorDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dialog_will_title)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.dialog_will_body),
                     style = MaterialTheme.typography.bodySmall,

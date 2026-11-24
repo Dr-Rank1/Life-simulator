@@ -21,7 +21,7 @@
     <string name="share_preview_subtitle">Angalia jinsi kadi yako itakavyoonekana</string>
     <string name="btn_share">Shiriki</string>
     <string name="share_chooser_title">Shiriki kadi ya maisha yako</string>
-    <string name="share_default_caption">Nimeishi maisha kamili! Unaweza kushinda takwimu zangu? 🌍</string>
+    <string name="share_default_caption">Nimeishi maisha kamili! Unaweza kushinda takwimu zangu?</string>
     <string name="share_error">Imeshindwa kushiriki kadi yako. Jaribu tena.</string>
     <string name="share_card_life_span">%1$d – %2$d</string>
     <string name="share_card_footer">Imechezwa kwenye Maisha — ishi hadithi yako</string>

@@ -27,7 +27,7 @@ import com.maisha.game.R
 import com.maisha.game.data.CountryCatalog
 
 /**
- * Renders a country flag using Unicode regional-indicator emoji (e.g. KE → 🇰🇪).
+ * Renders a country flag using Unicode regional-indicator sequence.
  * Zero bundled assets; works on Android 13+ with Noto Color Emoji.
  *
  * Fallback: ISO code chip when emoji glyphs are missing on device ([preferIsoFallback]).

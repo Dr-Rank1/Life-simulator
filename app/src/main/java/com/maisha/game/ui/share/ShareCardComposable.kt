@@ -356,35 +356,7 @@ private fun ShareAchievementChip(
     }
 }
 
-fun achievementEmoji(iconName: String): String = when (iconName) {
-    "briefcase" -> "💼"
-    "office" -> "🏢"
-    "shuffle" -> "🔀"
-    "graduation_cap" -> "🎓"
-    "star" -> "⭐"
-    "door" -> "🚪"
-    "rings" -> "💍"
-    "baby" -> "👶"
-    "family" -> "👨‍👩‍👧"
-    "heart" -> "❤️"
-    "coins" -> "🪙"
-    "million" -> "💰"
-    "house" -> "🏠"
-    "portfolio" -> "📈"
-    "calendar" -> "📅"
-    "sunset" -> "🌅"
-    "crown" -> "👑"
-    "handcuffs" -> "🚔"
-    "repeat" -> "🔁"
-    "shield" -> "🛡️"
-    "globe" -> "🌍"
-    "inseparable" -> "💞"
-    "tree" -> "🌳"
-    "dynasty" -> "👑"
-    "handshake" -> "🤝"
-    "friends" -> "👥"
-    else -> "🏆"
-}
+fun achievementEmoji(iconName: String): String = ""
 
 @Preview(showBackground = true, widthDp = 270, heightDp = 480)
 @Composable
@@ -408,7 +380,7 @@ private fun ShareCardPreview() {
                 achievementBadges = listOf(
                     ShareAchievementBadge(
                         titleRes = R.string.app_name,
-                        emoji = "🏆",
+                        emoji = "",
                         category = AchievementCategory.FAMILY
                     )
                 )

@@ -110,7 +110,7 @@
     <string name="share_preview_subtitle">पूर्वावलोकन करें कि आपका कार्ड कैसा दिखेगा</string>
     <string name="btn_share">शेयर करना</string>
     <string name="share_chooser_title">अपना जीवन कार्ड साझा करें</string>
-    <string name="share_default_caption">मैंने बस पूरी जिंदगी जी ली! क्या आप मेरे आँकड़ों को हरा सकते हैं? 🌍</string>
+    <string name="share_default_caption">मैंने बस पूरी जिंदगी जी ली! क्या आप मेरे आँकड़ों को हरा सकते हैं?</string>
     <string name="share_error">आपका जीवन कार्ड साझा नहीं किया जा सका. कृपया पुन: प्रयास करें।</string>
     <string name="share_card_life_span">%1$d – %2$d</string>
     <string name="share_card_footer">Maisha पर खेला गया - अपनी कहानी जियो</string>

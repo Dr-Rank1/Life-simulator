@@ -45,9 +45,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import com.maisha.game.ui.theme.AppIcons
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -425,7 +427,7 @@ private fun StatAdjustCard(
 ) {
     val label = field.type.defaultLabel()
     val statColor = field.type.color()
-    val statEmoji = field.type.emoji()
+    val statIcon = field.type.icon()
     val decreaseDescription = stringResource(R.string.stats_decrease, label)
     val increaseDescription = stringResource(R.string.stats_increase, label)
 
@@ -455,10 +457,11 @@ private fun StatAdjustCard(
                         .background(statColor.copy(alpha = 0.14f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = statEmoji,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = statColor
+                    Icon(
+                        imageVector = statIcon,
+                        contentDescription = null,
+                        tint = statColor,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
                 Column {
@@ -599,13 +602,12 @@ private fun StatType.defaultLabel(): String = when (this) {
     else -> ""
 }
 
-@Composable
-private fun StatType.emoji(): String = when (this) {
-    StatType.HEALTH -> "❤️"
-    StatType.HAPPINESS -> "😊"
-    StatType.SMARTS -> "🧠"
-    StatType.LOOKS -> "✨"
-    else -> ""
+private fun StatType.icon(): ImageVector = when (this) {
+    StatType.HEALTH -> AppIcons.Health
+    StatType.HAPPINESS -> AppIcons.Happiness
+    StatType.SMARTS -> AppIcons.Smarts
+    StatType.LOOKS -> AppIcons.Looks
+    else -> AppIcons.Happiness
 }
 
 private fun randomValidStats(): Stats {

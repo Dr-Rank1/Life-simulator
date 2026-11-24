@@ -499,7 +499,9 @@ private fun AdoptIdentityDialog(
             border = BorderStroke(1.dp, BorderCardSlate)
         ) {
             Column(
-                modifier = Modifier.padding(18.dp),
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(18.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
