@@ -77,7 +77,8 @@ data class Character(
     /** Master-skill showcase payout claimed this year. */
     val skillShowcaseDoneThisYear: Boolean = false,
     val doubleLife: DoubleLifeState = DoubleLifeState(),
-    val socialEcosystem: SocialEcosystemState = SocialEcosystemState()
+    val socialEcosystem: SocialEcosystemState = SocialEcosystemState(),
+    val finance: PersonalFinanceState = PersonalFinanceState()
 ) {
     /** Passports held; falls back to birth country for pre-immigration saves. */
     fun passportsHeld(): List<String> =

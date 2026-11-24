@@ -8,11 +8,14 @@ import com.maisha.game.data.content.CarMakeCatalog
 import com.maisha.game.data.content.FallbackCarMakeCatalog
 import com.maisha.game.data.content.FallbackStreetCatalog
 import com.maisha.game.data.content.StreetCatalog
+import com.maisha.game.data.model.AnnualCashFlow
 import com.maisha.game.data.model.Asset
 import com.maisha.game.data.model.AssetType
 import com.maisha.game.data.model.Character
+import com.maisha.game.data.model.CreditRatingTier
 import com.maisha.game.data.model.EconomicClimate
 import com.maisha.game.data.model.EconomicState
+import com.maisha.game.data.model.PersonalFinanceState
 import com.maisha.game.data.model.PortfolioStrategy
 import com.maisha.game.data.model.PoliticalOffice
 import com.maisha.game.data.model.RelationType
@@ -126,11 +129,28 @@ class FinanceEngine @Inject constructor(
         data class Success(val character: Character) : MortgagePurchaseResult()
         data object InsufficientFunds : MortgagePurchaseResult()
         data object NotEligible : MortgagePurchaseResult()
+        data class RejectedCredit(val creditScore: Int) : MortgagePurchaseResult()
+    }
+
+    /** Minimum down-payment percentage gated by credit rating tier. */
+    fun minDownPaymentPercentForCredit(creditScore: Int): Int = when (CreditRatingTier.forScore(creditScore)) {
+        CreditRatingTier.EXCELLENT -> 10
+        CreditRatingTier.GOOD -> 20
+        CreditRatingTier.FAIR -> 25
+        CreditRatingTier.POOR -> 40
+    }
+
+    /** Base mortgage APR gated by credit rating tier. */
+    fun baseMortgageAprForCredit(creditScore: Int): Double = when (CreditRatingTier.forScore(creditScore)) {
+        CreditRatingTier.EXCELLENT -> 0.055
+        CreditRatingTier.GOOD -> 0.075
+        CreditRatingTier.FAIR -> 0.095
+        CreditRatingTier.POOR -> 0.120
     }
 
     /**
-     * Purchases a house with a [downPaymentPercent] (20–50%) down payment.
-     * The remainder becomes a 30-year amortised mortgage at a fixed 8% annual interest.
+     * Purchases a house with a credit-gated down payment and interest rate.
+     * Requires credit score >= 500. Lower credit scores require higher down payments and APRs.
      * Monthly payment = P * r / (1 - (1+r)^-n), where r = annual_rate/12, n = 360.
      */
     fun purchaseWithMortgage(
@@ -143,7 +163,11 @@ class FinanceEngine @Inject constructor(
         if (catalogItem.type != AssetType.HOUSE || !catalogItem.isPurchasable || catalogItem.isHeirloom) {
             return MortgagePurchaseResult.NotEligible
         }
-        val pct = downPaymentPercent.coerceIn(20, 100)
+        if (character.finance.creditScore < 500) {
+            return MortgagePurchaseResult.RejectedCredit(character.finance.creditScore)
+        }
+        val minDown = minDownPaymentPercentForCredit(character.finance.creditScore)
+        val pct = maxOf(downPaymentPercent, minDown).coerceIn(minDown, 100)
         val purchasePrice = EconomyScaler.scaleAmount(catalogItem.purchasePrice, character.countryCode)
         val downPayment = (purchasePrice * pct / 100.0).toInt()
 
@@ -151,12 +175,13 @@ class FinanceEngine @Inject constructor(
 
         val principal = purchasePrice - downPayment
         val standingTier = character.socialEcosystem.currentStandingTier
-        val rateDiscount = when (standingTier) {
+        val standingDiscount = when (standingTier) {
             com.maisha.game.data.model.CommunityStandingTier.PILLAR_OF_SOCIETY -> 0.005
             com.maisha.game.data.model.CommunityStandingTier.WELL_RESPECTED -> 0.0025
             else -> 0.0
         }
-        val effectiveRate = (MORTGAGE_ANNUAL_RATE - rateDiscount).coerceAtLeast(0.04)
+        val baseRate = baseMortgageAprForCredit(character.finance.creditScore)
+        val effectiveRate = (baseRate - standingDiscount).coerceAtLeast(0.035)
         val monthlyRate = effectiveRate / 12.0
         val annualPayment = if (principal <= 0) 0 else {
             val monthly = principal * monthlyRate /
@@ -178,13 +203,15 @@ class FinanceEngine @Inject constructor(
             condition = 100,
             monthlyUpkeep = EconomyScaler.scaleAmount(catalogItem.monthlyUpkeep, character.countryCode),
             mortgageBalance = principal,
-            annualMortgagePayment = annualPayment
+            annualMortgagePayment = annualPayment,
+            mortgageInterestRate = effectiveRate
         )
 
+        val tierLabel = CreditRatingTier.forScore(character.finance.creditScore).name.lowercase()
         val logEntry = if (principal > 0) {
             "Bought ${asset.name} with a ${pct}% down payment " +
                 "(${formatMoney(downPayment, character.countryCode)}). " +
-                "Mortgage: ${formatMoney(principal, character.countryCode)} over 30 years."
+                "Mortgage: ${formatMoney(principal, character.countryCode)} over 30 years at ${(effectiveRate * 1000).roundToInt() / 10.0}% APR ($tierLabel credit rating)."
         } else {
             "Bought ${asset.name} outright for ${formatMoney(purchasePrice, character.countryCode)}."
         }
@@ -227,12 +254,19 @@ class FinanceEngine @Inject constructor(
                 "Paid ${formatMoney(totalPaid, character.countryCode)} in mortgage installments.")
         }
         paidOffNames.forEach { name ->
-            eventLog = EventLogCap.prepend(eventLog, "🏠 Mortgage fully paid off on $name!")
+            eventLog = EventLogCap.prepend(eventLog, "Mortgage fully paid off on $name!")
+        }
+
+        val updatedCredit = if (paidOffNames.isNotEmpty()) {
+            (character.finance.creditScore + 20 * paidOffNames.size).coerceAtMost(850)
+        } else {
+            character.finance.creditScore
         }
 
         return character.copy(
             stats = character.stats.copy(money = cash.coerceAtLeast(0)),
             assets = updatedAssets,
+            finance = character.finance.copy(creditScore = updatedCredit),
             eventLog = eventLog
         )
     }
@@ -251,9 +285,11 @@ class FinanceEngine @Inject constructor(
             else it
         }
         val message = "Paid off the mortgage on ${asset.name} in full (${formatMoney(payoff, character.countryCode)})."
+        val boostedCredit = (character.finance.creditScore + 25).coerceAtMost(850)
         return character.copy(
             stats = character.stats.copy(money = character.stats.money - payoff),
             assets = updatedAssets,
+            finance = character.finance.copy(creditScore = boostedCredit),
             eventLog = EventLogCap.prependToCurrentYear(character.eventLog, message, character.age)
         )
     }
@@ -288,9 +324,11 @@ class FinanceEngine @Inject constructor(
         } else {
             "Prepaid ${formatMoney(actualPayment, character.countryCode)} toward ${asset.name}'s mortgage principal (Remaining: ${formatMoney(remainingBalance, character.countryCode)})."
         }
+        val boostedCredit = (character.finance.creditScore + (if (remainingBalance <= 0) 25 else 15)).coerceAtMost(850)
         return character.copy(
             stats = character.stats.copy(money = character.stats.money - actualPayment),
             assets = updatedAssets,
+            finance = character.finance.copy(creditScore = boostedCredit),
             eventLog = EventLogCap.prependToCurrentYear(character.eventLog, message, character.age)
         )
     }
@@ -666,14 +704,15 @@ class FinanceEngine @Inject constructor(
         return EconomyScaler.scaleAmount(rawCost, countryCode)
     }
 
-    /** Cash, assets, businesses, savings, and investment portfolio, minus student loans and mortgages. */
+    /** Cash, assets, businesses, savings, junior trust, and investment portfolio, minus student loans and mortgages. */
     fun calculateNetWorth(character: Character): Int {
         val assetValue = character.assets.sumOf { it.currentValue }
         val businessValue = character.businesses.sumOf { it.valuation }
         val totalMortgages = character.assets.sumOf { it.mortgageBalance.coerceAtLeast(0) }
         return character.stats.money + assetValue + businessValue +
             character.investmentPortfolioValue.coerceAtLeast(0) +
-            character.savingsBalance.coerceAtLeast(0) -
+            character.savingsBalance.coerceAtLeast(0) +
+            character.finance.juniorTrustBalance.coerceAtLeast(0) -
             character.education.studentLoanBalance.coerceAtLeast(0) -
             totalMortgages
     }
@@ -788,8 +827,9 @@ class FinanceEngine @Inject constructor(
         }
         val ratePercent = when (character.economicState.climate) {
             EconomicClimate.BOOM -> Random.nextInt(SAVINGS_INTEREST_BOOM_MIN, SAVINGS_INTEREST_BOOM_MAX + 1)
-            EconomicClimate.BUST -> Random.nextInt(SAVINGS_INTEREST_BUST_MIN, SAVINGS_INTEREST_BUST_MAX + 1)
-            EconomicClimate.NEUTRAL -> Random.nextInt(SAVINGS_INTEREST_MIN, SAVINGS_INTEREST_MAX + 1)
+            EconomicClimate.RECESSION -> Random.nextInt(SAVINGS_INTEREST_BUST_MIN, SAVINGS_INTEREST_BUST_MAX + 1)
+            EconomicClimate.INFLATION_SURGE -> Random.nextInt(6, 11)
+            EconomicClimate.STEADY -> Random.nextInt(SAVINGS_INTEREST_MIN, SAVINGS_INTEREST_MAX + 1)
         }
         val interest = ((character.savingsBalance * ratePercent) / 100.0).toInt().coerceAtLeast(0)
         if (interest <= 0) {
@@ -802,6 +842,40 @@ class FinanceEngine @Inject constructor(
                 character.eventLog,
                 "Savings earned $ratePercent% interest " +
                     "(${formatMoney(interest, character.countryCode)})."
+            )
+        )
+    }
+
+    /** Saves gift money into childhood trust piggy bank (ages 0-17). */
+    fun depositJuniorTrust(character: Character, amount: Int): InvestmentResult {
+        if (amount <= 0) return InvestmentResult.InvalidAmount
+        if (character.age >= 18) return InvestmentResult.InvalidAmount
+        if (character.stats.money < amount) return InvestmentResult.InsufficientFunds
+        return InvestmentResult.Success(
+            character.copy(
+                stats = character.stats.copy(money = character.stats.money - amount),
+                finance = character.finance.copy(
+                    juniorTrustBalance = character.finance.juniorTrustBalance + amount
+                ),
+                eventLog = EventLogCap.prepend(
+                    character.eventLog,
+                    "Saved ${formatMoney(amount, character.countryCode)} into your Junior Trust Piggy Bank."
+                )
+            )
+        )
+    }
+
+    /** Unlocks the childhood trust piggy bank into liquid cash when reaching adulthood at 18. */
+    fun unlockJuniorTrustAtAge18(character: Character): Character {
+        if (character.age < 18 || character.finance.juniorTrustBalance <= 0) return character
+        val trustAmount = character.finance.juniorTrustBalance
+        val updatedMoney = character.stats.money + trustAmount
+        return character.copy(
+            stats = character.stats.copy(money = updatedMoney),
+            finance = character.finance.copy(juniorTrustBalance = 0),
+            eventLog = EventLogCap.prepend(
+                character.eventLog,
+                "Unlocked your Junior Trust Piggy Bank! Transferred ${formatMoney(trustAmount, character.countryCode)} into your liquid funds."
             )
         )
     }
@@ -849,7 +923,13 @@ class FinanceEngine @Inject constructor(
             it.relation == RelationType.CHILD && it.alive && it.age < 18
         }
         val dependentCost = dependentChildren * DEPENDENT_CHILD_COST_BASE
-        val raw = ((ageBase * standardMult * housingMult) + dependentCost).toInt()
+        val climateCostMult = when (character.economicState.climate) {
+            EconomicClimate.BOOM -> 1.08
+            EconomicClimate.STEADY -> 1.0
+            EconomicClimate.INFLATION_SURGE -> 1.30
+            EconomicClimate.RECESSION -> 0.95
+        }
+        val raw = ((ageBase * standardMult * housingMult * climateCostMult) + dependentCost).toInt()
         return EconomyScaler.scaleAmount(raw.coerceAtLeast(1), character.countryCode)
     }
 
@@ -949,14 +1029,20 @@ class FinanceEngine @Inject constructor(
 
     /**
      * Yearly portfolio tick: random return from [PORTFOLIO_RETURN_MIN_PERCENT] to
-     * [PORTFOLIO_RETURN_MAX_PERCENT] when portfolio value is positive.
+     * [PORTFOLIO_RETURN_MAX_PERCENT] when portfolio value is positive, shifted by macroeconomic climate.
      */
     fun applyPortfolioMarketTick(character: Character): Character {
         if (character.investmentPortfolioValue <= 0) {
             return character.copy(lastPortfolioReturnPercent = 0)
         }
-        val (minReturn, maxReturn) = portfolioReturnRange(character.lifestyle.portfolioStrategy)
-        val returnPercent = Random.nextInt(minReturn, maxReturn + 1)
+        val (baseMin, baseMax) = portfolioReturnRange(character.lifestyle.portfolioStrategy)
+        val climateShift = when (character.economicState.climate) {
+            EconomicClimate.BOOM -> 10
+            EconomicClimate.STEADY -> 0
+            EconomicClimate.INFLATION_SURGE -> -5
+            EconomicClimate.RECESSION -> -15
+        }
+        val returnPercent = Random.nextInt(baseMin + climateShift, baseMax + climateShift + 1)
         return applyPortfolioReturn(character, returnPercent, logMarketMove = true)
     }
 
@@ -1087,7 +1173,7 @@ class FinanceEngine @Inject constructor(
         val updated = character.copy(
             economicState = EconomicState(climate = climate, marketModifier = modifier),
             assets = updatedAssets,
-            eventLog = if (climate == EconomicClimate.NEUTRAL || (character.age < 18 && character.assets.isEmpty())) {
+            eventLog = if (climate == EconomicClimate.STEADY || (character.age < 18 && character.assets.isEmpty())) {
                 character.eventLog
             } else {
                 EventLogCap.prepend(character.eventLog, logEntry)
@@ -1207,7 +1293,9 @@ class FinanceEngine @Inject constructor(
     private fun resolveClimate(forced: String?): EconomicClimate {
         return when (forced?.lowercase()) {
             "boom" -> EconomicClimate.BOOM
-            "bust" -> EconomicClimate.BUST
+            "bust", "recession" -> EconomicClimate.RECESSION
+            "inflation", "inflation_surge", "inflationsurge" -> EconomicClimate.INFLATION_SURGE
+            "steady", "neutral" -> EconomicClimate.STEADY
             "random" -> rollClimate()
             null -> rollClimate()
             else -> rollClimate()
@@ -1218,21 +1306,24 @@ class FinanceEngine @Inject constructor(
         val roll = Random.nextFloat()
         return when {
             roll < BOOM_CHANCE -> EconomicClimate.BOOM
-            roll < BOOM_CHANCE + BUST_CHANCE -> EconomicClimate.BUST
-            else -> EconomicClimate.NEUTRAL
+            roll < BOOM_CHANCE + RECESSION_CHANCE -> EconomicClimate.RECESSION
+            roll < BOOM_CHANCE + RECESSION_CHANCE + INFLATION_CHANCE -> EconomicClimate.INFLATION_SURGE
+            else -> EconomicClimate.STEADY
         }
     }
 
     private fun marketModifierFor(climate: EconomicClimate): Float = when (climate) {
         EconomicClimate.BOOM -> BOOM_MARKET_MODIFIER
-        EconomicClimate.BUST -> BUST_MARKET_MODIFIER
-        EconomicClimate.NEUTRAL -> NEUTRAL_MARKET_MODIFIER
+        EconomicClimate.RECESSION -> RECESSION_MARKET_MODIFIER
+        EconomicClimate.INFLATION_SURGE -> INFLATION_MARKET_MODIFIER
+        EconomicClimate.STEADY -> STEADY_MARKET_MODIFIER
     }
 
     private fun upkeepMultiplier(climate: EconomicClimate): Double = when (climate) {
         EconomicClimate.BOOM -> BOOM_UPKEEP_MULTIPLIER
-        EconomicClimate.BUST -> BUST_UPKEEP_MULTIPLIER
-        EconomicClimate.NEUTRAL -> 1.0
+        EconomicClimate.RECESSION -> RECESSION_UPKEEP_MULTIPLIER
+        EconomicClimate.INFLATION_SURGE -> INFLATION_UPKEEP_MULTIPLIER
+        EconomicClimate.STEADY -> 1.0
     }
 
     private fun applyConditionDegradation(asset: Asset, marketModifier: Float): Asset {
@@ -1266,9 +1357,10 @@ class FinanceEngine @Inject constructor(
         com.maisha.game.util.formatMoney(amount, countryCode)
 
     private fun economicLogFor(climate: EconomicClimate): String = when (climate) {
-        EconomicClimate.BOOM -> "A strong economy lifted property values this year."
-        EconomicClimate.BUST -> "A tough economy pulled asset prices down this year."
-        EconomicClimate.NEUTRAL -> ""
+        EconomicClimate.BOOM -> "A strong economic boom lifted property values and investment returns this year."
+        EconomicClimate.RECESSION -> "An economic recession pulled asset prices down and tightened job markets."
+        EconomicClimate.INFLATION_SURGE -> "An inflation surge drove up consumer prices, living costs, and interest rates."
+        EconomicClimate.STEADY -> ""
     }
 
     sealed class TaxPolicyResult {
@@ -1333,6 +1425,141 @@ class FinanceEngine @Inject constructor(
         }
     }
 
+    /**
+     * Calculates transparent annual cash flow breakdown for [character].
+     * Computes Gross Income (salary, part-time, side hustles, rentals, dividends, pension, business, social media)
+     * minus Deductions (progressive tax, living cost, mortgages, student loans, asset upkeep, child support, pets).
+     */
+    fun computeAnnualCashFlow(character: Character): AnnualCashFlow {
+        val salary = if (!character.career.isRetired && character.career.currentJob != null) {
+            character.career.currentJob!!.baseSalary
+        } else 0
+        val partTime = 0
+        val sideHustle = 0
+        val rental = character.assets.filter { it.isRentedOut && isRentable(it) }.sumOf { calculateYearlyRent(it) }
+        val dividends = if (character.savingsBalance > 0 && character.lastSavingsInterestPercent > 0) {
+            ((character.savingsBalance * character.lastSavingsInterestPercent) / 100.0).toInt()
+        } else 0
+        val pension = if (character.career.isRetired) character.career.pensionAmount else 0
+        val businessProfits = character.businesses.sumOf { b ->
+            (b.revenue * 0.10f).roundToInt().coerceAtLeast(0)
+        }
+        val socialMedia = if (character.socialMedia.hasAccount && character.socialMedia.followers >= 100_000) {
+            calculateSocialMediaPayout(character)
+        } else 0
+        val other = 0
+
+        val gross = salary + partTime + sideHustle + rental + dividends + pension + businessProfits + socialMedia + other
+
+        val taxableIncome = (salary + partTime + sideHustle + rental + businessProfits + socialMedia).coerceAtLeast(0)
+        val tax = calculateIncomeTax(taxableIncome, character.countryCode)
+        val living = if (character.age >= MIN_COST_OF_LIVING_AGE) estimateAnnualCostOfLiving(character) else 0
+        val mortgage = character.assets.sumOf { if (it.mortgageBalance > 0) minOf(it.annualMortgagePayment, it.mortgageBalance) else 0 }
+        val studentLoan = if (character.education.studentLoanBalance > 0 && character.alive && salary > 0) {
+            (salary * StudentFinance.LOAN_REPAY_SALARY_FRACTION).roundToInt().coerceAtMost(character.education.studentLoanBalance)
+        } else 0
+        val assetUpkeep = if (character.assets.isNotEmpty()) {
+            val raw = character.assets.sumOf { it.monthlyUpkeep * 12 }
+            val stackDiscount = when {
+                character.assets.size <= 1 -> 1.0
+                character.assets.size == 2 -> 0.95
+                character.assets.size == 3 -> 0.90
+                else -> 0.85
+            }
+            (raw * stackDiscount * upkeepMultiplier(character.economicState.climate)).toInt()
+        } else 0
+        val minorChildren = character.family.count {
+            it.relation == RelationType.CHILD && it.alive && it.age < MINOR_CHILD_MAX_AGE
+        }
+        val childSupport = minorChildren * EconomyScaler.scaleAmount(CHILD_SUPPORT_BASE_KENYA, character.countryCode)
+        val petUpkeep = character.pets.sumOf { pet ->
+            val entry = PetCatalog.findBySpecies(pet.species) ?: return@sumOf 0
+            EconomyScaler.scaleAmount(entry.yearlyUpkeep, character.countryCode)
+        }
+        val otherExpenses = 0
+
+        val totalDeductions = tax + living + mortgage + studentLoan + assetUpkeep + childSupport + petUpkeep + otherExpenses
+        val net = gross - totalDeductions
+
+        return AnnualCashFlow(
+            salaryIncome = salary,
+            partTimeIncome = partTime,
+            sideHustleIncome = sideHustle,
+            rentalIncome = rental,
+            investmentDividends = dividends,
+            pensionIncome = pension,
+            businessProfits = businessProfits,
+            socialMediaIncome = socialMedia,
+            otherIncome = other,
+            grossIncome = gross,
+            incomeTax = tax,
+            livingCost = living,
+            mortgagePayments = mortgage,
+            studentLoanPayment = studentLoan,
+            assetUpkeep = assetUpkeep,
+            childSupport = childSupport,
+            petUpkeep = petUpkeep,
+            otherExpenses = otherExpenses,
+            totalDeductions = totalDeductions,
+            netCashFlow = net
+        )
+    }
+
+    /**
+     * Ticks credit score and stores the latest [AnnualCashFlow] snapshot on [Character.finance].
+     */
+    fun tickCreditScoreAndCashFlow(character: Character): Character {
+        val cashFlow = computeAnnualCashFlow(character)
+        if (character.age < MIN_COST_OF_LIVING_AGE) {
+            return character.copy(finance = character.finance.copy(lastCashFlow = cashFlow))
+        }
+
+        var score = character.finance.creditScore
+        var streak = character.finance.onTimePaymentStreak
+        var missed = character.finance.missedPaymentsCount
+
+        val hasDebt = character.assets.any { it.mortgageBalance > 0 } || character.education.studentLoanBalance > 0
+        val hadShortfall = character.stats.money <= 0 && cashFlow.netCashFlow < 0
+
+        if (hadShortfall) {
+            missed += 1
+            streak = 0
+            score = (score - 35).coerceAtLeast(300)
+        } else if (hasDebt) {
+            streak += 1
+            val boost = when {
+                score < 600 -> 12
+                score < 700 -> 8
+                score < 750 -> 6
+                else -> 4
+            }
+            score = (score + boost).coerceAtMost(850)
+        } else {
+            if (score < 680) {
+                score = (score + 3).coerceAtMost(680)
+            }
+        }
+
+        if (character.criminalRecord.hasRecord && !character.criminalRecord.recordExpunged) {
+            val arrestPenalty = (character.criminalRecord.timesArrested * 15).coerceAtLeast(15)
+            score = (score - arrestPenalty).coerceAtLeast(300)
+        }
+
+        val totalAnnualDebtService = cashFlow.mortgagePayments + cashFlow.studentLoanPayment
+        if (cashFlow.grossIncome > 0 && (totalAnnualDebtService.toDouble() / cashFlow.grossIncome.toDouble()) > 0.40) {
+            score = (score - 5).coerceAtLeast(300)
+        }
+
+        return character.copy(
+            finance = character.finance.copy(
+                creditScore = score,
+                onTimePaymentStreak = streak,
+                missedPaymentsCount = missed,
+                lastCashFlow = cashFlow
+            )
+        )
+    }
+
     companion object {
         private const val TAX_CUTS_APPROVAL_HIT = 8
         private const val WEALTH_TAX_APPROVAL_GAIN = 10
@@ -1372,13 +1599,20 @@ class FinanceEngine @Inject constructor(
         private const val RENOVATION_VALUE_BOOST = 0.15f
         private const val RENOVATION_VALUE_MULTIPLIER_PER_LEVEL = 0.08f
         private const val MIN_RENOVATION_COST = 8_000
-        private const val BOOM_CHANCE = 0.12f
-        private const val BUST_CHANCE = 0.10f
-        const val BOOM_MARKET_MODIFIER = 1.12f
+        private const val BOOM_CHANCE = 0.20f
+        private const val RECESSION_CHANCE = 0.20f
+        private const val INFLATION_CHANCE = 0.20f
+        private const val BUST_CHANCE = 0.20f
+        const val BOOM_MARKET_MODIFIER = 1.15f
+        const val RECESSION_MARKET_MODIFIER = 0.88f
         const val BUST_MARKET_MODIFIER = 0.88f
+        const val INFLATION_MARKET_MODIFIER = 1.05f
+        const val STEADY_MARKET_MODIFIER = 1.0f
         const val NEUTRAL_MARKET_MODIFIER = 1.0f
-        private const val BOOM_UPKEEP_MULTIPLIER = 1.06
-        private const val BUST_UPKEEP_MULTIPLIER = 0.96
+        private const val BOOM_UPKEEP_MULTIPLIER = 1.12
+        private const val RECESSION_UPKEEP_MULTIPLIER = 0.94
+        private const val BUST_UPKEEP_MULTIPLIER = 0.94
+        private const val INFLATION_UPKEEP_MULTIPLIER = 1.35
         private const val REAL_ESTATE_APPRECIATION_CHANCE = 0.35f
         private const val MAX_ANNUAL_APPRECIATION_RATE = 0.06f
         private const val HEIRLOOM_ANNUAL_APPRECIATION_RATE = 0.03f

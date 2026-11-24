@@ -285,6 +285,30 @@ object AppIcons {
         close()
     }
 
+    val Lock: ImageVector = icon("Lock") {
+        moveTo(18f, 8f)
+        lineTo(17f, 8f)
+        lineTo(17f, 6f)
+        curveTo(17f, 3.8f, 15.2f, 2f, 12f, 2f)
+        curveTo(8.8f, 2f, 7f, 3.8f, 7f, 6f)
+        lineTo(7f, 8f)
+        lineTo(6f, 8f)
+        curveTo(4.9f, 8f, 4f, 8.9f, 4f, 10f)
+        lineTo(4f, 20f)
+        curveTo(4f, 21.1f, 4.9f, 22f, 6f, 22f)
+        lineTo(18f, 22f)
+        curveTo(19.1f, 22f, 20f, 21.1f, 20f, 20f)
+        lineTo(20f, 10f)
+        curveTo(20f, 8.9f, 19.1f, 8f, 18f, 8f)
+        close()
+        moveTo(9f, 6f)
+        curveTo(9f, 4.9f, 10.3f, 4f, 12f, 4f)
+        curveTo(13.7f, 4f, 15f, 4.9f, 15f, 6f)
+        lineTo(15f, 8f)
+        lineTo(9f, 8f)
+        close()
+    }
+
     // —— Actions / crime / health ——
     val CrimePickpocket: ImageVector = icon("CrimePickpocket") {
         moveTo(4f, 8f)

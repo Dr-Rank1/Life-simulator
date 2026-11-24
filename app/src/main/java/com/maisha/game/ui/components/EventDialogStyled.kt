@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -67,9 +68,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.maisha.game.R
+import com.maisha.game.data.CountryCatalog
 import com.maisha.game.data.FlavorInterpolator
 import com.maisha.game.data.model.AvatarConfig
 import com.maisha.game.data.model.Character
+import com.maisha.game.data.model.CountryFlavor
 import com.maisha.game.data.model.EventChoice
 import com.maisha.game.data.model.Expression
 import com.maisha.game.data.model.Gender
@@ -77,6 +80,7 @@ import com.maisha.game.data.model.LifeEvent
 import com.maisha.game.data.model.Person
 import com.maisha.game.data.model.Stats
 import com.maisha.game.feedback.HapticType
+import com.maisha.game.feedback.SoundEffect
 import com.maisha.game.ui.avatar.AvatarImage
 import com.maisha.game.ui.avatar.EventNpcResolver
 import com.maisha.game.ui.avatar.ExpressionResolver
@@ -145,6 +149,10 @@ fun EventDialogStyled(
         feedbackManager.triggerHaptic(view, HapticType.LIGHT_TAP)
     }
 
+    val flavor = remember(character.countryCode) { CountryCatalog.flavorFor(character.countryCode) }
+    val resolvedNarrativeText = remember(event.text, flavor) {
+        FlavorInterpolator.interpolate(event.text, flavor)
+    }
     val category = remember(event.tags) { categoryVisualFor(event) }
     val tone = remember(event.tags) { toneFor(event) }
     val accentBarColor = remember(tone, category) { accentColorFor(tone, category) }
@@ -204,7 +212,7 @@ fun EventDialogStyled(
                                 .padding(horizontal = 20.dp, vertical = 16.dp)
                         ) {
                             EventNarrativePanel(
-                                text = event.text,
+                                text = resolvedNarrativeText,
                                 accentBarColor = accentBarColor
                             )
 
@@ -218,6 +226,7 @@ fun EventDialogStyled(
                                     EventChoiceCard(
                                         index = index + 1,
                                         choice = choice,
+                                        flavor = flavor,
                                         countryCode = character.countryCode,
                                         accent = category.accent,
                                         enabled = !selectionLocked,
@@ -225,7 +234,6 @@ fun EventDialogStyled(
                                         eventId = event.id,
                                         onSelectStart = {
                                             selectionLocked = true
-                                            feedbackManager.triggerHaptic(view, HapticType.LIGHT_TAP)
                                         },
                                         onClick = { onChoiceSelected(choice) }
                                     )
@@ -467,6 +475,7 @@ private fun EventNarrativePanel(
 private fun EventChoiceCard(
     index: Int,
     choice: EventChoice,
+    flavor: CountryFlavor,
     countryCode: String,
     accent: Color,
     enabled: Boolean,
@@ -475,10 +484,18 @@ private fun EventChoiceCard(
     onSelectStart: () -> Unit,
     onClick: () -> Unit
 ) {
+    val context = LocalContext.current
+    val feedbackManager = LocalFeedbackManager.current
+    val view = LocalView.current
+
     var visible by remember(eventId, index) { mutableStateOf(false) }
     var pressed by remember { mutableStateOf(false) }
     var flashing by remember { mutableStateOf(false) }
     var pendingClick by remember { mutableStateOf(false) }
+
+    val resolvedLabel = remember(choice.label, flavor) {
+        FlavorInterpolator.interpolate(choice.label, flavor)
+    }
 
     LaunchedEffect(eventId, index) {
         delay(staggerIndex * CHOICE_STAGGER_MS)
@@ -544,6 +561,18 @@ private fun EventChoiceCard(
                     try {
                         val up = waitForUpOrCancellation()
                         if (up != null && enabled && !pendingClick) {
+                            val moneyDelta = choice.statEffects["money"] ?: 0
+                            val happinessDelta = choice.statEffects["happiness"] ?: 0
+                            val healthDelta = choice.statEffects["health"] ?: 0
+                            val (sound, haptic) = when {
+                                moneyDelta > 0 -> SoundEffect.MONEY_GAIN to HapticType.SUCCESS
+                                moneyDelta < 0 -> SoundEffect.PURCHASE to HapticType.LIGHT_TAP
+                                happinessDelta >= 5 || healthDelta >= 5 -> SoundEffect.EVENT_POSITIVE to HapticType.SUCCESS
+                                happinessDelta <= -5 || healthDelta <= -5 || "crime" in choice.label.lowercase() -> SoundEffect.EVENT_NEGATIVE to HapticType.WARNING
+                                else -> SoundEffect.BUTTON_TAP to HapticType.LIGHT_TAP
+                            }
+                            feedbackManager.playSound(context, sound)
+                            feedbackManager.triggerHaptic(view, haptic)
                             onSelectStart()
                             pendingClick = true
                         }
@@ -560,7 +589,7 @@ private fun EventChoiceCard(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = choice.label,
+                text = resolvedLabel,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -650,36 +679,58 @@ private fun formatMoneyDelta(delta: Int, countryCode: String): String {
 
 private fun categoryVisualFor(event: LifeEvent): EventCategoryVisual {
     val tags = event.tags.map { it.lowercase() }
+    val hasMoneyGain = event.choices.any { (it.statEffects["money"] ?: 0) > 0 }
+
     return when {
-        "education" in tags -> EventCategoryVisual(
-            R.string.event_category_education,
+        "milestone" in tags || "graduation" in tags || "heritage" in tags || "birth" in tags -> EventCategoryVisual(
+            R.string.event_category_milestone,
+            AppIcons.Achievements,
+            GoldAccent
+        )
+        "windfall" in tags || "lottery" in tags || "inheritance" in tags || ("finance" in tags && hasMoneyGain) -> EventCategoryVisual(
+            R.string.event_category_windfall,
+            AppIcons.Wealth,
+            LifeGreen
+        )
+        "scandal" in tags || "drama" in tags || "secret" in tags || "blackmail" in tags || "exposure" in tags -> EventCategoryVisual(
+            R.string.event_category_scandal,
+            AppIcons.Mischief,
+            CoralNegative
+        )
+        "romance" in tags || "dating" in tags || "marriage" in tags || "crush" in tags || "partner" in tags -> EventCategoryVisual(
+            R.string.event_category_romance,
+            AppIcons.Relationship,
+            AccentPink
+        )
+        "education" in tags || "school" in tags || "university" in tags || "exam" in tags || "study" in tags -> EventCategoryVisual(
+            R.string.event_category_school,
             AppIcons.Education,
             StatSmarts
         )
-        "career" in tags -> EventCategoryVisual(
+        "career" in tags || "job" in tags || "workplace" in tags || "promotion" in tags || "salary" in tags -> EventCategoryVisual(
             R.string.event_category_career,
             AppIcons.Career,
             TealPrimary
+        )
+        "health" in tags || "illness" in tags || "disease" in tags || "hospital" in tags || "clinic" in tags -> EventCategoryVisual(
+            R.string.event_category_health,
+            AppIcons.Health,
+            StatHealth
+        )
+        "crime" in tags || "prison" in tags || "underworld" in tags || "heist" in tags || "theft" in tags || "gang" in tags -> EventCategoryVisual(
+            R.string.event_category_underworld,
+            AppIcons.CrimePickpocket,
+            Color(0xFF881337)
         )
         "finance" in tags -> EventCategoryVisual(
             R.string.event_category_finance,
             AppIcons.Wealth,
             StatMoney
         )
-        "relationship" in tags -> EventCategoryVisual(
-            R.string.event_category_relationships,
-            AppIcons.Relationship,
-            AccentPink
-        )
         "family" in tags -> EventCategoryVisual(
             R.string.event_category_family,
             AppIcons.Family,
             StatRelationship
-        )
-        "crime" in tags || "prison" in tags -> EventCategoryVisual(
-            R.string.event_category_crime,
-            AppIcons.Mischief,
-            CoralNegative
         )
         else -> EventCategoryVisual(
             R.string.event_category_life,

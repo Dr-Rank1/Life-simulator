@@ -429,10 +429,15 @@ fun ActionsScreen(
                 } else {
                     if (character.age < 16) {
                         item {
+                            val childhoodSubtitle = if (character.age <= 2) {
+                                "Infancy: Early development, toys & bonding"
+                            } else {
+                                stringResource(R.string.act_cat_childhood_desc)
+                            }
                             InsetCardContainer(title = stringResource(R.string.act_cat_childhood_title)) {
                                 DrillDownRow(
                                     title = stringResource(R.string.act_cat_childhood_title),
-                                    subtitle = stringResource(R.string.act_cat_childhood_desc),
+                                    subtitle = childhoodSubtitle,
                                     icon = Icons.Rounded.ChildCare,
                                     iconTint = LifeGreen,
                                     insideContainer = true,
@@ -496,6 +501,21 @@ fun ActionsScreen(
                                 }
                             }
                         }
+                    } else if (character.age < 14) {
+                        item {
+                            InsetCardContainer(title = "Career & Side Hustles") {
+                                DrillDownRow(
+                                    title = stringResource(R.string.section_jobs_side_hustles),
+                                    subtitle = "Part-time jobs, gigs & social media",
+                                    icon = Icons.Rounded.Work,
+                                    iconTint = LifeGreen,
+                                    isAgeLocked = true,
+                                    lockBadgeText = stringResource(R.string.badge_age_locked, 14),
+                                    insideContainer = true,
+                                    onClick = {}
+                                )
+                            }
+                        }
                     }
 
                     val hasLifestyle = showAdoptPetActions || showAdoptChild || showDrivingTest || showImmigrationOffice || showPhilanthropy || showBucketList
@@ -551,6 +571,7 @@ fun ActionsScreen(
                                         subtitle = stringResource(R.string.act_cat_crime_desc),
                                         icon = Icons.Rounded.Gavel,
                                         iconTint = CoralNegative,
+                                        riskPill = stringResource(R.string.badge_risk_high),
                                         insideContainer = true,
                                         onClick = { activeActionSheet = ActionSheet.CRIME }
                                     )
@@ -574,11 +595,27 @@ fun ActionsScreen(
                                         subtitle = doubleLifeSubtitle,
                                         icon = Icons.Rounded.Lock,
                                         iconTint = if (activeSecret != null && activeSecret.exposureRisk >= 60) CoralNegative else TealPrimary,
-                                        trailingBadge = if (activeSecret != null) "${activeSecret.exposureRisk}% Risk" else null,
+                                        riskPill = if (activeSecret != null) "${activeSecret.exposureRisk}% Risk" else null,
                                         insideContainer = true,
                                         onClick = onOpenDoubleLife
                                     )
                                 }
+                            }
+                        }
+                    } else if (character.age < 16) {
+                        item {
+                            InsetCardContainer(title = "Crime & Legal") {
+                                DrillDownRow(
+                                    title = stringResource(R.string.act_cat_crime_title),
+                                    subtitle = stringResource(R.string.act_cat_crime_desc),
+                                    icon = Icons.Rounded.Gavel,
+                                    iconTint = CoralNegative,
+                                    isAgeLocked = true,
+                                    lockBadgeText = stringResource(R.string.badge_age_locked, 16),
+                                    riskPill = stringResource(R.string.badge_risk_high),
+                                    insideContainer = true,
+                                    onClick = {}
+                                )
                             }
                         }
                     }

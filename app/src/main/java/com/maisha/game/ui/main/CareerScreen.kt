@@ -1,6 +1,7 @@
 // app/src/main/java/com/maisha/game/ui/main/CareerScreen.kt
 package com.maisha.game.ui.main
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -116,26 +117,33 @@ import com.maisha.game.domain.HealthEngine
 import com.maisha.game.domain.PoliticsEngine
 import com.maisha.game.domain.RelocationEngine
 import com.maisha.game.ui.avatar.AvatarImage
+import com.maisha.game.data.model.InterviewChoice
+import com.maisha.game.ui.components.AcademicDossierCard
+import com.maisha.game.ui.components.CareerHeroCard
 import com.maisha.game.ui.components.CategoryFilterChipRow
 import com.maisha.game.ui.components.ConfirmActionDialog
 import com.maisha.game.ui.components.ConfirmSeverity
 import com.maisha.game.ui.components.ConfirmableActionHost
 import com.maisha.game.ui.components.DrillDownRow
 import com.maisha.game.ui.components.EmptyStateCard
+import com.maisha.game.ui.components.IllustrationImage
 import com.maisha.game.ui.components.InsetCardContainer
 import com.maisha.game.ui.components.InsetDivider
-import com.maisha.game.ui.components.WorkplaceRosterSheet
-import com.maisha.game.ui.components.rememberConfirmableAction
-import com.maisha.game.ui.components.IllustrationImage
+import com.maisha.game.ui.components.JobInterviewDialog
+import com.maisha.game.ui.components.JobOpportunityCard
 import com.maisha.game.ui.components.RecordBadge
 import com.maisha.game.ui.components.StatBar
 import com.maisha.game.ui.components.StatType
 import com.maisha.game.ui.components.TabPageHero
+import com.maisha.game.ui.components.WorkplaceRosterSheet
+import com.maisha.game.ui.components.rememberConfirmableAction
 import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.illustrations.EmptyStateIllustrationView
 import com.maisha.game.ui.theme.AppIcons
+import com.maisha.game.ui.theme.BorderCardSlate
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.CreamBg
+import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
@@ -233,6 +241,9 @@ fun CareerScreen(
     onMingleWithSchoolClique: () -> Unit = {},
     onRequestCurfewExtension: () -> Unit = {},
     onTriggerExamFocusCheck: (String?, String?) -> Unit = { _, _ -> },
+    onStartJobInterview: (String) -> Unit = {},
+    onAnswerJobInterview: (InterviewChoice) -> Unit = {},
+    onDismissJobInterview: () -> Unit = {},
     onCareerMessageDismissed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -374,6 +385,14 @@ fun CareerScreen(
             snackbarHostState.showSnackbar(message)
             onCareerMessageDismissed()
         }
+    }
+
+    uiState.activeJobInterview?.let { session ->
+        JobInterviewDialog(
+            session = session,
+            onAnswerSelected = onAnswerJobInterview,
+            onDismiss = onDismissJobInterview
+        )
     }
 
     val currentJob = character.career.currentJob
@@ -1012,14 +1031,15 @@ fun CareerScreen(
                             countryJobs.forEach { job ->
                                 val isEligible = job.id in eligibleIds
                                 val reason = jobIneligibilityReason(character, job)
-                                JobListingCard(
+                                JobOpportunityCard(
+                                    character = character,
                                     job = job,
                                     countryCode = character.countryCode,
                                     isEligible = isEligible,
                                     ineligibilityReason = reason,
                                     onApply = {
                                         activeCareerSheet = CareerSheet.NONE
-                                        onApplyForJob(job.id)
+                                        onStartJobInterview(job.id)
                                     }
                                 )
                             }
@@ -2061,277 +2081,285 @@ private fun EducationSectionCard(
         else -> GoldAccent.copy(alpha = 0.14f)
     }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaishaRadius.cardShape,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(
-                text = stringResource(R.string.label_education),
-                style = MaterialTheme.typography.labelMedium,
-                color = GoldAccent
+    if (studyEffortEnabled) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            AcademicDossierCard(
+                character = character,
+                education = education,
+                countryCode = countryCode,
+                onSetStudyEffort = onSetStudyEffort
             )
-            if (schoolUiEngine.hasDisciplineWarning(character)) {
-                Spacer(modifier = Modifier.height(6.dp))
-                DisciplineStatusBanner(character = character)
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = EducationFormatter.formatStatus(education, resources, countryCode),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            if (education.gpa > 0f && education.stage != SchoolStage.NONE &&
-                education.stage != SchoolStage.GRADUATED && !education.expelled
-            ) {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = stringResource(R.string.format_gpa, education.gpa),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            education.lastExamSummary?.let { summary ->
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = stringResource(R.string.format_last_exam, summary),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = TealPrimary
-                )
-            }
 
-            if (showExamBanner) {
-                Spacer(modifier = Modifier.height(10.dp))
+            val hasWarningsOrExams = schoolUiEngine.hasDisciplineWarning(character) ||
+                showExamBanner ||
+                education.lastExamSummary != null ||
+                canDropOut
+
+            if (hasWarningsOrExams) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = bannerColor)
+                    shape = MaishaRadius.cardShape,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            text = stringResource(R.string.exam_alert_title),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = when {
-                                preparedness < 40 || education.examStress >= 70 -> CoralNegative
-                                preparedness >= 70 -> SuccessGreen
-                                else -> GoldAccent
-                            }
-                        )
-                        Text(
-                            text = when {
-                                imminentExams.isNotEmpty() -> stringResource(
-                                    R.string.exam_alert_imminent,
-                                    imminentExams.joinToString { it.title }
-                                )
-                                upcomingExams.isNotEmpty() -> stringResource(
-                                    R.string.exam_alert_upcoming,
-                                    upcomingExams.joinToString { it.title }
-                                )
-                                else -> stringResource(R.string.exam_alert_stress_only)
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                        Text(
-                            text = outlook,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        StatBar(
-                            type = StatType.SMARTS,
-                            value = preparedness,
-                            label = stringResource(R.string.label_exam_preparedness)
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        StatBar(
-                            type = StatType.HAPPINESS,
-                            value = education.examStress,
-                            label = stringResource(R.string.label_exam_stress)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = stringResource(R.string.format_exam_pass_chance, passChance),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (education.plannedCheatOnExam) {
-                            Text(
-                                text = stringResource(R.string.exam_cheat_plan_active),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = CoralNegative,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        if (schoolUiEngine.hasDisciplineWarning(character)) {
+                            DisciplineStatusBanner(character = character)
+                            Spacer(modifier = Modifier.height(6.dp))
                         }
-                        if (!education.examPrepDoneThisYear && imminentExams.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(8.dp))
+                        education.lastExamSummary?.let { summary ->
                             Text(
-                                text = stringResource(R.string.section_exam_prep),
+                                text = stringResource(R.string.format_last_exam, summary),
                                 style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                OutlinedButton(
-                                    onClick = { onExamPrepChoice(ExamPrepChoice.STUDY_HARD) },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(10.dp),
-                                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
-                                ) {
-                                    Text(
-                                        stringResource(R.string.exam_prep_study_hard),
-                                        maxLines = 1,
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                                OutlinedButton(
-                                    onClick = { onExamPrepChoice(ExamPrepChoice.STUDY_NORMAL) },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(10.dp),
-                                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
-                                ) {
-                                    Text(
-                                        stringResource(R.string.exam_prep_study_normal),
-                                        maxLines = 1,
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                OutlinedButton(
-                                    onClick = { onExamPrepChoice(ExamPrepChoice.CRAM) },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(10.dp),
-                                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
-                                ) {
-                                    Text(
-                                        stringResource(R.string.exam_prep_cram),
-                                        maxLines = 1,
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                                OutlinedButton(
-                                    onClick = { onExamPrepChoice(ExamPrepChoice.CHEAT) },
-                                    modifier = Modifier.weight(1f),
-                                    shape = RoundedCornerShape(10.dp),
-                                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
-                                ) {
-                                    Text(
-                                        stringResource(R.string.exam_prep_cheat),
-                                        maxLines = 1,
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                }
-                            }
-                        } else if (education.examPrepDoneThisYear) {
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(
-                                text = stringResource(R.string.exam_prep_used),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = TealPrimary
                             )
                         }
 
-                        if (imminentExams.isNotEmpty() || upcomingExams.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Button(
-                                onClick = {
-                                    val topExam = imminentExams.firstOrNull() ?: upcomingExams.firstOrNull()
-                                    onTriggerExamFocusCheck(topExam?.title, null)
-                                },
+                        if (showExamBanner) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Card(
                                 modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = bannerColor)
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = AppIcons.Performance,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(16.dp),
-                                        tint = Color.White
-                                    )
+                                Column(modifier = Modifier.padding(12.dp)) {
                                     Text(
-                                        text = stringResource(R.string.btn_exam_focus_check),
+                                        text = stringResource(R.string.exam_alert_title),
                                         style = MaterialTheme.typography.labelMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color.White
+                                        color = when {
+                                            preparedness < 40 || education.examStress >= 70 -> CoralNegative
+                                            preparedness >= 70 -> SuccessGreen
+                                            else -> GoldAccent
+                                        }
                                     )
+                                    Text(
+                                        text = when {
+                                            imminentExams.isNotEmpty() -> stringResource(
+                                                R.string.exam_alert_imminent,
+                                                imminentExams.joinToString { it.title }
+                                            )
+                                            upcomingExams.isNotEmpty() -> stringResource(
+                                                R.string.exam_alert_upcoming,
+                                                upcomingExams.joinToString { it.title }
+                                            )
+                                            else -> stringResource(R.string.exam_alert_stress_only)
+                                        },
+                                        style = MaterialTheme.typography.bodySmall,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                    Text(
+                                        text = outlook,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    StatBar(
+                                        type = StatType.SMARTS,
+                                        value = preparedness,
+                                        label = stringResource(R.string.label_exam_preparedness)
+                                    )
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    StatBar(
+                                        type = StatType.HAPPINESS,
+                                        value = education.examStress,
+                                        label = stringResource(R.string.label_exam_stress)
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.format_exam_pass_chance, passChance),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    if (education.plannedCheatOnExam) {
+                                        Text(
+                                            text = stringResource(R.string.exam_cheat_plan_active),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = CoralNegative,
+                                            modifier = Modifier.padding(top = 4.dp)
+                                        )
+                                    }
+                                    if (!education.examPrepDoneThisYear && imminentExams.isNotEmpty()) {
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = stringResource(R.string.section_exam_prep),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.SemiBold
+                                        )
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            OutlinedButton(
+                                                onClick = { onExamPrepChoice(ExamPrepChoice.STUDY_HARD) },
+                                                modifier = Modifier.weight(1f),
+                                                shape = RoundedCornerShape(10.dp),
+                                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
+                                            ) {
+                                                Text(
+                                                    stringResource(R.string.exam_prep_study_hard),
+                                                    maxLines = 1,
+                                                    style = MaterialTheme.typography.labelSmall
+                                                )
+                                            }
+                                            OutlinedButton(
+                                                onClick = { onExamPrepChoice(ExamPrepChoice.STUDY_NORMAL) },
+                                                modifier = Modifier.weight(1f),
+                                                shape = RoundedCornerShape(10.dp),
+                                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
+                                            ) {
+                                                Text(
+                                                    stringResource(R.string.exam_prep_study_normal),
+                                                    maxLines = 1,
+                                                    style = MaterialTheme.typography.labelSmall
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                        ) {
+                                            OutlinedButton(
+                                                onClick = { onExamPrepChoice(ExamPrepChoice.CRAM) },
+                                                modifier = Modifier.weight(1f),
+                                                shape = RoundedCornerShape(10.dp),
+                                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
+                                            ) {
+                                                Text(
+                                                    stringResource(R.string.exam_prep_cram),
+                                                    maxLines = 1,
+                                                    style = MaterialTheme.typography.labelSmall
+                                                )
+                                            }
+                                            OutlinedButton(
+                                                onClick = { onExamPrepChoice(ExamPrepChoice.CHEAT) },
+                                                modifier = Modifier.weight(1f),
+                                                shape = RoundedCornerShape(10.dp),
+                                                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp)
+                                            ) {
+                                                Text(
+                                                    stringResource(R.string.exam_prep_cheat),
+                                                    maxLines = 1,
+                                                    style = MaterialTheme.typography.labelSmall
+                                                )
+                                            }
+                                        }
+                                    } else if (education.examPrepDoneThisYear) {
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = stringResource(R.string.exam_prep_used),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+
+                                    if (imminentExams.isNotEmpty() || upcomingExams.isNotEmpty()) {
+                                        Spacer(modifier = Modifier.height(10.dp))
+                                        Button(
+                                            onClick = {
+                                                val topExam = imminentExams.firstOrNull() ?: upcomingExams.firstOrNull()
+                                                onTriggerExamFocusCheck(topExam?.title, null)
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            shape = RoundedCornerShape(10.dp),
+                                            colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                Icon(
+                                                    imageVector = AppIcons.Performance,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(16.dp),
+                                                    tint = Color.White
+                                                )
+                                                Text(
+                                                    text = stringResource(R.string.btn_exam_focus_check),
+                                                    style = MaterialTheme.typography.labelMedium,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
+                            }
+                        }
+
+                        if (canDropOut) {
+                            Spacer(modifier = Modifier.height(12.dp))
+                            OutlinedButton(
+                                onClick = onDropOut,
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(stringResource(R.string.btn_drop_out))
                             }
                         }
                     }
                 }
             }
-
-            if (studyEffortEnabled) {
-                Spacer(modifier = Modifier.height(10.dp))
+        }
+    } else {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaishaRadius.cardShape,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
                 Text(
-                    text = stringResource(R.string.label_study_effort),
+                    text = stringResource(R.string.label_education),
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold
+                    color = GoldAccent
                 )
-                Text(
-                    text = effortOutlook,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TealPrimary,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                Text(
-                    text = stringResource(R.string.tip_study_gpa),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    StudyEffort.entries.forEach { effort ->
-                        FilterChip(
-                            selected = education.plannedStudyEffort == effort,
-                            onClick = { onSetStudyEffort(effort) },
-                            label = {
-                                Text(
-                                    text = when (effort) {
-                                        StudyEffort.SLACK ->
-                                            stringResource(R.string.study_effort_slack)
-                                        StudyEffort.NORMAL ->
-                                            stringResource(R.string.study_effort_normal)
-                                        StudyEffort.HARD ->
-                                            stringResource(R.string.study_effort_hard)
-                                    },
-                                    maxLines = 1
-                                )
-                            },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                if (schoolUiEngine.hasDisciplineWarning(character)) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    DisciplineStatusBanner(character = character)
                 }
-            }
-            if (canDropOut) {
-                Spacer(modifier = Modifier.height(12.dp))
-                OutlinedButton(
-                    onClick = onDropOut,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = EducationFormatter.formatStatus(education, resources, countryCode),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (education.gpa > 0f && education.stage != SchoolStage.NONE &&
+                    education.stage != SchoolStage.GRADUATED && !education.expelled
                 ) {
-                    Text(stringResource(R.string.btn_drop_out))
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.format_gpa, education.gpa),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                education.lastExamSummary?.let { summary ->
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(R.string.format_last_exam, summary),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = TealPrimary
+                    )
+                }
+                if (canDropOut) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedButton(
+                        onClick = onDropOut,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(stringResource(R.string.btn_drop_out))
+                    }
                 }
             }
         }
@@ -2524,11 +2552,12 @@ private fun SchoolLifeSectionCard(
                     modifier = Modifier.padding(top = 4.dp)
                 )
             } else {
-                Spacer(modifier = Modifier.height(6.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     people.forEach { person ->
-                        SchoolPersonRow(
+                        SchoolPersonCard(
                             person = person,
+                            onAction = { action -> onSchoolPersonInteraction(person.id, action) },
                             onClick = { selectedPersonId = person.id }
                         )
                     }
@@ -2791,51 +2820,226 @@ private fun SchoolPersonActionSheet(
 }
 
 @Composable
-private fun SchoolPersonRow(
+private fun SchoolPersonCard(
     person: SchoolPerson,
+    onAction: (SchoolPersonAction) -> Unit,
     onClick: () -> Unit
 ) {
-    Row(
+    val (roleLabelRes, roleBg, roleTextColor) = when (person.role) {
+        SchoolRole.BULLY -> Triple(R.string.school_role_bully, CoralNegative.copy(alpha = 0.15f), CoralNegative)
+        SchoolRole.CRUSH -> Triple(R.string.school_role_crush, Color(0xFFFCE4EC), Color(0xFFE91E63))
+        SchoolRole.TEACHER -> Triple(R.string.school_role_teacher, TealPrimary.copy(alpha = 0.15f), TealPrimary)
+        SchoolRole.BEST_CLASSMATE -> Triple(R.string.school_role_best, GoldAccent.copy(alpha = 0.2f), GoldAccent)
+        SchoolRole.CLASSMATE -> Triple(R.string.school_role_classmate, CreamMuted, InkSecondary)
+    }
+
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+        border = BorderStroke(1.dp, BorderCardSlate)
     ) {
-        AvatarImage(
-            config = person.avatarConfig,
-            size = 40.dp,
-            age = person.age,
-            seed = person.id
-        )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = person.name,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = buildString {
-                    append(schoolRoleLabel(person.role))
-                    person.subject?.let { append(" · ").append(it) }
-                    if (person.traits.isNotEmpty()) {
-                        append(" · ").append(person.traits.first())
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                AvatarImage(
+                    config = person.avatarConfig,
+                    size = 44.dp,
+                    age = person.age,
+                    seed = person.id
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = person.name,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = roleBg
+                        ) {
+                            Text(
+                                text = stringResource(roleLabelRes),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = roleTextColor,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                        if (person.clique != SchoolClique.UNAFFILIATED) {
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = CreamMuted
+                            ) {
+                                Text(
+                                    text = person.clique.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = InkSecondary,
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
                     }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = buildString {
+                            person.subject?.let { append(it) }
+                            if (person.traits.isNotEmpty()) {
+                                if (person.subject != null) append(" · ")
+                                append(person.traits.first())
+                            }
+                        }.ifEmpty { stringResource(R.string.school_role_classmate) },
+                        style = MaterialTheme.typography.labelSmall,
+                        color = InkTertiary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Text(
+                    text = "${person.relationshipLevel}%",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = when {
+                        person.relationshipLevel >= 70 -> SuccessGreen
+                        person.relationshipLevel >= 40 -> TealPrimary
+                        else -> CoralNegative
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LinearProgressIndicator(
+                progress = { (person.relationshipLevel / 100f).coerceIn(0f, 1f) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp)),
+                color = when {
+                    person.relationshipLevel >= 70 -> SuccessGreen
+                    person.relationshipLevel >= 40 -> TealPrimary
+                    else -> CoralNegative
                 },
+                trackColor = CreamMuted
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                when (person.role) {
+                    SchoolRole.BULLY -> {
+                        SchoolActionChip(
+                            label = stringResource(R.string.school_chip_stand_up),
+                            color = CoralNegative,
+                            onClick = { onAction(SchoolPersonAction.INSULT) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        SchoolActionChip(
+                            label = stringResource(R.string.school_chip_befriend),
+                            color = TealPrimary,
+                            onClick = { onAction(SchoolPersonAction.BEFRIEND_BULLY) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    SchoolRole.CRUSH -> {
+                        SchoolActionChip(
+                            label = stringResource(R.string.school_chip_flirt),
+                            color = Color(0xFFE91E63),
+                            onClick = { onAction(SchoolPersonAction.COMPLIMENT) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        SchoolActionChip(
+                            label = stringResource(R.string.school_chip_ask_out),
+                            color = GoldAccent,
+                            onClick = { onAction(SchoolPersonAction.ASK_OUT) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    SchoolRole.TEACHER -> {
+                        SchoolActionChip(
+                            label = stringResource(R.string.school_chip_consult),
+                            color = TealPrimary,
+                            onClick = { onAction(SchoolPersonAction.CHAT) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        SchoolActionChip(
+                            label = stringResource(R.string.school_chip_ask_help),
+                            color = GoldAccent,
+                            onClick = { onAction(SchoolPersonAction.COMPLIMENT) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    else -> {
+                        SchoolActionChip(
+                            label = stringResource(R.string.school_chip_chat),
+                            color = TealPrimary,
+                            onClick = { onAction(SchoolPersonAction.CHAT) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        SchoolActionChip(
+                            label = stringResource(R.string.school_chip_compliment),
+                            color = GoldAccent,
+                            onClick = { onAction(SchoolPersonAction.COMPLIMENT) },
+                            modifier = Modifier.weight(1f)
+                        )
+                        SchoolActionChip(
+                            label = stringResource(R.string.school_chip_hangout),
+                            color = InkSecondary,
+                            onClick = { onAction(SchoolPersonAction.PASS_NOTE) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SchoolActionChip(
+    label: String,
+    color: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        color = color.copy(alpha = 0.12f),
+        border = BorderStroke(0.5.dp, color.copy(alpha = 0.35f)),
+        modifier = modifier.height(30.dp)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.padding(horizontal = 6.dp)
+        ) {
+            Text(
+                text = label,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold,
+                color = color,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
-        Text(
-            text = stringResource(R.string.format_school_bond, person.relationshipLevel),
-            style = MaterialTheme.typography.labelSmall,
-            color = TealPrimary
-        )
     }
 }
 
@@ -3277,56 +3481,206 @@ private fun SchoolClubSectionCard(
             if (activeClub != null && rankTitle != null) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = TealPrimary.copy(alpha = 0.08f)
-                    )
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = PaperWhite),
+                    border = BorderStroke(1.dp, BorderCardSlate)
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            text = stringResource(
-                                R.string.format_club_status,
-                                schoolClubLabel(activeClub),
-                                rankTitle
-                            ),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        if (character.education.clubAwardsWon > 0 ||
-                            character.education.clubYearsAsCaptain > 0 ||
-                            character.education.clubLetterJacket
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = buildString {
-                                    append(
-                                        stringResource(
-                                            R.string.format_club_resume,
-                                            character.education.clubAwardsWon,
-                                            character.education.clubYearsAsCaptain
+                                text = schoolClubLabel(activeClub),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = InkPrimary
+                            )
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = GoldAccent.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = rankTitle,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = GoldAccent,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Rank Insignia Stepper (Member -> Officer -> Captain)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            val ranks = listOf(
+                                Triple(ClubRank.MEMBER, stringResource(R.string.club_insignia_member), Icons.Rounded.Groups),
+                                Triple(ClubRank.OFFICER, stringResource(R.string.club_insignia_officer), Icons.Rounded.Star),
+                                Triple(ClubRank.CAPTAIN, stringResource(R.string.club_insignia_captain), Icons.Rounded.EmojiEvents)
+                            )
+                            val currentOrdinal = character.education.clubRank.ordinal
+                            ranks.forEachIndexed { index, (rank, title, icon) ->
+                                val isCurrent = character.education.clubRank == rank
+                                val isPast = currentOrdinal > index
+                                Surface(
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = when {
+                                        isCurrent -> TealPrimary
+                                        isPast -> TealPrimary.copy(alpha = 0.15f)
+                                        else -> CreamMuted
+                                    },
+                                    border = if (isCurrent) null else BorderStroke(0.5.dp, BorderCardSlate)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(vertical = 6.dp, horizontal = 4.dp),
+                                        horizontalArrangement = Arrangement.Center,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(14.dp),
+                                            tint = when {
+                                                isCurrent -> Color.White
+                                                isPast -> TealPrimary
+                                                else -> InkTertiary
+                                            }
                                         )
-                                    )
-                                    if (character.education.clubLetterJacket) {
-                                        append(" · ")
-                                        append(stringResource(R.string.label_club_letter_jacket))
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = title,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                                            color = when {
+                                                isCurrent -> Color.White
+                                                isPast -> TealPrimary
+                                                else -> InkTertiary
+                                            },
+                                            maxLines = 1
+                                        )
                                     }
-                                },
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                                }
+                            }
                         }
-                        if (scholarshipHint > 0) {
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = stringResource(
-                                    R.string.format_club_scholarship_hint,
-                                    formatMoney(scholarshipHint, character.countryCode)
-                                ),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = GoldAccent
-                            )
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        // Progress Badges
+                        val badges = buildList {
+                            if (character.education.clubAwardsWon > 0) {
+                                add(stringResource(R.string.club_trophies_label, character.education.clubAwardsWon) to GoldAccent)
+                            }
+                            if (scholarshipHint > 0) {
+                                add(stringResource(R.string.club_scholarship_status) to LifeGreen)
+                            }
+                            if (character.education.clubMajorEventReady) {
+                                add(stringResource(R.string.club_major_event_ready) to TealPrimary)
+                            }
+                            if (character.education.clubLetterJacket) {
+                                add(stringResource(R.string.label_club_letter_jacket) to InkSecondary)
+                            }
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
+
+                        if (badges.isNotEmpty()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                badges.take(2).forEach { (label, tint) ->
+                                    Surface(
+                                        shape = RoundedCornerShape(6.dp),
+                                        color = tint.copy(alpha = 0.12f),
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(
+                                            text = label,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = tint,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(10.dp))
+                        }
+
+                        // Team Chemistry & Rivalry Meters
+                        val teamChemistry = ((character.education.clubPrestige + character.education.clubSkill) / 2).coerceIn(0, 100)
+                        val rivalryIntensity = (character.education.clubPrestige * 0.8f + (if (character.education.clubMajorEventReady) 20 else 0)).toInt().coerceIn(0, 100)
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.club_chemistry_label),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Text(
+                                        text = "$teamChemistry%",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TealPrimary
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(3.dp))
+                                LinearProgressIndicator(
+                                    progress = { teamChemistry / 100f },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(6.dp)
+                                        .clip(RoundedCornerShape(3.dp)),
+                                    color = TealPrimary,
+                                    trackColor = CreamMuted
+                                )
+                            }
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.club_rivalry_label),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Text(
+                                        text = "$rivalryIntensity%",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = CoralNegative
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(3.dp))
+                                LinearProgressIndicator(
+                                    progress = { rivalryIntensity / 100f },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(6.dp)
+                                        .clip(RoundedCornerShape(3.dp)),
+                                    color = CoralNegative,
+                                    trackColor = CreamMuted
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
                         StatBar(
                             type = StatType.SMARTS,
                             value = character.education.clubSkill,
@@ -3974,127 +4328,30 @@ private fun CurrentJobCard(
     val promoReady = careerEngine.canAskForPromotion(character)
     val burnoutRisk = stressValue >= 80
 
-    Card(
+    Column(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardColor)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Text(
-                text = stringResource(R.string.section_corporate_dashboard),
-                style = MaterialTheme.typography.labelMedium,
-                color = GoldAccent
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(CreamBg),
-                    contentAlignment = Alignment.Center
-                ) {
-                    IllustrationImage(
-                        ref = IllustrationCatalog.getIllustrationForJob(job.id),
-                        size = 44.dp,
-                        contentDescription = job.title
+        CareerHeroCard(
+            character = character,
+            job = job,
+            promoReady = promoReady
+        )
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = cardColor)
+        ) {
+            Column(modifier = Modifier.padding(14.dp)) {
+                if (character.career.onPip) {
+                    PipAlertCard(
+                        character = character,
+                        onWorkDeliverable = onWorkPipDeliverable,
+                        onRebutPip = onRebutPipWithHR
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = job.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = company,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TealPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.format_job_level_short,
-                            job.level,
-                            character.career.yearsAtCurrentJob
-                        ),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Card(
-                shape = RoundedCornerShape(10.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = GoldAccent.copy(alpha = 0.18f)
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = annualSalaryLabel,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = GoldAccent,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-                )
-            }
-
-            if (promoReady) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = stringResource(R.string.banner_promotion_ready),
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = SuccessGreen
-                )
-            }
-            if (burnoutRisk) {
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(
-                    text = stringResource(R.string.banner_burnout_risk),
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = CoralNegative
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                OfficeMeterColumn(
-                    label = stringResource(R.string.stat_performance),
-                    value = performanceValue,
-                    barColor = performanceMeterColor(performanceValue),
-                    modifier = Modifier.weight(1f)
-                )
-                OfficeMeterColumn(
-                    label = stringResource(R.string.stat_workplace_stress),
-                    value = stressValue,
-                    barColor = stressMeterColor(stressValue),
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            if (character.career.onPip) {
-                PipAlertCard(
-                    character = character,
-                    onWorkDeliverable = onWorkPipDeliverable,
-                    onRebutPip = onRebutPipWithHR
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
 
             var showRosterSheet by remember { mutableStateOf(false) }
             val activeRoster = if (character.career.workplaceRoster.isNotEmpty()) {
@@ -4216,6 +4473,7 @@ private fun CurrentJobCard(
             }
         }
     }
+}
 }
 
 @Composable

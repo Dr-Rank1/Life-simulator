@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -38,6 +39,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maisha.game.R
+import com.maisha.game.feedback.HapticType
+import com.maisha.game.ui.feedback.LocalFeedbackManager
 import com.maisha.game.ui.theme.ComicStyle
 import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.Hairline
@@ -60,6 +63,9 @@ fun AgeUpButton(
 ) {
     var pressed by remember { mutableStateOf(false) }
     val canPress = enabled && !isLoading
+    val feedbackManager = LocalFeedbackManager.current
+    val view = LocalView.current
+
     val scale by animateFloatAsState(
         targetValue = if (pressed && canPress) 0.96f else 1f,
         animationSpec = spring(
@@ -95,6 +101,7 @@ fun AgeUpButton(
                 awaitEachGesture {
                     awaitFirstDown(requireUnconsumed = false)
                     pressed = true
+                    feedbackManager.triggerHaptic(view, HapticType.LIGHT_TAP)
                     try {
                         val up = waitForUpOrCancellation()
                         if (up != null) {

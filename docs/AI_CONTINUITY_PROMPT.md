@@ -183,11 +183,15 @@ Completely offline Canvas drawing engine (1,180+ lines):
 - Trials: Public Defender vs Elite Defense Attorney.
 - Prison life: Prison gangs, prison jobs, parole board hearings, escape attempts.
 
-### Assets & Mortgages
-- Real estate: 30-year amortized mortgages with 20–50% down payments, equity recovery upon sale.
-- Mortgage Principal Prepayments: `prepayMortgagePrincipal` directly reduces remaining loan balance and recalculates annual mortgage payments downwards.
-- Preventative Asset Servicing: `serviceAsset` restores condition, marks `servicedThisYear`, and shields vehicles/properties from annual wear and critical breakdown failure events.
-- Luxury vehicles: Cars, speedboats, yachts, private jets with realistic depreciation and upkeep. Dedicated leisure activities (`YACHT_DAY`, `PRIVATE_JET_TRIP`).
+### Assets, Mortgages & Personal Finance Ecosystem
+- **Credit Score (300-850):** Dynamic scoring tracking on-time debt payment streaks, default drops (-35), DTI ratio drag, and criminal record penalties. Gates mortgage down-payment tiers (10% to 40%), APR interest rates (5.5% to 12.0%), and approvals (minimum 500 score required).
+- **Annual Cash-Flow Breakdown (`computeAnnualCashFlow`):** Itemized ledger computing Gross Income (salary, gigs, rentals, dividends, pension, business, content) minus Deductions (progressive income tax, living costs, mortgage payments, student loans, upkeep, child support, pets) yielding Net Cash Flow.
+- **4-State Macroeconomic Cycle:** Simulates `BOOM`, `STEADY`, `INFLATION_SURGE`, and `RECESSION` cycles, impacting property valuations, living costs, investment returns, and corporate layoff frequency. Fully backwards-compatible with legacy saves via `EconomicClimateSerializer`.
+- **Junior Trust Piggy Bank:** Safely stashes childhood gift money for minors (0-17), maturing into liquid wallet cash at age 18. Infancy zero-stress protection is strictly preserved.
+- **Mortgage Engine & Prepayments:** 30-year fixed amortization with credit-based APR. `prepayMortgagePrincipal` reduces principal balance, lowers future annual installments, and boosts credit score (+15 for prepayment, +25 for full payoff).
+- **Preventative Asset Servicing:** `serviceAsset` restores condition, marks `servicedThisYear`, and shields vehicles/properties from annual wear and critical breakdown failure events.
+- **Luxury vehicles:** Cars, speedboats, yachts, private jets with realistic depreciation and upkeep. Dedicated leisure activities (`YACHT_DAY`, `PRIVATE_JET_TRIP`).
+- **Tactile UI Dashboard (`AssetsScreen`):** Prominent `FinanceSummaryCard` at the top of the tab with Net Worth, Liquid Cash, Net Cash Flow (+/-), Credit Rating meter, and Economic Climate chip, backed by `CashFlowLedgerSheet` and `DebtLiabilitiesSheet`.
 
 ### Mortality & Dynasty Legacy
 - Natural and accidental mortality checks.

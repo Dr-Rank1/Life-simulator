@@ -198,7 +198,8 @@ data class LifeUiState(
     val doubleLifeActionMessage: String? = null,
     val socialEcosystemMessage: String? = null,
     val activeRoutineDilemma: com.maisha.game.data.model.RoutineDilemma? = null,
-    val routineDilemmaPrompt: String? = null
+    val routineDilemmaPrompt: String? = null,
+    val activeJobInterview: com.maisha.game.data.model.JobInterviewSession? = null
 )
 
 @HiltViewModel
@@ -601,6 +602,49 @@ class LifeViewModel @Inject constructor(
         }
     }
 
+    fun onStartJobInterview(jobId: String) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val session = careerEngine.generateJobInterview(character, jobId)
+        if (session != null) {
+            _uiState.update { it.copy(activeJobInterview = session) }
+        } else {
+            onApplyForJob(jobId)
+        }
+    }
+
+    fun onAnswerJobInterview(choice: com.maisha.game.data.model.InterviewChoice) {
+        val character = _uiState.value.character ?: return
+        val session = _uiState.value.activeJobInterview ?: return
+        val updatedSession = careerEngine.advanceInterview(session, choice, character)
+        if (updatedSession.isConcluded) {
+            val (updatedCharacter, result) = careerEngine.hireFromInterview(character, updatedSession)
+            viewModelScope.launch {
+                persist(updatedCharacter)
+                processMidLifeAchievements(updatedCharacter)
+                val message = when (result) {
+                    is CareerResult.Hired -> context.getString(R.string.msg_hired, result.job.title)
+                    is CareerResult.Rejected -> context.getString(R.string.msg_job_rejected)
+                }
+                _uiState.update {
+                    it.copy(
+                        character = updatedCharacter,
+                        activeJobInterview = updatedSession,
+                        careerMessage = message,
+                        eligibleJobs = careerEngine.getEligibleJobs(updatedCharacter),
+                        netWorth = financeEngine.calculateNetWorth(updatedCharacter)
+                    )
+                }
+            }
+        } else {
+            _uiState.update { it.copy(activeJobInterview = updatedSession) }
+        }
+    }
+
+    fun onDismissJobInterview() {
+        _uiState.update { it.copy(activeJobInterview = null) }
+    }
+
     fun onQuitJob() {
         val character = _uiState.value.character ?: return
         if (!character.alive) return
@@ -939,6 +983,31 @@ class LifeViewModel @Inject constructor(
                         it.copy(
                             character = result.character,
                             assetsMessage = context.getString(R.string.msg_savings_withdraw_success),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is FinanceEngine.InvestmentResult.InsufficientFunds,
+                is FinanceEngine.InvestmentResult.InvalidAmount -> {
+                    _uiState.update {
+                        it.copy(assetsMessage = context.getString(R.string.msg_savings_cannot_afford))
+                    }
+                }
+            }
+        }
+    }
+
+    fun onDepositJuniorTrust(amount: Int) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive || character.age >= 18) return
+        viewModelScope.launch {
+            when (val result = gameEngine.depositJuniorTrust(character, amount)) {
+                is FinanceEngine.InvestmentResult.Success -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            assetsMessage = context.getString(R.string.msg_junior_trust_deposit_success),
                             netWorth = financeEngine.calculateNetWorth(result.character)
                         )
                     }

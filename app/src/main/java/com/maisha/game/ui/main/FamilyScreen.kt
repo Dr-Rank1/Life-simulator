@@ -397,18 +397,6 @@ fun FamilyScreen(
                             }
                         }
                     }
-                    if (children.isNotEmpty()) {
-                        item(key = "section_children") {
-                            InsetCardContainer(title = stringResource(R.string.section_children)) {
-                                children.forEachIndexed { idx, member ->
-                                    if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(member, character.countryCode, insideContainer = true) {
-                                        onMemberClick(member)
-                                    }
-                                }
-                            }
-                        }
-                    }
                     if (parents.isNotEmpty()) {
                         item(key = "section_parents") {
                             InsetCardContainer(title = stringResource(R.string.section_parents)) {
@@ -425,6 +413,18 @@ fun FamilyScreen(
                         item(key = "section_siblings") {
                             InsetCardContainer(title = stringResource(R.string.section_siblings)) {
                                 siblings.forEachIndexed { idx, member ->
+                                    if (idx > 0) InsetDivider(insetStart = false)
+                                    FamilyPersonCard(member, character.countryCode, insideContainer = true) {
+                                        onMemberClick(member)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if (children.isNotEmpty()) {
+                        item(key = "section_children") {
+                            InsetCardContainer(title = stringResource(R.string.section_children)) {
+                                children.forEachIndexed { idx, member ->
                                     if (idx > 0) InsetDivider(insetStart = false)
                                     FamilyPersonCard(member, character.countryCode, insideContainer = true) {
                                         onMemberClick(member)

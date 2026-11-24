@@ -379,4 +379,33 @@ class RelationshipEngineTest {
         assertEquals("msg_discuss_life_success", result.messageKey)
         assertTrue(result.character.family.first().relationshipLevel > 50)
     }
+
+    @Test
+    fun interactedTypesThisYear_preventsDuplicateInteractionSameYear() {
+        val member = TestFixtures.person(id = "s1", relationshipLevel = 50)
+        val character = TestFixtures.character(family = listOf(member))
+
+        val firstResult = engine.progressRelationship(character, "s1", InteractionType.SPEND_TIME)
+        val updatedMember = firstResult.character.family.first()
+        assertTrue(updatedMember.interactedTypesThisYear.contains(InteractionType.SPEND_TIME.name))
+
+        val secondResult = engine.progressRelationship(firstResult.character, "s1", InteractionType.SPEND_TIME)
+        assertEquals("msg_interaction_already_done", secondResult.messageKey)
+    }
+
+    @Test
+    fun tickFamilyYear_resetsInteractedTypesThisYear() {
+        val member = TestFixtures.person(
+            id = "s1",
+            relationshipLevel = 50,
+            interactedThisYear = true,
+            interactedTypesThisYear = listOf(InteractionType.SPEND_TIME.name, InteractionType.COMPLIMENT.name)
+        )
+        val character = TestFixtures.character(family = listOf(member))
+
+        val ticked = engine.tickFamilyYear(character)
+        val tickedMember = ticked.family.first()
+        assertTrue(tickedMember.interactedTypesThisYear.isEmpty())
+        org.junit.Assert.assertFalse(tickedMember.interactedThisYear)
+    }
 }

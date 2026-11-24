@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -81,15 +82,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.maisha.game.R
 import com.maisha.game.data.AssetCatalog
 import com.maisha.game.data.CatalogAsset
 import com.maisha.game.data.IllustrationCatalog
 import com.maisha.game.data.local.OnboardingTips
+import com.maisha.game.data.model.AnnualCashFlow
 import com.maisha.game.data.model.Asset
 import com.maisha.game.data.model.AssetType
 import com.maisha.game.data.model.Character
 import com.maisha.game.data.model.CommunityStandingTier
+import com.maisha.game.data.model.CreditRatingTier
+import com.maisha.game.data.model.EconomicClimate
 import com.maisha.game.data.model.Person
 import com.maisha.game.data.model.RelationType
 import com.maisha.game.domain.FinanceEngine
@@ -111,7 +116,9 @@ import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
 
 private enum class AssetsCategory { ALL, OVERVIEW, OWNED, SHOP, MARKETS, ESTATE }
-private enum class AssetSheet { NONE, REAL_ESTATE, VEHICLES, MARKETS, LIVING_STANDARD }
+private enum class AssetSheet {
+    NONE, REAL_ESTATE, VEHICLES, MARKETS, LIVING_STANDARD, CASH_FLOW_LEDGER, DEBT_LIABILITIES
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -140,6 +147,8 @@ fun AssetsScreen(
     onPayMortgage: (String) -> Unit = {},
     onPrepayMortgagePrincipal: (String, Int) -> Unit = { _, _ -> },
     onServiceAsset: (String) -> Unit = {},
+    onDepositJuniorTrust: (Int) -> Unit = {},
+    onRepayStudentLoan: (Int) -> Unit = {},
     carMakeCatalog: com.maisha.game.data.content.CarMakeCatalog =
         com.maisha.game.data.content.FallbackCarMakeCatalog,
     streetCatalog: com.maisha.game.data.content.StreetCatalog =
@@ -155,7 +164,9 @@ fun AssetsScreen(
     val pendingWithdraw = rememberConfirmableAction<Int>()
     val pendingSavingsDeposit = rememberConfirmableAction<Int>()
     val pendingSavingsWithdraw = rememberConfirmableAction<Int>()
+    val pendingJuniorTrustDeposit = rememberConfirmableAction<Int>()
     val financeEngine = remember { FinanceEngine() }
+    val cashFlow = remember(character) { financeEngine.computeAnnualCashFlow(character) }
     val isPrestigeEligible = character.socialEcosystem.currentStandingTier == CommunityStandingTier.PILLAR_OF_SOCIETY ||
         character.socialEcosystem.currentStandingTier == CommunityStandingTier.WELL_RESPECTED
     var activeAssetSheet by rememberSaveable { mutableStateOf(AssetSheet.NONE) }
@@ -165,6 +176,7 @@ fun AssetsScreen(
     var showWithdrawDialog by remember { mutableStateOf(false) }
     var showSavingsDepositDialog by remember { mutableStateOf(false) }
     var showSavingsWithdrawDialog by remember { mutableStateOf(false) }
+    var showJuniorTrustDialog by remember { mutableStateOf(false) }
     var selectedCategory by rememberSaveable { mutableIntStateOf(0) }
     var shopTypeFilter by rememberSaveable { mutableStateOf("ALL") }
     val category = AssetsCategory.entries.getOrElse(selectedCategory) { AssetsCategory.ALL }
@@ -363,6 +375,20 @@ fun AssetsScreen(
         )
     }
 
+    ConfirmableActionHost(
+        state = pendingJuniorTrustDeposit,
+        onConfirmed = { amount -> onDepositJuniorTrust(amount) }
+    ) { amount, onConfirm, onDismiss ->
+        ConfirmActionDialog(
+            title = stringResource(R.string.junior_trust_title),
+            description = "Deposit ${formatMoney(amount, character.countryCode)} into your Junior Trust Piggy Bank?",
+            confirmLabel = stringResource(R.string.btn_deposit),
+            severity = ConfirmSeverity.NEUTRAL,
+            onConfirm = onConfirm,
+            onDismiss = onDismiss
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -373,6 +399,19 @@ fun AssetsScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            item(key = "finance_summary_card") {
+                FinanceSummaryCard(
+                    character = character,
+                    netWorth = netWorth,
+                    cashFlow = cashFlow,
+                    onOpenLedger = { activeAssetSheet = AssetSheet.CASH_FLOW_LEDGER },
+                    onOpenBanking = { activeAssetSheet = AssetSheet.MARKETS },
+                    onOpenDebt = { activeAssetSheet = AssetSheet.DEBT_LIABILITIES },
+                    onOpenInvestments = { activeAssetSheet = AssetSheet.MARKETS },
+                    onOpenJuniorTrust = { showJuniorTrustDialog = true }
+                )
+            }
+
             if (character.age < 16) {
                 item(key = "dependent_minor") {
                     Card(
@@ -419,6 +458,31 @@ fun AssetsScreen(
                                 textAlign = TextAlign.Center
                             )
                         }
+                    }
+                }
+                item(key = "minor_locked_assets") {
+                    InsetCardContainer(title = stringResource(R.string.screen_assets)) {
+                        DrillDownRow(
+                            title = stringResource(R.string.asset_cat_real_estate),
+                            subtitle = stringResource(R.string.asset_cat_real_estate_desc),
+                            icon = Icons.Rounded.Home,
+                            iconTint = LifeGreen,
+                            isAgeLocked = true,
+                            lockBadgeText = stringResource(R.string.badge_age_locked, 18),
+                            insideContainer = true,
+                            onClick = {}
+                        )
+                        InsetDivider()
+                        DrillDownRow(
+                            title = stringResource(R.string.asset_cat_vehicles),
+                            subtitle = stringResource(R.string.asset_cat_vehicles_desc),
+                            icon = Icons.Rounded.DirectionsCar,
+                            iconTint = TealPrimary,
+                            isAgeLocked = true,
+                            lockBadgeText = stringResource(R.string.badge_age_locked, 18),
+                            insideContainer = true,
+                            onClick = {}
+                        )
                     }
                 }
             } else {
@@ -591,6 +655,7 @@ fun AssetsScreen(
                             repairCost = financeEngine.calculateRepairCost(asset, character.countryCode),
                             renovationCost = financeEngine.calculateRenovationCost(asset, character.countryCode),
                             yearlyYield = financeEngine.estimateYearlyRent(asset),
+                            onLifestyleAction = onPerformLeisure,
                             onSell = { onSellAsset(asset.id) },
                             onRepair = { pendingRepair.request(asset) },
                             onRenovate = { pendingRenovate.request(asset) },
@@ -710,6 +775,20 @@ fun AssetsScreen(
             onConfirm = { amount ->
                 showSavingsWithdrawDialog = false
                 pendingSavingsWithdraw.request(amount)
+            }
+        )
+    }
+
+    if (showJuniorTrustDialog) {
+        PortfolioTransferDialog(
+            title = stringResource(R.string.junior_trust_title),
+            maxAmount = character.stats.money,
+            countryCode = character.countryCode,
+            confirmLabel = stringResource(R.string.btn_deposit),
+            onDismiss = { showJuniorTrustDialog = false },
+            onConfirm = { amount ->
+                showJuniorTrustDialog = false
+                pendingJuniorTrustDeposit.request(amount)
             }
         )
     }
@@ -950,6 +1029,31 @@ fun AssetsScreen(
                     )
                 }
             }
+        }
+        AssetSheet.CASH_FLOW_LEDGER -> {
+            CashFlowLedgerSheet(
+                character = character,
+                cashFlow = cashFlow,
+                onDismiss = { activeAssetSheet = AssetSheet.NONE }
+            )
+        }
+        AssetSheet.DEBT_LIABILITIES -> {
+            DebtLiabilitiesSheet(
+                character = character,
+                onPayMortgage = { id ->
+                    activeAssetSheet = AssetSheet.NONE
+                    onPayMortgage(id)
+                },
+                onPrepayMortgagePrincipal = { id, amount ->
+                    activeAssetSheet = AssetSheet.NONE
+                    onPrepayMortgagePrincipal(id, amount)
+                },
+                onRepayStudentLoan = { amount ->
+                    activeAssetSheet = AssetSheet.NONE
+                    onRepayStudentLoan(amount)
+                },
+                onDismiss = { activeAssetSheet = AssetSheet.NONE }
+            )
         }
         AssetSheet.NONE -> Unit
     }
@@ -1569,6 +1673,7 @@ private fun OwnedAssetCard(
     repairCost: Int,
     renovationCost: Int,
     yearlyYield: Int,
+    onLifestyleAction: (com.maisha.game.domain.LeisureActivity) -> Unit = {},
     onSell: () -> Unit,
     onRepair: () -> Unit,
     onRenovate: () -> Unit,
@@ -1675,6 +1780,80 @@ private fun OwnedAssetCard(
                 }
             }
 
+            val delta = asset.currentValue - asset.purchasePrice
+            val percent = if (asset.purchasePrice > 0) ((delta.toDouble() / asset.purchasePrice) * 100).toInt() else 0
+            val equity = (asset.currentValue - asset.mortgageBalance).coerceAtLeast(0)
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (asset.mortgageBalance > 0) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(SuccessGreen.copy(alpha = 0.12f))
+                                .border(1.dp, SuccessGreen.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.format_asset_equity, formatMoney(equity, countryCode)),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = SuccessGreen,
+                                fontSize = 11.sp
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(Color(0xFFF1F5F9))
+                                .border(1.dp, Color(0xFFCBD5E1), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.format_asset_mortgage, formatMoney(asset.mortgageBalance, countryCode)),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF475569),
+                                fontSize = 11.sp
+                            )
+                        }
+                    }
+                } else {
+                    Spacer(modifier = Modifier.width(1.dp))
+                }
+
+                if (delta != 0) {
+                    val isGain = delta > 0
+                    val pillBg = if (isGain) SuccessGreen.copy(alpha = 0.12f) else CoralNegative.copy(alpha = 0.12f)
+                    val pillFg = if (isGain) SuccessGreen else CoralNegative
+                    val pillText = if (isGain) {
+                        stringResource(R.string.format_appreciated, percent, formatMoney(delta, countryCode))
+                    } else {
+                        stringResource(R.string.format_depreciated, percent, formatMoney(-delta, countryCode))
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(pillBg)
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = pillText,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = pillFg,
+                            fontSize = 10.sp
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             if (!isHeirloom) {
@@ -1772,6 +1951,38 @@ private fun OwnedAssetCard(
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                     }
+                }
+
+                if (asset.type == AssetType.BOAT) {
+                    Button(
+                        onClick = { onLifestyleAction(com.maisha.game.domain.LeisureActivity.YACHT_DAY) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaishaRadius.buttonShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = GoldAccent)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.btn_yacht_day),
+                            color = Color(0xFF1A1200),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                if (asset.type == AssetType.PRIVATE_JET) {
+                    Button(
+                        onClick = { onLifestyleAction(com.maisha.game.domain.LeisureActivity.PRIVATE_JET_TRIP) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaishaRadius.buttonShape,
+                        colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.btn_private_jet_trip),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
                 OutlinedButton(
@@ -1916,6 +2127,670 @@ private fun ShopAssetCard(
                 )
             }
             }
+        }
+    }
+}
+
+@Composable
+private fun FinanceSummaryCard(
+    character: Character,
+    netWorth: Int,
+    cashFlow: AnnualCashFlow,
+    onOpenLedger: () -> Unit,
+    onOpenBanking: () -> Unit,
+    onOpenDebt: () -> Unit,
+    onOpenInvestments: () -> Unit,
+    onOpenJuniorTrust: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    val creditTier = CreditRatingTier.forScore(character.finance.creditScore)
+    val creditColor = when (creditTier) {
+        CreditRatingTier.EXCELLENT -> SuccessGreen
+        CreditRatingTier.GOOD -> LifeGreen
+        CreditRatingTier.FAIR -> GoldAccent
+        CreditRatingTier.POOR -> CoralNegative
+    }
+    val climateName = when (character.economicState.climate) {
+        EconomicClimate.BOOM -> stringResource(R.string.climate_boom)
+        EconomicClimate.STEADY -> stringResource(R.string.climate_steady)
+        EconomicClimate.INFLATION_SURGE -> stringResource(R.string.climate_inflation)
+        EconomicClimate.RECESSION -> stringResource(R.string.climate_recession)
+    }
+    val climateColor = when (character.economicState.climate) {
+        EconomicClimate.BOOM -> SuccessGreen
+        EconomicClimate.STEADY -> TealPrimary
+        EconomicClimate.INFLATION_SURGE -> GoldAccent
+        EconomicClimate.RECESSION -> CoralNegative
+    }
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaishaRadius.cardShape,
+        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, com.maisha.game.ui.theme.Hairline)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Top Row: Net Worth + Economic Climate Chip
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.finance_net_worth).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = InkTertiary,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = formatMoney(netWorth, character.countryCode),
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = com.maisha.game.ui.theme.InkPrimary
+                    )
+                }
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = climateColor.copy(alpha = 0.12f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, climateColor.copy(alpha = 0.35f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(climateColor)
+                        )
+                        Text(
+                            text = climateName,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = climateColor
+                        )
+                    }
+                }
+            }
+
+            // Middle Row: Liquid Cash & Net Cash Flow
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(CreamBg.copy(alpha = 0.7f))
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.finance_liquid_cash),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = InkTertiary
+                    )
+                    Text(
+                        text = formatMoney(character.stats.money, character.countryCode),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = com.maisha.game.ui.theme.InkPrimary
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = stringResource(R.string.finance_net_cash_flow),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = InkTertiary
+                    )
+                    val isPositive = cashFlow.netCashFlow >= 0
+                    val flowColor = if (isPositive) LifeGreen else CoralNegative
+                    val formattedFlow = if (isPositive) {
+                        stringResource(R.string.finance_cash_flow_positive, formatMoney(cashFlow.netCashFlow, character.countryCode))
+                    } else {
+                        stringResource(R.string.finance_cash_flow_negative, formatMoney(-cashFlow.netCashFlow, character.countryCode))
+                    }
+                    Text(
+                        text = formattedFlow,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = flowColor
+                    )
+                }
+            }
+
+            // Credit Score Row
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.credit_score_title),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = com.maisha.game.ui.theme.InkPrimary
+                        )
+                        Text(
+                            text = "${character.finance.creditScore}",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = creditColor
+                        )
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = creditColor.copy(alpha = 0.12f)
+                    ) {
+                        val tierStr = when (creditTier) {
+                            CreditRatingTier.EXCELLENT -> stringResource(R.string.credit_tier_excellent)
+                            CreditRatingTier.GOOD -> stringResource(R.string.credit_tier_good)
+                            CreditRatingTier.FAIR -> stringResource(R.string.credit_tier_fair)
+                            CreditRatingTier.POOR -> stringResource(R.string.credit_tier_poor)
+                        }
+                        Text(
+                            text = tierStr,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = creditColor,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+                val creditProgress = ((character.finance.creditScore - 300) / 550f).coerceIn(0f, 1f)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(Color.LightGray.copy(alpha = 0.4f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(creditProgress)
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(creditColor)
+                    )
+                }
+            }
+
+            // Junior Trust Balance pill if character has balance or is minor
+            if (character.finance.juniorTrustBalance > 0 || (character.age < 18 && character.stats.money > 0)) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(enabled = character.age < 18, onClick = onOpenJuniorTrust),
+                    shape = RoundedCornerShape(8.dp),
+                    color = GoldAccent.copy(alpha = 0.12f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, GoldAccent.copy(alpha = 0.3f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Savings,
+                                contentDescription = null,
+                                tint = GoldAccent,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.junior_trust_title),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = com.maisha.game.ui.theme.InkPrimary
+                            )
+                        }
+                        Text(
+                            text = formatMoney(character.finance.juniorTrustBalance, character.countryCode),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = GoldAccent
+                        )
+                    }
+                }
+            }
+
+            // Action Pill Buttons Row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FinanceQuickActionButton(
+                    label = stringResource(R.string.finance_action_ledger),
+                    icon = Icons.Rounded.Description,
+                    color = TealPrimary,
+                    onClick = onOpenLedger
+                )
+                FinanceQuickActionButton(
+                    label = stringResource(R.string.finance_action_banking),
+                    icon = Icons.Rounded.Savings,
+                    color = LifeGreen,
+                    onClick = onOpenBanking
+                )
+                FinanceQuickActionButton(
+                    label = stringResource(R.string.finance_action_debt),
+                    icon = Icons.Rounded.Home,
+                    color = AccentPink,
+                    onClick = onOpenDebt
+                )
+                FinanceQuickActionButton(
+                    label = stringResource(R.string.finance_action_invest),
+                    icon = Icons.Rounded.Savings,
+                    color = GoldAccent,
+                    onClick = onOpenInvestments
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun FinanceQuickActionButton(
+    label: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    color: Color,
+    onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = color.copy(alpha = 0.08f),
+        border = androidx.compose.foundation.BorderStroke(1.dp, color.copy(alpha = 0.25f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(15.dp)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = com.maisha.game.ui.theme.InkPrimary
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CashFlowLedgerSheet(
+    character: Character,
+    cashFlow: AnnualCashFlow,
+    onDismiss: () -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = PaperWhite
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.ledger_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = com.maisha.game.ui.theme.InkPrimary
+            )
+            Text(
+                text = stringResource(R.string.ledger_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = InkTertiary
+            )
+
+            val isPositive = cashFlow.netCashFlow >= 0
+            val bannerColor = if (isPositive) LifeGreen else CoralNegative
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = bannerColor.copy(alpha = 0.12f),
+                border = androidx.compose.foundation.BorderStroke(1.dp, bannerColor.copy(alpha = 0.35f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.ledger_net_total),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = bannerColor
+                    )
+                    Text(
+                        text = if (isPositive) {
+                            "+${formatMoney(cashFlow.netCashFlow, character.countryCode)} / yr"
+                        } else {
+                            "-${formatMoney(-cashFlow.netCashFlow, character.countryCode)} / yr"
+                        },
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = bannerColor
+                    )
+                }
+            }
+
+            InsetCardContainer(title = stringResource(R.string.ledger_section_income)) {
+                LedgerItemRow(stringResource(R.string.ledger_salary), formatMoney(cashFlow.salaryIncome, character.countryCode), isIncome = true)
+                if (cashFlow.partTimeIncome > 0) {
+                    InsetDivider()
+                    LedgerItemRow(stringResource(R.string.ledger_part_time), formatMoney(cashFlow.partTimeIncome, character.countryCode), isIncome = true)
+                }
+                if (cashFlow.rentalIncome > 0) {
+                    InsetDivider()
+                    LedgerItemRow(stringResource(R.string.ledger_rental), formatMoney(cashFlow.rentalIncome, character.countryCode), isIncome = true)
+                }
+                if (cashFlow.investmentDividends > 0) {
+                    InsetDivider()
+                    LedgerItemRow(stringResource(R.string.ledger_dividends), formatMoney(cashFlow.investmentDividends, character.countryCode), isIncome = true)
+                }
+                if (cashFlow.pensionIncome > 0) {
+                    InsetDivider()
+                    LedgerItemRow(stringResource(R.string.ledger_pension), formatMoney(cashFlow.pensionIncome, character.countryCode), isIncome = true)
+                }
+                if (cashFlow.businessProfits > 0) {
+                    InsetDivider()
+                    LedgerItemRow(stringResource(R.string.ledger_business), formatMoney(cashFlow.businessProfits, character.countryCode), isIncome = true)
+                }
+                if (cashFlow.socialMediaIncome > 0) {
+                    InsetDivider()
+                    LedgerItemRow(stringResource(R.string.ledger_social_media), formatMoney(cashFlow.socialMediaIncome, character.countryCode), isIncome = true)
+                }
+                InsetDivider()
+                LedgerItemRow(
+                    label = stringResource(R.string.ledger_gross_total),
+                    amount = formatMoney(cashFlow.grossIncome, character.countryCode),
+                    isIncome = true,
+                    isTotal = true
+                )
+            }
+
+            InsetCardContainer(title = stringResource(R.string.ledger_section_deductions)) {
+                LedgerItemRow(stringResource(R.string.ledger_tax), formatMoney(cashFlow.incomeTax, character.countryCode), isIncome = false)
+                InsetDivider()
+                LedgerItemRow(stringResource(R.string.ledger_living), formatMoney(cashFlow.livingCost, character.countryCode), isIncome = false)
+                if (cashFlow.mortgagePayments > 0) {
+                    InsetDivider()
+                    LedgerItemRow(stringResource(R.string.ledger_mortgage), formatMoney(cashFlow.mortgagePayments, character.countryCode), isIncome = false)
+                }
+                if (cashFlow.studentLoanPayment > 0) {
+                    InsetDivider()
+                    LedgerItemRow(stringResource(R.string.ledger_student_loan), formatMoney(cashFlow.studentLoanPayment, character.countryCode), isIncome = false)
+                }
+                if (cashFlow.assetUpkeep > 0) {
+                    InsetDivider()
+                    LedgerItemRow(stringResource(R.string.ledger_upkeep), formatMoney(cashFlow.assetUpkeep, character.countryCode), isIncome = false)
+                }
+                if (cashFlow.childSupport > 0) {
+                    InsetDivider()
+                    LedgerItemRow(stringResource(R.string.ledger_child_support), formatMoney(cashFlow.childSupport, character.countryCode), isIncome = false)
+                }
+                if (cashFlow.petUpkeep > 0) {
+                    InsetDivider()
+                    LedgerItemRow(stringResource(R.string.ledger_pet_upkeep), formatMoney(cashFlow.petUpkeep, character.countryCode), isIncome = false)
+                }
+                InsetDivider()
+                LedgerItemRow(
+                    label = stringResource(R.string.ledger_deductions_total),
+                    amount = formatMoney(cashFlow.totalDeductions, character.countryCode),
+                    isIncome = false,
+                    isTotal = true
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun LedgerItemRow(
+    label: String,
+    amount: String,
+    isIncome: Boolean,
+    isTotal: Boolean = false
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = if (isTotal) MaterialTheme.typography.titleSmall else MaterialTheme.typography.bodyMedium,
+            fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal,
+            color = com.maisha.game.ui.theme.InkPrimary
+        )
+        val color = if (isTotal) {
+            if (isIncome) LifeGreen else CoralNegative
+        } else {
+            if (isIncome) LifeGreen else InkTertiary
+        }
+        val prefix = if (isIncome) "+" else "-"
+        Text(
+            text = "$prefix$amount",
+            style = if (isTotal) MaterialTheme.typography.titleSmall else MaterialTheme.typography.bodyMedium,
+            fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Medium,
+            color = color
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DebtLiabilitiesSheet(
+    character: Character,
+    onPayMortgage: (String) -> Unit,
+    onPrepayMortgagePrincipal: (String, Int) -> Unit,
+    onRepayStudentLoan: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val mortgagedHouses = character.assets.filter { it.mortgageBalance > 0 }
+    val hasStudentLoan = character.education.studentLoanBalance > 0
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = PaperWhite
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.debt_sheet_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = com.maisha.game.ui.theme.InkPrimary
+            )
+            Text(
+                text = stringResource(R.string.debt_sheet_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = InkTertiary
+            )
+
+            if (mortgagedHouses.isEmpty() && !hasStudentLoan) {
+                EmptyStateCard(
+                    illustration = EmptyStateIllustration.ASSETS,
+                    title = "Debt Free",
+                    message = stringResource(R.string.debt_no_liabilities)
+                )
+            }
+
+            // Mortgaged properties
+            mortgagedHouses.forEach { house ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaishaRadius.cardShape,
+                    colors = CardDefaults.cardColors(containerColor = CreamBg.copy(alpha = 0.5f)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, com.maisha.game.ui.theme.Hairline)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = house.name,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = com.maisha.game.ui.theme.InkPrimary
+                            )
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = AccentPink.copy(alpha = 0.12f)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.debt_mortgage_rate, house.mortgageInterestRate * 100),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = AccentPink,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = stringResource(R.string.debt_mortgage_balance, formatMoney(house.mortgageBalance, character.countryCode)),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = InkTertiary
+                            )
+                            Text(
+                                text = stringResource(R.string.debt_mortgage_annual, formatMoney(house.annualMortgagePayment, character.countryCode)),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = InkTertiary
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val prepayChunk = minOf(house.mortgageBalance / 4, character.stats.money).coerceAtLeast(1_000)
+                            if (character.stats.money >= 1_000 && prepayChunk <= house.mortgageBalance) {
+                                OutlinedButton(
+                                    onClick = { onPrepayMortgagePrincipal(house.id, prepayChunk) },
+                                    modifier = Modifier.weight(1f),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Text(
+                                        text = "Prepay ${formatMoney(prepayChunk, character.countryCode)}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                            Button(
+                                onClick = { onPayMortgage(house.id) },
+                                enabled = character.stats.money >= house.mortgageBalance,
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = LifeGreen)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.debt_payoff_button),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Student Loans
+            if (hasStudentLoan) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaishaRadius.cardShape,
+                    colors = CardDefaults.cardColors(containerColor = CreamBg.copy(alpha = 0.5f)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, com.maisha.game.ui.theme.Hairline)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.debt_student_loan_title),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = com.maisha.game.ui.theme.InkPrimary
+                        )
+                        Text(
+                            text = stringResource(R.string.debt_student_loan_balance, formatMoney(character.education.studentLoanBalance, character.countryCode)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = InkTertiary
+                        )
+                        val repayChunk = minOf(character.education.studentLoanBalance / 4, character.stats.money).coerceAtLeast(500)
+                        if (character.stats.money >= 500) {
+                            Button(
+                                onClick = { onRepayStudentLoan(repayChunk) },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
+                            ) {
+                                Text(
+                                    text = "Repay ${formatMoney(repayChunk, character.countryCode)}",
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

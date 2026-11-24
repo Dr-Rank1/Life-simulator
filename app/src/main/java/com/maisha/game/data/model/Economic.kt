@@ -1,14 +1,50 @@
 // app/src/main/java/com/maisha/game/data/model/Economic.kt
 package com.maisha.game.data.model
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+
+/**
+ * Custom serializer for [EconomicClimate] allowing legacy values "NEUTRAL" and "BUST"
+ * to map cleanly to [EconomicClimate.STEADY] and [EconomicClimate.RECESSION].
+ */
+object EconomicClimateSerializer : KSerializer<EconomicClimate> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("EconomicClimate", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: EconomicClimate) {
+        encoder.encodeString(value.name)
+    }
+
+    override fun deserialize(decoder: Decoder): EconomicClimate {
+        val raw = decoder.decodeString().uppercase()
+        return when (raw) {
+            "BOOM" -> EconomicClimate.BOOM
+            "STEADY", "NEUTRAL" -> EconomicClimate.STEADY
+            "INFLATION_SURGE", "INFLATION" -> EconomicClimate.INFLATION_SURGE
+            "RECESSION", "BUST" -> EconomicClimate.RECESSION
+            else -> EconomicClimate.STEADY
+        }
+    }
+}
 
 /** Macro-economic climate for the current in-game year. */
-@Serializable
+@Serializable(with = EconomicClimateSerializer::class)
 enum class EconomicClimate {
-    NEUTRAL,
     BOOM,
-    BUST
+    STEADY,
+    INFLATION_SURGE,
+    RECESSION;
+
+    companion object {
+        val NEUTRAL: EconomicClimate get() = STEADY
+        val BUST: EconomicClimate get() = RECESSION
+    }
 }
 
 /**
@@ -17,7 +53,7 @@ enum class EconomicClimate {
  */
 @Serializable
 data class EconomicState(
-    val climate: EconomicClimate = EconomicClimate.NEUTRAL,
+    val climate: EconomicClimate = EconomicClimate.STEADY,
     val marketModifier: Float = 1.0f
 )
 

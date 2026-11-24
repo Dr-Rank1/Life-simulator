@@ -753,6 +753,13 @@
     <string name="event_category_family">Family</string>
     <string name="event_category_crime">Crime</string>
     <string name="event_category_life">Life</string>
+    <string name="event_category_milestone">Milestone</string>
+    <string name="event_category_windfall">Windfall</string>
+    <string name="event_category_scandal">Scandal</string>
+    <string name="event_category_romance">Romance</string>
+    <string name="event_category_school">School</string>
+    <string name="event_category_health">Health</string>
+    <string name="event_category_underworld">Underworld</string>
 
     <!-- Achievements -->
     <string name="achievement_unlocked_title">Achievement Unlocked!</string>
@@ -1983,6 +1990,13 @@
     <string name="label_upkeep">Annual Upkeep</string>
     <string name="label_mortgage_remaining">Mortgage Remaining</string>
     <string name="btn_pay_mortgage">Pay Off Mortgage</string>
+    <string name="format_asset_equity">Equity: %1$s</string>
+    <string name="format_asset_mortgage">Mortgage: %1$s</string>
+    <string name="format_appreciated">+%1$d%% (%2$s)</string>
+    <string name="format_depreciated">%1$d%% (%2$s)</string>
+    <string name="badge_age_locked">Age %1$d+</string>
+    <string name="btn_yacht_day">Take Yacht Out</string>
+    <string name="btn_private_jet_trip">Charter Jet Trip</string>
 
     <!-- Part 3 — Dating & Matchmaking App -->
     <string name="dating_match_title">Dating Profile</string>
@@ -2646,4 +2660,289 @@
     <string name="dilemma_family_dishes_leave_desc">Slip away to relax and let whoever cooked handle it later.</string>
     <string name="dilemma_family_dishes_leave_tag">Relaxation</string>
     <string name="dilemma_family_dishes_leave_outcome">You lounged on the sofa instead, ignoring the silent stack of pots in the sink.</string>
+
+    <!-- Career Hero Card & Tier Stepper -->
+    <string name="career_hero_dashboard_title">Career Dashboard</string>
+    <string name="tier_entry">Entry</string>
+    <string name="tier_mid">Mid</string>
+    <string name="tier_senior">Senior</string>
+    <string name="tier_lead">Lead</string>
+    <string name="tier_director">Director</string>
+    <string name="tier_executive">Executive</string>
+    <string name="career_projected_raise_grind">+8% Projected Raise (Grind)</string>
+    <string name="career_projected_raise_normal">+5% Projected Raise (Normal)</string>
+    <string name="career_projected_raise_coast">+2% Projected Raise (Coast)</string>
+    <string name="career_projected_raise_promo">+12% Promo Review Track</string>
+    <string name="performance_state_at_risk">At Risk · PIP Warning</string>
+    <string name="performance_state_satisfactory">Meets Expectations</string>
+    <string name="performance_state_strong">Strong Performer</string>
+    <string name="performance_state_stellar">Promotion Track</string>
+    <string name="burnout_warning_critical">Critical Burnout Warning · Rest Needed</string>
+    <string name="burnout_warning_elevated">Elevated Stress · Pace Yourself</string>
+    <string name="burnout_warning_calm">Stress Manageable</string>
+    <string name="format_tenure_years">%1$d yr tenure</string>
+
+    <!-- Job Opportunity Cards -->
+    <string name="job_opp_badge_degree">Degree: %1$s</string>
+    <string name="job_opp_badge_degree_none">No Degree</string>
+    <string name="job_opp_badge_smarts">Smarts: %1$d+</string>
+    <string name="job_opp_badge_looks">Looks: %1$d+</string>
+    <string name="job_opp_badge_looks_any">Looks: Any</string>
+    <string name="job_opp_badge_exp">Exp: %1$s</string>
+    <string name="job_opp_apply_btn">Apply &amp; Interview</string>
+    <string name="job_opp_locked_btn">Requirements Not Met</string>
+
+    <!-- Interview Mini-Check Dialog -->
+    <string name="interview_dialog_title">Corporate Hiring Panel</string>
+    <string name="interview_dialog_subtitle">%1$s · Interviewing for %2$s</string>
+    <string name="interview_question_indicator">Question %1$d of %2$d</string>
+    <string name="interview_score_preview">Candidate Standing: %1$d pts</string>
+    <string name="interview_panel_reaction">Hiring Panel Reaction</string>
+    <string name="interview_btn_next">Submit Answer</string>
+    <string name="interview_btn_conclude">View Decision</string>
+    <string name="interview_hired_headline">Congratulations! You Are Hired</string>
+    <string name="interview_rejected_headline">Application Declined</string>
+    <string name="interview_hired_body">Your answers impressed the panel. Welcome aboard as %1$s at %2$s!</string>
+    <string name="interview_rejected_body">The panel decided to pursue other candidates whose interview responses better aligned with their needs.</string>
+    <string name="interview_close_btn">Continue</string>
+
+    <!-- Interview Questions Catalog -->
+    <string name="interview_q_deadline_prompt">A critical project deadline is 24 hours away, and a key deliverable is blocked by an unexpected technical hitch. How do you respond?</string>
+    <string name="interview_q_deadline_c1">Triage blockers with the team, communicate status to leadership, and prioritize essentials.</string>
+    <string name="interview_q_deadline_c1_fb">The panel commended your calm leadership and proactive stakeholder communication.</string>
+    <string name="interview_q_deadline_c2">Work late into the night alone to push the code across the line.</string>
+    <string name="interview_q_deadline_c2_fb">The panel noted your hustle but cautioned against solo heroics.</string>
+    <string name="interview_q_deadline_c3">Point out that external vendor dependencies caused the delay.</string>
+    <string name="interview_q_deadline_c3_fb">The panel frowned at your instinct to pass blame under pressure.</string>
+
+    <string name="interview_q_culture_prompt">Where do you envision your contribution to our company evolving over the next two years?</string>
+    <string name="interview_q_culture_c1">Deliver high-impact metrics and mentor junior associates as they onboard.</string>
+    <string name="interview_q_culture_c1_fb">The panel loved your balance of personal ambition and team mentorship.</string>
+    <string name="interview_q_culture_c2">Perform my assigned duties reliably and maintain a steady rhythm.</string>
+    <string name="interview_q_culture_c2_fb">The panel accepted your answer as dependable, if slightly uninspired.</string>
+    <string name="interview_q_culture_c3">Climb to department head by outmaneuvering current managers.</string>
+    <string name="interview_q_culture_c3_fb">The panel exchanged uncomfortable glances at your cutthroat attitude.</string>
+
+    <string name="interview_q_tech_prompt">A production outage occurs during high traffic. Error alerts are firing simultaneously across multiple systems.</string>
+    <string name="interview_q_tech_c1">Roll back the recent release, check telemetry logs, and restore service stability first.</string>
+    <string name="interview_q_tech_c1_fb">The engineers on the panel nodded approvingly at your disciplined incident response.</string>
+    <string name="interview_q_tech_c2">Quickly patch files directly on production servers to see what sticks.</string>
+    <string name="interview_q_tech_c2_fb">The lead architect winced at your cowboy hotfix strategy.</string>
+    <string name="interview_q_tech_c3">Mute the notification channel and assume traffic spikes will subside.</string>
+    <string name="interview_q_tech_c3_fb">The tech leads were alarmed by your total disregard for uptime.</string>
+
+    <string name="interview_q_ethics_prompt">An influential client urges you to overlook a compliance regulation to accelerate a lucrative contract.</string>
+    <string name="interview_q_ethics_c1">Politely hold firm on compliance boundaries and propose a legitimate alternative.</string>
+    <string name="interview_q_ethics_c1_fb">The compliance officer noted your integrity and professional backbone.</string>
+    <string name="interview_q_ethics_c2">Pass the decision up to senior management to avoid personal liability.</string>
+    <string name="interview_q_ethics_c2_fb">The panel found your response bureaucratic and lacking initiative.</string>
+    <string name="interview_q_ethics_c3">Agree to bend the rules off-the-record to secure the contract bonus.</string>
+    <string name="interview_q_ethics_c3_fb">The panel noted a serious compliance red flag in your ethics.</string>
+
+    <string name="interview_q_service_prompt">An irate customer publicly yells at you at the front desk over a misunderstanding.</string>
+    <string name="interview_q_service_c1">Listen patiently, validate their frustration, and calmly resolve their core issue.</string>
+    <string name="interview_q_service_c1_fb">The hiring manager praised your emotional intelligence and de-escalation skills.</string>
+    <string name="interview_q_service_c2">Hand them a customer support card and tell them to file a ticket online.</string>
+    <string name="interview_q_service_c2_fb">The panel found your response bureaucratic and lacking customer warmth.</string>
+    <string name="interview_q_service_c3">Argue back to demonstrate that company policy was strictly followed.</string>
+    <string name="interview_q_service_c3_fb">The interviewers marked you down heavily for inflaming customer conflict.</string>
+
+    <string name="interview_q_medical_prompt">During a busy shift, two critical situations demand your attention at the same moment. How do you prioritize?</string>
+    <string name="interview_q_medical_c1">Rapidly triage based on vital severity, delegate secondary tasks, and stay composed.</string>
+    <string name="interview_q_medical_c1_fb">The panel commended your clinical decision-making and composure under crisis.</string>
+    <string name="interview_q_medical_c2">Focus entirely on the first patient who arrived to follow standard queue protocols.</string>
+    <string name="interview_q_medical_c2_fb">The panel noted your protocol adherence but cautioned that clinical urgency overrides queues.</string>
+    <string name="interview_q_medical_c3">Freeze momentarily and request the attending physician take over immediately.</string>
+    <string name="interview_q_medical_c3_fb">The panel expressed concern over hesitation during emergency care situations.</string>
+
+    <!-- Workplace Roster Badges -->
+    <string name="badge_risk_low">Low Risk</string>
+    <string name="badge_risk_med">Med Risk</string>
+    <string name="badge_risk_high">High Risk</string>
+    <string name="badge_cooldown_yearly">1 / Year</string>
+    <string name="badge_req_rapport">Rapport 60+</string>
+    <string name="badge_req_performance">Perf 65+</string>
+    <string name="meter_competence_label">Competence: %1$d%%</string>
+    <string name="meter_strictness_label">Strictness: %1$d%%</string>
+    <string name="meter_rapport_label">Rapport: %1$d%%</string>
+
+    <!-- Academic Dossier Card -->
+    <string name="academic_dossier_title">Academic Dossier</string>
+    <string name="academic_dossier_gpa">%1$.2f GPA</string>
+    <string name="dossier_honors_summa">Summa Cum Laude</string>
+    <string name="dossier_honors_magna">Magna Cum Laude</string>
+    <string name="dossier_honors_cum_laude">Cum Laude</string>
+    <string name="dossier_honors_good">Good Standing</string>
+    <string name="dossier_honors_probation">Academic Probation</string>
+    <string name="study_pill_slacker">Slacker</string>
+    <string name="study_pill_normal">Normal</string>
+    <string name="study_pill_grind">Grind</string>
+    <string name="dossier_pips_header">Yearly Agency Pips</string>
+    <string name="dossier_pip_academic">Academic: %1$s</string>
+    <string name="dossier_pip_social">Social: %1$s</string>
+    <string name="dossier_pip_available">Available</string>
+    <string name="dossier_pip_used">Used</string>
+    <string name="exam_countdown_label">Upcoming Milestone</string>
+    <string name="exam_countdown_format">%1$s in %2$d yr</string>
+    <string name="exam_countdown_format_plural">%1$s in %2$d yrs</string>
+    <string name="exam_countdown_due_this_year">%1$s Due This Year!</string>
+
+    <!-- School Clubs Visual Insignia & Meters -->
+    <string name="club_insignia_member">Member</string>
+    <string name="club_insignia_officer">Officer</string>
+    <string name="club_insignia_captain">Captain</string>
+    <string name="club_meter_chemistry">Team Chemistry: %1$d%%</string>
+    <string name="club_meter_rivalry">Rivalry Intensity: %1$d%%</string>
+    <string name="club_trophies_won">%1$d Trophies Won</string>
+    <string name="club_trophies_label">%1$d Trophies Won</string>
+    <string name="club_scholarship_track">Varsity Grant Active</string>
+    <string name="club_scholarship_eligible">Scholarship Eligible</string>
+    <string name="club_scholarship_status">Scholarship Eligible</string>
+    <string name="club_major_event_ready">Tournament Final Ready</string>
+    <string name="club_chemistry_label">Team Chemistry</string>
+    <string name="club_rivalry_label">Rivalry Intensity</string>
+
+    <!-- School People Role & Clique Pills -->
+    <string name="role_pill_classmate">Classmate</string>
+    <string name="role_pill_best_friend">Best Friend</string>
+    <string name="role_pill_bully">Bully</string>
+    <string name="role_pill_teacher">Teacher</string>
+    <string name="role_pill_crush">Crush</string>
+    <string name="clique_pill_nerds">Nerds</string>
+    <string name="clique_pill_jocks">Jocks</string>
+    <string name="clique_pill_rebels">Rebels</string>
+    <string name="clique_pill_populars">Populars</string>
+    <string name="clique_pill_outcasts">Outcasts</string>
+    <string name="clique_pill_unaffiliated">Unaffiliated</string>
+
+    <!-- One-Tap School Interaction Chips -->
+    <string name="school_chip_chat">Chat</string>
+    <string name="school_chip_compliment">Compliment</string>
+    <string name="school_chip_hangout">Hang Out</string>
+    <string name="school_chip_flirt">Flirt</string>
+    <string name="school_chip_ask_out">Ask Out</string>
+    <string name="school_chip_stand_up">Confront</string>
+    <string name="school_chip_befriend">Befriend</string>
+    <string name="school_chip_ask_help">Study Help</string>
+    <string name="school_chip_consult">Consult</string>
+    <string name="school_chip_insult">Insult</string>
+
+    <!-- Character Interaction Tiles & BitLife Overhaul -->
+    <string name="tile_spend_time">Spend Time</string>
+    <string name="tile_compliment">Compliment</string>
+    <string name="tile_gift">Give Gift</string>
+    <string name="tile_deep_talk">Deep Talk</string>
+    <string name="tile_ask_advice">Ask Advice</string>
+    <string name="tile_ask_money">Ask Money</string>
+    <string name="tile_argue">Argue</string>
+    <string name="tile_prank">Prank</string>
+    <string name="tile_insult">Insult</string>
+    <string name="tile_propose">Propose</string>
+    <string name="tile_propose_prenup">Prenup Offer</string>
+    <string name="tile_date_night">Date Night</string>
+    <string name="tile_have_baby">Have Baby</string>
+    <string name="tile_break_up">Break Up</string>
+    <string name="tile_divorce">Divorce</string>
+    <string name="tile_make_exclusive">Go Exclusive</string>
+    <string name="tile_vacation">Vacation</string>
+    <string name="tile_reconcile">Make Peace</string>
+    <string name="tile_sibling_team_up">Team Up</string>
+    <string name="tile_sibling_borrow">Borrow Item</string>
+    <string name="tile_sibling_compete">Compete</string>
+    <string name="tile_play_together">Play</string>
+    <string name="tile_help_homework">Homework</string>
+    <string name="tile_allowance">Allowance</string>
+    <string name="tile_discipline">Discipline</string>
+    <string name="tile_visit">Visit</string>
+    <string name="tile_financial_support">Send Cash</string>
+    <string name="tile_celebrate">Celebrate</string>
+    <string name="tile_discuss_life">Discuss Life</string>
+    <string name="tile_cuddle">Cuddle</string>
+    <string name="tile_babble">Babble</string>
+    <string name="tile_tantrum">Tantrum</string>
+    <string name="tile_set_up_date">Matchmake</string>
+    <string name="tile_used_badge">Used</string>
+    <string name="tile_cost_free">Free</string>
+    <string name="stat_temperament">Temperament</string>
+    <string name="badge_needs_attention">Needs Attention</string>
+    <string name="badge_recent_milestone">Milestone</string>
+    <string name="salary_tier_modest">Modest Income</string>
+    <string name="salary_tier_middle">Middle Class</string>
+    <string name="salary_tier_high">High Earner</string>
+    <string name="salary_tier_wealthy">Wealthy</string>
+    <string name="feedback_relationship_up">+%1$d Bond</string>
+    <string name="feedback_relationship_down">%1$d Bond</string>
+    <string name="feedback_money_up">+%1$s</string>
+    <string name="feedback_money_down">-%1$s</string>
+    <string name="npc_thought_compliment">\"Thank you! That really made my day.\"</string>
+    <string name="npc_thought_gift">\"Wow, you did not have to! I love this.\"</string>
+    <string name="npc_thought_argue">\"Why must we always turn this into an argument?!\"</string>
+    <string name="npc_thought_prank">\"Hey! Watch it! That got me good though.\"</string>
+    <string name="npc_thought_money">\"I appreciate you helping me out financially.\"</string>
+    <string name="npc_thought_time">\"It was so nice catching up together today.\"</string>
+
+    <!-- Personal Finance & Economic Dashboard -->
+    <string name="msg_junior_trust_deposit_success">Saved into your Junior Trust Piggy Bank.</string>
+    <string name="credit_score_title">Credit Score</string>
+    <string name="credit_score_label">Credit Rating</string>
+    <string name="credit_tier_excellent">Excellent</string>
+    <string name="credit_tier_good">Good</string>
+    <string name="credit_tier_fair">Fair</string>
+    <string name="credit_tier_poor">Poor</string>
+    <string name="climate_boom">Boom</string>
+    <string name="climate_steady">Steady</string>
+    <string name="climate_inflation">Inflation Surge</string>
+    <string name="climate_recession">Recession</string>
+    <string name="climate_title">Economy</string>
+
+    <string name="finance_summary_title">Financial Standing</string>
+    <string name="finance_net_worth">Net Worth</string>
+    <string name="finance_liquid_cash">Liquid Cash</string>
+    <string name="finance_net_cash_flow">Annual Cash Flow</string>
+    <string name="finance_cash_flow_positive">+%1$s / yr</string>
+    <string name="finance_cash_flow_negative">-%1$s / yr</string>
+    <string name="finance_action_ledger">Cash Flow Ledger</string>
+    <string name="finance_action_banking">Banking &amp; Savings</string>
+    <string name="finance_action_debt">Debt &amp; Loans</string>
+    <string name="finance_action_invest">Investments</string>
+
+    <string name="ledger_title">Annual Cash-Flow Breakdown</string>
+    <string name="ledger_subtitle">Yearly projection of gross earnings and ongoing commitments</string>
+    <string name="ledger_section_income">Gross Income</string>
+    <string name="ledger_salary">Primary Salary</string>
+    <string name="ledger_part_time">Part-Time &amp; Gigs</string>
+    <string name="ledger_rental">Rental Property Yield</string>
+    <string name="ledger_dividends">Savings &amp; Returns</string>
+    <string name="ledger_pension">Retirement Pension</string>
+    <string name="ledger_business">Business Dividends</string>
+    <string name="ledger_social_media">Content Revenue</string>
+    <string name="ledger_gross_total">Total Gross Income</string>
+    <string name="ledger_section_deductions">Deductions &amp; Living Costs</string>
+    <string name="ledger_tax">Income Tax</string>
+    <string name="ledger_living">Cost of Living</string>
+    <string name="ledger_mortgage">Mortgage Payments</string>
+    <string name="ledger_student_loan">Student Loan Service</string>
+    <string name="ledger_upkeep">Asset Maintenance</string>
+    <string name="ledger_child_support">Child Support &amp; Dependents</string>
+    <string name="ledger_pet_upkeep">Pet Care &amp; Upkeep</string>
+    <string name="ledger_deductions_total">Total Deductions</string>
+    <string name="ledger_net_total">Annual Net Cash Flow</string>
+
+    <string name="junior_trust_title">Junior Trust Piggy Bank</string>
+    <string name="junior_trust_subtitle">Safely locked childhood funds. Matures into liquid wallet cash at age 18.</string>
+    <string name="junior_trust_balance">Trust Balance: %1$s</string>
+    <string name="junior_trust_save_button">Stash in Trust</string>
+
+    <string name="debt_sheet_title">Debt &amp; Liabilities</string>
+    <string name="debt_sheet_subtitle">Pay extra principal to reduce annual interest and boost credit score</string>
+    <string name="debt_no_liabilities">You currently have zero outstanding mortgages or student debt.</string>
+    <string name="debt_mortgage_label">%1$s Mortgage</string>
+    <string name="debt_mortgage_rate">APR: %1$.1f%%</string>
+    <string name="debt_mortgage_annual">Annual Payment: %1$s</string>
+    <string name="debt_mortgage_balance">Balance: %1$s</string>
+    <string name="debt_prepay_button">Prepay Principal</string>
+    <string name="debt_payoff_button">Pay Off in Full</string>
+    <string name="debt_student_loan_title">Student Loan Debt</string>
+    <string name="debt_student_loan_balance">Loan Balance: %1$s</string>
+    <string name="debt_pay_student_button">Repay Student Loan</string>
 </resources>

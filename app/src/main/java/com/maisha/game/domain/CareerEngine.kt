@@ -15,6 +15,9 @@ import com.maisha.game.data.model.EventChoice
 import com.maisha.game.data.model.FameEventAction
 import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.HustleType
+import com.maisha.game.data.model.InterviewChoice
+import com.maisha.game.data.model.InterviewQuestion
+import com.maisha.game.data.model.JobInterviewSession
 import com.maisha.game.data.model.JobLadder
 import com.maisha.game.data.model.OfficeAction
 import com.maisha.game.data.model.OfficePoliticsAction
@@ -293,6 +296,132 @@ class CareerEngine @Inject constructor(
             performance = 50f,
             stress = 28f,
             bossRelationship = Random.nextInt(0, 25),
+            colleagueRelationships = JobLadder.defaultColleagues(seed),
+            workplaceRoster = roster,
+            officeWorkActionDoneThisYear = false,
+            kissUpDoneThisYear = false,
+            askPromotionDoneThisYear = false
+        )
+        return hiredCharacter.copy(career = updatedCareer) to CareerResult.Hired(hiredJob)
+    }
+
+    /**
+     * Generates a 2-question interactive interview check for an eligible job.
+     */
+    fun generateJobInterview(character: Character, jobId: String): JobInterviewSession? {
+        if (character.criminalRecord.awaitingTrial ||
+            character.career.isRetired ||
+            character.career.currentJob != null
+        ) {
+            return null
+        }
+        val (baseJobId, sponsorCountry) = parseSponsoredJobId(jobId)
+        val jobTemplate = JobPool.findById(baseJobId) ?: return null
+        if (!isJobEligible(character, jobTemplate)) {
+            return null
+        }
+        val workCountry = sponsorCountry ?: character.countryCode
+        val seed = character.name.hashCode() xor jobId.hashCode()
+        val company = JobLadder.randomCompanyName(seed)
+
+        val q1 = when {
+            jobTemplate.id.contains("developer", ignoreCase = true) || jobTemplate.id.contains("engineer", ignoreCase = true) || jobTemplate.id.contains("tech", ignoreCase = true) ->
+                INTERVIEW_TECH_QUESTION
+            jobTemplate.id.contains("doctor", ignoreCase = true) || jobTemplate.id.contains("nurse", ignoreCase = true) || jobTemplate.id.contains("medical", ignoreCase = true) ->
+                INTERVIEW_MEDICAL_QUESTION
+            jobTemplate.id.contains("lawyer", ignoreCase = true) || jobTemplate.id.contains("accountant", ignoreCase = true) || jobTemplate.id.contains("finance", ignoreCase = true) || jobTemplate.id.contains("manager", ignoreCase = true) ->
+                INTERVIEW_ETHICS_QUESTION
+            jobTemplate.id.contains("waiter", ignoreCase = true) || jobTemplate.id.contains("barista", ignoreCase = true) || jobTemplate.id.contains("service", ignoreCase = true) || jobTemplate.id.contains("clerk", ignoreCase = true) ->
+                INTERVIEW_SERVICE_QUESTION
+            else -> INTERVIEW_DEADLINE_QUESTION
+        }
+        val q2 = INTERVIEW_CULTURE_QUESTION
+
+        return JobInterviewSession(
+            jobId = jobId,
+            jobTitle = jobTemplate.title,
+            companyName = company,
+            countryCode = workCountry,
+            questions = listOf(q1, q2)
+        )
+    }
+
+    /**
+     * Evaluates a candidate's answer and either progresses to Question 2 or concludes the interview.
+     */
+    fun advanceInterview(session: JobInterviewSession, choice: InterviewChoice, character: Character): JobInterviewSession {
+        val newAccumulated = session.accumulatedScore + choice.scoreDelta
+        val nextIndex = session.currentQuestionIndex + 1
+
+        return if (nextIndex < session.questions.size) {
+            session.copy(
+                currentQuestionIndex = nextIndex,
+                accumulatedScore = newAccumulated,
+                previousFeedbackKey = choice.feedbackResKey
+            )
+        } else {
+            val candidateBonus = (character.stats.smarts / 4) +
+                (if (character.stats.happiness >= 60) 10 else 0) -
+                (if (character.criminalRecord.hasRecord) 15 else 0)
+            val totalScore = newAccumulated + candidateBonus
+            val passed = totalScore >= 35
+
+            session.copy(
+                currentQuestionIndex = nextIndex,
+                accumulatedScore = newAccumulated,
+                previousFeedbackKey = choice.feedbackResKey,
+                isConcluded = true,
+                isHired = passed,
+                finalFeedbackKey = if (passed) "interview_hired_body" else "interview_rejected_body"
+            )
+        }
+    }
+
+    /**
+     * Concludes the interview and hires the candidate if successful.
+     */
+    fun hireFromInterview(character: Character, session: JobInterviewSession): Pair<Character, CareerResult> {
+        if (!session.isHired) {
+            return character to CareerResult.Rejected
+        }
+        val (baseJobId, sponsorCountry) = parseSponsoredJobId(session.jobId)
+        val jobTemplate = JobPool.findById(baseJobId) ?: return character to CareerResult.Rejected
+
+        var hiredCharacter = character
+        val workCountry = sponsorCountry ?: character.countryCode
+        if (sponsorCountry != null) {
+            hiredCharacter = relocationEngine.relocate(
+                hiredCharacter,
+                CountryCatalog.getCountry(sponsorCountry),
+                VisaType.WORK
+            )
+        }
+
+        val ladderTitle = JobLadder.titleFor(
+            jobId = jobTemplate.id,
+            level = 1,
+            fallbackTitle = jobTemplate.title
+        )
+        val hiredJob = jobTemplate.copy(
+            title = ladderTitle,
+            level = 1,
+            baseSalary = EconomyScaler.scaleAmount(jobTemplate.baseSalary, workCountry),
+            performanceScore = 55,
+            isMilitary = jobTemplate.isMilitary,
+            requiresDrivingLicense = jobTemplate.requiresDrivingLicense
+        )
+        val pendingDeployment = hiredJob.isMilitary && Random.nextFloat() < DEPLOYMENT_CHANCE
+        val seed = hiredCharacter.name.hashCode() xor hiredJob.id.hashCode()
+        val roster = generateWorkplaceRoster(workCountry, seed)
+        val updatedCareer = hiredCharacter.career.copy(
+            currentJob = hiredJob,
+            yearsAtCurrentJob = 0,
+            isDeployed = false,
+            pendingDeployment = pendingDeployment,
+            companyName = session.companyName,
+            performance = 55f,
+            stress = 25f,
+            bossRelationship = Random.nextInt(5, 30),
             colleagueRelationships = JobLadder.defaultColleagues(seed),
             workplaceRoster = roster,
             officeWorkActionDoneThisYear = false,
@@ -834,10 +963,16 @@ class CareerEngine @Inject constructor(
         )
     }
 
-    /** Random layoff roll while employed and past minimum job age. */
+    /** Random layoff roll while employed and past minimum job age, scaled by macroeconomic climate. */
     fun shouldTriggerDownsizing(character: Character): Boolean {
         if (character.career.currentJob == null) return false
-        return character.age >= MIN_JOB_AGE && Random.nextFloat() < DOWNSIZING_CHANCE
+        val climateMultiplier = when (character.economicState.climate) {
+            com.maisha.game.data.model.EconomicClimate.BOOM -> 0.4f
+            com.maisha.game.data.model.EconomicClimate.STEADY -> 1.0f
+            com.maisha.game.data.model.EconomicClimate.INFLATION_SURGE -> 1.5f
+            com.maisha.game.data.model.EconomicClimate.RECESSION -> 2.5f
+        }
+        return character.age >= MIN_JOB_AGE && Random.nextFloat() < (DOWNSIZING_CHANCE * climateMultiplier)
     }
 
     /** Clears job without performance check; applies happiness penalty and logs layoff. */
@@ -3114,6 +3249,66 @@ class CareerEngine @Inject constructor(
     }
 
     companion object {
+        val INTERVIEW_DEADLINE_QUESTION = InterviewQuestion(
+            id = "q_deadline",
+            promptResKey = "interview_q_deadline_prompt",
+            choices = listOf(
+                InterviewChoice("c1", "interview_q_deadline_c1", 25, "interview_q_deadline_c1_fb"),
+                InterviewChoice("c2", "interview_q_deadline_c2", 10, "interview_q_deadline_c2_fb"),
+                InterviewChoice("c3", "interview_q_deadline_c3", -15, "interview_q_deadline_c3_fb")
+            )
+        )
+
+        val INTERVIEW_CULTURE_QUESTION = InterviewQuestion(
+            id = "q_culture",
+            promptResKey = "interview_q_culture_prompt",
+            choices = listOf(
+                InterviewChoice("c1", "interview_q_culture_c1", 25, "interview_q_culture_c1_fb"),
+                InterviewChoice("c2", "interview_q_culture_c2", 10, "interview_q_culture_c2_fb"),
+                InterviewChoice("c3", "interview_q_culture_c3", -20, "interview_q_culture_c3_fb")
+            )
+        )
+
+        val INTERVIEW_TECH_QUESTION = InterviewQuestion(
+            id = "q_tech",
+            promptResKey = "interview_q_tech_prompt",
+            choices = listOf(
+                InterviewChoice("c1", "interview_q_tech_c1", 25, "interview_q_tech_c1_fb"),
+                InterviewChoice("c2", "interview_q_tech_c2", 10, "interview_q_tech_c2_fb"),
+                InterviewChoice("c3", "interview_q_tech_c3", -25, "interview_q_tech_c3_fb")
+            )
+        )
+
+        val INTERVIEW_ETHICS_QUESTION = InterviewQuestion(
+            id = "q_ethics",
+            promptResKey = "interview_q_ethics_prompt",
+            choices = listOf(
+                InterviewChoice("c1", "interview_q_ethics_c1", 25, "interview_q_ethics_c1_fb"),
+                InterviewChoice("c2", "interview_q_ethics_c2", 10, "interview_q_ethics_c2_fb"),
+                InterviewChoice("c3", "interview_q_ethics_c3", -25, "interview_q_ethics_c3_fb")
+            )
+        )
+
+        val INTERVIEW_MEDICAL_QUESTION = InterviewQuestion(
+            id = "q_medical",
+            promptResKey = "interview_q_medical_prompt",
+            choices = listOf(
+                InterviewChoice("c1", "interview_q_medical_c1", 25, "interview_q_medical_c1_fb"),
+                InterviewChoice("c2", "interview_q_medical_c2", 10, "interview_q_medical_c2_fb"),
+                InterviewChoice("c3", "interview_q_medical_c3", -20, "interview_q_medical_c3_fb")
+            )
+        )
+
+        val INTERVIEW_SERVICE_QUESTION = InterviewQuestion(
+            id = "q_service",
+            promptResKey = "interview_q_service_prompt",
+            choices = listOf(
+                InterviewChoice("c1", "interview_q_service_c1", 25, "interview_q_service_c1_fb"),
+                InterviewChoice("c2", "interview_q_service_c2", 10, "interview_q_service_c2_fb"),
+                InterviewChoice("c3", "interview_q_service_c3", -20, "interview_q_service_c3_fb")
+            )
+        )
+
         const val CAREER_SYSTEM_TAG = "career_system"
         /** Event gate: only eligible when the character has a current job. */
         const val REQUIRES_JOB_TAG = "requires_job"

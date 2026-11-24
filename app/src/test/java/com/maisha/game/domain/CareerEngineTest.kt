@@ -8,6 +8,7 @@ import com.maisha.game.data.model.CriminalRecord
 import com.maisha.game.data.model.EducationState
 import com.maisha.game.data.model.HustleType
 import com.maisha.game.data.model.Job
+import com.maisha.game.data.model.JobInterviewSession
 import com.maisha.game.data.model.PartTimeJob
 import com.maisha.game.data.model.SchoolClub
 import com.maisha.game.data.model.SchoolStage
@@ -709,5 +710,103 @@ class CareerEngineTest {
         val after = engine.tickFameAndTalentYear(faded)
         assertTrue(after.career.fame < 50)
         assertTrue(after.career.fameIdleYears >= 3)
+    }
+
+    @Test
+    fun generateJobInterview_createsTwoQuestionSessionForEligibleJob() {
+        val candidate = TestFixtures.character(
+            age = 22,
+            stats = Stats(smarts = 80, happiness = 70),
+            education = EducationState(stage = SchoolStage.GRADUATED, gpa = 3.5f)
+        )
+        val session = engine.generateJobInterview(candidate, "software_developer")
+        assertTrue(session != null)
+        assertEquals("software_developer", session!!.jobId)
+        assertEquals(2, session.questions.size)
+        assertEquals(0, session.currentQuestionIndex)
+        assertFalse(session.isConcluded)
+        assertFalse(session.isHired)
+    }
+
+    @Test
+    fun advanceInterview_accumulatesScoreAndPassesWithStrongChoices() {
+        val candidate = TestFixtures.character(
+            age = 22,
+            stats = Stats(smarts = 80, happiness = 70),
+            education = EducationState(stage = SchoolStage.GRADUATED, gpa = 3.5f)
+        )
+        val initialSession = engine.generateJobInterview(candidate, "software_developer")!!
+        val q1 = initialSession.currentQuestion!!
+        val bestChoiceQ1 = q1.choices.maxByOrNull { it.scoreDelta }!!
+
+        val sessionAfterQ1 = engine.advanceInterview(initialSession, bestChoiceQ1, candidate)
+        assertEquals(1, sessionAfterQ1.currentQuestionIndex)
+        assertFalse(sessionAfterQ1.isConcluded)
+
+        val q2 = sessionAfterQ1.currentQuestion!!
+        val bestChoiceQ2 = q2.choices.maxByOrNull { it.scoreDelta }!!
+        val sessionAfterQ2 = engine.advanceInterview(sessionAfterQ1, bestChoiceQ2, candidate)
+
+        assertTrue(sessionAfterQ2.isConcluded)
+        assertTrue(sessionAfterQ2.isHired)
+        assertTrue(sessionAfterQ2.accumulatedScore > 0)
+    }
+
+    @Test
+    fun advanceInterview_failsWhenPoorChoicesSelected() {
+        val candidate = TestFixtures.character(
+            age = 22,
+            stats = Stats(smarts = 10, happiness = 20),
+            criminalRecord = CriminalRecord(hasRecord = true, timesArrested = 2),
+            education = EducationState(stage = SchoolStage.GRADUATED, gpa = 2.0f)
+        )
+        val initialSession = engine.generateJobInterview(candidate, "cashier")!!
+        val q1 = initialSession.currentQuestion!!
+        val worstChoiceQ1 = q1.choices.minByOrNull { it.scoreDelta }!!
+
+        val sessionAfterQ1 = engine.advanceInterview(initialSession, worstChoiceQ1, candidate)
+        val q2 = sessionAfterQ1.currentQuestion!!
+        val worstChoiceQ2 = q2.choices.minByOrNull { it.scoreDelta }!!
+        val sessionAfterQ2 = engine.advanceInterview(sessionAfterQ1, worstChoiceQ2, candidate)
+
+        assertTrue(sessionAfterQ2.isConcluded)
+        assertFalse(sessionAfterQ2.isHired)
+    }
+
+    @Test
+    fun hireFromInterview_hiresCandidateWhenInterviewPassed() {
+        val candidate = TestFixtures.character(
+            age = 22,
+            stats = Stats(smarts = 80, happiness = 70),
+            education = EducationState(stage = SchoolStage.GRADUATED, gpa = 3.5f)
+        )
+        val initialSession = engine.generateJobInterview(candidate, "software_developer")!!
+        val q1 = initialSession.currentQuestion!!
+        val session1 = engine.advanceInterview(initialSession, q1.choices.maxByOrNull { it.scoreDelta }!!, candidate)
+        val q2 = session1.currentQuestion!!
+        val passedSession = engine.advanceInterview(session1, q2.choices.maxByOrNull { it.scoreDelta }!!, candidate)
+
+        val (hiredCharacter, result) = engine.hireFromInterview(candidate, passedSession)
+        assertTrue(result is CareerResult.Hired)
+        assertEquals("software_developer", hiredCharacter.career.currentJob?.id)
+    }
+
+    @Test
+    fun hireFromInterview_rejectsCandidateWhenInterviewFailed() {
+        val candidate = TestFixtures.character(
+            age = 22,
+            stats = Stats(smarts = 0, happiness = 10),
+            criminalRecord = CriminalRecord(hasRecord = true, timesArrested = 3),
+            education = EducationState(stage = SchoolStage.GRADUATED, gpa = 2.0f)
+        )
+        val initialSession = engine.generateJobInterview(candidate, "cashier")!!
+        val q1 = initialSession.currentQuestion!!
+        val session1 = engine.advanceInterview(initialSession, q1.choices.minByOrNull { it.scoreDelta }!!, candidate)
+        val q2 = session1.currentQuestion!!
+        val failedSession = engine.advanceInterview(session1, q2.choices.minByOrNull { it.scoreDelta }!!, candidate)
+
+        val (unemployedCharacter, result) = engine.hireFromInterview(candidate, failedSession)
+        assertTrue(result is CareerResult.Rejected)
+        assertNull(unemployedCharacter.career.currentJob)
     }
 }

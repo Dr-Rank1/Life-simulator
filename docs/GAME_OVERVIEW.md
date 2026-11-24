@@ -134,18 +134,22 @@ com.maisha.game.domain/
 #### 2. `EducationEngine`
 - **Role:** Manages academic lifecycle from kindergarten through postgraduate programs.
 - **Key Systems:**
-  - `ensureSchoolRoster`: Generates unique Classmates, Bully, Teachers, and Crush with dynamic personality stats.
+  - `ensureSchoolRoster`: Generates unique Classmates, Bully, Teachers, and Crush with dynamic personality stats on `education.schoolPeople`.
+  - `AcademicDossierCard`: High-impact dossier card displaying crest insignia, stage subtitle, GPA badge with honors color states (Summa, Magna, Cum Laude, Good, Probation), localized exam countdown (`{primaryExam}` / `{secondaryExam}` from `CountryCatalog`), tactile Study Effort selector pills (Slacker / Normal / Grind), and yearly action pips (Academic + Social).
   - `tickSchoolYear`: Ages school NPCs, decays unmaintained bonds, resets yearly action flags, rolls exam outcomes.
   - `performSchoolActivity`: Processes study groups, library study, teacher help, social hangouts, bully confrontations, skipping class, and school dances.
-  - `SchoolClubs`: Manages membership, practice intensity, officer promotions, rivalry challenges, fundraisers, letter jackets, and leadership responsibilities (`leadClubStrategy` for tactical advantage and `mentorClubJunior` for grooming underclassmen and boosting school reputation).
+  - `SchoolClubs`: Upgraded active club card featuring a 3-tier Rank Insignia Stepper (`Member` &rarr; `Officer` &rarr; `Captain`), Team Chemistry (`(clubPrestige + clubSkill)/2`) and Rivalry Intensity meters, tournament/scholarship progress badges (`clubAwardsWon`, `clubMajorEventReady`, varsity scholarship eligibility), practice intensity, rivalry challenges, fundraisers, letter jackets, and leadership responsibilities (`leadClubStrategy` and `mentorClubJunior`).
+  - `SchoolPeople`: Classmates, Best Friend, Bully, Teacher, and Crush rendered with procedural avatars, role badges, clique pills (`Nerds`, `Jocks`, `Populars`, `Rebels`, `Artsy`), rapport progress bars, and one-tap interaction chips (`Chat`, `Compliment`, `Hang Out`, `Flirt`, `Ask Out`, `Stand Up`, `Befriend`, `Ask Help`).
   - `UniversitySystem`: Handles application gates, tuition billing, student loan interest, campus jobs, internships, honors, and post-grad career track offers.
 
 #### 3. `CareerEngine`
 - **Role:** Drives employment, corporate ladders, office politics, and fame pathways.
 - **Key Systems:**
-  - Country-specific job market listings with qualifications and interview tests.
+  - `CareerHeroCard`: High-impact Another Life style dashboard card featuring custom vector role badges (Military, Tech, Medical, Legal, Corporate, Star, General), 6-tier corporate stepper (`Entry` &rarr; `Mid` &rarr; `Senior` &rarr; `Lead` &rarr; `Director` &rarr; `Executive`), salary + annual raise projection pill (accounting for grind/normal/coast effort and promotion readiness), dynamic performance meter with color states, and burnout/stress warning bar with alert thresholds.
+  - `JobOpportunityCard`: Bold opportunity cards with role illustrations, salary range pills (`formatMoney(base)` &rarr; `formatMoney(max)`), requirement badges (`Degree`, `Smarts`, `Looks`, `Experience`), and "Apply & Interview" trigger.
+  - `JobInterviewSession`: Interactive 2-question interview mini-challenge before hiring. Features panel feedback notes, candidate bonus calculated from Smarts, Happiness, and criminal record, scoring thresholds (&ge; 35 points to pass), and pass/rejection resolution via `hireFromInterview`.
   - Corporate ladder hierarchy: Entry &rarr; Mid &rarr; Senior &rarr; Lead &rarr; Director &rarr; Executive.
-  - `WorkplaceRoster`: Generates Boss/Supervisor (Strictness, Competence) and Coworkers.
+  - `WorkplaceRosterSheet`: Upgraded supervisor and coworker cards featuring `MiniMeter` competence and strictness meters, rapport bars, and tactile icon action buttons (Schmooze, Collaborate, Ask Raise, Pitch Promotion, Prank, Report to HR, Romance, Mentor Request) equipped with risk badges (`Low`, `Med`, `High`) and cooldown indicators.
   - Workplace agency: Schmoozing boss, asking for raises/promotions, collaborating, pranking, reporting to HR, asking coworkers for mentorship (`MENTOR_REQUEST`), and pitching innovative projects (`PITCH_PROJECT`).
   - Workplace anti-farming: Coworkers track `interactedThisYear` with badge indicators to prevent repeated exploitation.
   - Office politics: Performance Improvement Plans (PIP), credit-stealing, burnout, and severance.
@@ -153,24 +157,37 @@ com.maisha.game.domain/
   - Student part-time jobs & side hustles (balancing energy and study).
   - Talent & Fame Hub: Athletic and musical pathways, gigs, idle fame decay, paparazzi, and endorsements.
 
-#### 4. `FinanceEngine`
-- **Role:** Manages wealth, cash flow, debt, assets, and estate planning.
+#### 4. `FinanceEngine` & Personal Economy Ecosystem
+- **Role:** Manages wealth, cash flow, credit scoring, debt, assets, macroeconomic cycles, and estate planning.
 - **Key Systems:**
-  - Annual income tax calculations and living expenses scaling with country economy tiers.
-  - **Mortgage Engine:** 20–50% down payment, 30-year fixed amortization, annual principal/interest payments, equity recovery upon sale.
-  - **Principal Prepayments:** `prepayMortgagePrincipal` enables players to make lump-sum principal paydowns, immediately lowering remaining mortgage debt and proportionally reducing annual payments.
-  - **Luxury Assets & Preventative Servicing:** Cars, speedboats, yachts, and private jets with realistic depreciation and monthly maintenance; `serviceAsset` provides preventative upkeep that restores condition and grants full immunity against annual wear and critical breakdown events.
-  - Student loan interest accrual and repayment schedules.
-  - Estate planning: Wills (Spouse, Equal Split, Favorite Child, Charity).
+  - **Dynamic Credit Score (300-850):** Driven by on-time mortgage and loan payments, payment streaks, shortfall defaults (-35), debt-to-income (DTI) drag, and criminal convictions (-20 per felony). Gates mortgage qualification (minimum 500 score required) and sets tiered down-payment requirements (10% Excellent, 20% Good, 25% Fair, 40% Poor) and APR interest rates (5.5% to 12.0%).
+  - **Transparent Annual Cash-Flow Breakdown (`computeAnnualCashFlow`):** Itemized ledger computing Gross Income (primary salary, part-time & side gigs, rental yields, investment/savings dividends, retirement pensions, business dividends, monetized content revenue) minus Deductions (progressive income tax, living costs, mortgage service, student loan repayment, asset maintenance, child support, pet care) to project net annual surplus or deficit.
+  - **4-State Macroeconomic Cycle:** Simulates fluctuating national economic climates (`BOOM`, `STEADY`, `INFLATION_SURGE`, `RECESSION`). Shifts property valuations, portfolio returns, living costs, upkeep multipliers, and company downsizing/layoff frequencies across in-game years. Backwards-compatible `EconomicClimateSerializer` transparently bridges legacy save states (`NEUTRAL` &rarr; `STEADY`, `BUST` &rarr; `RECESSION`).
+  - **Banking, Savings & Junior Trust:** Distinguishes liquid wallet cash from interest-bearing savings and investment portfolios. Minor characters (ages 0-17) can deposit gift money into a Junior Trust Piggy Bank which automatically unlocks and transfers into liquid funds upon reaching adulthood at age 18. Age 0-2 infancy zero-stress protections are strictly enforced.
+  - **Mortgage Engine & Principal Prepayments:** 30-year fixed amortization tied to credit score and community standing discounts. `prepayMortgagePrincipal` enables lump-sum paydowns that reduce principal balance, lower future annual payments, and boost credit score (+15 for prepayment, +25 for full payoff).
+  - **Luxury Assets & Preventative Servicing:** Houses, cars, speedboats, yachts, and private jets with country-scaled pricing, depreciation, and upkeep. Preventative servicing grants annual immunity to wear and critical breakdowns.
+  - **Student Loans & Estate Planning:** Progressive repayments tied to wages, and full will customization across spouse, equal child split, or charities.
+  - **Tactile Financial Dashboard (`AssetsScreen`):** `FinanceSummaryCard` at the top of the assets tab displaying Net Worth, Liquid Cash, Net Cash Flow (+/-), Credit Rating meter, and Economic Climate chip, backed by tactile bottom sheets: `CashFlowLedgerSheet` (full itemized breakdown) and `DebtLiabilitiesSheet` (mortgage and student loan payoff controls).
 
-#### 5. `RelationshipEngine`
-- **Role:** Governs family, romance, social networks, and domestic pets.
+#### 5. `RelationshipEngine` & Character Interaction Ecosystem
+- **Role:** Governs family lineages, romance, social networks, domestic pets, and BitLife-grade tactical character interaction sheets.
 - **Key Systems:**
-  - Generates realistic parents, siblings, children, friends, and enemies.
-  - **Interactive Matchmaking:** `DatingMatchSheet` candidate profiles (Age, Occupation, Looks, Smarts, Crazy/Drama %).
-  - Relationship progression: Casual Dating &rarr; Exclusive &rarr; Engaged &rarr; Married.
-  - Weddings & Prenups: Courthouse, Local Venue, Luxury Destination venues; prenuptial agreement reactions driven by partner Crazy/Karma.
+  - Generates realistic parents, siblings, children, friends, rivals, benefactors, and enemies.
+  - **BitLife-Style Character Detail Sheet (`PersonDetailSheet`):**
+    - High-impact character header featuring 64dp `ProceduralAvatarPortrait` with live mood/expression synced to relationship & temperament (`Expression.ANGRY`, `SAD`, `HAPPY`, `SURPRISED`, or `NEUTRAL`).
+    - Dynamic role and clique badge pills (Spouse, Parent, Sibling, Child, Rival, Ally) with marital stage chips.
+    - Dual color-coded stat bars for Relationship Level and Temperament/Drama (`member.crazy`).
+    - Reactive speech/thought quote banner updating immediately after every interaction with floating delta feedback pills (`+Bond`, `-Bond`, cash deltas).
+    - Tactile 2-column grid of custom vector icon interaction tiles with action cost/free pills and explicit "Used" status indicators for `interactedTypesThisYear`.
+  - **Sleek Matchmaking (`DatingMatchSheet`):**
+    - Procedural portrait profile cards displaying candidate age, occupation, national flag, salary tier badges (Modest, Middle Class, High Earner, Wealthy), and Looks/Smarts/Drama/Finances meters.
+    - Tactile Pass and Ask Out buttons with spring press feedback and 100% clean vector icons (zero emojis).
+  - **Family & Pets Roster (`FamilyScreen` & `PetDetailSheet`):**
+    - Clean hierarchical grouping: Partner &rarr; Parents &rarr; Siblings &rarr; Children &rarr; Friends/Rivals &rarr; Others &rarr; Pets.
+    - Roster cards display proactive "Needs Attention" and "Milestone" visual cue badges.
+    - Pet care cards and sheets with vector species icons, dual bond/health meters, and tactile Feed, Play, and Vet care actions.
   - Anti-Farming Shield: `interactedTypesThisYear` prevents spamming interactions on the same NPC in a single turn across infancy (0–2), childhood (3–5), adult children, and romantic partners.
+  - Weddings & Prenups: Courthouse, Local Venue, Luxury Destination venues; prenuptial agreement reactions driven by partner Crazy/Karma.
   - Pet adoption, veterinary healthcare, feeding, walking, training, and mortality.
 
 #### 6. `HealthEngine`
@@ -367,10 +384,10 @@ Maisha has undergone a complete **Material 3 modernization**:
 │  [Happiness: 85%] [Health: 92%] [Smarts: 78%] [Looks]  │
 ├────────────────────────────────────────────────────────┤
 │ Connected Year Journal Timeline                        │
-│  • Age 18: Graduated High School with Honors 🎓        │
+│  • Age 18: Graduated High School with Honors           │
 │  • Age 18: Enrolled in CS at National University       │
 │  • Age 19: Started Corporate Internship                │
-│  • Age 20: Promoted to Junior Developer 🎉             │
+│  • Age 20: Promoted to Junior Developer                │
 ├────────────────────────────────────────────────────────┤
 │ [ 3D Tactile Age Up Button (Spring Physics & Haptic) ] │
 ├────────────────────────────────────────────────────────┤
@@ -383,13 +400,15 @@ Maisha has undergone a complete **Material 3 modernization**:
 1. **`ProceduralAvatarPortrait`:** Over 1,180 lines of custom 2D Canvas rendering that procedurally composes skin tones, hair textures, facial features, expressions, and accessories without requiring external network calls.
 2. **`LeftNavRail`:** Adaptive navigation rail that automatically activates on tablets, foldables, and landscape orientations, leaving the bottom bar for compact phones.
 3. **`InsetCardContainer`:** Elevated card surfaces utilizing warm neutral canvas backgrounds (`#F8F9FA`), pure paper white cards (`#FFFFFF`), and refined 1dp hairline outlines (`#E2E8F0`).
-4. **`DrillDownRow` List Architecture:** Eliminates overwhelming nested card walls on 360dp screens by presenting clean, discoverable drill-down lists that open dedicated `ModalBottomSheet`s.
-5. **Tactile `3D AgeUpButton`:** Custom 3D button with layered depth, gradient face, spring depression physics, and synchronized audio-haptic feedback.
+4. **`DrillDownRow` List Architecture:** Eliminates overwhelming nested card walls on 360dp screens by presenting clean, discoverable drill-down lists that open dedicated `ModalBottomSheet`s. Features price and upkeep pills, risk tags (Low, Med, High), and clear age-gated lock badges (e.g., Age 14+, Age 16+, Age 18+).
+5. **Tactile `3D AgeUpButton`:** Custom 3D button with layered depth, gradient face, spring depression physics, and synchronized audio-haptic feedback with immediate tactile tap on touch down.
 6. **Elevated `FloatingStatChange` Delta Layer:** Real-time floating status and currency badges with scale-in and ease-out float animation, dark translucent slate surfaces (`#0F172A`), category icons, and non-blocking tap passthrough for instant visual feedback on actions and age-ups.
 7. **Contextual `This Year` Focus Strip:** A dynamic, compact card atop the Life timeline highlighting 2–3 timely priorities (e.g. failing health, low mood, childhood hobbies, school cliques, curfews, adulthood crossroads, performance improvement plans, or weekly challenges) with direct tactile action shortcuts.
 8. **Classified Story Timeline Cards:** Narrative logs grouped into semantic story categories (`MILESTONE`, `CRIME_DRAMA`, `CAREER_SCHOOL`, `FAMILY_ROMANCE`, `HEALTH_WELLNESS`, `GENERAL`) with distinctive golden milestone cards, incident badges, and category iconography.
 9. **Living NPCs (Personality Tags & Reactive Dialogue):** Relationship (`PersonDetailSheet`) and workplace (`WorkplaceRosterSheet`) sheets featuring dynamic personality tag chips (*Devoted*, *Friendly*, *Distant*, *Hot-tempered*, *Level-headed*, *Strict*, *Supportive*, *Ambitious*, *Slacker*) and reactive 1-line dialogue speech bubbles responding to relationship standing.
-10. **Rich Tactical `ActionCard`s:** Activity cards featuring risk level chips (*Low Risk*, *Moderate Risk*, *High Risk*) and energy drain indicators (*1⚡*, *2⚡*) alongside icon art and category accents.
+10. **Rich Tactical `ActionCard`s:** Activity cards featuring risk level chips (*Low Risk*, *Moderate Risk*, *High Risk*) and energy drain indicators alongside icon art and category accents.
+11. **Dramatic Event Modals (`EventDialogStyled`):** Dynamic event popups with 8 high-impact categories (`Milestone`, `Windfall`, `Scandal`, `Romance`, `School`, `Career`, `Health`, `Underworld`) with custom vector emblems, real-time country flavor placeholder interpolation, and tactile choice selection cards triggering matching sound and haptic waveforms.
+12. **Assets Equity & Lifestyle Engine (`AssetsScreen`):** Displays real-time home equity calculations (`currentValue - mortgageBalance`), percentage appreciation/depreciation badges, and playable lifestyle actions (`Take Yacht Out` for boats, `Charter Jet Trip` for private jets).
 
 ---
 

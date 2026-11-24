@@ -861,6 +861,9 @@ class GameEngine @Inject constructor(
     fun withdrawSavings(character: Character, amount: Int): FinanceEngine.InvestmentResult =
         financeEngine.withdrawSavings(character, amount)
 
+    fun depositJuniorTrust(character: Character, amount: Int): FinanceEngine.InvestmentResult =
+        financeEngine.depositJuniorTrust(character, amount)
+
     fun setLivingStandard(
         character: Character,
         standard: com.maisha.game.data.model.LivingStandard
@@ -1400,6 +1403,7 @@ class GameEngine @Inject constructor(
         var updated = financeEngine.applyEconomicShift(character).character
         updated = financeEngine.applyPortfolioMarketTick(updated)
         updated = financeEngine.applySavingsInterest(updated)
+        updated = financeEngine.unlockJuniorTrustAtAge18(updated)
         updated = financeEngine.applyPension(updated)
         updated = financeEngine.applyPetUpkeep(updated)
         if (updated.assets.isNotEmpty()) {
@@ -1410,6 +1414,7 @@ class GameEngine @Inject constructor(
         }
         updated = financeEngine.applyCostOfLiving(updated)
         updated = financeEngine.tickStudentLoan(updated)
+        updated = financeEngine.tickCreditScoreAndCashFlow(updated)
         return updated
     }
 

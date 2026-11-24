@@ -53,7 +53,9 @@ object TestFixtures {
         bucketList: List<com.maisha.game.data.model.BucketGoal> = emptyList(),
         doubleLife: com.maisha.game.data.model.DoubleLifeState = com.maisha.game.data.model.DoubleLifeState(),
         socialEcosystem: com.maisha.game.data.model.SocialEcosystemState = com.maisha.game.data.model.SocialEcosystemState(),
-        politics: com.maisha.game.data.model.PoliticalState = com.maisha.game.data.model.PoliticalState()
+        politics: com.maisha.game.data.model.PoliticalState = com.maisha.game.data.model.PoliticalState(),
+        finance: com.maisha.game.data.model.PersonalFinanceState = com.maisha.game.data.model.PersonalFinanceState(),
+        economicState: com.maisha.game.data.model.EconomicState = com.maisha.game.data.model.EconomicState()
     ): Character = Character(
         name = name,
         age = age,
@@ -85,7 +87,9 @@ object TestFixtures {
         bucketList = bucketList,
         doubleLife = doubleLife,
         socialEcosystem = socialEcosystem,
-        politics = politics
+        politics = politics,
+        finance = finance,
+        economicState = economicState
     )
 
     fun person(
@@ -95,6 +99,7 @@ object TestFixtures {
         age: Int = 20,
         relationshipLevel: Int = 60,
         interactedThisYear: Boolean = false,
+        interactedTypesThisYear: List<String> = emptyList(),
         gender: Gender = Gender.FEMALE,
         countryCode: String = "US",
         isMarried: Boolean = false
@@ -106,6 +111,7 @@ object TestFixtures {
         age = age,
         relationshipLevel = relationshipLevel,
         interactedThisYear = interactedThisYear,
+        interactedTypesThisYear = interactedTypesThisYear,
         countryCode = countryCode,
         isMarried = isMarried
     )
@@ -134,17 +140,34 @@ object TestFixtures {
         type: AssetType = AssetType.MOTORBIKE,
         isHeirloom: Boolean = false,
         generationAcquired: Int = 1,
-        name: String = "Test Asset"
+        name: String = "Test Asset",
+        purchasePrice: Int = currentValue,
+        mortgageBalance: Int = 0,
+        annualMortgagePayment: Int = 0,
+        mortgageInterestRate: Double = 0.08,
+        isRentedOut: Boolean = false,
+        tenantHappiness: Int? = null,
+        renovationLevel: Int = 0,
+        servicedThisYear: Boolean = false,
+        catalogId: String? = null
     ): Asset = Asset(
         id = id,
+        catalogId = catalogId,
         type = type,
         name = name,
-        purchasePrice = currentValue,
+        purchasePrice = purchasePrice,
         currentValue = currentValue,
         condition = condition,
         monthlyUpkeep = monthlyUpkeep,
         isHeirloom = isHeirloom,
-        generationAcquired = generationAcquired
+        generationAcquired = generationAcquired,
+        isRentedOut = isRentedOut,
+        tenantHappiness = tenantHappiness,
+        renovationLevel = renovationLevel,
+        mortgageBalance = mortgageBalance,
+        annualMortgagePayment = annualMortgagePayment,
+        mortgageInterestRate = mortgageInterestRate,
+        servicedThisYear = servicedThisYear
     )
 
     fun pet(

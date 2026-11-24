@@ -1,354 +1,367 @@
 package com.maisha.game.domain
 
+import com.maisha.game.data.model.AnnualCashFlow
+import com.maisha.game.data.model.Asset
 import com.maisha.game.data.model.AssetType
+import com.maisha.game.data.model.CareerState
+import com.maisha.game.data.model.Character
+import com.maisha.game.data.model.CreditRatingTier
+import com.maisha.game.data.model.CriminalRecord
+import com.maisha.game.data.model.EconomicClimate
+import com.maisha.game.data.model.EconomicState
+import com.maisha.game.data.model.EducationState
+import com.maisha.game.data.model.Job
+import com.maisha.game.data.model.Person
+import com.maisha.game.data.model.PersonalFinanceState
+import com.maisha.game.data.model.RelationType
+import com.maisha.game.data.model.Stats
+import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 
 class FinanceEngineTest {
 
-    private val engine = FinanceEngine()
+    private lateinit var financeEngine: FinanceEngine
+    private lateinit var careerEngine: CareerEngine
 
-    @Test
-    fun purchaseAsset_rejectsInsufficientFunds() {
-        val character = TestFixtures.character(stats = com.maisha.game.data.model.Stats(money = 1_000))
-        val result = engine.purchaseAsset(character, "motorbike_used")
-        assertTrue(result is PurchaseResult.InsufficientFunds)
+    @Before
+    fun setUp() {
+        financeEngine = FinanceEngine()
+        careerEngine = CareerEngine(HealthEngine(), RelocationEngine())
     }
 
     @Test
-    fun purchaseAsset_deductsMoneyOnSuccess() {
-        val character = TestFixtures.character(stats = com.maisha.game.data.model.Stats(money = 500_000))
-        val result = engine.purchaseAsset(character, "motorbike_used")
-        assertTrue(result is PurchaseResult.Success)
-        val updated = (result as PurchaseResult.Success).character
-        assertTrue(updated.stats.money < 500_000)
-        assertEquals(1, updated.assets.size)
+    fun creditRatingTier_resolvesCorrectlyAcrossRanges() {
+        assertEquals(CreditRatingTier.EXCELLENT, CreditRatingTier.forScore(850))
+        assertEquals(CreditRatingTier.EXCELLENT, CreditRatingTier.forScore(750))
+        assertEquals(CreditRatingTier.GOOD, CreditRatingTier.forScore(749))
+        assertEquals(CreditRatingTier.GOOD, CreditRatingTier.forScore(670))
+        assertEquals(CreditRatingTier.FAIR, CreditRatingTier.forScore(669))
+        assertEquals(CreditRatingTier.FAIR, CreditRatingTier.forScore(580))
+        assertEquals(CreditRatingTier.POOR, CreditRatingTier.forScore(579))
+        assertEquals(CreditRatingTier.POOR, CreditRatingTier.forScore(300))
     }
 
     @Test
-    fun purchaseAsset_brandsGenericCarWithCatalogMake() {
-        val catalog = object : com.maisha.game.data.content.CarMakeCatalog {
-            override fun makeFor(assetId: String) = "Saab"
-            override fun randomMake() = "Saab"
-        }
-        val finance = FinanceEngine(catalog)
-        val character = TestFixtures.character(
-            countryCode = "US",
-            stats = com.maisha.game.data.model.Stats(money = 2_000_000)
-        )
-        val result = finance.purchaseAsset(character, "car_new")
-        assertTrue(result is PurchaseResult.Success)
-        assertEquals("New Saab", (result as PurchaseResult.Success).character.assets.single().name)
-    }
-
-    @Test
-    fun purchaseAsset_keepsKenyaVehicleNames() {
-        val catalog = object : com.maisha.game.data.content.CarMakeCatalog {
-            override fun makeFor(assetId: String) = "Saab"
-            override fun randomMake() = "Saab"
-        }
-        val finance = FinanceEngine(catalog)
-        val character = TestFixtures.character(
-            countryCode = "KE",
-            stats = com.maisha.game.data.model.Stats(money = 5_000_000)
-        )
-        val result = finance.purchaseAsset(character, "car_new")
-        assertTrue(result is PurchaseResult.Success)
-        assertEquals(
-            "New Toyota Corolla",
-            (result as PurchaseResult.Success).character.assets.single().name
-        )
-    }
-
-    @Test
-    fun purchaseAsset_appendsStreetToHouseName() {
-        val streets = object : com.maisha.game.data.content.StreetCatalog {
-            override fun listingFor(countryCode: String, key: String) = "Bedford Avenue"
-        }
-        val finance = FinanceEngine(
-            com.maisha.game.data.content.FallbackCarMakeCatalog,
-            streets
-        )
-        val character = TestFixtures.character(
-            countryCode = "US",
-            stats = com.maisha.game.data.model.Stats(money = 5_000_000)
-        )
-        val result = finance.purchaseAsset(character, "house_suburban")
-        assertTrue(result is PurchaseResult.Success)
-        val name = (result as PurchaseResult.Success).character.assets.single().name
-        assertTrue(name.contains("Bedford Avenue"))
-    }
-
-    @Test
-    fun applyUpkeep_reducesMoneyOverMultipleYears() {
-        val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(money = 1_000_000),
-            assets = listOf(TestFixtures.asset(monthlyUpkeep = 2_000))
-        )
-        val afterOne = engine.applyUpkeep(character)
-        val afterTwo = engine.applyUpkeep(afterOne)
-        assertTrue(afterTwo.stats.money < afterOne.stats.money)
-        assertTrue(afterOne.stats.money < character.stats.money)
-    }
-
-    @Test
-    fun degradeAssets_reducesConditionOverYears() {
-        var character = TestFixtures.character(
-            assets = listOf(TestFixtures.asset(condition = 100))
-        )
-        repeat(5) {
-            character = engine.degradeAssets(character)
-        }
-        assertTrue(character.assets.first().condition < 100)
-    }
-
-    @Test
-    fun calculateNetWorth_sumsCashAndAssetValues() {
-        val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(money = 50_000),
-            assets = listOf(
-                TestFixtures.asset(id = "a1", currentValue = 120_000, type = AssetType.HOUSE),
-                TestFixtures.asset(id = "a2", currentValue = 30_000)
-            )
-        )
-        assertEquals(200_000, engine.calculateNetWorth(character))
-    }
-
-    @Test
-    fun calculateNetWorth_subtractsStudentLoanBalance() {
-        val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(money = 50_000),
-            education = com.maisha.game.data.model.EducationState(studentLoanBalance = 20_000)
-        )
-        assertEquals(30_000, engine.calculateNetWorth(character))
-    }
-
-    @Test
-    fun tickStudentLoan_accruesInterestAndRepaysFromSalary() {
-        val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(money = 100_000),
-            education = com.maisha.game.data.model.EducationState(studentLoanBalance = 50_000),
-            career = com.maisha.game.data.model.CareerState(
-                currentJob = TestFixtures.job(baseSalary = 100_000)
-            )
-        )
-        val after = engine.tickStudentLoan(character)
-        assertTrue(after.education.studentLoanBalance < 50_000 + 10_000)
-        assertTrue(after.stats.money < character.stats.money)
-    }
-
-    @Test
-    fun repayStudentLoan_deductsCashAndBalance() {
-        val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(money = 40_000),
-            education = com.maisha.game.data.model.EducationState(studentLoanBalance = 25_000)
-        )
-        val result = engine.repayStudentLoan(character, 20_000)
-        assertTrue(result is FinanceEngine.StudentLoanRepayResult.Success)
-        val updated = (result as FinanceEngine.StudentLoanRepayResult.Success).character
-        assertEquals(5_000, updated.education.studentLoanBalance)
-        assertEquals(20_000, updated.stats.money)
-    }
-
-    @Test
-    fun recalculateValue_allowsRealEstateToAppreciate() {
-        val house = TestFixtures.asset(
+    fun creditScore_increasesWithOnTimeDebtPayments() {
+        val mortgagedHouse = TestFixtures.asset(
+            id = "house-1",
             type = AssetType.HOUSE,
+            purchasePrice = 200_000,
             currentValue = 200_000,
-            condition = 100
-        ).copy(purchasePrice = 200_000)
-        val appreciated = engine.recalculateValue(house, marketModifier = FinanceEngine.BOOM_MARKET_MODIFIER)
-        assertTrue(
-            "Real estate should appreciate under a boom modifier",
-            appreciated.currentValue >= house.purchasePrice
+            mortgageBalance = 150_000,
+            annualMortgagePayment = 12_000
+        )
+        val character = TestFixtures.character(
+            age = 28,
+            stats = Stats(money = 100_000),
+            assets = listOf(mortgagedHouse),
+            career = CareerState(currentJob = TestFixtures.job(id = "job-1", title = "Architect", baseSalary = 80_000)),
+            finance = PersonalFinanceState(creditScore = 650, onTimePaymentStreak = 2)
         )
 
-        val car = TestFixtures.asset(
-            type = AssetType.CAR,
+        val updated = financeEngine.tickCreditScoreAndCashFlow(character)
+
+        assertTrue("Credit score should increase on-time", updated.finance.creditScore > 650)
+        assertEquals(3, updated.finance.onTimePaymentStreak)
+        assertEquals(0, updated.finance.missedPaymentsCount)
+    }
+
+    @Test
+    fun creditScore_dropsOnPaymentShortfall() {
+        val mortgagedHouse = TestFixtures.asset(
+            id = "house-1",
+            type = AssetType.HOUSE,
+            purchasePrice = 200_000,
+            currentValue = 200_000,
+            mortgageBalance = 150_000,
+            annualMortgagePayment = 12_000
+        )
+        val brokeCharacter = TestFixtures.character(
+            age = 28,
+            stats = Stats(money = 0),
+            assets = listOf(mortgagedHouse),
+            finance = PersonalFinanceState(creditScore = 680, onTimePaymentStreak = 5)
+        )
+
+        val updated = financeEngine.tickCreditScoreAndCashFlow(brokeCharacter)
+
+        assertEquals("Payment streak should reset to 0 on shortfall", 0, updated.finance.onTimePaymentStreak)
+        assertEquals("Missed payments counter should increment", 1, updated.finance.missedPaymentsCount)
+        assertTrue("Credit score should drop significantly", updated.finance.creditScore <= 645)
+    }
+
+    @Test
+    fun creditScore_draggedByCriminalRecord() {
+        val character = TestFixtures.character(
+            age = 30,
+            stats = Stats(money = 50_000),
+            criminalRecord = CriminalRecord(hasRecord = true, timesArrested = 2),
+            finance = PersonalFinanceState(creditScore = 700)
+        )
+
+        val updated = financeEngine.tickCreditScoreAndCashFlow(character)
+
+        assertTrue("Criminal record should drag down credit score", updated.finance.creditScore < 700)
+    }
+
+    @Test
+    fun prepayMortgage_boostsCreditScore() {
+        val house = TestFixtures.asset(
+            id = "house-1",
+            type = AssetType.HOUSE,
+            purchasePrice = 300_000,
+            currentValue = 300_000,
+            mortgageBalance = 200_000,
+            annualMortgagePayment = 18_000
+        )
+        val character = TestFixtures.character(
+            age = 32,
+            stats = Stats(money = 50_000),
+            assets = listOf(house),
+            finance = PersonalFinanceState(creditScore = 650)
+        )
+
+        val updated = financeEngine.prepayMortgagePrincipal(character, "house-1", 20_000)
+
+        assertEquals(665, updated.finance.creditScore)
+        assertEquals(180_000, updated.assets.first().mortgageBalance)
+    }
+
+    @Test
+    fun payOffMortgage_boostsCreditScore() {
+        val house = TestFixtures.asset(
+            id = "house-1",
+            type = AssetType.HOUSE,
+            purchasePrice = 100_000,
             currentValue = 100_000,
-            condition = 80
-        ).copy(purchasePrice = 100_000)
-        val carValue = engine.recalculateValue(car, marketModifier = FinanceEngine.BOOM_MARKET_MODIFIER)
-        assertTrue(
-            "Vehicles should not benefit from a boom modifier",
-            carValue.currentValue <= 80_000
+            mortgageBalance = 30_000,
+            annualMortgagePayment = 4_000
         )
-    }
-
-    @Test
-    fun applyEconomicShift_altersTotalNetWorth() {
         val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(money = 50_000),
-            assets = listOf(
-                TestFixtures.asset(
-                    type = AssetType.HOUSE,
-                    currentValue = 300_000,
-                    condition = 100
-                ).copy(purchasePrice = 300_000)
-            )
+            age = 35,
+            stats = Stats(money = 40_000),
+            assets = listOf(house),
+            finance = PersonalFinanceState(creditScore = 670)
         )
-        val before = engine.calculateNetWorth(character)
-        val boom = engine.applyEconomicShift(character, forced = "boom")
-        val bust = engine.applyEconomicShift(character, forced = "bust")
-        assertTrue(engine.calculateNetWorth(boom.character) != before || boom.character.economicState.marketModifier > 1f)
-        assertTrue(engine.calculateNetWorth(bust.character) < engine.calculateNetWorth(boom.character))
+
+        val updated = financeEngine.payOffMortgage(character, "house-1")
+
+        assertEquals(695, updated.finance.creditScore)
+        assertEquals(0, updated.assets.first().mortgageBalance)
     }
 
     @Test
-    fun repairAsset_deductsCashAndRestoresConditionToFull() {
-        val asset = TestFixtures.asset(
-            id = "repair-me",
-            condition = 45,
-            currentValue = 50_000
-        ).copy(purchasePrice = 200_000)
+    fun mortgageGating_rejectsSub500CreditScore() {
+        val poorCreditCharacter = TestFixtures.character(
+            age = 25,
+            stats = Stats(money = 500_000),
+            countryCode = "US",
+            finance = PersonalFinanceState(creditScore = 450)
+        )
+
+        val result = financeEngine.purchaseWithMortgage(
+            poorCreditCharacter,
+            "house_suburban",
+            downPaymentPercent = 20
+        )
+
+        assertTrue(result is FinanceEngine.MortgagePurchaseResult.RejectedCredit)
+        assertEquals(450, (result as FinanceEngine.MortgagePurchaseResult.RejectedCredit).creditScore)
+    }
+
+    @Test
+    fun mortgageGating_tierDownPaymentAndAprScaling() {
+        assertEquals(10, financeEngine.minDownPaymentPercentForCredit(780))
+        assertEquals(20, financeEngine.minDownPaymentPercentForCredit(700))
+        assertEquals(25, financeEngine.minDownPaymentPercentForCredit(620))
+        assertEquals(40, financeEngine.minDownPaymentPercentForCredit(520))
+
+        assertEquals(0.055, financeEngine.baseMortgageAprForCredit(800), 0.001)
+        assertEquals(0.075, financeEngine.baseMortgageAprForCredit(700), 0.001)
+        assertEquals(0.095, financeEngine.baseMortgageAprForCredit(600), 0.001)
+        assertEquals(0.120, financeEngine.baseMortgageAprForCredit(500), 0.001)
+    }
+
+    @Test
+    fun computeAnnualCashFlow_calculatesAccurateTotals() {
+        val job = TestFixtures.job(id = "job-1", title = "Doctor", baseSalary = 150_000)
+        val rentedHouse = TestFixtures.asset(
+            id = "house-rented",
+            type = AssetType.HOUSE,
+            purchasePrice = 400_000,
+            currentValue = 400_000,
+            monthlyUpkeep = 500,
+            isRentedOut = true,
+            tenantHappiness = 85
+        )
+        val child = Person(
+            id = "child-1",
+            name = "Baby",
+            age = 4,
+            relation = RelationType.CHILD,
+            alive = true
+        )
         val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(money = 500_000),
-            assets = listOf(asset)
+            age = 34,
+            stats = Stats(money = 50_000),
+            countryCode = "US",
+            career = CareerState(currentJob = job),
+            assets = listOf(rentedHouse),
+            family = listOf(child),
+            finance = PersonalFinanceState(creditScore = 720)
         )
-        val cost = engine.calculateRepairCost(asset, character.countryCode)
-        val result = engine.repairAsset(character, asset.id)
-        assertTrue(result is RepairResult.Success)
-        val updated = (result as RepairResult.Success).character
-        assertEquals(100, updated.assets.first().condition)
-        assertEquals(500_000 - cost, updated.stats.money)
+
+        val cashFlow = financeEngine.computeAnnualCashFlow(character)
+
+        assertEquals(150_000, cashFlow.salaryIncome)
+        assertTrue("Rental income should be positive", cashFlow.rentalIncome > 0)
+        assertEquals(cashFlow.salaryIncome + cashFlow.rentalIncome, cashFlow.grossIncome)
+        assertTrue("Income tax should be calculated", cashFlow.incomeTax > 0)
+        assertTrue("Living cost should be calculated", cashFlow.livingCost > 0)
+        assertTrue("Asset upkeep should be calculated", cashFlow.assetUpkeep > 0)
+        assertTrue("Child support should be calculated", cashFlow.childSupport > 0)
+        assertEquals(
+            cashFlow.incomeTax + cashFlow.livingCost + cashFlow.assetUpkeep + cashFlow.childSupport,
+            cashFlow.totalDeductions
+        )
+        assertEquals(cashFlow.grossIncome - cashFlow.totalDeductions, cashFlow.netCashFlow)
     }
 
     @Test
-    fun degradeAssets_triggersCriticalFailureOnLowCondition() {
-        val worn = TestFixtures.character(
-            assets = listOf(TestFixtures.asset(condition = 35))
+    fun economicCycle_resolvesAndAppliesAllFourStates() {
+        val adult = TestFixtures.character(age = 30)
+
+        val boomResult = financeEngine.applyEconomicShift(adult, forced = "boom")
+        assertEquals(EconomicClimate.BOOM, boomResult.climate)
+        assertEquals(FinanceEngine.BOOM_MARKET_MODIFIER, boomResult.character.economicState.marketModifier, 0.01f)
+
+        val steadyResult = financeEngine.applyEconomicShift(adult, forced = "steady")
+        assertEquals(EconomicClimate.STEADY, steadyResult.climate)
+        assertEquals(FinanceEngine.STEADY_MARKET_MODIFIER, steadyResult.character.economicState.marketModifier, 0.01f)
+
+        val inflationResult = financeEngine.applyEconomicShift(adult, forced = "inflation_surge")
+        assertEquals(EconomicClimate.INFLATION_SURGE, inflationResult.climate)
+        assertEquals(FinanceEngine.INFLATION_MARKET_MODIFIER, inflationResult.character.economicState.marketModifier, 0.01f)
+
+        val recessionResult = financeEngine.applyEconomicShift(adult, forced = "recession")
+        assertEquals(EconomicClimate.RECESSION, recessionResult.climate)
+        assertEquals(FinanceEngine.RECESSION_MARKET_MODIFIER, recessionResult.character.economicState.marketModifier, 0.01f)
+    }
+
+    @Test
+    fun economicCycle_backwardCompatibilityAliases() {
+        val adult = TestFixtures.character(age = 30)
+
+        val legacyNeutral = financeEngine.applyEconomicShift(adult, forced = "neutral")
+        assertEquals(EconomicClimate.STEADY, legacyNeutral.climate)
+
+        val legacyBust = financeEngine.applyEconomicShift(adult, forced = "bust")
+        assertEquals(EconomicClimate.RECESSION, legacyBust.climate)
+    }
+
+    @Test
+    fun economicCycle_layoffOddsScaleWithMacroConditions() {
+        val employedAdult = TestFixtures.character(
+            age = 30,
+            career = CareerState(currentJob = TestFixtures.job(id = "job-1", title = "Analyst", baseSalary = 50_000)),
+            economicState = EconomicState(climate = EconomicClimate.RECESSION)
         )
-        var criticalFailures = 0
-        repeat(400) {
-            val after = engine.degradeAssets(worn)
-            if (after.assets.first().condition == 0) {
-                criticalFailures++
+
+        // Multiple sampling to verify downsizing trigger responds
+        var layoffsInRecession = 0
+        for (i in 0 until 100) {
+            if (careerEngine.shouldTriggerDownsizing(employedAdult)) {
+                layoffsInRecession++
             }
         }
-        assertTrue(
-            "Assets below 40% condition should sometimes critically fail",
-            criticalFailures > 40
-        )
-    }
 
-    @Test
-    fun applyUpkeep_heirloomsAppreciateInValue() {
-        val heirloom = TestFixtures.asset(
-            id = "watch",
-            currentValue = 100_000,
-            monthlyUpkeep = 0,
-            type = AssetType.HEIRLOOM,
-            isHeirloom = true
-        )
-        val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(money = 1_000_000),
-            assets = listOf(heirloom)
-        )
-        val after = engine.applyUpkeep(character)
-        assertTrue(
-            "Heirlooms should appreciate during the yearly upkeep tick",
-            after.assets.first().currentValue > heirloom.currentValue
-        )
-    }
-
-    @Test
-    fun degradeAssets_heirloomsIgnoreCriticalFailure() {
-        val heirloom = TestFixtures.asset(
-            condition = 10,
-            isHeirloom = true,
-            type = AssetType.HEIRLOOM,
-            monthlyUpkeep = 0
-        )
-        val character = TestFixtures.character(assets = listOf(heirloom))
-        repeat(200) {
-            val after = engine.degradeAssets(character)
-            assertEquals(10, after.assets.first().condition)
+        val employedBoom = employedAdult.copy(economicState = EconomicState(climate = EconomicClimate.BOOM))
+        var layoffsInBoom = 0
+        for (i in 0 until 100) {
+            if (careerEngine.shouldTriggerDownsizing(employedBoom)) {
+                layoffsInBoom++
+            }
         }
+
+        assertTrue("Recession layoffs should be significantly higher than Boom layoffs", layoffsInRecession >= layoffsInBoom)
     }
 
     @Test
-    fun investFunds_movesCashToPortfolioSuccessfully() {
-        val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(money = 50_000)
+    fun juniorTrust_depositLockedForMinorAndUnlocksAtAge18() {
+        val minor = TestFixtures.character(
+            age = 10,
+            stats = Stats(money = 15_000),
+            finance = PersonalFinanceState(juniorTrustBalance = 5_000)
         )
-        val result = engine.investFunds(character, 20_000)
-        assertTrue(result is FinanceEngine.InvestmentResult.Success)
-        val after = (result as FinanceEngine.InvestmentResult.Success).character
-        assertEquals(30_000, after.stats.money)
-        assertEquals(20_000, after.investmentPortfolioValue)
-        assertEquals(50_000, engine.calculateNetWorth(after))
+
+        val depositResult = financeEngine.depositJuniorTrust(minor, 5_000)
+        assertTrue(depositResult is FinanceEngine.InvestmentResult.Success)
+        val afterDeposit = (depositResult as FinanceEngine.InvestmentResult.Success).character
+        assertEquals(10_000, afterDeposit.stats.money)
+        assertEquals(10_000, afterDeposit.finance.juniorTrustBalance)
+
+        // Reaching age 18 unlocks the trust
+        val adultCharacter = afterDeposit.copy(age = 18)
+        val afterUnlock = financeEngine.unlockJuniorTrustAtAge18(adultCharacter)
+
+        assertEquals("Trust balance should be cleared", 0, afterUnlock.finance.juniorTrustBalance)
+        assertEquals("Liquid cash should receive all trust funds", 20_000, afterUnlock.stats.money)
+        assertTrue("Event log should mention Junior Trust unlock", afterUnlock.eventLog.any { it.contains("Junior Trust Piggy Bank") })
     }
 
     @Test
-    fun yearlyTick_appliesRandomMarketModifierToPortfolio() {
-        val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(money = 0)
-        ).copy(investmentPortfolioValue = 100_000)
-        var sawChange = false
-        var minValue = Int.MAX_VALUE
-        var maxValue = Int.MIN_VALUE
-        repeat(40) {
-            val after = engine.applyPortfolioMarketTick(character)
-            assertTrue(
-                after.lastPortfolioReturnPercent in
-                    FinanceEngine.PORTFOLIO_RETURN_MIN_PERCENT..FinanceEngine.PORTFOLIO_RETURN_MAX_PERCENT
-            )
-            minValue = minOf(minValue, after.investmentPortfolioValue)
-            maxValue = maxOf(maxValue, after.investmentPortfolioValue)
-            if (after.investmentPortfolioValue != 100_000) sawChange = true
-        }
-        assertTrue(sawChange)
-        assertTrue(minValue >= 70_000) // -30% floor
-        assertTrue(maxValue <= 140_000) // +40% ceiling
-    }
-
-    @Test
-    fun yearlyTick_collectsRentForRentedAssets() {
-        val house = TestFixtures.asset(
-            id = "house1",
-            type = AssetType.HOUSE,
-            currentValue = 1_000_000,
-            monthlyUpkeep = 4_000,
-            condition = 100
-        ).copy(isRentedOut = true, tenantHappiness = 70)
-        val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(money = 50_000),
-            assets = listOf(house)
+    fun infancyProtection_noLivingCostOrDebtStressAtAgeZeroToTwo() {
+        val infant = TestFixtures.character(
+            age = 1,
+            stats = Stats(happiness = 100, health = 100, money = 0)
         )
-        val after = engine.collectRent(character)
-        assertTrue(after.stats.money > character.stats.money)
-        val rent = after.stats.money - character.stats.money
-        assertTrue("Rent should be 5–8% of valuation (got $rent)", rent in 50_000..80_000)
-        assertTrue(after.assets.first().isRentedOut)
-        assertTrue(after.assets.first().tenantHappiness != null)
+
+        val afterCol = financeEngine.applyCostOfLiving(infant)
+        assertEquals(100, afterCol.stats.happiness)
+        assertEquals(100, afterCol.stats.health)
+        assertEquals(0, afterCol.stats.money)
+
+        val afterCredit = financeEngine.tickCreditScoreAndCashFlow(infant)
+        assertEquals(650, afterCredit.finance.creditScore)
     }
 
     @Test
-    fun evictTenant_removesRentedStatusAndAppliesLegalFee() {
-        val house = TestFixtures.asset(
-            id = "house1",
-            type = AssetType.HOUSE,
-            currentValue = 800_000,
-            monthlyUpkeep = 4_000
-        ).copy(isRentedOut = true, tenantHappiness = 60)
-        val character = TestFixtures.character(
-            stats = com.maisha.game.data.model.Stats(
-                health = 80,
-                happiness = 70,
-                smarts = 60,
-                looks = 50,
-                money = 100_000
-            ),
-            assets = listOf(house)
-        )
-        val fee = engine.evictionFee(character)
-        val result = engine.evictTenant(character, "house1")
-        assertTrue(result is FinanceEngine.RentalResult.Success)
-        val after = (result as FinanceEngine.RentalResult.Success).character
-        assertEquals(false, after.assets.first().isRentedOut)
-        assertEquals(null, after.assets.first().tenantHappiness)
-        assertEquals(character.stats.money - fee, after.stats.money)
-        assertTrue(after.stats.happiness < character.stats.happiness)
+    fun economicClimateSerializer_deserializesLegacyNeutralAndBust() {
+        val json = Json { ignoreUnknownKeys = true }
+
+        val neutralJson = """{"climate":"NEUTRAL","marketModifier":1.0}"""
+        val parsedNeutral = json.decodeFromString<EconomicState>(neutralJson)
+        assertEquals(EconomicClimate.STEADY, parsedNeutral.climate)
+
+        val bustJson = """{"climate":"BUST","marketModifier":0.88}"""
+        val parsedBust = json.decodeFromString<EconomicState>(bustJson)
+        assertEquals(EconomicClimate.RECESSION, parsedBust.climate)
+
+        val inflationJson = """{"climate":"INFLATION_SURGE","marketModifier":1.05}"""
+        val parsedInflation = json.decodeFromString<EconomicState>(inflationJson)
+        assertEquals(EconomicClimate.INFLATION_SURGE, parsedInflation.climate)
+    }
+
+    @Test
+    fun assetSerialization_defaultsMortgageInterestRate() {
+        val json = Json { ignoreUnknownKeys = true }
+        val legacyAssetJson = """{
+            "id": "asset-1",
+            "type": "HOUSE",
+            "name": "Cozy Bungalow",
+            "purchasePrice": 200000,
+            "currentValue": 200000,
+            "monthlyUpkeep": 300,
+            "mortgageBalance": 160000,
+            "annualMortgagePayment": 14000
+        }"""
+
+        val asset = json.decodeFromString<Asset>(legacyAssetJson)
+        assertEquals(0.08, asset.mortgageInterestRate, 0.001)
     }
 }

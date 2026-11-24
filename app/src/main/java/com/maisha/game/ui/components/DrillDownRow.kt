@@ -36,10 +36,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maisha.game.ui.theme.AppIcons
+import com.maisha.game.ui.theme.CoralNegative
+import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.InkTertiary
+import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.PaperWhite
 
 /**
@@ -58,10 +62,16 @@ fun DrillDownRow(
     leadingContent: (@Composable () -> Unit)? = null,
     trailingBadge: String? = null,
     trailingBadgeColor: Color? = null,
+    pricePill: String? = null,
+    riskPill: String? = null,
+    isAgeLocked: Boolean = false,
+    lockBadgeText: String? = null,
     trailingContent: (@Composable () -> Unit)? = null,
     enabled: Boolean = true,
     insideContainer: Boolean = false
 ) {
+    val isRowEnabled = enabled && !isAgeLocked
+
     val rowContent = @Composable {
         Row(
             modifier = Modifier
@@ -74,11 +84,10 @@ fun DrillDownRow(
             if (leadingContent != null) {
                 leadingContent()
             } else if (icon != null) {
-                // Vibrant solid squircle badge with pure white icon
-                val badgeColor = if (iconTint != Color.Unspecified && iconTint != Color.Transparent) {
-                    iconTint
-                } else {
-                    Color(0xFF10B981)
+                val badgeColor = when {
+                    isAgeLocked -> Color(0xFF94A3B8)
+                    iconTint != Color.Unspecified && iconTint != Color.Transparent -> iconTint
+                    else -> Color(0xFF10B981)
                 }
                 Box(
                     modifier = Modifier
@@ -88,7 +97,7 @@ fun DrillDownRow(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = icon,
+                        imageVector = if (isAgeLocked) AppIcons.Lock else icon,
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.size(20.dp)
@@ -96,7 +105,7 @@ fun DrillDownRow(
                 }
             }
 
-            // Title & Subtitle
+            // Title, Subtitle, & Optional Pills
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center
@@ -105,7 +114,7 @@ fun DrillDownRow(
                     text = title,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = if (enabled) Color(0xFF0F172A) else InkTertiary,
+                    color = if (isRowEnabled) Color(0xFF0F172A) else InkTertiary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontSize = 15.sp
@@ -115,16 +124,90 @@ fun DrillDownRow(
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF475569),
+                        color = if (isRowEnabled) Color(0xFF475569) else InkTertiary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 12.sp
                     )
                 }
+                if (!pricePill.isNullOrBlank() || !riskPill.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (!pricePill.isNullOrBlank()) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Color(0xFFF1F5F9))
+                                    .border(1.dp, Color(0xFFCBD5E1), RoundedCornerShape(6.dp))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = pricePill,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isRowEnabled) Color(0xFF0F172A) else InkTertiary,
+                                    fontSize = 10.sp
+                                )
+                            }
+                        }
+                        if (!riskPill.isNullOrBlank()) {
+                            val lower = riskPill.lowercase()
+                            val isHigh = "high" in lower
+                            val isMed = "med" in lower
+                            val riskBg = if (isHigh) CoralNegative.copy(alpha = 0.12f) else if (isMed) GoldAccent.copy(alpha = 0.15f) else LifeGreen.copy(alpha = 0.12f)
+                            val riskFg = if (isHigh) CoralNegative else if (isMed) Color(0xFFB45309) else LifeGreen
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(riskBg)
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = riskPill,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = riskFg,
+                                    fontSize = 10.sp
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
-            // Optional Trailing Badge or Custom Content
-            if (trailingBadge != null) {
+            // Optional Trailing Badge or Lock or Custom Content
+            if (isAgeLocked && lockBadgeText != null) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFFF1F5F9))
+                        .border(1.dp, Color(0xFFCBD5E1), RoundedCornerShape(8.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = AppIcons.Lock,
+                            contentDescription = null,
+                            tint = Color(0xFF64748B),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = lockBadgeText,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF475569),
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+            } else if (trailingBadge != null) {
                 val badgeBg = trailingBadgeColor ?: iconTint.copy(alpha = 0.14f)
                 val badgeText = if (trailingBadgeColor != null) Color.White else iconTint
                 Box(
@@ -150,7 +233,7 @@ fun DrillDownRow(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = Color(0xFF94A3B8),
+                    tint = if (isRowEnabled) Color(0xFF94A3B8) else Color(0xFFCBD5E1),
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -163,7 +246,7 @@ fun DrillDownRow(
                 .fillMaxWidth()
                 .heightIn(min = 58.dp)
                 .semantics { role = Role.Button }
-                .clickable(enabled = enabled, onClick = onClick),
+                .clickable(enabled = isRowEnabled, onClick = onClick),
             contentAlignment = Alignment.CenterStart
         ) {
             rowContent()
@@ -174,7 +257,7 @@ fun DrillDownRow(
                 .fillMaxWidth()
                 .heightIn(min = 64.dp)
                 .semantics { role = Role.Button }
-                .clickable(enabled = enabled, onClick = onClick),
+                .clickable(enabled = isRowEnabled, onClick = onClick),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = PaperWhite),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),

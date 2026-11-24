@@ -171,13 +171,49 @@ fun PersonCard(
                         }
                     }
                 }
-                Text(
-                    text = "$relationLabel, $ageLabel",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = "$relationLabel, $ageLabel",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (person.relationshipLevel < 40) {
+                        Surface(
+                            shape = RoundedCornerShape(3.dp),
+                            color = CoralNegative.copy(alpha = 0.15f),
+                            border = BorderStroke(0.5.dp, CoralNegative.copy(alpha = 0.4f))
+                        ) {
+                            Text(
+                                text = stringResource(R.string.badge_needs_attention).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = CoralNegative,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                fontSize = 8.sp
+                            )
+                        }
+                    } else if (person.milestones.isNotEmpty()) {
+                        Surface(
+                            shape = RoundedCornerShape(3.dp),
+                            color = GoldAccent.copy(alpha = 0.15f),
+                            border = BorderStroke(0.5.dp, GoldAccent.copy(alpha = 0.4f))
+                        ) {
+                            Text(
+                                text = stringResource(R.string.badge_recent_milestone).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = GoldAccent,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                fontSize = 8.sp
+                            )
+                        }
+                    }
+                }
             }
 
             Row(

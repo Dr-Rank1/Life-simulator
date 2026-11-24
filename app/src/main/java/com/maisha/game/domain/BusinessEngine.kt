@@ -199,8 +199,9 @@ class BusinessEngine @Inject constructor(
         // Net margin on revenue; payroll pressure scales with headcount vs revenue.
         val baseMargin = when (climate) {
             EconomicClimate.BOOM -> 0.18f + Random.nextFloat() * 0.14f
-            EconomicClimate.BUST -> -0.04f + Random.nextFloat() * 0.14f
-            EconomicClimate.NEUTRAL -> 0.08f + Random.nextFloat() * 0.14f
+            EconomicClimate.STEADY -> 0.08f + Random.nextFloat() * 0.14f
+            EconomicClimate.INFLATION_SURGE -> 0.02f + Random.nextFloat() * 0.10f
+            EconomicClimate.RECESSION -> -0.06f + Random.nextFloat() * 0.12f
         }
         val headcountPressure = (business.employeeCount * 0.004f).coerceAtMost(0.08f)
         val margin = (baseMargin - headcountPressure).coerceIn(-0.20f, 0.40f)
@@ -211,8 +212,9 @@ class BusinessEngine @Inject constructor(
     private fun valuationMultiplier(climate: EconomicClimate, marketModifier: Float): Float {
         val climateBoost = when (climate) {
             EconomicClimate.BOOM -> 1.08f
-            EconomicClimate.BUST -> 0.90f
-            EconomicClimate.NEUTRAL -> 1.0f
+            EconomicClimate.STEADY -> 1.0f
+            EconomicClimate.INFLATION_SURGE -> 0.95f
+            EconomicClimate.RECESSION -> 0.88f
         }
         val noise = 0.94f + Random.nextFloat() * 0.14f
         return (climateBoost * marketModifier.coerceIn(0.8f, 1.2f) * noise).coerceIn(0.75f, 1.35f)

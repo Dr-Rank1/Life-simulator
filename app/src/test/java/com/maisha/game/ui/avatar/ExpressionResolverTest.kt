@@ -42,6 +42,18 @@ class ExpressionResolverTest {
         assertEquals(Expression.ANGRY, expression)
     }
 
+    @Test
+    fun personExpression_reflectsRelationshipLevel() {
+        val happyPerson = com.maisha.game.domain.TestFixtures.person(relationshipLevel = 80)
+        assertEquals(Expression.HAPPY, ExpressionResolver.resolvePersonExpression(happyPerson))
+
+        val sadPerson = com.maisha.game.domain.TestFixtures.person(relationshipLevel = 25)
+        assertEquals(Expression.SAD, ExpressionResolver.resolvePersonExpression(sadPerson))
+
+        val neutralPerson = com.maisha.game.domain.TestFixtures.person(relationshipLevel = 50)
+        assertEquals(Expression.NEUTRAL, ExpressionResolver.resolvePersonExpression(neutralPerson))
+    }
+
     private fun baseCharacter() = Character(
         name = "Test",
         gender = Gender.MALE,

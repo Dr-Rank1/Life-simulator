@@ -333,6 +333,29 @@ private fun WorkplacePersonCard(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
+                // Competence & Strictness Meters
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    MiniMeter(
+                        label = stringResource(R.string.stat_competence),
+                        value = person.competence,
+                        color = TealPrimary,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (isSupervisor) {
+                        MiniMeter(
+                            label = stringResource(R.string.stat_strictness),
+                            value = person.strictness,
+                            color = if (person.strictness > 65) CoralNegative else GoldAccent,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
                 // Relationship Bar
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -584,6 +607,9 @@ private fun WorkplacePersonActionSheet(
             subtitle = stringResource(R.string.action_schmooze_desc),
             icon = Icons.Default.ThumbUp,
             tint = LifeGreen,
+            riskBadge = stringResource(R.string.badge_risk_low),
+            riskColor = LifeGreen,
+            cooldownBadge = stringResource(R.string.badge_cooldown_yearly),
             enabled = canInteract,
             onClick = { onAction(WorkplaceAction.SCHMOOZE) }
         )
@@ -593,6 +619,8 @@ private fun WorkplacePersonActionSheet(
             subtitle = stringResource(R.string.action_mentor_request_desc),
             icon = Icons.Default.MilitaryTech,
             tint = GoldAccent,
+            riskBadge = stringResource(R.string.badge_risk_low),
+            riskColor = LifeGreen,
             enabled = canInteract,
             onClick = { onAction(WorkplaceAction.MENTOR_REQUEST) }
         )
@@ -602,6 +630,8 @@ private fun WorkplacePersonActionSheet(
             subtitle = stringResource(R.string.action_pitch_project_desc),
             icon = Icons.Default.Work,
             tint = TealPrimary,
+            riskBadge = stringResource(R.string.badge_risk_med),
+            riskColor = GoldAccent,
             enabled = canInteract,
             onClick = { onAction(WorkplaceAction.PITCH_PROJECT) }
         )
@@ -612,6 +642,9 @@ private fun WorkplacePersonActionSheet(
                 subtitle = stringResource(R.string.action_ask_raise_desc),
                 icon = Icons.Default.Work,
                 tint = GoldAccent,
+                riskBadge = stringResource(R.string.badge_risk_med),
+                riskColor = GoldAccent,
+                cooldownBadge = stringResource(R.string.badge_req_rapport),
                 enabled = canInteract,
                 onClick = { onAction(WorkplaceAction.ASK_RAISE) }
             )
@@ -621,6 +654,9 @@ private fun WorkplacePersonActionSheet(
                 subtitle = stringResource(R.string.action_ask_promotion_desc),
                 icon = Icons.Default.MilitaryTech,
                 tint = TealPrimary,
+                riskBadge = stringResource(R.string.badge_risk_high),
+                riskColor = CoralNegative,
+                cooldownBadge = stringResource(R.string.badge_req_performance),
                 enabled = canInteract,
                 onClick = { onAction(WorkplaceAction.ASK_PROMOTION) }
             )
@@ -630,6 +666,8 @@ private fun WorkplacePersonActionSheet(
                 subtitle = stringResource(R.string.action_collaborate_desc),
                 icon = Icons.Default.Work,
                 tint = TealPrimary,
+                riskBadge = stringResource(R.string.badge_risk_low),
+                riskColor = LifeGreen,
                 enabled = canInteract,
                 onClick = { onAction(WorkplaceAction.COLLABORATE) }
             )
@@ -639,6 +677,8 @@ private fun WorkplacePersonActionSheet(
                 subtitle = stringResource(R.string.action_office_romance_desc),
                 icon = Icons.Default.Favorite,
                 tint = CoralNegative,
+                riskBadge = stringResource(R.string.badge_risk_med),
+                riskColor = GoldAccent,
                 enabled = canInteract,
                 onClick = { onAction(WorkplaceAction.OFFICE_ROMANCE) }
             )
@@ -649,6 +689,8 @@ private fun WorkplacePersonActionSheet(
             subtitle = stringResource(R.string.action_office_prank_desc),
             icon = Icons.Default.Person,
             tint = GoldAccent,
+            riskBadge = stringResource(R.string.badge_risk_high),
+            riskColor = CoralNegative,
             enabled = canInteract,
             onClick = { onAction(WorkplaceAction.PRANK) }
         )
@@ -658,11 +700,57 @@ private fun WorkplacePersonActionSheet(
             subtitle = stringResource(R.string.action_report_hr_desc),
             icon = Icons.Default.Report,
             tint = CoralNegative,
+            riskBadge = stringResource(R.string.badge_risk_high),
+            riskColor = CoralNegative,
             enabled = canInteract,
             onClick = { onAction(WorkplaceAction.REPORT_HR) }
         )
 
         Spacer(modifier = Modifier.height(32.dp))
+    }
+}
+
+@Composable
+private fun MiniMeter(
+    label: String,
+    value: Int,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                fontSize = 9.sp,
+                color = InkSecondary
+            )
+            Text(
+                text = "$value%",
+                style = MaterialTheme.typography.labelSmall,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                color = color
+            )
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(4.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(SurfaceMuted)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = (value / 100f).coerceIn(0f, 1f))
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(color)
+            )
+        }
     }
 }
 
@@ -701,6 +789,9 @@ private fun WorkplaceActionButton(
     subtitle: String,
     icon: ImageVector,
     tint: Color,
+    riskBadge: String? = null,
+    riskColor: Color = GoldAccent,
+    cooldownBadge: String? = null,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
@@ -737,11 +828,46 @@ private fun WorkplaceActionButton(
             }
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    riskBadge?.let { badge ->
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = riskColor.copy(alpha = 0.14f)
+                        ) {
+                            Text(
+                                text = badge,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = riskColor,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                            )
+                        }
+                    }
+                    cooldownBadge?.let { cooldown ->
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = TealPrimary.copy(alpha = 0.10f)
+                        ) {
+                            Text(
+                                text = cooldown,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = TealPrimary,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                            )
+                        }
+                    }
+                }
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodySmall,
