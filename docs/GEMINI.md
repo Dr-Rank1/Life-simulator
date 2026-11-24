@@ -1,8 +1,8 @@
 # Maisha (Life Simulator) — Project Overview & Gemini Context
 
-> **Last Updated:** 2026-11-23  
+> **Last Updated:** 2026-11-24  
 > **Package:** `com.maisha.game`  
-> **Repository:** `https://github.com/stewiriffin/Life-simulator` (`origin/main`)  
+> **Repository:** `https://github.com/Dr-Rank1/Life-simulator` (`origin/main`)  
 > **Target Platform:** Android (minSdk 26, targetSdk / compileSdk 35)  
 > **Primary Audience for this Document:** Gemini AI assistants, developers, and maintainers.
 
@@ -78,7 +78,7 @@ Players create a custom character and guide them year-by-year from birth to deat
 | **Concurrency** | Kotlin Coroutines & Flow | Asynchronous event processing and reactive `StateFlow` state streams. |
 | **Background Tasks** | AndroidX WorkManager | Contextual daily notifications and retention nudges. |
 | **Cloud & Social** | Google Play Games Services v2 | Cloud save snapshots (`SnapshotsClient`) and global leaderboards. |
-| **Monetization** | Google Mobile Ads (AdMob) | Interstitial on age-ups, banner on slot picker, rewarded Second Wind revive. |
+| **Monetization** | Google Mobile Ads (AdMob) & Play Billing v7 | Interstitials, banners, rewarded revive, country-scaled cash vouchers, and permanent unlocks (`unlock_ad_free`, `unlock_creator_pass`). |
 | **Unit Testing** | JUnit 4, Kotlin Test | High-coverage domain tests for all engines (`app/src/test/`). |
 
 ---
@@ -106,29 +106,38 @@ All business rules live in `app/src/main/java/com/maisha/game/domain/`.
    - Youth and adult side hustles.
    - Fame and talent pathways: Pro sports / entertainment tracks, training, street gigs, exhibitions, paparazzi, and endorsements.
 4. **`FinanceEngine`**:
-   - Cash flow, tax calculations, living expenses, investments, and wills.
-   - **Mortgages:** 20–50% down payment, 30-year amortization, annual payments, and equity resolution on sale.
-   - **Luxury Assets:** Cars, speedboats, yachts, and private jets with accurate depreciation and monthly upkeep.
-   - Student loan interest accrual and repayment.
+   - Dynamic credit score (300-850) gating mortgage approvals, down-payment tiers, and APR rates.
+   - Itemized annual cash-flow breakdown (`computeAnnualCashFlow`) computing gross income minus deductions.
+   - 4-state macroeconomic cycle (`BOOM`, `STEADY`, `INFLATION_SURGE`, `RECESSION`).
+   - 15 Country-authentic financial instruments (SACCO, T-Bills, 401(k), ISA, PPF, NISA, Pag-IBIG MP2, etc.) and mobile overdraft buffers.
+   - Relocation PPP FX currency conversions and international remittances (`remitMoneyHome`).
+   - 30-year amortized mortgages with principal prepayments.
+   - Luxury assets (cars, speedboats, yachts, private jets) with depreciation, upkeep, and preventative servicing.
+   - Junior trust piggy bank for minors (0-17) unlocking at age 18.
 5. **`RelationshipEngine`**:
    - Family (parents, siblings, children), dating, proposals, weddings, prenups, affairs, and divorces.
    - **Interactive Matchmaking:** `DatingMatchSheet` candidate profiles (age, occupation, Looks, Smarts, Crazy/Drama %).
    - Relationship progression: Casual &rarr; Exclusive &rarr; Engaged &rarr; Married; prenups driven by partner Crazy/Karma.
    - Anti-farming protection (`interactedTypesThisYear`).
    - Pet adoption, veterinary care, feeding, training, and mortality.
-6. **`HealthEngine`**:
+6. **`SocialEcosystemEngine` & `LegacyEngine`**:
+   - Recurring rivals, mentors, benefactors, family feuds, and alliances that persist across decades and pass to designated heirs.
+   - Neighborhood reputation and multi-generational family memory shaping opportunities and NPC reactions.
+7. **`RoutineDilemmaEngine`**:
+   - Fast-resolving snap decisions during everyday routines (commute via `{transportMode}`, study crams, work crunch, weekend splurges).
+8. **`HealthEngine`**:
    - Health deterioration, acute diseases, chronic illnesses, and medical treatment tiers (Free, Private, Alternative).
-7. **`CrimeEngine`**:
+9. **`CrimeEngine`**:
    - Targeted crime specializations: Shoplifting, Pickpocketing, Grand Theft Auto (GTA), Burglary, Armed Heists.
    - Lawyer representation (Public Defender vs Elite Attorney), trials, prison yard life (gangs, jobs, parole), and escape attempts.
-8. **`LeisureEngine`**:
-   - Hobbies, gym, meditation, vacations, yacht days, and private jet trips.
-9. **`BusinessEngine` & `PoliticsEngine`**:
-   - Founding, funding, and managing startups; political campaigns, municipal/national office, and tax policy.
-10. **`RelocationEngine`**:
+10. **`LeisureEngine`**:
+    - Hobbies, gym, meditation, vacations, yacht days, and private jet trips.
+11. **`BusinessEngine` & `PoliticsEngine`**:
+    - Founding, funding, and managing startups; political campaigns, municipal/national office, and tax policy.
+12. **`RelocationEngine`**:
     - Emigration, work visas, permanent residency, and expat restrictions across 15 countries.
-11. **`AchievementEngine`, `MilestoneEngine`, `YearQuestEngine`, `WeeklyChallengeEngine`, `LegacyEngine`, `LifeArchetypeEngine`**:
-    - Player progression, dynamic yearly goals, silk-sash tombstone ribbons, heir succession, and family dynasty trees.
+13. **`AchievementEngine`, `MilestoneEngine`, `YearQuestEngine`, `WeeklyChallengeEngine`, `LifeArchetypeEngine`**:
+    - Player progression, dynamic yearly goals, live era/chapter titles, evocative epitaphs, silk-sash tombstone ribbons, and heir succession.
 
 ---
 
@@ -176,6 +185,20 @@ The UI features a modern **Material 3 simulator aesthetic**:
    - Targeted crime specializations (Burglary, GTA, Heists), lawyers, trials, prison yard gangs, and parole petitions.
    - Silk-sash tombstone ribbons (*Loaded*, *Academic*, *Saint*, *Scandalous*, etc.) and multi-generational dynasty succession.
    - 16-bit 44.1kHz synthesized audio and multi-waveform haptic vibration patterns.
+6. **Tactile Dashboard Overhauls (Another Life & BitLife Style)**:
+   - Career Hero Card with corporate tier stepper, salary/raise projection pills, job opportunity cards with 2-question interview mini-checks, and PIP deliverable recovery.
+   - `PersonDetailSheet.kt` with 64dp procedural avatar synced to emotions, drama meters, speech bubble thought quotes, floating delta pills, and 2-column vector action tiles with anti-farming tracking.
+7. **Living Social Ecosystem & Generational Memory (`SocialEcosystemEngine.kt`)**:
+   - Recurring rivals, mentors, benefactors, family feuds, and alliances that persist across years and pass into heir succession.
+8. **Routine Micro-Dilemmas & Snap Decisions (`RoutineDilemmaEngine.kt`)**:
+   - Snappy dilemmas during daily routines (commuting via `{transportMode}`, late-night cramming, work crunch, weekend splurges) with crisp stat trade-offs.
+9. **Dynamic Chapter Titles & Evocative Epitaphs (`LifeArchetypeEngine.kt`)**:
+   - Live era titles reflecting current life stage and achievements; rich obituaries and legacy stamps.
+10. **15-Country Finance, Remittances & Google Play Billing v7**:
+    - Dynamic credit score (300-850), itemized annual cash-flow breakdown, 4-state macroeconomic cycle, junior trust piggy bank (0-17).
+    - 15 Country-authentic financial instruments (SACCO, T-Bills, 401(k), ISA, PPF, NISA, Pag-IBIG MP2, etc.) and mobile overdraft buffer.
+    - Relocation PPP FX currency conversion and international remittances (`remitMoneyHome`).
+    - Google Play Billing v7 (`BillingManager.kt`): consumable country-scaled cash vouchers and permanent unlocks (`unlock_ad_free`, `unlock_creator_pass`).
 
 ---
 

@@ -1,8 +1,8 @@
 # Privacy Policy — Maisha (Life Simulator)
 
-**Last updated:** 23 November 2026  
+**Last updated:** 24 November 2026  
 **Package:** `com.maisha.game`  
-**Repository:** [https://github.com/stewiriffin/Life-simulator](https://github.com/stewiriffin/Life-simulator)
+**Repository:** [https://github.com/Dr-Rank1/Life-simulator](https://github.com/Dr-Rank1/Life-simulator)
 
 Maisha (“the app”, “we”, “our”) is a single-player, offline-first life simulation mobile game for Android. This Privacy Policy explains what data the app uses, where it is stored, how optional network requests operate, and how your privacy is protected.
 
@@ -69,13 +69,23 @@ During character creation, tapping **Random Name** may optionally request a firs
 
 Maisha may display ads provided by **Google Mobile Ads (AdMob)**:
 - **Ad Formats:** Banners on the character slot picker, occasional interstitial ads on age-ups, and optional rewarded video ads for the "Second Wind" revive mechanic upon premature character death.
+- **Ad-Free Option:** Players can permanently remove all banner and interstitial advertisements by purchasing the "Ad-Free Dynasty" unlock via Google Play Billing.
 - **Data Collection by AdMob:** Google AdMob may collect advertising identifiers (e.g., Android Advertising ID), approximate device location, and technical device specifications as outlined in [Google's Privacy & Terms](https://policies.google.com/privacy).
 - **User Control:** You can reset or opt out of personalized advertising at any time via Android System Settings (`Settings` &rarr; `Google` &rarr; `Ads`).
 - We do not sell, rent, or trade your personal data.
 
 ---
 
-## 6. Local Device Notifications
+## 6. In-App Purchases (Google Play Billing)
+
+Maisha offers optional digital purchases processed through **Google Play Billing** (`com.android.billingclient:billing-ktx`):
+- **Transaction Processing:** All purchase transactions (such as consumable Dynasty Cash Vouchers, permanent Ad-Free unlocks, and Creator Passes) are executed directly and securely by Google Play.
+- **No Financial Data Handled:** We do not collect, process, or store credit card numbers, banking details, or billing addresses. All payment data is handled exclusively by Google LLC under the [Google Payments Privacy Notice](https://payments.google.com/legaldocument?family=0.privacynotice).
+- **Entitlement Verification:** Purchase tokens and receipts are queried locally via Google Play APIs to grant game entitlements (e.g., crediting country-scaled dynasty funds or suppressing AdMob advertisements).
+
+---
+
+## 7. Local Device Notifications
 
 If granted notification permissions on Android 13+ (API 33+), Maisha schedules contextual daily reminders (e.g. reminding you of your saved character's upcoming birthday) using Android's local **WorkManager**.
 - Notifications are scheduled and generated 100% locally on the device.
@@ -83,7 +93,7 @@ If granted notification permissions on Android 13+ (API 33+), Maisha schedules c
 
 ---
 
-## 7. Life Summary Sharing
+## 8. Life Summary Sharing
 
 When you tap **Share My Life** on the Life Summary or Tombstone screen:
 - A graphic summary card is generated entirely in device memory.
@@ -92,20 +102,20 @@ When you tap **Share My Life** on the Life Summary or Tombstone screen:
 
 ---
 
-## 8. Children’s Privacy
+## 9. Children’s Privacy
 
 Maisha is designed as a general-audience life simulation game. We do not knowingly solicit or collect personal information from children under 13 (or under the applicable age of digital consent in your jurisdiction). If ads are enabled, AdMob ad requests are tagged with appropriate maximum content ratings.
 
 ---
 
-## 9. Changes to This Privacy Policy
+## 10. Changes to This Privacy Policy
 
 We may periodically update this Privacy Policy to reflect codebase enhancements or regulatory adjustments. Any modifications will be posted to this document with an updated revision date.
 
 ---
 
-## 10. Contact Information
+## 11. Contact Information
 
 If you have questions, feedback, or concerns regarding this Privacy Policy or Maisha's data practices, please open an issue on the official GitHub repository:
 
-**Repository:** [https://github.com/stewiriffin/Life-simulator](https://github.com/stewiriffin/Life-simulator)
+**Repository:** [https://github.com/Dr-Rank1/Life-simulator](https://github.com/Dr-Rank1/Life-simulator)

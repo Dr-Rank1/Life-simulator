@@ -435,7 +435,7 @@ Maisha has undergone a complete **Material 3 modernization**:
 | **Higher Ed** | 18–22+ | 7 university majors, scholarships, student loans, work-study, internships, honors |
 | **Workplace** | 18–65 | Corporate ladder, supervisor schmoozing, raises, promotions, pranks, HR reporting, PIPs |
 | **Romance** | 14+ | Dating app candidates (`DatingMatchSheet`), dating, weddings, prenups, having children |
-| **Finances** | 18+ | 30-year amortized mortgages, luxury cars, yachts, private jets, crypto portfolios, wills |
+| **Finances** | 18+ | 30-year mortgages, 15-country instruments (SACCO, 401k, ISA, PPF), remittances, Dynasty Vault store, luxury cars, yachts, jets |
 | **Underworld**| 14+ | Pickpocketing, shoplifting, GTA, armed heists, defense lawyers, prison yard life |
 | **Wellness** | All | Public/private doctors, diets, gym memberships, plastic surgery, meditation |
 | **Legacy** | Death | Silk-sash tombstone ribbons, obituary recaps, dynasty succession as an adult child |

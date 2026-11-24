@@ -175,10 +175,10 @@ Authors should avoid hardcoding nation-specific terms in universal events. Inste
 
 ## 6. Authoring & Verification Checklist
 
-1. **Pick the Right Pack:** Place the event in the appropriate JSON file based on its theme.
-2. **Globally Unique ID:** Ensure the `id` is unique across all 17 event packs.
+1. **Pick the Right Pack:** Place the event in the appropriate JSON file based on its theme across the 19 packs.
+2. **Globally Unique ID:** Ensure the `id` is unique across all 19 event packs.
 3. **Age Bounds:** Match `minAge` and `maxAge` to the intended life stage.
 4. **Appropriate Gating:** Add tags like `education` or `requires_job` to prevent nonsensical contexts (e.g. an unemployed infant getting a workplace event).
-5. **Universal Placeholders:** Use `{transportMode}`, `{secondaryExam}`, `{moneyApp}` instead of hardcoded terms.
+5. **Universal Placeholders:** Use `{transportMode}`, `{secondaryExam}`, `{moneyApp}`, `{primaryExam}`, `{greeting}`, `{holidayName}` instead of hardcoded terms.
 6. **Valid JSON Syntax:** No trailing commas or malformed quotes (Kotlinx Serialization requires strict JSON).
-7. **Verification Test:** Run `./gradlew :app:testDebugUnitTest --tests "com.maisha.game.domain.GlobalContentCoverageTest"` to verify that all event packs parse cleanly and resolve placeholders for all 15 countries.
+7. **Verification Test:** Run `./gradlew :app:testDebugUnitTest --tests "com.maisha.game.domain.GlobalContentCoverageTest"` to verify that all 19 event packs parse cleanly and resolve placeholders for all 15 countries.

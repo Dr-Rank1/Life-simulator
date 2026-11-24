@@ -2,15 +2,15 @@
 
 > **Purpose:** Read this document at the start of any new session so the assistant or developer understands **what Maisha is**, **what has already been built**, **what just shipped**, **what is still missing**, and **how to work in this repo without undoing progress**.
 >
-> **Last updated:** 2026-11-23 (Procedural 2D Portrait Engine, Visual HUD & LeftNavRail, Single-Screen New Life Creation, Early-Game Balance & Age-Gates, DrillDownRow & ModalBottomSheet Architecture, Matchmaking & Dating App Sheets, Workplace Roster & Agency, Targeted Crime & Prison Yards, Tombstone Ribbons & Heir Succession, Synthesized 44.1kHz Audio & Haptics)  
-> **Repository:** `https://github.com/stewiriffin/Life-simulator` (`origin/main`)  
+> **Last updated:** 2026-11-24 (15-Country Authentic Financial Instruments, Remittances, Google Play Billing v7, Social Ecosystem & Memory, Routine Micro-Dilemmas, Chapter Titles, BitLife/Another Life Dashboards)  
+> **Repository:** `https://github.com/Dr-Rank1/Life-simulator` (`origin/main`)  
 > **Package:** `com.maisha.game`
 
 ---
 
 ## 1. One-Paragraph Product Summary
 
-**Maisha** (Swahili for *life*) is a single-player Android **life simulation** game in the BitLife / Age Sim genre. The player creates a character, ages **one year at a time**, and makes active choices across education, career, relationships, finances, crime, health, politics, leisure, and legacy. The game is **offline-first**: narrative content lives in 13+ JSON packs under `app/src/main/assets/data/events/`, and game rules live in pure Kotlin **domain engines**. It targets mid-range phones (**~360dp width**, **minSdk 26**, **targetSdk 35**) while supporting adaptive layouts (`LeftNavRail`) for tablets and foldables. The product is natively localized for **15 countries** (Kenya, Nigeria, South Africa, Egypt, USA, Canada, UK, France, Germany, India, Japan, Philippines, Indonesia, Brazil, Mexico) with real currencies, names, exam systems, transport modes, and money apps.
+**Maisha** (Swahili for *life*) is a single-player Android **life simulation** game in the BitLife / Age Sim genre. The player creates a character, ages **one year at a time**, and makes active choices across education, career, relationships, finances, crime, health, politics, leisure, and legacy. The game is **offline-first**: narrative content lives in 19 JSON packs under `app/src/main/assets/data/events/`, and game rules live in pure Kotlin **domain engines**. It targets mid-range phones (**~360dp width**, **minSdk 26**, **targetSdk 35**) while supporting adaptive layouts (`LeftNavRail`) for tablets and foldables. The product is natively localized for **15 countries** (Kenya, Nigeria, South Africa, Egypt, USA, Canada, UK, France, Germany, India, Japan, Philippines, Indonesia, Brazil, Mexico) with real currencies, names, exam systems, transport modes, localized financial instruments, and money apps.
 
 **Design north star:** Every year should feel like there is something meaningful to *do* (interactive systems, NPC actions, career agency, asset management), not only a passive random event card.
 
@@ -43,6 +43,7 @@
 | **Kotlinx Serialization** | Event JSON parsing & deep state serialization |
 | **AndroidX WorkManager** | Contextual daily retention reminders |
 | **Google Mobile Ads (AdMob)** | Interstitial on age-ups, banner on slot picker, rewarded Second Wind |
+| **Google Play Billing v7** | In-app store (`billing-ktx`), country-scaled vouchers, permanent ad removal & creator pass |
 | **Google Play Games Services v2** | Cloud save snapshots (`SnapshotsClient`) & global leaderboards |
 | **JUnit 4 & Kotlin Test** | Domain unit tests under `app/src/test/` |
 
