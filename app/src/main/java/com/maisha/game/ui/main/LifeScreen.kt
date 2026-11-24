@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.widthIn
 
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,6 +37,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -44,6 +47,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -179,6 +183,7 @@ import com.maisha.game.ui.theme.StatLooks
 import com.maisha.game.ui.theme.StatMoney
 import com.maisha.game.ui.theme.StatSmarts
 import com.maisha.game.ui.theme.SuccessGreen
+import com.maisha.game.ui.theme.TealLight
 import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
 
@@ -625,7 +630,7 @@ fun LifeScreen(
             ),
             contentWindowInsets = WindowInsets(0, 0, 0, 0),
             containerColor = prisonBackground,
-            snackbarHost = { SnackbarHost(snackbarHostState) },
+            snackbarHost = {},
             topBar = {
                 GlobalHudHeader(
                     character = character,
@@ -876,34 +881,40 @@ fun LifeScreen(
         }
     }
 
-        if (isWideLayout) {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                LeftNavRail(
-                    selectedTab = selectedTab,
-                    onTabSelected = { selectedTabOrdinal = it.ordinal },
-                    disabledTabs = disabledTabs
-                )
-
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            if (isWideLayout) {
+                Row(
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    tabContent()
+                    LeftNavRail(
+                        selectedTab = selectedTab,
+                        onTabSelected = { selectedTabOrdinal = it.ordinal },
+                        disabledTabs = disabledTabs
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                    ) {
+                        tabContent()
+                    }
                 }
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
+            } else {
                 tabContent()
             }
+
+            GameNotificationHost(
+                snackbarHostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 8.dp, start = 12.dp, end = 12.dp)
+                    .widthIn(max = 520.dp)
+            )
         }
 
         EdgeGlowOverlay(
@@ -912,6 +923,98 @@ fun LifeScreen(
         )
     }
 }
+}
+
+@Composable
+private fun GameNotificationHost(
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier
+) {
+    SnackbarHost(
+        hostState = snackbarHostState,
+        modifier = modifier
+    ) { data ->
+        val isQuestOrChallenge = remember(data.visuals.message) {
+            data.visuals.message.contains("quest", ignoreCase = true) ||
+                data.visuals.message.contains("challenge", ignoreCase = true)
+        }
+
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = NavyElevated
+            ),
+            border = BorderStroke(
+                width = 1.dp,
+                color = if (isQuestOrChallenge) GoldAccent.copy(alpha = 0.6f) else TealPrimary.copy(alpha = 0.6f)
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { data.dismiss() }
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (isQuestOrChallenge) GoldAccent.copy(alpha = 0.18f) else TealPrimary.copy(alpha = 0.18f)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isQuestOrChallenge) AppIcons.Achievements else AppIcons.NavActions,
+                        contentDescription = null,
+                        tint = if (isQuestOrChallenge) GoldAccent else TealLight,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                Text(
+                    text = data.visuals.message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                if (data.visuals.actionLabel != null) {
+                    TextButton(
+                        onClick = { data.performAction() },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = data.visuals.actionLabel!!,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = TealLight
+                        )
+                    }
+                } else {
+                    IconButton(
+                        onClick = { data.dismiss() },
+                        modifier = Modifier.size(28.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = stringResource(R.string.content_desc_dismiss_notification),
+                            tint = InkTertiary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 private data class YearBlock(

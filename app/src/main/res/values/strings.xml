@@ -20,6 +20,7 @@
     <string name="onboarding_ready_body">Create your character and start your first life. Three save slots let you run different family lines — or continue one through Legacy Mode.</string>
     <string name="onboarding_start_first_life">Start Your First Life</string>
     <string name="content_desc_dismiss_tip">Dismiss tip</string>
+    <string name="content_desc_dismiss_notification">Dismiss notification</string>
     <string name="tip_family_dating">Once you turn 18, you can look for a partner here.</string>
     <string name="tip_first_death_achievements">Your achievements carry over to your next life.</string>
     <string name="tip_year_quests">Complete yearly quests on the Life tab for karma and streaks.</string>
