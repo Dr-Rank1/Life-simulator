@@ -15,10 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.key
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -106,117 +105,103 @@ fun RelocationBoard(
     val canAffordDriving = character.stats.money >= drivingTestFee
     val showDrivingTest = character.alive && character.age >= 16 && !character.hasDrivingLicense
 
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+    Column(
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         // Dossier & Residence Snapshot Card
-        item {
-            ResidenceHeaderCard(
-                character = character,
-                currentCountry = currentCountry,
-                currentFlavor = currentFlavor
-            )
-        }
+        ResidenceHeaderCard(
+            character = character,
+            currentCountry = currentCountry,
+            currentFlavor = currentFlavor
+        )
 
         // Tab Selector
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    selected = selectedTab == RelocationTab.DOSSIER,
-                    onClick = { selectedTab = RelocationTab.DOSSIER },
-                    label = { Text(stringResource(R.string.tab_relocation_status)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
-                        selectedLabelColor = TealPrimary
-                    )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                selected = selectedTab == RelocationTab.DOSSIER,
+                onClick = { selectedTab = RelocationTab.DOSSIER },
+                label = { Text(stringResource(R.string.tab_relocation_status)) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
+                    selectedLabelColor = TealPrimary
                 )
-                FilterChip(
-                    selected = selectedTab == RelocationTab.EMIGRATION,
-                    onClick = { selectedTab = RelocationTab.EMIGRATION },
-                    label = { Text(stringResource(R.string.tab_relocation_destinations)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
-                        selectedLabelColor = TealPrimary
-                    )
+            )
+            FilterChip(
+                selected = selectedTab == RelocationTab.EMIGRATION,
+                onClick = { selectedTab = RelocationTab.EMIGRATION },
+                label = { Text(stringResource(R.string.tab_relocation_destinations)) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
+                    selectedLabelColor = TealPrimary
                 )
-            }
+            )
         }
 
         if (selectedTab == RelocationTab.DOSSIER) {
             // Driving Test Action if applicable
             if (showDrivingTest) {
-                item {
-                    DrivingTestActionCard(
-                        fee = drivingTestFee,
-                        countryCode = character.countryCode,
-                        canAfford = canAffordDriving,
-                        onTakeTest = onTakeDrivingTest
-                    )
-                }
+                DrivingTestActionCard(
+                    fee = drivingTestFee,
+                    countryCode = character.countryCode,
+                    canAfford = canAffordDriving,
+                    onTakeTest = onTakeDrivingTest
+                )
             }
 
             // Visa Status & Renewal Card
             if (character.isLivingAbroad()) {
-                item {
-                    VisaRenewalActionCard(
-                        character = character,
-                        canRenew = canRenewVisa,
-                        fee = visaRenewalFee,
-                        canAfford = canAffordVisa,
-                        onRenew = onRenewVisa
-                    )
-                }
+                VisaRenewalActionCard(
+                    character = character,
+                    canRenew = canRenewVisa,
+                    fee = visaRenewalFee,
+                    canAfford = canAffordVisa,
+                    onRenew = onRenewVisa
+                )
 
                 // Naturalization & Citizenship Card
-                item {
-                    CitizenshipApplicationCard(
-                        character = character,
-                        canApply = canApplyCitizenship,
-                        fee = citizenshipFee,
-                        canAfford = canAffordCitizenship,
-                        onApply = onApplyForCitizenship
-                    )
-                }
+                CitizenshipApplicationCard(
+                    character = character,
+                    canApply = canApplyCitizenship,
+                    fee = citizenshipFee,
+                    canAfford = canAffordCitizenship,
+                    onApply = onApplyForCitizenship
+                )
             } else {
-                item {
-                    NativeCitizenDossierCard(currentCountry = currentCountry)
-                }
+                NativeCitizenDossierCard(currentCountry = currentCountry)
             }
         } else {
             // Emigration Destination Cards
-            items(destinations, key = { it.code }) { destination ->
-                val flavor = CountryCatalog.flavorFor(destination.code)
-                val flightFee = relocationEngine.relocationFee(character)
-                val canAffordMove = character.stats.money >= flightFee
-                val holdsPassport = character.holdsCitizenship(destination.code)
-                val convertedCash = EconomyScaler.convertCurrency(
-                    (character.stats.money - flightFee).coerceAtLeast(0),
-                    character.countryCode,
-                    destination.code
-                )
+            destinations.forEach { destination ->
+                key(destination.code) {
+                    val flavor = CountryCatalog.flavorFor(destination.code)
+                    val flightFee = relocationEngine.relocationFee(character)
+                    val canAffordMove = character.stats.money >= flightFee
+                    val holdsPassport = character.holdsCitizenship(destination.code)
+                    val convertedCash = EconomyScaler.convertCurrency(
+                        (character.stats.money - flightFee).coerceAtLeast(0),
+                        character.countryCode,
+                        destination.code
+                    )
 
-                DestinationCountryCard(
-                    character = character,
-                    destination = destination,
-                    flavor = flavor,
-                    flightFee = flightFee,
-                    canAfford = canAffordMove,
-                    holdsPassport = holdsPassport,
-                    convertedCash = convertedCash,
-                    onSelect = { destinationToConfirm = destination }
-                )
+                    DestinationCountryCard(
+                        character = character,
+                        destination = destination,
+                        flavor = flavor,
+                        flightFee = flightFee,
+                        canAfford = canAffordMove,
+                        holdsPassport = holdsPassport,
+                        convertedCash = convertedCash,
+                        onSelect = { destinationToConfirm = destination }
+                    )
+                }
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 
     // Emigration Confirmation Dialog

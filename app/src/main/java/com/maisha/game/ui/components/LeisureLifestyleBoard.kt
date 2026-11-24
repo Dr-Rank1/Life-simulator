@@ -15,10 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.key
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -125,130 +124,124 @@ fun LeisureLifestyleBoard(
         }
     }
 
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+    Column(
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         // Leisure Board Header
-        item {
-            Card(
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = PaperWhite),
-                border = BorderStroke(1.dp, BorderCardSlate),
-                modifier = Modifier.fillMaxWidth()
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = PaperWhite),
+            border = BorderStroke(1.dp, BorderCardSlate),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(GoldAccent.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(GoldAccent.copy(alpha = 0.15f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = AppIcons.Travel,
-                                contentDescription = null,
-                                tint = GoldAccent,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-                        Column {
-                            Text(
-                                text = stringResource(R.string.label_leisure_hub_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = InkPrimary
-                            )
-                            Text(
-                                text = stringResource(R.string.label_leisure_hub_desc),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = InkSecondary
-                            )
-                        }
+                        Icon(
+                            imageVector = AppIcons.Travel,
+                            contentDescription = null,
+                            tint = GoldAccent,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = stringResource(R.string.label_leisure_hub_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = InkPrimary
+                        )
+                        Text(
+                            text = stringResource(R.string.label_leisure_hub_desc),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = InkSecondary
+                        )
                     }
                 }
             }
         }
 
         // Category Filter Chips
-        item {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    selected = selectedCategory == LeisureCategory.VACATIONS,
-                    onClick = { selectedCategory = LeisureCategory.VACATIONS },
-                    label = { Text(stringResource(R.string.tab_leisure_vacations)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
-                        selectedLabelColor = TealPrimary
-                    )
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                selected = selectedCategory == LeisureCategory.VACATIONS,
+                onClick = { selectedCategory = LeisureCategory.VACATIONS },
+                label = { Text(stringResource(R.string.tab_leisure_vacations)) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
+                    selectedLabelColor = TealPrimary
                 )
-                FilterChip(
-                    selected = selectedCategory == LeisureCategory.HOBBIES,
-                    onClick = { selectedCategory = LeisureCategory.HOBBIES },
-                    label = { Text(stringResource(R.string.tab_leisure_hobbies)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
-                        selectedLabelColor = TealPrimary
-                    )
+            )
+            FilterChip(
+                selected = selectedCategory == LeisureCategory.HOBBIES,
+                onClick = { selectedCategory = LeisureCategory.HOBBIES },
+                label = { Text(stringResource(R.string.tab_leisure_hobbies)) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
+                    selectedLabelColor = TealPrimary
                 )
-                FilterChip(
-                    selected = selectedCategory == LeisureCategory.WELLNESS,
-                    onClick = { selectedCategory = LeisureCategory.WELLNESS },
-                    label = { Text(stringResource(R.string.tab_leisure_wellness)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
-                        selectedLabelColor = TealPrimary
-                    )
+            )
+            FilterChip(
+                selected = selectedCategory == LeisureCategory.WELLNESS,
+                onClick = { selectedCategory = LeisureCategory.WELLNESS },
+                label = { Text(stringResource(R.string.tab_leisure_wellness)) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
+                    selectedLabelColor = TealPrimary
                 )
-                FilterChip(
-                    selected = selectedCategory == LeisureCategory.LUXURY,
-                    onClick = { selectedCategory = LeisureCategory.LUXURY },
-                    label = { Text(stringResource(R.string.tab_leisure_luxury)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = GoldAccent.copy(alpha = 0.15f),
-                        selectedLabelColor = GoldAccent
-                    )
+            )
+            FilterChip(
+                selected = selectedCategory == LeisureCategory.LUXURY,
+                onClick = { selectedCategory = LeisureCategory.LUXURY },
+                label = { Text(stringResource(R.string.tab_leisure_luxury)) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = GoldAccent.copy(alpha = 0.15f),
+                    selectedLabelColor = GoldAccent
                 )
-            }
-        }
-
-        // Activity Cards
-        items(categoryActivities, key = { it.name }) { activity ->
-            val eligible = leisureEngine.isEligible(character, activity)
-            val cost = leisureEngine.cost(activity, character.countryCode)
-            val canAfford = cost == 0 || character.stats.money >= cost
-            val hasRequiredAsset = when (activity) {
-                LeisureActivity.YACHT_DAY -> character.assets.any { it.type == AssetType.BOAT }
-                LeisureActivity.PRIVATE_JET_TRIP -> character.assets.any { it.type == AssetType.PRIVATE_JET }
-                else -> true
-            }
-
-            LeisureActivityCard(
-                activity = activity,
-                cost = cost,
-                countryCode = character.countryCode,
-                eligible = eligible,
-                canAfford = canAfford,
-                hasRequiredAsset = hasRequiredAsset,
-                onSelect = { activityToConfirm = activity }
             )
         }
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
+        // Activity Cards
+        categoryActivities.forEach { activity ->
+            key(activity.name) {
+                val eligible = leisureEngine.isEligible(character, activity)
+                val cost = leisureEngine.cost(activity, character.countryCode)
+                val canAfford = cost == 0 || character.stats.money >= cost
+                val hasRequiredAsset = when (activity) {
+                    LeisureActivity.YACHT_DAY -> character.assets.any { it.type == AssetType.BOAT }
+                    LeisureActivity.PRIVATE_JET_TRIP -> character.assets.any { it.type == AssetType.PRIVATE_JET }
+                    else -> true
+                }
+
+                LeisureActivityCard(
+                    activity = activity,
+                    cost = cost,
+                    countryCode = character.countryCode,
+                    eligible = eligible,
+                    canAfford = canAfford,
+                    hasRequiredAsset = hasRequiredAsset,
+                    onSelect = { activityToConfirm = activity }
+                )
+            }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 
     // Confirmation Dialog

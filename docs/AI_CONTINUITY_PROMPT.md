@@ -254,6 +254,7 @@ Completely offline Canvas drawing engine (1,180+ lines):
 | `feature` | Health & Wellness Hub, Leisure Lifestyle Board & Global Emigration: `HealthEngine` 4-tier care & infancy zero-cost protection (`HealthWellnessHub`), `LeisureEngine` 4-category boards & luxury yacht/jet trips (`LeisureLifestyleBoard`), `RelocationEngine` residence dossiers, dual citizenship naturalization & 15-country emigration with PPP conversions (`RelocationBoard`) |
 | `feature` | Event Dialog Styling, Quest Progress Bars & Adaptive Chrome: `EventDialogStyled` holiday flavor interpolation & choice card index badges, `WeeklyChallengeCard` and `WeeklyChallengeSheet` vector iconography, `YearQuestsSheet` active Bucket List goals & reward breakdown, and `LeftNavRail` unclipped vertical scrolling |
 | `fix` | Top-Anchored Game Notifications: Repositioned quest completions and snackbars from Scaffold bottom edge into a top-anchored `GameNotificationHost` pill below the HUD header, preventing obstruction of the Age+ button and providing 1-tap dismissal |
+| `fix` | Bottom Sheet Scrollable Crash Fix: Replaced `LazyColumn` with `Column` in `HealthWellnessHub`, `LeisureLifestyleBoard`, and `RelocationBoard` to eliminate fatal infinite height constraint `IllegalStateException` inside `ActionCategorySheet` |
 
 ---
 

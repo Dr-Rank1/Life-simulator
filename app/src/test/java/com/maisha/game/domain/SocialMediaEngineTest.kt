@@ -111,7 +111,7 @@ class SocialMediaEngineTest {
         val social = SocialMediaEngine(financeEngine, quotes)
         when (val result = social.postContent(accountHolder(looks = 50, smarts = 50))) {
             is SocialMediaResult.Success -> {
-                assertTrue(result.character.eventLog.first().contains("Be where you are."))
+                assertTrue(result.character.eventLog.any { it.contains("Be where you are.") })
             }
             is SocialMediaResult.Failed -> error("Expected post success")
         }

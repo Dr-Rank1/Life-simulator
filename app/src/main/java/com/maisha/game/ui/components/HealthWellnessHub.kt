@@ -15,10 +15,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.key
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -78,99 +77,85 @@ fun HealthWellnessHub(
     var selectedTreatment by remember { mutableStateOf<Triple<HealthCondition, CareTier, Int>?>(null) }
     var lifestyleToConfirm by remember { mutableStateOf<Pair<LifestyleOption, Boolean>?>(null) }
 
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+    Column(
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         // Vitality Header Card
-        item {
-            VitalitySummaryCard(
-                character = character,
-                untreatedCount = untreated.size
-            )
-        }
+        VitalitySummaryCard(
+            character = character,
+            untreatedCount = untreated.size
+        )
 
         // Infancy Protection Banner
         if (character.age < 3) {
-            item {
-                InfancyProtectionBanner()
-            }
+            InfancyProtectionBanner()
         }
 
         // Active Conditions Header
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.label_active_conditions),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = InkPrimary
-                )
-                if (untreated.isNotEmpty()) {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = CoralNegative.copy(alpha = 0.12f),
-                        border = BorderStroke(1.dp, CoralNegative.copy(alpha = 0.35f))
-                    ) {
-                        Text(
-                            text = "${untreated.size} Unresolved",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = CoralNegative,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.label_active_conditions),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = InkPrimary
+            )
+            if (untreated.isNotEmpty()) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = CoralNegative.copy(alpha = 0.12f),
+                    border = BorderStroke(1.dp, CoralNegative.copy(alpha = 0.35f))
+                ) {
+                    Text(
+                        text = "${untreated.size} Unresolved",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = CoralNegative,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
                 }
             }
         }
 
         // Active Conditions or Clean Bill of Health
         if (untreated.isEmpty()) {
-            item {
-                CleanBillOfHealthCard()
-            }
+            CleanBillOfHealthCard()
         } else {
-            items(untreated, key = { it.id }) { condition ->
-                ConditionTreatmentCard(
-                    character = character,
-                    condition = condition,
-                    healthEngine = healthEngine,
-                    onSelectTier = { tier, cost ->
-                        selectedTreatment = Triple(condition, tier, cost)
-                    }
-                )
+            untreated.forEach { condition ->
+                key(condition.id) {
+                    ConditionTreatmentCard(
+                        character = character,
+                        condition = condition,
+                        healthEngine = healthEngine,
+                        onSelectTier = { tier, cost ->
+                            selectedTreatment = Triple(condition, tier, cost)
+                        }
+                    )
+                }
             }
         }
 
         // Preventative Wellness & Subscriptions Section
-        item {
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = stringResource(R.string.label_wellness_subscriptions),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = InkPrimary
-            )
-        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = stringResource(R.string.label_wellness_subscriptions),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = InkPrimary
+        )
 
-        item {
-            WellnessSubscriptionsSection(
-                character = character,
-                onToggleLifestyle = { option, enable ->
-                    lifestyleToConfirm = Pair(option, enable)
-                }
-            )
-        }
+        WellnessSubscriptionsSection(
+            character = character,
+            onToggleLifestyle = { option, enable ->
+                lifestyleToConfirm = Pair(option, enable)
+            }
+        )
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 
     // Treatment Confirmation Dialog
