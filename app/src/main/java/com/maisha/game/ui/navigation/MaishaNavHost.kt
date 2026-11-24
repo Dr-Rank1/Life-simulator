@@ -438,7 +438,10 @@ fun MaishaNavHost(
                 onResolveFeudAction = viewModel::onResolveFeudAction,
                 onCallInBenefactorFavor = viewModel::onCallInBenefactorFavor,
                 onReconcileRivalry = viewModel::onReconcileRivalry,
-                onDismissSocialEcosystemMessage = viewModel::onDismissSocialEcosystemMessage
+                onDismissSocialEcosystemMessage = viewModel::onDismissSocialEcosystemMessage,
+                onResolveRoutineDilemma = viewModel::onResolveRoutineDilemma,
+                onDismissRoutineDilemma = viewModel::onDismissRoutineDilemma,
+                onCommuteTransit = viewModel::onCommuteTransit
             )
 
             NotificationPermissionEffect(

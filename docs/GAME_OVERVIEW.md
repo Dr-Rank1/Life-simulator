@@ -117,6 +117,7 @@ com.maisha.game.domain/
   ├── MiniChallengeEngine.kt      (Interactive exam focus, push-your-luck crime, negotiations)
   ├── DoubleLifeEngine.kt         (Undercover rackets, secret romance, shadow persona, confrontations)
   ├── SocialEcosystemEngine.kt    (Community standing, recurring rivals, benefactors, family feuds/alliances)
+  ├── RoutineDilemmaEngine.kt     (Snap routine dilemmas, daily commute, work crunch, weekend splurge, family dinner)
   └── LifeArchetypeEngine.kt      (Silk-sash ribbons, dynamic chapter titles, evocative epitaphs, legacy stamps)
 ```
 
@@ -257,6 +258,19 @@ com.maisha.game.domain/
   - **Economic & Career Privileges:** High community standing grants tangible advantages:
     - *Prestige Mortgage:* Up to 0.5% APR discount on property mortgages.
     - *Hiring Advantage:* Up to +15% hire chance bonus for Pillars of Society (and -20% penalty for Pariahs).
+
+#### 20. `RoutineDilemmaEngine`
+- **Role:** Pure Kotlin engine generating bite-sized micro-dilemmas and snap decisions during everyday routines to give between-year actions and age-up intervals vibrant personality and immediate trade-offs.
+- **Key Categories:**
+  - `COMMUTE`: Transit dilemmas featuring country-specific transport modes (`{transportMode}`, e.g., matatu, danfo, trotro, jeepney, angkot, bus, subway). Dilemmas like offering a seat, fare disputes, taking express shortcuts, and street hawkers with crisp trade-offs across Karma, Health/Energy, Cash, and Heat.
+  - `WORK_STUDY`: Late-night crunch, covering slacking colleagues, study shortcuts, and exam cramming impacting Smarts, Performance, Stress/Health, and Workplace Standing.
+  - `WEEKEND_SPLURGE`: Street food binges, flash sales on `{moneyApp}`, haggling in artisanal markets, and VIP tickets with trade-offs across Cash, Happiness, Health, and Discipline.
+  - `FAMILY_DINNER`: Awkward family questions, splitting contentious restaurant bills, inheriting peculiar hand-me-downs, and sibling disputes impacting Family Bonds, Cash, and Stress.
+- **Key Mechanics:**
+  - **Dynamic Interpolation:** Dynamic placeholder substitution using `CountryCatalog` (`{transportMode}`, `{moneyApp}`) tailored to each of the 15 supported countries.
+  - **Country-Aware Economy Scaling:** All cash penalties and windfalls scale across country economies via `EconomyScaler.scaleAmount`.
+  - **Relational & State Propagation:** Updates stats, cash, heat level, workplace colleague relationship levels, and family relationship tiers directly.
+  - **Tactile UI Experience:** Fast-resolving Compose dialog with categorical vector iconography, colored impact preview badges (`+Karma`, `-Health`, `+Bond`, `+Cash`, `+Heat`), and haptic/audio cues.
 
 ---
 

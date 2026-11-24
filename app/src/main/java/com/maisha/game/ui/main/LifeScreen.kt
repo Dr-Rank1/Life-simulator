@@ -108,6 +108,7 @@ import com.maisha.game.ui.components.DoubleLifeSheet
 import com.maisha.game.ui.components.ExamFocusDialog
 import com.maisha.game.ui.components.LifeArchetypeStrings
 import com.maisha.game.ui.components.NegotiationDialog
+import com.maisha.game.ui.components.RoutineDilemmaDialog
 import com.maisha.game.ui.components.SecretConfrontationDialog
 import com.maisha.game.ui.components.AgeUpButton
 import com.maisha.game.ui.components.AppLoadingIndicator
@@ -341,7 +342,10 @@ fun LifeScreen(
     onResolveFeudAction: (String, FeudAction) -> Unit = { _, _ -> },
     onCallInBenefactorFavor: (String, BenefactorFavorType) -> Unit = { _, _ -> },
     onReconcileRivalry: (String) -> Unit = {},
-    onDismissSocialEcosystemMessage: () -> Unit = {}
+    onDismissSocialEcosystemMessage: () -> Unit = {},
+    onResolveRoutineDilemma: (com.maisha.game.data.model.DilemmaChoice) -> Unit = {},
+    onDismissRoutineDilemma: () -> Unit = {},
+    onCommuteTransit: () -> Unit = {}
 ) {
     if (uiState.isLoading) {
         Column(
@@ -544,6 +548,15 @@ fun LifeScreen(
             countryCode = character.countryCode,
             onChoice = onResolveSecretConfrontation,
             onDismiss = onDismissSecretConfrontation
+        )
+    }
+
+    uiState.activeRoutineDilemma?.let { dilemma ->
+        RoutineDilemmaDialog(
+            dilemma = dilemma,
+            interpolatedPrompt = uiState.routineDilemmaPrompt ?: dilemma.promptTemplate,
+            onChoiceSelected = onResolveRoutineDilemma,
+            onDismiss = onDismissRoutineDilemma
         )
     }
 
@@ -768,6 +781,7 @@ fun LifeScreen(
                 onSignEndorsement = onSignEndorsement,
                 onDropEndorsement = onDropEndorsement,
                 onOpenDoubleLife = onOpenDoubleLifeSheet,
+                onCommuteTransit = onCommuteTransit,
                 onActionMessageDismissed = onActionMessageDismissed,
                 onDismissLeisureTip = onDismissLeisureTip,
                 modifier = Modifier.fillMaxSize()

@@ -196,7 +196,9 @@ data class LifeUiState(
     val showDoubleLifeSheet: Boolean = false,
     val activeSecretConfrontation: SecretConfrontation? = null,
     val doubleLifeActionMessage: String? = null,
-    val socialEcosystemMessage: String? = null
+    val socialEcosystemMessage: String? = null,
+    val activeRoutineDilemma: com.maisha.game.data.model.RoutineDilemma? = null,
+    val routineDilemmaPrompt: String? = null
 )
 
 @HiltViewModel
@@ -214,6 +216,7 @@ class LifeViewModel @Inject constructor(
     private val weeklyChallengeEngine: WeeklyChallengeEngine,
     private val adFrequencyController: AdFrequencyController,
     private val notificationScheduler: NotificationScheduler,
+    private val routineDilemmaEngine: com.maisha.game.domain.RoutineDilemmaEngine,
     val carMakeCatalog: CarMakeCatalog,
     val streetCatalog: StreetCatalog
 ) : ViewModel() {
@@ -452,6 +455,11 @@ class LifeViewModel @Inject constructor(
             val pendingConfrontation = rewardedCharacter.doubleLife.activeSecret?.pendingConfrontation
             if (pendingConfrontation != null) {
                 _uiState.update { it.copy(activeSecretConfrontation = pendingConfrontation) }
+            }
+            if (_uiState.value.currentEvent == null && _uiState.value.activeSecretConfrontation == null && rewardedCharacter.age >= 4) {
+                if (kotlin.random.Random.nextFloat() <= 0.40f) {
+                    onTriggerRoutineDilemma()
+                }
             }
             suppressQuestRefresh = false
             val earnedInterstitialSlot = rewardedCharacter.alive &&
@@ -1020,6 +1028,9 @@ class LifeViewModel @Inject constructor(
                             netWorth = financeEngine.calculateNetWorth(result.character)
                         )
                     }
+                    if (_uiState.value.activeRoutineDilemma == null && (action == com.maisha.game.data.model.OfficeAction.WORK_HARDER || action == com.maisha.game.data.model.OfficeAction.SLACK_OFF) && kotlin.random.Random.nextFloat() <= 0.35f) {
+                        onTriggerRoutineDilemma(com.maisha.game.data.model.RoutineCategory.WORK_STUDY)
+                    }
                 }
                 is OfficeActionResult.Denied -> {
                     persist(result.character)
@@ -1165,6 +1176,9 @@ class LifeViewModel @Inject constructor(
                             netWorth = financeEngine.calculateNetWorth(result.character),
                             headerExpression = ExpressionResolver.resolveExpression(result.character, null)
                         )
+                    }
+                    if (_uiState.value.activeRoutineDilemma == null && kotlin.random.Random.nextFloat() <= 0.35f) {
+                        onTriggerRoutineDilemma(com.maisha.game.data.model.RoutineCategory.WORK_STUDY)
                     }
                 }
                 StudySessionResult.Ineligible -> {
@@ -2641,6 +2655,9 @@ class LifeViewModel @Inject constructor(
                     ExpressionResolver.outcomeFromInteraction(type)
                 )
             )
+            if (_uiState.value.activeRoutineDilemma == null && type == com.maisha.game.domain.InteractionType.SPEND_TIME && kotlin.random.Random.nextFloat() <= 0.35f) {
+                onTriggerRoutineDilemma(com.maisha.game.data.model.RoutineCategory.FAMILY_DINNER)
+            }
         }
     }
 
@@ -3062,6 +3079,70 @@ class LifeViewModel @Inject constructor(
 
     fun onDismissExamFocus() {
         _uiState.update { it.copy(activeExamFocusChallenge = null) }
+    }
+
+    fun onTriggerRoutineDilemma(category: com.maisha.game.data.model.RoutineCategory? = null) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val dilemma = routineDilemmaEngine.findEligibleDilemma(character, category) ?: return
+        val prompt = routineDilemmaEngine.interpolatePrompt(dilemma.promptTemplate, character.countryCode)
+        _uiState.update {
+            it.copy(
+                activeRoutineDilemma = dilemma,
+                routineDilemmaPrompt = prompt
+            )
+        }
+    }
+
+    fun onResolveRoutineDilemma(choice: com.maisha.game.data.model.DilemmaChoice) {
+        val character = _uiState.value.character ?: return
+        val dilemma = _uiState.value.activeRoutineDilemma ?: return
+        val statsBefore = character.stats
+        val netWorthBefore = financeEngine.calculateNetWorth(character)
+        val resolution = routineDilemmaEngine.resolveChoice(character, dilemma, choice)
+
+        viewModelScope.launch {
+            persist(resolution.character)
+            processMidLifeAchievements(resolution.character)
+            val statDeltas = buildStatDeltas(statsBefore, resolution.character.stats) +
+                buildNetWorthDelta(
+                    before = netWorthBefore,
+                    after = financeEngine.calculateNetWorth(resolution.character),
+                    countryCode = resolution.character.countryCode
+                )
+            if (statDeltas.isNotEmpty()) {
+                appendStatDeltas(statDeltas)
+            }
+            if (resolution.success) {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+            } else {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.WARNING))
+            }
+            val outcomeText = context.getString(
+                com.maisha.game.ui.components.RoutineDilemmaStrings.stringResFor(resolution.outcomeMessageResKey)
+            )
+            val interpolatedOutcome = routineDilemmaEngine.interpolatePrompt(outcomeText, resolution.character.countryCode)
+            _uiState.update {
+                it.copy(
+                    character = resolution.character,
+                    activeRoutineDilemma = null,
+                    routineDilemmaPrompt = null,
+                    lifePulseMessage = interpolatedOutcome,
+                    actionMessage = interpolatedOutcome,
+                    netWorth = financeEngine.calculateNetWorth(resolution.character)
+                )
+            }
+        }
+    }
+
+    fun onDismissRoutineDilemma() {
+        _uiState.update { it.copy(activeRoutineDilemma = null, routineDilemmaPrompt = null) }
+    }
+
+    fun onCommuteTransit() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        onTriggerRoutineDilemma(com.maisha.game.data.model.RoutineCategory.COMMUTE)
     }
 
     fun onOpenDoubleLifeSheet() {
@@ -4450,6 +4531,9 @@ class LifeViewModel @Inject constructor(
                             netWorth = financeEngine.calculateNetWorth(result.character),
                             headerExpression = ExpressionResolver.resolveExpression(result.character, null)
                         )
+                    }
+                    if (_uiState.value.activeRoutineDilemma == null && kotlin.random.Random.nextFloat() <= 0.35f) {
+                        onTriggerRoutineDilemma(com.maisha.game.data.model.RoutineCategory.WEEKEND_SPLURGE)
                     }
                 }
                 LeisureResult.InsufficientFunds -> {

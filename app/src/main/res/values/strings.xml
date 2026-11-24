@@ -2439,4 +2439,211 @@
     <string name="stamp_solitary_pioneer">Solitary Pioneer · Gen %1$d</string>
     <string name="stamp_steadfast_torchbearer">Steadfast Torchbearer · Gen %1$d</string>
     <string name="stamp_humble_origin">Humble Origin · Gen %1$d</string>
+
+    <!-- Routine Dilemmas & Snap Decisions -->
+    <string name="btn_transit_commute">Commute via %1$s</string>
+    <string name="btn_transit_commute_desc">Navigate the daily rhythm and encounters of the city.</string>
+    <string name="routine_dilemma_headline">Snap Decision</string>
+    <string name="routine_dilemma_dismiss">Walk Away</string>
+    <string name="routine_category_commute">Daily Commute</string>
+    <string name="routine_category_work_study">Late-Night Grind</string>
+    <string name="routine_category_weekend_splurge">Weekend Outing</string>
+    <string name="routine_category_family_dinner">Family Table</string>
+
+    <!-- Commute: Crowded Transit Seat -->
+    <string name="dilemma_commute_seat_title">Crowded Transit</string>
+    <string name="dilemma_commute_seat_prompt">An elderly passenger carrying heavy groceries steps aboard your packed {transportMode}. Every seat is occupied.</string>
+    <string name="dilemma_commute_seat_offer">Offer Your Seat</string>
+    <string name="dilemma_commute_seat_offer_desc">Stand for the rest of the journey so they can sit comfortably.</string>
+    <string name="dilemma_commute_seat_offer_tag">Generosity</string>
+    <string name="dilemma_commute_seat_offer_outcome">You gave up your seat on the {transportMode}. The elder blessed you warmly.</string>
+    <string name="dilemma_commute_seat_ignore">Close Your Eyes</string>
+    <string name="dilemma_commute_seat_ignore_desc">Pretend to be asleep and keep resting your weary legs.</string>
+    <string name="dilemma_commute_seat_ignore_tag">Rest</string>
+    <string name="dilemma_commute_seat_ignore_outcome">You feigned sleep in the {transportMode} and kept your seat, feeling slightly guilty.</string>
+
+    <!-- Commute: Gridlock Shortcut -->
+    <string name="dilemma_commute_shortcut_title">Gridlock Shortcut</string>
+    <string name="dilemma_commute_shortcut_prompt">Traffic is deadlocked on your commute. The driver proposes weaving through narrow, unpaved alleyways to bypass the jam.</string>
+    <string name="dilemma_commute_shortcut_take">Take the Shortcut</string>
+    <string name="dilemma_commute_shortcut_take_desc">Risk the bumpy, unpaved detour to beat the gridlock.</string>
+    <string name="dilemma_commute_shortcut_take_tag">Gamble</string>
+    <string name="dilemma_commute_shortcut_take_success">The reckless shortcut paid off! You arrived well ahead of schedule.</string>
+    <string name="dilemma_commute_shortcut_take_fail">The alleyway was blocked by a stalled lorry. You arrived late with bruised shins.</string>
+    <string name="dilemma_commute_shortcut_stay">Stay on the Road</string>
+    <string name="dilemma_commute_shortcut_stay_desc">Sit out the slow crawl of traffic safely on the paved road.</string>
+    <string name="dilemma_commute_shortcut_stay_tag">Patience</string>
+    <string name="dilemma_commute_shortcut_stay_outcome">You waited patiently through the traffic crawl, listening to street noise.</string>
+
+    <!-- Commute: Conductor Fare Dispute -->
+    <string name="dilemma_commute_fare_title">Fare Dispute</string>
+    <string name="dilemma_commute_fare_prompt">The {transportMode} conductor demands an extra fare charge, claiming peak-hour surge pricing.</string>
+    <string name="dilemma_commute_fare_dispute">Contest the Overcharge</string>
+    <string name="dilemma_commute_fare_dispute_desc">Stand your ground and demand the standard regulated rate.</string>
+    <string name="dilemma_commute_fare_dispute_tag">Assertive</string>
+    <string name="dilemma_commute_fare_dispute_success">Fellow passengers backed you up! The conductor yielded and charged the standard fare.</string>
+    <string name="dilemma_commute_fare_dispute_fail">The conductor made an embarrassing scene and threatened to leave you stranded.</string>
+    <string name="dilemma_commute_fare_pay">Pay without Fuss</string>
+    <string name="dilemma_commute_fare_pay_desc">Hand over the extra money to keep peace on your journey.</string>
+    <string name="dilemma_commute_fare_pay_tag">Discretion</string>
+    <string name="dilemma_commute_fare_pay_outcome">You paid the inflated fare and reached your destination without conflict.</string>
+
+    <!-- Commute: Roadside Breakdown -->
+    <string name="dilemma_commute_push_title">Roadside Breakdown</string>
+    <string name="dilemma_commute_push_prompt">Your {transportMode} sputters and stalls in traffic. The driver asks passengers to help push it to start.</string>
+    <string name="dilemma_commute_push_help">Lend a Shoulder</string>
+    <string name="dilemma_commute_push_help_desc">Join the crew of passengers pushing the vehicle to get it rolling.</string>
+    <string name="dilemma_commute_push_help_tag">Solidarity</string>
+    <string name="dilemma_commute_push_help_outcome">Together you jump-started the vehicle! Everyone cheered as the engine roared back to life.</string>
+    <string name="dilemma_commute_push_watch">Wait on Sidewalk</string>
+    <string name="dilemma_commute_push_watch_desc">Watch from the curb while keeping your clothes clean.</string>
+    <string name="dilemma_commute_push_watch_tag">Prudence</string>
+    <string name="dilemma_commute_push_watch_outcome">You waited on the sidewalk until others got the vehicle moving.</string>
+
+    <!-- Work/Study: Covering a Coworker -->
+    <string name="dilemma_work_cover_title">Covering a Coworker</string>
+    <string name="dilemma_work_cover_prompt">A visibly anxious coworker asks if you can finish their portion of tomorrow\'s major deliverable.</string>
+    <string name="dilemma_work_cover_accept">Take on Extra Work</string>
+    <string name="dilemma_work_cover_accept_desc">Stay late and complete their deliverable alongside yours.</string>
+    <string name="dilemma_work_cover_accept_tag">Teamwork</string>
+    <string name="dilemma_work_cover_accept_outcome">You pulled a late shift to bail out your colleague. They expressed heartfelt gratitude.</string>
+    <string name="dilemma_work_cover_decline">Politely Decline</string>
+    <string name="dilemma_work_cover_decline_desc">Protect your own bandwidth and leave at your scheduled hour.</string>
+    <string name="dilemma_work_cover_decline_tag">Boundaries</string>
+    <string name="dilemma_work_cover_decline_outcome">You declined the request and went home on time, keeping your evening intact.</string>
+
+    <!-- Work/Study: Midnight Oil -->
+    <string name="dilemma_work_midnight_title">Midnight Oil</string>
+    <string name="dilemma_work_midnight_prompt">It is 1:00 AM before a crucial presentation. Your eyelids are heavy, but several slides still look mediocre.</string>
+    <string name="dilemma_work_midnight_push">Caffeine and Grind</string>
+    <string name="dilemma_work_midnight_push_desc">Down another coffee and polish the slides until 3:30 AM.</string>
+    <string name="dilemma_work_midnight_push_tag">Ambition</string>
+    <string name="dilemma_work_midnight_push_outcome">You perfected every slide before dawn. Management was thoroughly impressed, though you were exhausted.</string>
+    <string name="dilemma_work_midnight_sleep">Sleep Now</string>
+    <string name="dilemma_work_midnight_sleep_desc">Close the laptop and rely on rested energy tomorrow.</string>
+    <string name="dilemma_work_midnight_sleep_tag">Wellness</string>
+    <string name="dilemma_work_midnight_sleep_outcome">You woke up refreshed and spoke naturally during the meeting, improvising the rough spots.</string>
+
+    <!-- Work/Study: Watercooler Secret -->
+    <string name="dilemma_work_leak_title">Watercooler Secret</string>
+    <string name="dilemma_work_leak_prompt">You inadvertently see an unredacted memo about upcoming restructuring plans left on a communal printer.</string>
+    <string name="dilemma_work_leak_share">Tip Off Your Team</string>
+    <string name="dilemma_work_leak_share_desc">Discreetly give your close work friends an early heads-up.</string>
+    <string name="dilemma_work_leak_share_tag">Loyalty</string>
+    <string name="dilemma_work_leak_share_outcome">Your colleagues thanked you deeply for the heads-up, though management grew suspicious of leaks.</string>
+    <string name="dilemma_work_leak_ignore">Turn It Face Down</string>
+    <string name="dilemma_work_leak_ignore_desc">Leave the paper alone and stay completely out of the drama.</string>
+    <string name="dilemma_work_leak_ignore_tag">Professionalism</string>
+    <string name="dilemma_work_leak_ignore_outcome">You kept your head down and stayed clean of workplace gossip.</string>
+
+    <!-- Work/Study: Tedious Report Shortcut -->
+    <string name="dilemma_work_shortcut_title">Report Shortcut</string>
+    <string name="dilemma_work_shortcut_prompt">A repetitive audit report will take hours to verify manually. You could copy last term\'s baseline data.</string>
+    <string name="dilemma_work_shortcut_gamble">Use Quick Baseline</string>
+    <string name="dilemma_work_shortcut_gamble_desc">Save hours of tedious manual data entry.</string>
+    <string name="dilemma_work_shortcut_gamble_tag">Efficiency</string>
+    <string name="dilemma_work_shortcut_gamble_success">The submission sailed through without anyone questioning the estimates. Hours saved!</string>
+    <string name="dilemma_work_shortcut_gamble_fail">A supervisor noticed conflicting discrepancies in the audit. You received a formal reprimand.</string>
+    <string name="dilemma_work_shortcut_manual">Verify Every Cell</string>
+    <string name="dilemma_work_shortcut_manual_desc">Check every number diligently, even if it eats your free evening.</string>
+    <string name="dilemma_work_shortcut_manual_tag">Integrity</string>
+    <string name="dilemma_work_shortcut_manual_outcome">Your meticulous accuracy uncovered two genuine bookkeeping errors and earned quiet praise.</string>
+
+    <!-- Weekend: Marketplace Haggle -->
+    <string name="dilemma_splurge_haggle_title">Marketplace Bargain</string>
+    <string name="dilemma_splurge_haggle_prompt">An open-air market vendor quotes a steep tourist price for fresh goods you want to purchase.</string>
+    <string name="dilemma_splurge_haggle_push">Haggle with Flair</string>
+    <string name="dilemma_splurge_haggle_push_desc">Quote half the price and tease a dramatic walk-away.</string>
+    <string name="dilemma_splurge_haggle_push_tag">Barter</string>
+    <string name="dilemma_splurge_haggle_push_success">The vendor chuckled at your bargaining skills and sold it at wholesale price!</string>
+    <string name="dilemma_splurge_haggle_push_fail">The vendor took offense at your lowball offer and refused to negotiate further.</string>
+    <string name="dilemma_splurge_haggle_pay">Pay Quoted Price</string>
+    <string name="dilemma_splurge_haggle_pay_desc">Support the local vendor without dispute.</string>
+    <string name="dilemma_splurge_haggle_pay_tag">Patronage</string>
+    <string name="dilemma_splurge_haggle_pay_outcome">You paid the initial asking price. The grateful vendor tossed in extra produce.</string>
+
+    <!-- Weekend: Unequal Dinner Bill -->
+    <string name="dilemma_splurge_bill_title">Unequal Dinner Bill</string>
+    <string name="dilemma_splurge_bill_prompt">After dining with acquaintances, someone suggests an equal split, ignoring that two people ordered pricey cocktails.</string>
+    <string name="dilemma_splurge_bill_item">Itemized Split</string>
+    <string name="dilemma_splurge_bill_item_desc">Ask the server for separate tabs or pay only for what you consumed.</string>
+    <string name="dilemma_splurge_bill_item_tag">Fairness</string>
+    <string name="dilemma_splurge_bill_item_outcome">You paid your exact share and saved your cash, though the table fell into brief awkward silence.</string>
+    <string name="dilemma_splurge_bill_even">Split Evenly</string>
+    <string name="dilemma_splurge_bill_even_desc">Pay the inflated split to preserve the harmonious group mood.</string>
+    <string name="dilemma_splurge_bill_even_tag">Generosity</string>
+    <string name="dilemma_splurge_bill_even_outcome">You chipped in for the whole table without complaining, earning a reputation as easygoing.</string>
+
+    <!-- Weekend: Street Musician -->
+    <string name="dilemma_splurge_busker_title">Street Musician</string>
+    <string name="dilemma_splurge_busker_prompt">A street musician plays a stirring acoustic melody near the walkway, drawing a small, appreciative crowd.</string>
+    <string name="dilemma_splurge_busker_tip">Drop Generous Tip</string>
+    <string name="dilemma_splurge_busker_tip_desc">Toss some spare cash into their instrument case.</string>
+    <string name="dilemma_splurge_busker_tip_tag">Arts Patron</string>
+    <string name="dilemma_splurge_busker_tip_outcome">The busker met your eyes and bowed in appreciation. The music lifted your spirits.</string>
+    <string name="dilemma_splurge_busker_pass">Keep Moving</string>
+    <string name="dilemma_splurge_busker_pass_desc">Enjoy the melody as you hurry along on your way.</string>
+    <string name="dilemma_splurge_busker_pass_tag">Frugal</string>
+    <string name="dilemma_splurge_busker_pass_outcome">You walked past the performance, keeping your change securely in your pocket.</string>
+
+    <!-- Weekend: Alley Game Dealer -->
+    <string name="dilemma_splurge_street_game_title">Alley Game Dealer</string>
+    <string name="dilemma_splurge_street_game_prompt">A quick-handed street operator on a wooden crate calls out to passersby to bet on a shell game.</string>
+    <string name="dilemma_splurge_street_game_bet">Wager Some Cash</string>
+    <string name="dilemma_splurge_street_game_bet_desc">Try your hand at following the dealer\'s fingers.</string>
+    <string name="dilemma_splurge_street_game_bet_tag">Street Gamble</string>
+    <string name="dilemma_splurge_street_game_bet_success">Your sharp eyes spotted the palmed cup! You doubled your bet and walked away grinning.</string>
+    <string name="dilemma_splurge_street_game_bet_fail">Sleight of hand got the best of you. The dealer scooped your money before you could blink.</string>
+    <string name="dilemma_splurge_street_game_walk">Walk Away</string>
+    <string name="dilemma_splurge_street_game_walk_desc">Recognize the hustle and keep your distance.</string>
+    <string name="dilemma_splurge_street_game_walk_tag">Wisdom</string>
+    <string name="dilemma_splurge_street_game_walk_outcome">You kept your hands in your pockets and strolled past the obvious trap.</string>
+
+    <!-- Family: Unsolicited Advice -->
+    <string name="dilemma_family_advice_title">Unsolicited Advice</string>
+    <string name="dilemma_family_advice_prompt">During dinner, a relative questions your recent financial and relationship decisions in front of everyone.</string>
+    <string name="dilemma_family_advice_nod">Smile and Nod</string>
+    <string name="dilemma_family_advice_nod_desc">Defuse the tension with polite, neutral agreement.</string>
+    <string name="dilemma_family_advice_nod_tag">Diplomacy</string>
+    <string name="dilemma_family_advice_nod_outcome">You nodded politely and redirected the conversation, keeping peace across the dinner table.</string>
+    <string name="dilemma_family_advice_stand">Speak Your Mind</string>
+    <string name="dilemma_family_advice_stand_desc">Respectfully explain that your choices are your own to make.</string>
+    <string name="dilemma_family_advice_stand_tag">Autonomy</string>
+    <string name="dilemma_family_advice_stand_outcome">You held your ground with dignity. Relatives respected your backbone, though dinner went quiet.</string>
+
+    <!-- Family: The Last Savory Portion -->
+    <string name="dilemma_family_portion_title">The Last Portion</string>
+    <string name="dilemma_family_portion_prompt">One single delicious portion remains on the dinner platter, and your sibling is eyeing it hungrily.</string>
+    <string name="dilemma_family_portion_yield">Offer It Up</string>
+    <string name="dilemma_family_portion_yield_desc">Slide the platter their way with a warm smile.</string>
+    <string name="dilemma_family_portion_yield_tag">Kindness</string>
+    <string name="dilemma_family_portion_yield_outcome">Your kin grinned from ear to ear and thanked you for giving up the final portion.</string>
+    <string name="dilemma_family_portion_take">Claim It First</string>
+    <string name="dilemma_family_portion_take_desc">First come, first served—scoop it onto your plate.</string>
+    <string name="dilemma_family_portion_take_tag">Appetite</string>
+    <string name="dilemma_family_portion_take_outcome">You savored every bite of the last piece, shrugging playfully at your sibling\'s mock groan.</string>
+
+    <!-- Family: Relative Transfer Request -->
+    <string name="dilemma_family_loan_title">Relative Loan Request</string>
+    <string name="dilemma_family_loan_prompt">A family member sends a private message asking for an urgent {moneyApp} transfer to cover a surprise bill.</string>
+    <string name="dilemma_family_loan_send">Send {moneyApp} Help</string>
+    <string name="dilemma_family_loan_send_desc">Transfer the modest sum immediately to relieve their stress.</string>
+    <string name="dilemma_family_loan_send_tag">Family Pillar</string>
+    <string name="dilemma_family_loan_send_outcome">You transferred the funds via {moneyApp}. Your relative sent back endless thank-you messages.</string>
+    <string name="dilemma_family_loan_deny">Decline Politely</string>
+    <string name="dilemma_family_loan_deny_desc">Explain you are stretched thin so you do not compromise your finances.</string>
+    <string name="dilemma_family_loan_deny_tag">Frugality</string>
+    <string name="dilemma_family_loan_deny_outcome">You politely declined. They understood, though communication was somewhat subdued.</string>
+
+    <!-- Family: Kitchen Clean-up -->
+    <string name="dilemma_family_dishes_title">Kitchen Clean-up</string>
+    <string name="dilemma_family_dishes_prompt">After dinner, a tower of greasy cookware remains in the sink while everyone else drifts into the living room.</string>
+    <string name="dilemma_family_dishes_wash">Wash Everything</string>
+    <string name="dilemma_family_dishes_wash_desc">Roll up your sleeves and scrub the dishes clean.</string>
+    <string name="dilemma_family_dishes_wash_tag">Diligence</string>
+    <string name="dilemma_family_dishes_wash_outcome">You cleaned the entire kitchen until it gleamed. Your family was deeply impressed by your diligence.</string>
+    <string name="dilemma_family_dishes_leave">Slip Away</string>
+    <string name="dilemma_family_dishes_leave_desc">Slip away to relax and let whoever cooked handle it later.</string>
+    <string name="dilemma_family_dishes_leave_tag">Relaxation</string>
+    <string name="dilemma_family_dishes_leave_outcome">You lounged on the sofa instead, ignoring the silent stack of pots in the sink.</string>
 </resources>
