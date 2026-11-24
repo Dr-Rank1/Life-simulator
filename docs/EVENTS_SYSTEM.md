@@ -9,11 +9,11 @@
 
 Narrative **life events** are the storytelling backbone of Maisha. Each turn (calendar year), after domain engines update character stats, the `EventRepository` queries the merged pool of authored events. Eligible events are filtered by age, career status, education level, relationship gates, and country restrictions, then interpolated with authentic local tokens (transport, exams, banking apps) before being presented in `EventDialogStyled` modals.
 
-System-generated mechanical events (such as national exam results, corporate promotions, firings, corporate downsizing, and relocation job offers) are generated directly in domain engines (`EducationEngine`, `CareerEngine`, `RelocationEngine`). Narrative events live in 18 specialized JSON asset packs.
+System-generated mechanical events (such as national exam results, corporate promotions, firings, corporate downsizing, and relocation job offers) are generated directly in domain engines (`EducationEngine`, `CareerEngine`, `RelocationEngine`). Narrative events live in 19 specialized JSON asset packs.
 
 ```mermaid
 flowchart TD
-    JSON[18 JSON Event Packs in assets] --> Repo[EventRepository.loadAllFromAssets]
+    JSON[19 JSON Event Packs in assets] --> Repo[EventRepository.loadAllFromAssets]
     Repo --> Filter{getEligibleEvents}
     Filter -->|Check Age Range| G1[Age Gating]
     Filter -->|Check Tags: requires_job, education, etc.| G2[State & Career Gating]
@@ -27,7 +27,7 @@ flowchart TD
 
 ---
 
-## 2. Event Pack Inventory (18 JSON Files)
+## 2. Event Pack Inventory (19 JSON Files)
 
 All narrative event packs reside in `app/src/main/assets/data/events/`:
 
@@ -51,6 +51,7 @@ All narrative event packs reside in `app/src/main/assets/data/events/`:
 | `holiday_events.json` | Country holiday celebrations and family traditions | 4–90 | `holiday`, holiday cooldowns |
 | `wave3_events.json` | Specialized medical, legal, and lifestyle dilemmas | 18–80 | Wave 3 system integrations |
 | `narrative_arcs_events.json` | Cohesive multi-year narrative story arcs and country-authentic life stage milestones | 7–95 | `one_time`, `requires_event_<id>`, `education`, `requires_job`, `holiday` |
+| `wildcard_twists_events.json` | Bizarre inheritances, mistaken identities, viral mishaps, surreal encounters, and fate forks | 8–95 | `one_time`, `requires_event_<id>`, `requires_flag_<flag>`, `education`, `holiday` |
 
 ---
 
@@ -97,6 +98,10 @@ All narrative event packs reside in `app/src/main/assets/data/events/`:
 | `triggersIllnessRoll` | `Boolean` | `false` | Forces an immediate illness roll. |
 | `doctorCareTier` | `String` | `null` | Initiates healthcare flow: `"free"`, `"private"`, `"alternative"`. |
 | `relocateToCountry` | `String` | `null` | Triggers international relocation to target country code. |
+| `setsConsequenceFlag` | `String` | `null` | Sets a persistent narrative consequence flag on character state. |
+| `clearsConsequenceFlag` | `String` | `null` | Clears a consequence flag from character state. |
+| `parentalTrustEffect` | `Int` | `0` | Delta applied to minor's parental trust score (0 to 100). |
+| `aptitudeBoost` | `String` | `null` | Childhood aptitude name to boost or discover (`ATHLETICS`, `ARTS_MUSIC`, etc.). |
 
 ---
 
@@ -109,6 +114,10 @@ Tags are evaluated by `EventRepository` against the active `Character` state:
 | `one_time` | Fires at most once per life. Tracked in `character.triggeredEventIds`. |
 | `requires_event_<id>` | Prerequisite event gating. Only eligible if event `<id>` was triggered in this life (`id in triggeredEventIds`). Used to construct multi-year story arcs. |
 | `conflicts_with_event_<id>` | Mutually exclusive narrative branching. Ineligible if event `<id>` was triggered in this life. |
+| `requires_flag_<flag>` | Consequence flag gating. Character must possess consequence flag `<flag>` on `character.consequenceFlags`. |
+| `conflicts_with_flag_<flag>` | Flag exclusivity gating. Ineligible if character possesses consequence flag `<flag>`. |
+| `requires_aptitude_<apt>` | Childhood aptitude gating. Requires `character.education.childhoodAptitude == <apt>`. |
+| `requires_clique_<clique>` | School clique gating. Requires `character.education.schoolClique == <clique>`. |
 | `education` | Requires active enrollment in Primary, Secondary, or University (`passesEducationGate`). |
 | `requires_job` | Requires current employment (`passesCareerGate`). |
 | `requires_spouse` | Character must have an active spouse. |

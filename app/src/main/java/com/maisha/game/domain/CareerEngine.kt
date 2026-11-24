@@ -570,7 +570,9 @@ class CareerEngine @Inject constructor(
         if (job.level >= maxLevel) return character to false
 
         val perf = maxOf(character.career.performance, job.performanceScore.toFloat())
-        val strongCase = perf >= PROMOTION_OPPORTUNITY_PERFORMANCE &&
+        val hasMentorAdvocate = character.career.workplaceRoster.any { it.isMentor && it.relationshipLevel >= 60 }
+        val effectivePromoThreshold = if (hasMentorAdvocate) 80f else PROMOTION_OPPORTUNITY_PERFORMANCE
+        val strongCase = perf >= effectivePromoThreshold &&
             character.career.bossRelationship > 0 &&
             character.career.yearsAtCurrentJob >= 1
         val legacyInterval = character.career.yearsAtCurrentJob > 0 &&
@@ -1084,18 +1086,22 @@ class CareerEngine @Inject constructor(
         )
 
         val coworkerRoles = listOf("Senior Associate", "Colleague", "Junior Associate", "Operations Specialist")
-        val coworkers = coworkerRoles.map { role ->
+        val coworkers = coworkerRoles.mapIndexed { index, role ->
             val gender = if (Random.nextBoolean()) Gender.MALE else Gender.FEMALE
             val name = NamePool.randomFullName(gender, countryCode)
+            val isRival = index == 0
+            val isMentor = index == 1
             WorkplacePerson(
                 id = UUID.randomUUID().toString(),
                 name = name,
                 role = role,
-                relationshipLevel = Random.nextInt(40, 70),
-                competence = Random.nextInt(35, 80),
+                relationshipLevel = if (isRival) Random.nextInt(25, 45) else Random.nextInt(40, 70),
+                competence = if (isMentor) Random.nextInt(75, 95) else Random.nextInt(35, 80),
                 strictness = Random.nextInt(20, 60),
                 isSupervisor = false,
-                avatarConfig = AvatarConfig.random()
+                avatarConfig = AvatarConfig.random(),
+                isRival = isRival,
+                isMentor = isMentor
             )
         }
         return listOf(supervisor) + coworkers
@@ -2001,8 +2007,15 @@ class CareerEngine @Inject constructor(
         } else {
             0f
         }
+        val standingModifier = when (character.socialEcosystem.currentStandingTier) {
+            com.maisha.game.data.model.CommunityStandingTier.PILLAR_OF_SOCIETY -> 0.12f
+            com.maisha.game.data.model.CommunityStandingTier.WELL_RESPECTED -> 0.06f
+            com.maisha.game.data.model.CommunityStandingTier.DISTRUSTED -> -0.08f
+            com.maisha.game.data.model.CommunityStandingTier.NOTORIOUS_PARIAH -> -0.15f
+            com.maisha.game.data.model.CommunityStandingTier.RESPECTABLE -> 0f
+        }
         val base = 0.35f
-        return (base + smartsFactor + gpaFactor + looksFactor + healthFactor - recordPenalty - cultureShockPenalty)
+        return (base + smartsFactor + gpaFactor + looksFactor + healthFactor - recordPenalty - cultureShockPenalty + standingModifier)
             .coerceIn(0.1f, 0.95f)
     }
 

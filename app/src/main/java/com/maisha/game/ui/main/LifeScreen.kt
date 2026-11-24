@@ -27,10 +27,12 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -40,6 +42,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -65,27 +69,46 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maisha.game.R
 import com.maisha.game.data.local.OnboardingTips
+import com.maisha.game.data.model.BenefactorFavorType
 import com.maisha.game.data.model.BucketGoalKind
 import com.maisha.game.data.model.CareerState
 import com.maisha.game.data.model.Character
+import com.maisha.game.data.model.ChildhoodAptitude
+import com.maisha.game.data.model.ConfrontationChoice
 import com.maisha.game.data.model.CrimeType
 import com.maisha.game.data.model.EducationState
 import com.maisha.game.data.model.EventChoice
 import com.maisha.game.data.model.Expression
+import com.maisha.game.data.model.FeudAction
 import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.LivingStandard
 import com.maisha.game.data.model.Person
 import com.maisha.game.data.model.SchoolStage
+import com.maisha.game.data.model.SecretIdentityType
 import com.maisha.game.data.model.Stats
+import com.maisha.game.domain.EventLogCategory
 import com.maisha.game.domain.EventLogClassifier
 import com.maisha.game.domain.EventLogTone
 import com.maisha.game.domain.GiftTier
 import com.maisha.game.domain.InteractionType
+import com.maisha.game.domain.LifeArchetypeEngine
 import com.maisha.game.domain.YearQuest
 import com.maisha.game.domain.YearQuestKind
 import com.maisha.game.domain.YearQuestProgress
 import com.maisha.game.ui.celebration.CelebrationOverlay
 import com.maisha.game.ui.components.AchievementUnlockedDialog
+import com.maisha.game.domain.CrimePushLuckSession
+import com.maisha.game.domain.ExamFocusChallenge
+import com.maisha.game.domain.ExamFocusTactic
+import com.maisha.game.domain.NegotiationChallenge
+import com.maisha.game.domain.NegotiationTactics
+import com.maisha.game.domain.PushLuckAction
+import com.maisha.game.ui.components.CrimePushLuckSheet
+import com.maisha.game.ui.components.DoubleLifeSheet
+import com.maisha.game.ui.components.ExamFocusDialog
+import com.maisha.game.ui.components.LifeArchetypeStrings
+import com.maisha.game.ui.components.NegotiationDialog
+import com.maisha.game.ui.components.SecretConfrontationDialog
 import com.maisha.game.ui.components.AgeUpButton
 import com.maisha.game.ui.components.AppLoadingIndicator
 import com.maisha.game.ui.components.CountryFlag
@@ -208,6 +231,10 @@ fun LifeScreen(
     onSignEndorsement: () -> Unit = {},
     onDropEndorsement: () -> Unit = {},
     onLeaveCareerTrack: () -> Unit = {},
+    onExploreChildhoodAptitude: (com.maisha.game.data.model.ChildhoodAptitude) -> Unit = {},
+    onJoinSchoolClique: (com.maisha.game.data.model.SchoolClique) -> Unit = {},
+    onMingleWithSchoolClique: () -> Unit = {},
+    onRequestCurfewExtension: () -> Unit = {},
     onCareerMessageDismissed: () -> Unit,
     onPurchaseAsset: (String) -> Unit,
     onSellAsset: (String) -> Unit,
@@ -293,7 +320,28 @@ fun LifeScreen(
     onServiceAsset: (String) -> Unit = {},
     onCaseCrimeTarget: (com.maisha.game.data.model.CrimeTarget) -> Unit = {},
     onLayLowCrime: () -> Unit = {},
-    onBribeInformantCrime: () -> Unit = {}
+    onBribeInformantCrime: () -> Unit = {},
+    onPushLuckStep: (PushLuckAction) -> Unit = {},
+    onDismissCrimePushLuck: () -> Unit = {},
+    onResolveNegotiation: (NegotiationTactics) -> Unit = {},
+    onDismissNegotiation: () -> Unit = {},
+    onTriggerExamFocusCheck: (String?, String?) -> Unit = { _, _ -> },
+    onResolveExamFocus: (ExamFocusTactic, Boolean) -> Unit = { _, _ -> },
+    onDismissExamFocus: () -> Unit = {},
+    onOpenDoubleLifeSheet: () -> Unit = {},
+    onDismissDoubleLifeSheet: () -> Unit = {},
+    onAdoptSecretIdentity: (SecretIdentityType, String, String?) -> Unit = { _, _, _ -> },
+    onPlantDoubleLifeAlibi: () -> Unit = {},
+    onScrubDoubleLifeTracks: () -> Unit = {},
+    onExploitDoubleLife: () -> Unit = {},
+    onComeCleanDoubleLife: () -> Unit = {},
+    onResolveSecretConfrontation: (ConfrontationChoice) -> Unit = {},
+    onDismissSecretConfrontation: () -> Unit = {},
+    onDismissDoubleLifeMessage: () -> Unit = {},
+    onResolveFeudAction: (String, FeudAction) -> Unit = { _, _ -> },
+    onCallInBenefactorFavor: (String, BenefactorFavorType) -> Unit = { _, _ -> },
+    onReconcileRivalry: (String) -> Unit = {},
+    onDismissSocialEcosystemMessage: () -> Unit = {}
 ) {
     if (uiState.isLoading) {
         Column(
@@ -415,6 +463,20 @@ fun LifeScreen(
         }
     }
 
+    LaunchedEffect(uiState.doubleLifeActionMessage) {
+        uiState.doubleLifeActionMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            onDismissDoubleLifeMessage()
+        }
+    }
+
+    LaunchedEffect(uiState.socialEcosystemMessage) {
+        uiState.socialEcosystemMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            onDismissSocialEcosystemMessage()
+        }
+    }
+
     var showQuestsSheet by rememberSaveable { mutableStateOf(false) }
 
     if (showQuestsSheet) {
@@ -437,6 +499,52 @@ fun LifeScreen(
                 onDismiss = onDismissWeeklyChallenge
             )
         }
+    }
+
+    uiState.activeExamFocusChallenge?.let { challenge ->
+        ExamFocusDialog(
+            challenge = challenge,
+            onResolve = onResolveExamFocus,
+            onDismiss = onDismissExamFocus
+        )
+    }
+
+    uiState.activeCrimePushLuck?.let { session ->
+        CrimePushLuckSheet(
+            session = session,
+            countryCode = character.countryCode,
+            onAction = onPushLuckStep,
+            onDismiss = onDismissCrimePushLuck
+        )
+    }
+
+    uiState.activeNegotiation?.let { challenge ->
+        NegotiationDialog(
+            challenge = challenge,
+            onResolve = onResolveNegotiation,
+            onDismiss = onDismissNegotiation
+        )
+    }
+
+    if (uiState.showDoubleLifeSheet) {
+        DoubleLifeSheet(
+            character = character,
+            onAdoptSecret = onAdoptSecretIdentity,
+            onPlantAlibi = onPlantDoubleLifeAlibi,
+            onScrubTracks = onScrubDoubleLifeTracks,
+            onExploitSecret = onExploitDoubleLife,
+            onComeClean = onComeCleanDoubleLife,
+            onDismiss = onDismissDoubleLifeSheet
+        )
+    }
+
+    uiState.activeSecretConfrontation?.let { confrontation ->
+        SecretConfrontationDialog(
+            confrontation = confrontation,
+            countryCode = character.countryCode,
+            onChoice = onResolveSecretConfrontation,
+            onDismiss = onDismissSecretConfrontation
+        )
     }
 
     val eventActive = uiState.currentEvent != null
@@ -493,6 +601,10 @@ fun LifeScreen(
                         onViewCharacterStats = onViewCharacterStats,
                         onOpenSettings = onOpenSettings,
                         onOpenWeeklyChallenge = onOpenWeeklyChallenge,
+                        onExploreChildhoodAptitude = onExploreChildhoodAptitude,
+                        onMingleWithSchoolClique = onMingleWithSchoolClique,
+                        onRequestCurfewExtension = onRequestCurfewExtension,
+                        onWorkPipDeliverable = onWorkPipDeliverable,
                         onStatDeltaFinished = onStatDeltaFinished,
                         onYearRecapDismissed = onYearRecapDismissed,
                         onDismissYearQuestsTip = onDismissYearQuestsTip,
@@ -522,6 +634,9 @@ fun LifeScreen(
                 onDismissFamilyDatingTip = onDismissFamilyDatingTip,
                 onDismissFamilyDetailTip = onDismissFamilyDetailTip,
                 onThrowParty = onThrowParty,
+                onResolveFeudAction = onResolveFeudAction,
+                onCallInBenefactorFavor = onCallInBenefactorFavor,
+                onReconcileRivalry = onReconcileRivalry,
                 modifier = Modifier.fillMaxSize()
             )
             MainTab.CAREER -> CareerScreen(
@@ -578,6 +693,11 @@ fun LifeScreen(
                 onRebutPipWithHR = onRebutPipWithHR,
                 onLeadClubStrategy = onLeadClubStrategy,
                 onMentorClubJunior = onMentorClubJunior,
+                onExploreChildhoodAptitude = onExploreChildhoodAptitude,
+                onJoinSchoolClique = onJoinSchoolClique,
+                onMingleWithSchoolClique = onMingleWithSchoolClique,
+                onRequestCurfewExtension = onRequestCurfewExtension,
+                onTriggerExamFocusCheck = onTriggerExamFocusCheck,
                 onCareerMessageDismissed = onCareerMessageDismissed,
                 modifier = Modifier.fillMaxSize()
             )
@@ -647,6 +767,7 @@ fun LifeScreen(
                 onTrainTalent = onTrainTalent,
                 onSignEndorsement = onSignEndorsement,
                 onDropEndorsement = onDropEndorsement,
+                onOpenDoubleLife = onOpenDoubleLifeSheet,
                 onActionMessageDismissed = onActionMessageDismissed,
                 onDismissLeisureTip = onDismissLeisureTip,
                 modifier = Modifier.fillMaxSize()
@@ -696,6 +817,7 @@ private data class YearBlock(
 private data class YearLogItem(
     val text: String,
     val tone: EventLogTone,
+    val category: EventLogCategory = EventLogCategory.GENERAL,
     val deltaBadge: String? = null
 )
 
@@ -715,6 +837,7 @@ private fun parseYearBlocks(entries: List<String>, currentAge: Int): List<YearBl
             curAge = parsedAge
         } else if (trimmed.isNotEmpty()) {
             val tone = EventLogClassifier.classify(trimmed)
+            val category = EventLogClassifier.categorize(trimmed)
             val deltaMatch = Regex("""\(([+\-]?\d+[^)]+)\)""").find(trimmed)
             val deltaBadge = deltaMatch?.groups?.get(1)?.value
             val cleanText = if (deltaBadge != null) {
@@ -726,6 +849,7 @@ private fun parseYearBlocks(entries: List<String>, currentAge: Int): List<YearBl
                 YearLogItem(
                     text = cleanText,
                     tone = tone,
+                    category = category,
                     deltaBadge = deltaBadge
                 )
             )
@@ -747,6 +871,10 @@ private fun LifeTabContent(
     onViewCharacterStats: () -> Unit = {},
     onOpenSettings: () -> Unit = {},
     onOpenWeeklyChallenge: () -> Unit = {},
+    onExploreChildhoodAptitude: (ChildhoodAptitude) -> Unit = {},
+    onMingleWithSchoolClique: () -> Unit = {},
+    onRequestCurfewExtension: () -> Unit = {},
+    onWorkPipDeliverable: () -> Unit = {},
     onStatDeltaFinished: (Long) -> Unit,
     onYearRecapDismissed: () -> Unit,
     onDismissYearQuestsTip: () -> Unit = {},
@@ -803,6 +931,21 @@ private fun LifeTabContent(
                         WeeklyChallengeCard(
                             progress = progress,
                             onClick = onOpenWeeklyChallenge
+                        )
+                    }
+                }
+
+                uiState.character?.let { character ->
+                    item {
+                        ContextualThisYearStrip(
+                            character = character,
+                            weeklyChallengeProgress = uiState.weeklyChallengeProgress,
+                            onOpenWeeklyChallenge = onOpenWeeklyChallenge,
+                            onExploreChildhoodAptitude = onExploreChildhoodAptitude,
+                            onMingleWithSchoolClique = onMingleWithSchoolClique,
+                            onRequestCurfewExtension = onRequestCurfewExtension,
+                            onWorkPipDeliverable = onWorkPipDeliverable,
+                            onViewCharacterStats = onViewCharacterStats
                         )
                     }
                 }
@@ -899,12 +1042,19 @@ private fun YearTimelineCard(
     yearBlock: YearBlock,
     modifier: Modifier = Modifier
 ) {
+    val hasMilestone = remember(yearBlock) {
+        yearBlock.entries.any { it.category == EventLogCategory.MILESTONE || it.tone == EventLogTone.MILESTONE }
+    }
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = PaperWhite),
-        border = androidx.compose.foundation.BorderStroke(1.dp, BorderCardSlate),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        border = BorderStroke(
+            width = if (hasMilestone) 1.5.dp else 1.dp,
+            color = if (hasMilestone) GoldAccent.copy(alpha = 0.5f) else BorderCardSlate
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (hasMilestone) 3.dp else 2.dp)
     ) {
         Column(
             modifier = Modifier
@@ -919,7 +1069,7 @@ private fun YearTimelineCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(DeepSlate)
+                        .background(if (hasMilestone) GoldAccent else DeepSlate)
                         .padding(horizontal = 8.dp, vertical = 3.dp)
                 ) {
                     Text(
@@ -931,58 +1081,371 @@ private fun YearTimelineCard(
                         letterSpacing = 0.5.sp
                     )
                 }
+
+                if (hasMilestone) {
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = GoldAccent.copy(alpha = 0.15f)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.timeline_tag_milestone),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = GoldAccent,
+                            fontSize = 10.sp,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
                     thickness = 1.dp,
-                    color = Hairline
+                    color = if (hasMilestone) GoldAccent.copy(alpha = 0.3f) else Hairline
                 )
             }
 
             yearBlock.entries.forEach { entry ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val dotColor = when (entry.tone) {
-                        EventLogTone.POSITIVE -> Color(0xFF10B981)
-                        EventLogTone.MILESTONE -> Color(0xFFF59E0B)
-                        EventLogTone.NEGATIVE -> Color(0xFFEF4444)
-                        EventLogTone.NEUTRAL -> Color(0xFF64748B)
-                    }
-                    Text(
-                        text = "•",
-                        color = dotColor,
-                        fontWeight = FontWeight.Black,
-                        fontSize = 15.sp,
-                        lineHeight = 16.sp,
-                        modifier = Modifier.padding(top = 1.dp)
-                    )
-                    Text(
-                        text = entry.text,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = InkPrimary,
-                        fontSize = 13.sp,
-                        lineHeight = 18.sp,
-                        modifier = Modifier.weight(1f)
-                    )
-                    if (!entry.deltaBadge.isNullOrBlank()) {
-                        val isPositive = !entry.deltaBadge.startsWith("-")
-                        Box(
+                val isMilestone = entry.category == EventLogCategory.MILESTONE || entry.tone == EventLogTone.MILESTONE
+                val isDrama = entry.category == EventLogCategory.CRIME_DRAMA
+
+                if (isMilestone) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(10.dp),
+                        color = GoldAccent.copy(alpha = 0.10f),
+                        border = BorderStroke(1.dp, GoldAccent.copy(alpha = 0.40f))
+                    ) {
+                        Row(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(if (isPositive) Color(0xFFDCFCE7) else Color(0xFFFEE2E2))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp, vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = entry.deltaBadge,
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isPositive) Color(0xFF15803D) else Color(0xFFB91C1C),
-                                fontSize = 10.sp
+                            Icon(
+                                imageVector = AppIcons.Achievements,
+                                contentDescription = null,
+                                tint = GoldAccent,
+                                modifier = Modifier.size(16.dp)
                             )
+                            Text(
+                                text = entry.text,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = InkPrimary,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.sp,
+                                lineHeight = 18.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                            if (!entry.deltaBadge.isNullOrBlank()) {
+                                TimelineDeltaBadge(entry.deltaBadge)
+                            }
                         }
                     }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        val (iconVector, iconColor) = when (entry.category) {
+                            EventLogCategory.CRIME_DRAMA -> AppIcons.Mischief to CoralNegative
+                            EventLogCategory.CAREER_SCHOOL -> AppIcons.Career to TealPrimary
+                            EventLogCategory.FAMILY_ROMANCE -> AppIcons.Family to StatHappiness
+                            EventLogCategory.HEALTH_WELLNESS -> AppIcons.Health to StatHealth
+                            else -> null to when (entry.tone) {
+                                EventLogTone.POSITIVE -> Color(0xFF10B981)
+                                EventLogTone.NEGATIVE -> CoralNegative
+                                else -> Color(0xFF64748B)
+                            }
+                        }
+
+                        if (iconVector != null) {
+                            Icon(
+                                imageVector = iconVector,
+                                contentDescription = null,
+                                tint = iconColor,
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .padding(top = 2.dp)
+                            )
+                        } else {
+                            Text(
+                                text = "•",
+                                color = iconColor,
+                                fontWeight = FontWeight.Black,
+                                fontSize = 15.sp,
+                                lineHeight = 16.sp,
+                                modifier = Modifier.padding(top = 1.dp)
+                            )
+                        }
+
+                        Text(
+                            text = entry.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (isDrama) CoralNegative else InkPrimary,
+                            fontWeight = if (isDrama) FontWeight.Medium else FontWeight.Normal,
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        if (!entry.deltaBadge.isNullOrBlank()) {
+                            TimelineDeltaBadge(entry.deltaBadge)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimelineDeltaBadge(deltaBadge: String) {
+    val isPositive = !deltaBadge.startsWith("-")
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(6.dp))
+            .background(if (isPositive) Color(0xFFDCFCE7) else Color(0xFFFEE2E2))
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+    ) {
+        Text(
+            text = deltaBadge,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = if (isPositive) Color(0xFF15803D) else Color(0xFFB91C1C),
+            fontSize = 10.sp
+        )
+    }
+}
+
+private data class ThisYearFocusItem(
+    val icon: ImageVector,
+    val titleRes: Int,
+    val descRes: Int,
+    val accent: Color,
+    val onClick: () -> Unit
+)
+
+@Composable
+private fun ContextualThisYearStrip(
+    character: Character,
+    weeklyChallengeProgress: com.maisha.game.domain.WeeklyChallengeProgress?,
+    onOpenWeeklyChallenge: () -> Unit,
+    onExploreChildhoodAptitude: (ChildhoodAptitude) -> Unit,
+    onMingleWithSchoolClique: () -> Unit,
+    onRequestCurfewExtension: () -> Unit,
+    onWorkPipDeliverable: () -> Unit,
+    onViewCharacterStats: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val items = remember(character, weeklyChallengeProgress) {
+        val list = mutableListOf<ThisYearFocusItem>()
+        if (character.stats.health < 40) {
+            list.add(
+                ThisYearFocusItem(
+                    icon = AppIcons.Health,
+                    titleRes = R.string.strip_action_health_title,
+                    descRes = R.string.strip_action_health_desc,
+                    accent = CoralNegative,
+                    onClick = onViewCharacterStats
+                )
+            )
+        }
+        if (character.stats.happiness < 30) {
+            list.add(
+                ThisYearFocusItem(
+                    icon = AppIcons.Happiness,
+                    titleRes = R.string.strip_action_happiness_title,
+                    descRes = R.string.strip_action_happiness_desc,
+                    accent = CoralNegative,
+                    onClick = onViewCharacterStats
+                )
+            )
+        }
+        if (character.career.onPip) {
+            list.add(
+                ThisYearFocusItem(
+                    icon = AppIcons.Career,
+                    titleRes = R.string.strip_action_pip_title,
+                    descRes = R.string.strip_action_pip_desc,
+                    accent = CoralNegative,
+                    onClick = onWorkPipDeliverable
+                )
+            )
+        }
+        if (character.age in 4..10 && !character.education.aptitudeExploredThisYear) {
+            val aptitudeToExplore = if (character.education.childhoodAptitude != ChildhoodAptitude.NONE) {
+                character.education.childhoodAptitude
+            } else {
+                ChildhoodAptitude.ATHLETICS
+            }
+            list.add(
+                ThisYearFocusItem(
+                    icon = AppIcons.Smarts,
+                    titleRes = R.string.strip_action_aptitude_title,
+                    descRes = R.string.strip_action_aptitude_desc,
+                    accent = TealPrimary,
+                    onClick = { onExploreChildhoodAptitude(aptitudeToExplore) }
+                )
+            )
+        }
+        if (character.age in 11..14 && character.education.cliqueStanding < 60) {
+            list.add(
+                ThisYearFocusItem(
+                    icon = AppIcons.Family,
+                    titleRes = R.string.strip_action_clique_title,
+                    descRes = R.string.strip_action_clique_desc,
+                    accent = TealPrimary,
+                    onClick = onMingleWithSchoolClique
+                )
+            )
+        }
+        if (character.age in 15..17 && character.education.curfewHour < 24) {
+            list.add(
+                ThisYearFocusItem(
+                    icon = AppIcons.Longevity,
+                    titleRes = R.string.strip_action_curfew_title,
+                    descRes = R.string.strip_action_curfew_desc,
+                    accent = TealPrimary,
+                    onClick = onRequestCurfewExtension
+                )
+            )
+        }
+        if (character.age == 18) {
+            list.add(
+                ThisYearFocusItem(
+                    icon = AppIcons.Achievements,
+                    titleRes = R.string.strip_action_adulthood_title,
+                    descRes = R.string.strip_action_adulthood_desc,
+                    accent = GoldAccent,
+                    onClick = onViewCharacterStats
+                )
+            )
+        }
+        if (weeklyChallengeProgress != null && !weeklyChallengeProgress.isAllCompleted) {
+            list.add(
+                ThisYearFocusItem(
+                    icon = AppIcons.Achievements,
+                    titleRes = R.string.strip_action_challenge_title,
+                    descRes = R.string.strip_action_challenge_desc,
+                    accent = GoldAccent,
+                    onClick = onOpenWeeklyChallenge
+                )
+            )
+        }
+        list.take(2)
+    }
+
+    if (items.isEmpty()) return
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+        border = BorderStroke(1.dp, BorderCardSlate),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(TealPrimary.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = AppIcons.NavLife,
+                        contentDescription = null,
+                        tint = TealPrimary,
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.strip_this_year_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = InkPrimary,
+                    fontSize = 13.sp
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Text(
+                        text = "${items.size}",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+            }
+
+            items.forEachIndexed { index, item ->
+                if (index > 0) {
+                    HorizontalDivider(thickness = 0.5.dp, color = HairlineSoft)
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = item.onClick)
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(item.accent.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = null,
+                            tint = item.accent,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(item.titleRes),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = InkPrimary,
+                            fontSize = 13.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = stringResource(item.descRes),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = InkSecondary,
+                            fontSize = 11.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = InkTertiary,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
         }
@@ -1068,6 +1531,36 @@ private fun GlobalHudHeader(
                             fontSize = 11.sp
                         )
                     }
+                }
+
+                val chapterKey = remember(
+                    character.age,
+                    character.career.currentJob,
+                    character.education.stage,
+                    character.criminalRecord.notoriety,
+                    character.education.childhoodAptitude,
+                    character.education.schoolClique,
+                    netWorth
+                ) {
+                    LifeArchetypeEngine.resolveChapterKey(character, netWorth)
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = TealPrimary.copy(alpha = 0.12f)
+                ) {
+                    Text(
+                        text = stringResource(LifeArchetypeStrings.chapterStringRes(chapterKey)),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TealPrimary,
+                        fontSize = 10.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(2.dp))

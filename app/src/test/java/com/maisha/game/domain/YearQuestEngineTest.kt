@@ -89,4 +89,14 @@ class EventLogClassifierTest {
         assertEquals(EventLogTone.NEGATIVE, EventLogClassifier.classify("You were arrested for fraud."))
         assertEquals(EventLogTone.POSITIVE, EventLogClassifier.classify("You were hired as a nurse."))
     }
+
+    @Test
+    fun categorize_detectsStoryCategories() {
+        assertEquals(EventLogCategory.MILESTONE, EventLogClassifier.categorize("You got married in a lavish ceremony."))
+        assertEquals(EventLogCategory.CRIME_DRAMA, EventLogClassifier.categorize("You were arrested by the police."))
+        assertEquals(EventLogCategory.CAREER_SCHOOL, EventLogClassifier.categorize("You were hired as a Junior Software Engineer."))
+        assertEquals(EventLogCategory.FAMILY_ROMANCE, EventLogClassifier.categorize("Your spouse gave birth to a baby boy."))
+        assertEquals(EventLogCategory.HEALTH_WELLNESS, EventLogClassifier.categorize("You visited the clinic and received treatment."))
+        assertEquals(EventLogCategory.GENERAL, EventLogClassifier.categorize("You enjoyed a peaceful sunny afternoon."))
+    }
 }

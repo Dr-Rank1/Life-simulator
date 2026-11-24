@@ -1,5 +1,6 @@
 package com.maisha.game.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,15 +48,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.maisha.game.R
 import com.maisha.game.data.model.Character
 import com.maisha.game.data.model.WorkplaceAction
 import com.maisha.game.data.model.WorkplacePerson
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.Hairline
+import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.SurfaceMuted
@@ -246,6 +251,33 @@ private fun WorkplacePersonCard(
                             )
                         }
                     }
+                    if (person.isRival) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = CoralNegative
+                        ) {
+                            Text(
+                                text = stringResource(R.string.badge_rival).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    } else if (person.isMentor) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = TealPrimary
+                        ) {
+                            Text(
+                                text = stringResource(R.string.badge_mentor).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
                     if (person.interactedThisYear) {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
@@ -262,11 +294,42 @@ private fun WorkplacePersonCard(
                     }
                 }
 
-                Text(
-                    text = person.role,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = person.role,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    val personaTagRes = if (isSupervisor) {
+                        when {
+                            person.strictness >= 70 -> R.string.npc_tag_strict_mgr
+                            person.relationshipLevel >= 65 -> R.string.npc_tag_supportive_mgr
+                            else -> R.string.npc_tag_chill_mgr
+                        }
+                    } else {
+                        when {
+                            person.competence >= 75 -> R.string.npc_tag_ambitious_coworker
+                            person.relationshipLevel >= 50 -> R.string.npc_tag_reliable_coworker
+                            else -> R.string.npc_tag_slacker_coworker
+                        }
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        Text(
+                            text = stringResource(personaTagRes),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 10.sp,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(6.dp))
 
@@ -357,6 +420,55 @@ private fun WorkplacePersonActionSheet(
 
         Spacer(modifier = Modifier.height(4.dp))
 
+        if (person.isRival || person.isMentor) {
+            val (badgeText, badgeColor, contextText) = if (person.isRival) {
+                Triple(
+                    stringResource(R.string.badge_rival).uppercase(),
+                    CoralNegative,
+                    stringResource(R.string.reactive_rival_desc)
+                )
+            } else {
+                Triple(
+                    stringResource(R.string.badge_mentor).uppercase(),
+                    TealPrimary,
+                    stringResource(R.string.reactive_mentor_desc)
+                )
+            }
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = badgeColor.copy(alpha = 0.12f),
+                border = BorderStroke(1.dp, badgeColor.copy(alpha = 0.35f)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = badgeColor
+                    ) {
+                        Text(
+                            text = badgeText,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                            fontSize = 10.sp
+                        )
+                    }
+                    Text(
+                        text = contextText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = InkSecondary,
+                        maxLines = 2
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+
         // Mini Stats
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -377,6 +489,70 @@ private fun WorkplacePersonActionSheet(
                 value = "${person.strictness}%",
                 color = if (person.strictness > 65) CoralNegative else GoldAccent
             )
+        }
+
+        val isSupervisor = person.role == "Supervisor" || person.role == "Boss"
+        val personaTagRes = if (isSupervisor) {
+            when {
+                person.strictness >= 70 -> R.string.npc_tag_strict_mgr
+                person.relationshipLevel >= 65 -> R.string.npc_tag_supportive_mgr
+                else -> R.string.npc_tag_chill_mgr
+            }
+        } else {
+            when {
+                person.competence >= 75 -> R.string.npc_tag_ambitious_coworker
+                person.relationshipLevel >= 50 -> R.string.npc_tag_reliable_coworker
+                else -> R.string.npc_tag_slacker_coworker
+            }
+        }
+        val dialogueRes = if (isSupervisor) {
+            when {
+                person.relationshipLevel >= 65 -> R.string.npc_dialogue_mgr_pleased
+                person.relationshipLevel <= 35 -> R.string.npc_dialogue_mgr_critical
+                else -> R.string.npc_dialogue_mgr_neutral
+            }
+        } else {
+            if (person.relationshipLevel >= 50) {
+                R.string.npc_dialogue_coworker_friendly
+            } else {
+                R.string.npc_dialogue_coworker_aloof
+            }
+        }
+
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(10.dp),
+            color = SurfaceMuted.copy(alpha = 0.6f),
+            border = BorderStroke(0.5.dp, Hairline)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Text(
+                        text = stringResource(personaTagRes),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    )
+                }
+                Text(
+                    text = stringResource(dialogueRes),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = InkSecondary,
+                    fontStyle = FontStyle.Italic,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))

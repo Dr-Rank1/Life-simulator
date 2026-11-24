@@ -8,12 +8,14 @@ import com.maisha.game.data.model.AgingDetails
 import com.maisha.game.data.model.AssetType
 import com.maisha.game.data.model.AchievementProgress
 import com.maisha.game.data.model.AvatarConfig
+import com.maisha.game.data.model.BenefactorFavorType
 import com.maisha.game.data.model.Character
 import com.maisha.game.data.model.ClubPracticeIntensity
 import com.maisha.game.data.model.EventChoice
 import com.maisha.game.data.model.ExamType
 import com.maisha.game.data.model.EyewearStyle
 import com.maisha.game.data.model.FacialHairStyle
+import com.maisha.game.data.model.FeudAction
 import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.LifestyleOption
 import com.maisha.game.data.model.LifeEvent
@@ -87,7 +89,10 @@ class GameEngine @Inject constructor(
     private val legacyEngine: LegacyEngine,
     private val milestoneEngine: MilestoneEngine,
     private val bucketListEngine: BucketListEngine,
-    private val leisureEngine: LeisureEngine
+    private val leisureEngine: LeisureEngine,
+    private val miniChallengeEngine: MiniChallengeEngine,
+    private val doubleLifeEngine: DoubleLifeEngine,
+    private val socialEcosystemEngine: SocialEcosystemEngine
 ) {
 
     /**
@@ -144,6 +149,9 @@ class GameEngine @Inject constructor(
             updatedCharacter = careerEngine.finishStudentWorkYear(updatedCharacter)
             updatedCharacter = processCareerProgression(updatedCharacter)
             updatedCharacter = careerEngine.tickFameAndTalentYear(updatedCharacter)
+            if (previousAge == 17 && nextAge == 18) {
+                updatedCharacter = educationEngine.evaluateAge18Crossroads(updatedCharacter)
+            }
         }
 
         updatedCharacter = processFinanceProgression(updatedCharacter)
@@ -240,6 +248,13 @@ class GameEngine @Inject constructor(
 
         val milestones = milestoneEngine.checkNewUnlocks(beforeYear, updated, netWorth)
         updated = milestoneEngine.applyUnlocks(updated, milestones)
+
+        val (doubleLifeUpdated, _) = doubleLifeEngine.ageUpDoubleLife(updated)
+        updated = doubleLifeUpdated
+
+        val socialEcosystemResult = socialEcosystemEngine.ageUpSocialEcosystem(updated)
+        updated = socialEcosystemResult.character
+
         return GamifyDepthResult(updated, milestones, fameTierUp, completedBucketGoals)
     }
 
@@ -669,6 +684,36 @@ class GameEngine @Inject constructor(
             )
         }
 
+        if (choice.setsConsequenceFlag != null) {
+            updatedCharacter = updatedCharacter.addConsequenceFlag(choice.setsConsequenceFlag)
+        }
+        if (choice.clearsConsequenceFlag != null) {
+            updatedCharacter = updatedCharacter.removeConsequenceFlag(choice.clearsConsequenceFlag)
+        }
+        if (choice.parentalTrustEffect != 0) {
+            updatedCharacter = updatedCharacter.copy(
+                education = updatedCharacter.education.copy(
+                    parentalTrust = (updatedCharacter.education.parentalTrust + choice.parentalTrustEffect)
+                        .coerceIn(0, 100)
+                )
+            )
+        }
+        if (choice.aptitudeBoost != null) {
+            val aptitude = runCatching {
+                com.maisha.game.data.model.ChildhoodAptitude.valueOf(choice.aptitudeBoost)
+            }.getOrNull()
+            if (aptitude != null) {
+                val current = updatedCharacter.education.childhoodAptitude
+                val targetApt = if (current == com.maisha.game.data.model.ChildhoodAptitude.NONE) aptitude else current
+                updatedCharacter = updatedCharacter.copy(
+                    education = updatedCharacter.education.copy(
+                        childhoodAptitude = targetApt,
+                        aptitudeScore = (updatedCharacter.education.aptitudeScore + 15).coerceIn(0, 100)
+                    )
+                )
+            }
+        }
+
         val updatedStats = updatedCharacter.stats.applyEffects(choice.statEffects)
         val updatedLog = EventLogCap.prepend(updatedCharacter.eventLog, choice.resultText)
         return updatedCharacter.copy(stats = updatedStats, eventLog = updatedLog)
@@ -993,6 +1038,22 @@ class GameEngine @Inject constructor(
     fun calculateExamPassChance(character: Character): Float =
         educationEngine.calculateExamPassChance(character)
 
+    fun exploreChildhoodAptitude(
+        character: Character,
+        aptitude: com.maisha.game.data.model.ChildhoodAptitude
+    ): ChildhoodAptitudeResult = educationEngine.exploreChildhoodAptitude(character, aptitude)
+
+    fun joinSchoolClique(
+        character: Character,
+        targetClique: com.maisha.game.data.model.SchoolClique
+    ): SchoolActionResult = educationEngine.joinClique(character, targetClique)
+
+    fun mingleWithSchoolClique(character: Character): SchoolActionResult =
+        educationEngine.mingleWithClique(character)
+
+    fun requestCurfewExtension(character: Character): Pair<Character, String> =
+        educationEngine.requestCurfewExtension(character)
+
     fun startCareerTrack(character: Character, track: com.maisha.game.data.model.CareerTrack): Character {
         val started = careerEngine.startCareerTrack(character, track)
         return if (
@@ -1169,6 +1230,30 @@ class GameEngine @Inject constructor(
 
     fun attemptTargetedCrime(character: Character, target: com.maisha.game.data.model.CrimeTarget): CrimeResult =
         crimeEngine.attemptTargetedCrime(character, target)
+
+    fun startCrimePushLuck(
+        character: Character,
+        crimeType: com.maisha.game.data.model.CrimeType?,
+        target: com.maisha.game.data.model.CrimeTarget? = null
+    ): CrimePushLuckSession = miniChallengeEngine.startCrimePushLuck(character, crimeType, target)
+
+    fun resolvePushLuckStep(
+        character: Character,
+        session: CrimePushLuckSession,
+        action: PushLuckAction
+    ): PushLuckStepResult = miniChallengeEngine.resolvePushLuckStep(character, session, action)
+
+    fun evaluateExamFocus(
+        character: Character,
+        tactic: ExamFocusTactic,
+        rapidResponseBonus: Boolean = false
+    ): ExamFocusResult = miniChallengeEngine.evaluateExamFocus(character, tactic, rapidResponseBonus)
+
+    fun evaluateNegotiation(
+        character: Character,
+        challenge: NegotiationChallenge,
+        tactic: NegotiationTactics
+    ): NegotiationOutcome = miniChallengeEngine.evaluateNegotiation(character, challenge, tactic)
 
     fun caseCrimeTarget(character: Character, target: com.maisha.game.data.model.CrimeTarget): Character =
         crimeEngine.caseTarget(character, target)
@@ -1607,6 +1692,46 @@ class GameEngine @Inject constructor(
         1 -> AgeUpResult.SingleEvent(first())
         else -> AgeUpResult.MultipleEvents(this)
     }
+
+    fun canAdoptSecret(character: Character, type: com.maisha.game.data.model.SecretIdentityType): Pair<Boolean, String?> =
+        doubleLifeEngine.canAdoptSecret(character, type)
+
+    fun adoptSecret(
+        character: Character,
+        type: com.maisha.game.data.model.SecretIdentityType,
+        codename: String,
+        coverStory: String? = null
+    ): Character = doubleLifeEngine.adoptSecret(character, type, codename, coverStory)
+
+    fun plantDoubleLifeAlibi(character: Character): DoubleLifeActionResult =
+        doubleLifeEngine.plantAlibi(character)
+
+    fun scrubDoubleLifeTracks(character: Character): DoubleLifeActionResult =
+        doubleLifeEngine.scrubTracks(character)
+
+    fun exploitDoubleLife(character: Character): DoubleLifeActionResult =
+        doubleLifeEngine.exploitSecret(character)
+
+    fun comeCleanDoubleLife(character: Character): Character =
+        doubleLifeEngine.comeClean(character)
+
+    fun resolveSecretConfrontation(
+        character: Character,
+        choice: com.maisha.game.data.model.ConfrontationChoice
+    ): ConfrontationResolution = doubleLifeEngine.resolveConfrontation(character, choice)
+
+    fun resolveFeudAction(character: Character, feudId: String, action: FeudAction): FeudActionResult =
+        socialEcosystemEngine.resolveFeudAction(character, feudId, action)
+
+    fun callInBenefactorFavor(
+        character: Character,
+        allianceId: String,
+        favorType: BenefactorFavorType
+    ): BenefactorFavorResult =
+        socialEcosystemEngine.callInBenefactorFavor(character, allianceId, favorType)
+
+    fun reconcileRivalry(character: Character, personId: String): RivalryResolutionResult =
+        socialEcosystemEngine.reconcileRivalry(character, personId)
 
     private fun List<Person>.replaceAt(index: Int, person: Person): List<Person> =
         toMutableList().apply { this[index] = person }

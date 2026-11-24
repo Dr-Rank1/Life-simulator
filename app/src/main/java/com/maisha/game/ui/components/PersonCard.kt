@@ -24,12 +24,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -38,20 +40,24 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.maisha.game.R
 import com.maisha.game.data.model.AvatarConfig
 import com.maisha.game.data.model.Expression
 import com.maisha.game.data.model.Person
 import com.maisha.game.data.model.RelationType
 import com.maisha.game.data.model.RelationshipTier
+import com.maisha.game.data.model.SocialBondType
 import com.maisha.game.data.model.relationshipTierFor
 import com.maisha.game.ui.avatar.AvatarImage
 import com.maisha.game.ui.avatar.ExpressionResolver
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.Hairline
+import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
+import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.TealPrimary
 
 
@@ -141,6 +147,28 @@ fun PersonCard(
                             modifier = Modifier.size(16.dp)
                         )
                         else -> Unit
+                    }
+                    if (person.socialBond != SocialBondType.NONE) {
+                        val (badgeText, badgeColor) = when (person.socialBond) {
+                            SocialBondType.RECURRING_RIVAL -> stringResource(R.string.badge_rival).uppercase() to GoldAccent
+                            SocialBondType.BENEFACTOR_MENTOR -> stringResource(R.string.badge_benefactor).uppercase() to TealPrimary
+                            SocialBondType.FAMILY_FEUD -> stringResource(R.string.badge_feud).uppercase() to CoralNegative
+                            SocialBondType.FAMILY_ALLY -> stringResource(R.string.badge_ally).uppercase() to LifeGreen
+                            SocialBondType.NONE -> "" to Color.Transparent
+                        }
+                        Surface(
+                            shape = RoundedCornerShape(3.dp),
+                            color = badgeColor
+                        ) {
+                            Text(
+                                text = badgeText,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = PaperWhite,
+                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                fontSize = 9.sp
+                            )
+                        }
                     }
                 }
                 Text(

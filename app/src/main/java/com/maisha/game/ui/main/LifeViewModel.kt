@@ -69,6 +69,7 @@ import com.maisha.game.domain.PetCareResult
 import com.maisha.game.domain.ProposalResult
 import com.maisha.game.domain.SeekFriendshipResult
 import com.maisha.game.domain.ClubActivityResult
+import com.maisha.game.domain.ChildhoodAptitudeResult
 import com.maisha.game.domain.SchoolDisciplineResult
 import com.maisha.game.domain.OfficeActionResult
 import com.maisha.game.domain.ExamPrepResult
@@ -91,6 +92,25 @@ import com.maisha.game.domain.RenovateResult
 import com.maisha.game.domain.WeeklyChallengeEngine
 import com.maisha.game.domain.WeeklyChallengeProgress
 import com.maisha.game.domain.ClaimWeeklyChallengeResult
+import com.maisha.game.data.model.BenefactorFavorType
+import com.maisha.game.data.model.ConfrontationChoice
+import com.maisha.game.data.model.FeudAction
+import com.maisha.game.data.model.SecretConfrontation
+import com.maisha.game.data.model.SecretIdentityType
+import com.maisha.game.domain.BenefactorFavorResult
+import com.maisha.game.domain.DoubleLifeActionResult
+import com.maisha.game.domain.FeudActionResult
+import com.maisha.game.domain.RivalryResolutionResult
+import com.maisha.game.domain.ConfrontationResolution
+import com.maisha.game.domain.CrimePushLuckSession
+import com.maisha.game.domain.ExamFocusChallenge
+import com.maisha.game.domain.ExamFocusTactic
+import com.maisha.game.domain.NegotiationChallenge
+import com.maisha.game.domain.NegotiationParty
+import com.maisha.game.domain.NegotiationTactics
+import com.maisha.game.domain.NegotiationType
+import com.maisha.game.domain.PushLuckAction
+import com.maisha.game.domain.PushLuckStepResult
 import com.maisha.game.data.model.PartTimeJob
 import com.maisha.game.data.model.PortfolioStrategy
 import com.maisha.game.domain.BusinessFailure
@@ -113,6 +133,7 @@ import com.maisha.game.ui.components.StatType
 import com.maisha.game.feedback.HapticType
 import com.maisha.game.feedback.SoundEffect
 import com.maisha.game.notifications.NotificationScheduler
+import com.maisha.game.util.clampStat
 import com.maisha.game.util.formatMoney
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -168,7 +189,14 @@ data class LifeUiState(
     /** Ephemeral Life-tab toast (quest progress, etc.). */
     val lifePulseMessage: String? = null,
     /** Localized bullets for the post–Age Up recap strip; not persisted. */
-    val yearRecapLines: List<String> = emptyList()
+    val yearRecapLines: List<String> = emptyList(),
+    val activeExamFocusChallenge: ExamFocusChallenge? = null,
+    val activeCrimePushLuck: CrimePushLuckSession? = null,
+    val activeNegotiation: NegotiationChallenge? = null,
+    val showDoubleLifeSheet: Boolean = false,
+    val activeSecretConfrontation: SecretConfrontation? = null,
+    val doubleLifeActionMessage: String? = null,
+    val socialEcosystemMessage: String? = null
 )
 
 @HiltViewModel
@@ -267,7 +295,8 @@ class LifeViewModel @Inject constructor(
                             yearQuests = loadedQuests,
                             yearQuestProgress = emptyList(),
                             weeklyChallenge = weeklyChallengeEngine.currentChallenge(),
-                            weeklyChallengeCompleted = weeklyChallengeEngine.isComplete(character, weeklyChallengeEngine.currentChallenge())
+                            weeklyChallengeCompleted = weeklyChallengeEngine.isComplete(character, weeklyChallengeEngine.currentChallenge()),
+                            activeSecretConfrontation = character.doubleLife.activeSecret?.pendingConfrontation
                         ).withDynasty(character, financeEngine.calculateNetWorth(character))
                     }
                     refreshYearQuestProgress(character)
@@ -419,6 +448,10 @@ class LifeViewModel @Inject constructor(
                         state.actionMessage
                     }
                 ).withDynasty(rewardedCharacter, netWorthAfter)
+            }
+            val pendingConfrontation = rewardedCharacter.doubleLife.activeSecret?.pendingConfrontation
+            if (pendingConfrontation != null) {
+                _uiState.update { it.copy(activeSecretConfrontation = pendingConfrontation) }
             }
             suppressQuestRefresh = false
             val earnedInterstitialSlot = rewardedCharacter.alive &&
@@ -946,6 +979,36 @@ class LifeViewModel @Inject constructor(
     fun onOfficeAction(action: com.maisha.game.data.model.OfficeAction) {
         val character = _uiState.value.character ?: return
         if (!character.alive) return
+
+        if (action == com.maisha.game.data.model.OfficeAction.REQUEST_RAISE ||
+            action == com.maisha.game.data.model.OfficeAction.ASK_PROMOTION
+        ) {
+            if (character.career.askPromotionDoneThisYear) {
+                _uiState.update { it.copy(careerMessage = context.getString(R.string.msg_office_already_done)) }
+                return
+            }
+            if (character.career.currentJob == null) {
+                _uiState.update { it.copy(careerMessage = context.getString(R.string.msg_office_ineligible)) }
+                return
+            }
+            val supervisor = character.career.workplaceRoster.find { it.isSupervisor || it.role == "Supervisor" || it.role == "Boss" }
+            val party = NegotiationParty(
+                name = supervisor?.name ?: "Director",
+                roleTitle = supervisor?.role ?: "Supervisor",
+                relationshipLevel = character.career.bossRelationship,
+                resistanceLevel = supervisor?.strictness ?: 50,
+                avatarSeed = supervisor?.id ?: "boss"
+            )
+            val challenge = NegotiationChallenge(
+                type = if (action == com.maisha.game.data.model.OfficeAction.REQUEST_RAISE) NegotiationType.SALARY_RAISE else NegotiationType.PROMOTION,
+                party = party,
+                subjectLabel = if (action == com.maisha.game.data.model.OfficeAction.REQUEST_RAISE) "Annual Salary Raise" else "Corporate Promotion",
+                baselineRewardLabel = if (action == com.maisha.game.data.model.OfficeAction.REQUEST_RAISE) "+8% Salary" else "Next Corporate Rank"
+            )
+            _uiState.update { it.copy(activeNegotiation = challenge) }
+            return
+        }
+
         viewModelScope.launch {
             when (val result = gameEngine.performOfficeAction(character, action)) {
                 is OfficeActionResult.Success -> {
@@ -1354,11 +1417,43 @@ class LifeViewModel @Inject constructor(
     ) {
         val character = _uiState.value.character ?: return
         if (!character.alive) return
+
+        if (activity == com.maisha.game.data.model.SchoolActivity.CONFRONT_BULLY) {
+            if (character.education.socialActionDoneThisYear) {
+                _uiState.update { it.copy(careerMessage = context.getString(R.string.msg_school_action_already_done)) }
+                return
+            }
+            val bully = character.education.schoolPeople.find {
+                (targetPersonId != null && it.id == targetPersonId) || it.role == com.maisha.game.data.model.SchoolRole.BULLY
+            }
+            if (bully == null) {
+                _uiState.update { it.copy(careerMessage = context.getString(R.string.msg_school_person_missing)) }
+                return
+            }
+            val party = NegotiationParty(
+                name = bully.name,
+                roleTitle = "School Bully",
+                relationshipLevel = bully.relationshipLevel,
+                resistanceLevel = 60,
+                avatarSeed = bully.id
+            )
+            val challenge = NegotiationChallenge(
+                type = NegotiationType.CONFRONT_BULLY,
+                party = party,
+                subjectLabel = "Hallway Confrontation",
+                baselineRewardLabel = "Stand your ground / Defuse bully"
+            )
+            _uiState.update { it.copy(activeNegotiation = challenge) }
+            return
+        }
+
+        val statsBefore = character.stats
         viewModelScope.launch {
             when (val result = gameEngine.performSchoolActivity(character, activity, targetPersonId)) {
                 is SchoolActionResult.Success -> {
                     persist(result.character)
                     processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
                     _uiState.update {
                         it.copy(
                             character = result.character,
@@ -1393,11 +1488,13 @@ class LifeViewModel @Inject constructor(
     ) {
         val character = _uiState.value.character ?: return
         if (!character.alive) return
+        val statsBefore = character.stats
         viewModelScope.launch {
             when (val result = gameEngine.handleSchoolPersonInteraction(character, personId, action)) {
                 is SchoolInteractionResult.Success -> {
                     persist(result.character)
                     processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
                     _uiState.update {
                         it.copy(
                             character = result.character,
@@ -1538,6 +1635,130 @@ class LifeViewModel @Inject constructor(
                         it.copy(careerMessage = context.getString(R.string.msg_exam_prep_ineligible))
                     }
                 }
+            }
+        }
+    }
+
+    fun onExploreChildhoodAptitude(aptitude: com.maisha.game.data.model.ChildhoodAptitude) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            when (val result = gameEngine.exploreChildhoodAptitude(character, aptitude)) {
+                is ChildhoodAptitudeResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character),
+                            headerExpression = ExpressionResolver.resolveExpression(result.character, null)
+                        )
+                    }
+                }
+                ChildhoodAptitudeResult.AlreadyDoneThisYear -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_childhood_aptitude_already_done))
+                    }
+                }
+                ChildhoodAptitudeResult.TooYoung -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_childhood_aptitude_too_young))
+                    }
+                }
+                ChildhoodAptitudeResult.Ineligible -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_childhood_aptitude_ineligible))
+                    }
+                }
+            }
+        }
+    }
+
+    fun onJoinSchoolClique(clique: com.maisha.game.data.model.SchoolClique) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            when (val result = gameEngine.joinSchoolClique(character, clique)) {
+                is SchoolActionResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character),
+                            headerExpression = ExpressionResolver.resolveExpression(result.character, null)
+                        )
+                    }
+                }
+                SchoolActionResult.AlreadyDone -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_clique_already_member))
+                    }
+                }
+                else -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_school_action_ineligible))
+                    }
+                }
+            }
+        }
+    }
+
+    fun onMingleWithSchoolClique() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            when (val result = gameEngine.mingleWithSchoolClique(character)) {
+                is SchoolActionResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character),
+                            headerExpression = ExpressionResolver.resolveExpression(result.character, null)
+                        )
+                    }
+                }
+                SchoolActionResult.AlreadyDone -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_school_action_already_done))
+                    }
+                }
+                else -> {
+                    _uiState.update {
+                        it.copy(careerMessage = context.getString(R.string.msg_school_action_ineligible))
+                    }
+                }
+            }
+        }
+    }
+
+    fun onRequestCurfewExtension() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            val (updated, message) = gameEngine.requestCurfewExtension(character)
+            persist(updated)
+            processMidLifeAchievements(updated)
+            appendStatDeltas(buildStatDeltas(statsBefore, updated.stats, character.countryCode))
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    careerMessage = message,
+                    netWorth = financeEngine.calculateNetWorth(updated),
+                    headerExpression = ExpressionResolver.resolveExpression(updated, null)
+                )
             }
         }
     }
@@ -2064,11 +2285,13 @@ class LifeViewModel @Inject constructor(
     fun onWorkPartTime(job: PartTimeJob) {
         val character = _uiState.value.character ?: return
         if (!character.alive) return
+        val statsBefore = character.stats
         viewModelScope.launch {
             when (val result = gameEngine.workPartTime(character, job)) {
                 is PartTimeJobResult.Success -> {
                     persist(result.character)
                     checkWeeklyChallengeRibbons(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
                     val message = context.getString(
                         R.string.msg_part_time_success,
                         formatMoney(result.payout, result.character.countryCode)
@@ -2394,7 +2617,8 @@ class LifeViewModel @Inject constructor(
             val statsBefore = character.stats
             val result = gameEngine.interactWithFamilyMember(character, personId, type, giftTier)
             persist(result.character)
-            val statDeltas = buildStatDeltas(statsBefore, result.character.stats)
+            val statDeltas = buildStatDeltas(statsBefore, result.character.stats, character.countryCode)
+            appendStatDeltas(statDeltas)
             _uiState.update {
                 it.copy(
                     character = result.character,
@@ -2407,8 +2631,7 @@ class LifeViewModel @Inject constructor(
                     headerExpression = ExpressionResolver.resolveExpression(
                         result.character,
                         ExpressionResolver.outcomeFromInteraction(type)
-                    ),
-                    pendingStatDeltas = it.pendingStatDeltas + statDeltas
+                    )
                 )
             }
             flashExpression(
@@ -2517,6 +2740,27 @@ class LifeViewModel @Inject constructor(
         val character = _uiState.value.character ?: return
         if (!character.alive) return
 
+        if (signPrenup) {
+            val partner = character.family.find { it.id == personId }
+            if (partner != null) {
+                val party = NegotiationParty(
+                    name = partner.name,
+                    roleTitle = context.getString(R.string.relation_partner),
+                    relationshipLevel = partner.relationshipLevel,
+                    resistanceLevel = partner.crazy,
+                    avatarSeed = partner.id
+                )
+                val challenge = NegotiationChallenge(
+                    type = NegotiationType.PRENUP,
+                    party = party,
+                    subjectLabel = context.getString(R.string.dialog_prenup_title),
+                    baselineRewardLabel = context.getString(R.string.negotiation_reward_prenup)
+                )
+                _uiState.update { it.copy(activeNegotiation = challenge) }
+                return
+            }
+        }
+
         viewModelScope.launch {
             val (updatedCharacter, result) = gameEngine.proposeMarriage(character, personId, signPrenup)
             val message = when (result) {
@@ -2616,40 +2860,57 @@ class LifeViewModel @Inject constructor(
     fun onAttemptCrime(crimeType: CrimeType) {
         val character = _uiState.value.character ?: return
         if (!character.alive || character.criminalRecord.currentlyIncarcerated) return
+        val session = gameEngine.startCrimePushLuck(character, crimeType, null)
+        _uiState.update { it.copy(activeCrimePushLuck = session) }
+    }
+
+    fun onAttemptTargetedCrime(target: com.maisha.game.data.model.CrimeTarget) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive || character.criminalRecord.currentlyIncarcerated) return
+        val session = gameEngine.startCrimePushLuck(character, null, target)
+        _uiState.update { it.copy(activeCrimePushLuck = session) }
+    }
+
+    fun onPushLuckStep(action: PushLuckAction) {
+        val character = _uiState.value.character ?: return
+        val session = _uiState.value.activeCrimePushLuck ?: return
+        val statsBefore = character.stats
 
         viewModelScope.launch {
-            when (val result = gameEngine.attemptCrime(character, crimeType)) {
-                is CrimeResult.Success -> {
-                    val updated = result.character.copy(
-                        eventLog = EventLogCap.prepend(
-                            result.character.eventLog,
-                            context.getString(
-                                R.string.msg_crime_got_away_log,
-                                crimeTypeLabel(crimeType),
-                                formatMoney(result.moneyGained, result.character.countryCode)
-                            )
-                        )
-                    )
-                    persist(updated)
-                    processMidLifeAchievements(updated)
-                    _uiState.update {
-                        it.copy(
-                            character = updated,
-                            actionMessage = context.getString(
-                                R.string.msg_crime_success,
-                                formatMoney(result.moneyGained, result.character.countryCode)
-                            ),
-                            netWorth = financeEngine.calculateNetWorth(updated)
-                        )
-                    }
-                }
-                is CrimeResult.Caught -> {
+            when (val result = gameEngine.resolvePushLuckStep(character, session, action)) {
+                is PushLuckStepResult.CashedOut -> {
                     persist(result.character)
                     processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.MONEY_GAIN, haptic = HapticType.SUCCESS))
                     _uiState.update {
                         it.copy(
                             character = result.character,
-                            actionMessage = context.getString(R.string.msg_crime_arrested),
+                            activeCrimePushLuck = null,
+                            actionMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is PushLuckStepResult.PushedSuccess -> {
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.BUTTON_TAP, haptic = HapticType.LIGHT_TAP))
+                    _uiState.update {
+                        it.copy(
+                            activeCrimePushLuck = result.updatedSession,
+                            actionMessage = result.message
+                        )
+                    }
+                }
+                is PushLuckStepResult.Busted -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.ERROR))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            activeCrimePushLuck = null,
+                            actionMessage = result.message,
                             eligibleJobs = careerEngine.getEligibleJobs(result.character),
                             netWorth = financeEngine.calculateNetWorth(result.character)
                         )
@@ -2659,41 +2920,385 @@ class LifeViewModel @Inject constructor(
         }
     }
 
-    fun onAttemptTargetedCrime(target: com.maisha.game.data.model.CrimeTarget) {
+    fun onDismissCrimePushLuck() {
+        val session = _uiState.value.activeCrimePushLuck
+        if (session != null && session.stage > 1) {
+            onPushLuckStep(PushLuckAction.CASH_OUT)
+        } else {
+            _uiState.update { it.copy(activeCrimePushLuck = null) }
+        }
+    }
+
+    fun onResolveNegotiation(tactic: NegotiationTactics) {
         val character = _uiState.value.character ?: return
-        if (!character.alive || character.criminalRecord.currentlyIncarcerated) return
+        val challenge = _uiState.value.activeNegotiation ?: return
+        val statsBefore = character.stats
 
         viewModelScope.launch {
-            when (val result = gameEngine.attemptTargetedCrime(character, target)) {
-                is CrimeResult.Success -> {
-                    persist(result.character)
-                    processMidLifeAchievements(result.character)
-                    _uiState.update {
-                        it.copy(
-                            character = result.character,
-                            actionMessage = context.getString(
-                                R.string.msg_crime_success,
-                                formatMoney(result.moneyGained, result.character.countryCode)
-                            ),
-                            netWorth = financeEngine.calculateNetWorth(result.character)
-                        )
+            val outcome = gameEngine.evaluateNegotiation(character, challenge, tactic)
+            var updatedCharacter = outcome.character
+
+            if (challenge.type == NegotiationType.PRENUP) {
+                val partnerId = challenge.party.avatarSeed
+                if (outcome.success) {
+                    val (marriedChar, result) = gameEngine.proposeMarriage(updatedCharacter, partnerId, signPrenup = true)
+                    updatedCharacter = marriedChar
+                    if (result is ProposalResult.Accepted) {
+                        enqueueCelebration(CelebrationType.MARRIAGE)
                     }
-                    enqueueFeedback(FeedbackCue(sound = SoundEffect.MONEY_GAIN, haptic = HapticType.SUCCESS))
                 }
-                is CrimeResult.Caught -> {
+            } else if (challenge.type == NegotiationType.CONFRONT_BULLY) {
+                val bullyId = challenge.party.avatarSeed
+                val updatedPeople = updatedCharacter.education.schoolPeople.map { p ->
+                    if (p.id == bullyId) {
+                        p.copy(relationshipLevel = (p.relationshipLevel + outcome.relationshipDelta).coerceIn(0, 100))
+                    } else p
+                }
+                updatedCharacter = updatedCharacter.copy(
+                    education = updatedCharacter.education.copy(
+                        socialActionDoneThisYear = true,
+                        schoolPeople = updatedPeople
+                    )
+                )
+            }
+
+            persist(updatedCharacter)
+            processMidLifeAchievements(updatedCharacter)
+            appendStatDeltas(buildStatDeltas(statsBefore, updatedCharacter.stats, character.countryCode))
+            if (outcome.success) {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+            } else {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.WARNING))
+            }
+
+            val message = outcome.message
+            _uiState.update {
+                it.copy(
+                    character = updatedCharacter,
+                    activeNegotiation = null,
+                    careerMessage = if (challenge.type == NegotiationType.SALARY_RAISE || challenge.type == NegotiationType.PROMOTION) message else it.careerMessage,
+                    relationshipMessage = if (challenge.type == NegotiationType.PRENUP) message else it.relationshipMessage,
+                    actionMessage = if (challenge.type == NegotiationType.CONFRONT_BULLY || challenge.type == NegotiationType.EXPULSION_APPEAL) message else it.actionMessage,
+                    netWorth = financeEngine.calculateNetWorth(updatedCharacter)
+                )
+            }
+        }
+    }
+
+    fun onDismissNegotiation() {
+        _uiState.update { it.copy(activeNegotiation = null) }
+    }
+
+    fun onTriggerExamFocusCheck(examTitle: String? = null, subjectSummary: String? = null) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val examName = examTitle
+            ?: character.education.pendingExams.firstOrNull()?.title
+            ?: com.maisha.game.data.ExamNames.primaryExamName(character.countryCode)
+        val subject = subjectSummary
+            ?: character.education.pendingExams.firstOrNull()?.let { "Focus on ${it.title} curriculum and exam questions." }
+            ?: "Standardized academic curriculum and high-focus exam questions."
+
+        val gpaPreparedness = if (character.education.gpa > 0f) {
+            (character.education.gpa / 4.0f * 100f).toInt().coerceIn(0, 100)
+        } else {
+            character.stats.smarts
+        }
+
+        val challenge = ExamFocusChallenge(
+            examTitle = examName,
+            subjectSummary = subject,
+            basePreparedness = gpaPreparedness,
+            baseSmarts = character.stats.smarts,
+            baseStress = character.education.examStress
+        )
+        _uiState.update { it.copy(activeExamFocusChallenge = challenge) }
+    }
+
+    fun onResolveExamFocus(tactic: ExamFocusTactic, rapidResponseBonus: Boolean) {
+        val character = _uiState.value.character ?: return
+        val challenge = _uiState.value.activeExamFocusChallenge ?: return
+        val statsBefore = character.stats
+
+        viewModelScope.launch {
+            val result = gameEngine.evaluateExamFocus(character, tactic, rapidResponseBonus)
+            val gpaDelta = (result.scoreDelta / 100f) * 0.4f
+            val updatedEdu = character.education.copy(
+                examStress = (character.education.examStress + result.stressDelta).coerceIn(0, 100),
+                gpa = (character.education.gpa + gpaDelta).coerceIn(0f, 4f)
+            )
+            var updated = character.copy(
+                education = updatedEdu,
+                stats = character.stats.copy(
+                    happiness = clampStat(character.stats.happiness + if (result.panicReduced) 4 else -4)
+                ),
+                eventLog = EventLogCap.prepend(
+                    character.eventLog,
+                    "[${challenge.examTitle}] ${result.outcomeMessage}"
+                )
+            )
+            if (result.consequenceFlag != null) {
+                updated = updated.addConsequenceFlag(result.consequenceFlag)
+            }
+
+            persist(updated)
+            processMidLifeAchievements(updated)
+            appendStatDeltas(buildStatDeltas(statsBefore, updated.stats, character.countryCode))
+            if (result.panicReduced) {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+            } else {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.WARNING))
+            }
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    activeExamFocusChallenge = null,
+                    careerMessage = result.outcomeMessage,
+                    netWorth = financeEngine.calculateNetWorth(updated)
+                )
+            }
+        }
+    }
+
+    fun onDismissExamFocus() {
+        _uiState.update { it.copy(activeExamFocusChallenge = null) }
+    }
+
+    fun onOpenDoubleLifeSheet() {
+        _uiState.update { it.copy(showDoubleLifeSheet = true) }
+    }
+
+    fun onDismissDoubleLifeSheet() {
+        _uiState.update { it.copy(showDoubleLifeSheet = false) }
+    }
+
+    fun onAdoptSecretIdentity(type: SecretIdentityType, codename: String, coverStory: String? = null) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            val updated = gameEngine.adoptSecret(character, type, codename, coverStory)
+            persist(updated)
+            processMidLifeAchievements(updated)
+            enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    doubleLifeActionMessage = context.getString(R.string.msg_double_life_initiated, codename)
+                )
+            }
+        }
+    }
+
+    fun onPlantDoubleLifeAlibi() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            when (val result = gameEngine.plantDoubleLifeAlibi(character)) {
+                is DoubleLifeActionResult.Success -> {
                     persist(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.BUTTON_TAP, haptic = HapticType.LIGHT_TAP))
                     _uiState.update {
                         it.copy(
                             character = result.character,
-                            actionMessage = context.getString(R.string.msg_crime_arrested),
-                            eligibleJobs = careerEngine.getEligibleJobs(result.character),
+                            doubleLifeActionMessage = result.message,
                             netWorth = financeEngine.calculateNetWorth(result.character)
                         )
                     }
-                    enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.WARNING))
+                }
+                is DoubleLifeActionResult.Failed -> {
+                    _uiState.update { it.copy(doubleLifeActionMessage = result.reason) }
                 }
             }
         }
+    }
+
+    fun onScrubDoubleLifeTracks() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            when (val result = gameEngine.scrubDoubleLifeTracks(character)) {
+                is DoubleLifeActionResult.Success -> {
+                    persist(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.BUTTON_TAP, haptic = HapticType.LIGHT_TAP))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            doubleLifeActionMessage = result.message
+                        )
+                    }
+                }
+                is DoubleLifeActionResult.Failed -> {
+                    _uiState.update { it.copy(doubleLifeActionMessage = result.reason) }
+                }
+            }
+        }
+    }
+
+    fun onExploitDoubleLife() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            when (val result = gameEngine.exploitDoubleLife(character)) {
+                is DoubleLifeActionResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.MONEY_GAIN, haptic = HapticType.SUCCESS))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            doubleLifeActionMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is DoubleLifeActionResult.Failed -> {
+                    _uiState.update { it.copy(doubleLifeActionMessage = result.reason) }
+                }
+            }
+        }
+    }
+
+    fun onComeCleanDoubleLife() {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            val updated = gameEngine.comeCleanDoubleLife(character)
+            persist(updated)
+            processMidLifeAchievements(updated)
+            appendStatDeltas(buildStatDeltas(statsBefore, updated.stats, character.countryCode))
+            enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.WARNING))
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    doubleLifeActionMessage = context.getString(R.string.msg_double_life_come_clean)
+                )
+            }
+        }
+    }
+
+    fun onResolveSecretConfrontation(choice: ConfrontationChoice) {
+        val character = _uiState.value.character ?: return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            val resolution = gameEngine.resolveSecretConfrontation(character, choice)
+            persist(resolution.character)
+            processMidLifeAchievements(resolution.character)
+            appendStatDeltas(buildStatDeltas(statsBefore, resolution.character.stats, character.countryCode))
+            if (resolution.success) {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+            } else {
+                enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_NEGATIVE, haptic = HapticType.ERROR))
+            }
+            _uiState.update {
+                it.copy(
+                    character = resolution.character,
+                    activeSecretConfrontation = null,
+                    actionMessage = resolution.narrativeOutcome,
+                    doubleLifeActionMessage = resolution.narrativeOutcome,
+                    eligibleJobs = careerEngine.getEligibleJobs(resolution.character),
+                    netWorth = financeEngine.calculateNetWorth(resolution.character)
+                )
+            }
+        }
+    }
+
+    fun onDismissSecretConfrontation() {
+        onResolveSecretConfrontation(ConfrontationChoice.CONFESS_FALLOUT)
+    }
+
+    fun onDismissDoubleLifeMessage() {
+        _uiState.update { it.copy(doubleLifeActionMessage = null) }
+    }
+
+    fun onResolveFeudAction(feudId: String, action: FeudAction) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            when (val result = gameEngine.resolveFeudAction(character, feudId, action)) {
+                is FeudActionResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.BUTTON_TAP, haptic = HapticType.SUCCESS))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            familyInteractionMessage = result.message,
+                            socialEcosystemMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is FeudActionResult.Failed -> {
+                    _uiState.update { it.copy(socialEcosystemMessage = result.reason) }
+                }
+            }
+        }
+    }
+
+    fun onCallInBenefactorFavor(allianceId: String, favorType: BenefactorFavorType) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            when (val result = gameEngine.callInBenefactorFavor(character, allianceId, favorType)) {
+                is BenefactorFavorResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.MONEY_GAIN, haptic = HapticType.SUCCESS))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            familyInteractionMessage = result.message,
+                            socialEcosystemMessage = result.message,
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is BenefactorFavorResult.Failed -> {
+                    _uiState.update { it.copy(socialEcosystemMessage = result.reason) }
+                }
+            }
+        }
+    }
+
+    fun onReconcileRivalry(personId: String) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        val statsBefore = character.stats
+        viewModelScope.launch {
+            when (val result = gameEngine.reconcileRivalry(character, personId)) {
+                is RivalryResolutionResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats, character.countryCode))
+                    enqueueFeedback(FeedbackCue(sound = SoundEffect.EVENT_POSITIVE, haptic = HapticType.SUCCESS))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            familyInteractionMessage = result.message,
+                            socialEcosystemMessage = result.message
+                        )
+                    }
+                }
+                is RivalryResolutionResult.Failed -> {
+                    _uiState.update { it.copy(socialEcosystemMessage = result.reason) }
+                }
+            }
+        }
+    }
+
+    fun onDismissSocialEcosystemMessage() {
+        _uiState.update { it.copy(socialEcosystemMessage = null) }
     }
 
     fun onCaseCrimeTarget(target: com.maisha.game.data.model.CrimeTarget) {
@@ -3441,10 +4046,15 @@ class LifeViewModel @Inject constructor(
         }
     }
 
-    private fun buildStatDeltas(before: Stats, after: Stats): List<StatDeltaEvent> {
+    private fun buildStatDeltas(before: Stats, after: Stats, countryCode: String? = null): List<StatDeltaEvent> {
         fun delta(type: StatType, b: Int, a: Int): StatDeltaEvent? {
             val change = a - b
-            return if (change != 0) StatDeltaEvent(type, change) else null
+            if (change == 0) return null
+            val displayText = if (type == StatType.MONEY && countryCode != null) {
+                val sign = if (change > 0) "+" else "-"
+                "$sign${formatMoney(kotlin.math.abs(change), countryCode)}"
+            } else null
+            return StatDeltaEvent(type, change, displayText = displayText)
         }
         return listOfNotNull(
             delta(StatType.HEALTH, before.health, after.health),

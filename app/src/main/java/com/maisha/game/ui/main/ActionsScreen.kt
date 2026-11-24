@@ -212,6 +212,7 @@ fun ActionsScreen(
     onTrainTalent: (com.maisha.game.data.model.TalentTraining) -> Unit = {},
     onSignEndorsement: () -> Unit = {},
     onDropEndorsement: () -> Unit = {},
+    onOpenDoubleLife: () -> Unit = {},
     onActionMessageDismissed: () -> Unit,
     onDismissLeisureTip: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -320,7 +321,8 @@ fun ActionsScreen(
     val hasGrow = showSkillActions || showBucketList || showAdoptPetActions || showSocialMediaActions || showStudySession
     val hasLive = showDrivingTest || showPhilanthropy || showImmigrationOffice || showLeisureActions ||
         showStudentPartTime || showAdoptChild || showExpungement
-    val hasRisk = showCrimeActions || incarcerated || awaitingTrial || showPrisonActions
+    val showDoubleLife = character.alive && character.age >= 14 && !incarcerated
+    val hasRisk = showCrimeActions || incarcerated || awaitingTrial || showPrisonActions || showDoubleLife
     val hasContent = hasCare || hasEarn || hasGrow || hasLive || hasRisk
     val leisureActivities = remember(character.age, character.criminalRecord) {
         leisureEngine.activitiesFor(character)
@@ -538,17 +540,44 @@ fun ActionsScreen(
                         }
                     }
 
-                    if (showCrimeActions || showExpungement) {
+                    if (showCrimeActions || showExpungement || showDoubleLife) {
                         item {
                             InsetCardContainer(title = "Crime & Legal") {
-                                DrillDownRow(
-                                    title = stringResource(R.string.act_cat_crime_title),
-                                    subtitle = stringResource(R.string.act_cat_crime_desc),
-                                    icon = Icons.Rounded.Gavel,
-                                    iconTint = CoralNegative,
-                                    insideContainer = true,
-                                    onClick = { activeActionSheet = ActionSheet.CRIME }
-                                )
+                                var crimeDividerNeeded = false
+                                if (showCrimeActions || showExpungement) {
+                                    DrillDownRow(
+                                        title = stringResource(R.string.act_cat_crime_title),
+                                        subtitle = stringResource(R.string.act_cat_crime_desc),
+                                        icon = Icons.Rounded.Gavel,
+                                        iconTint = CoralNegative,
+                                        insideContainer = true,
+                                        onClick = { activeActionSheet = ActionSheet.CRIME }
+                                    )
+                                    crimeDividerNeeded = true
+                                }
+                                if (showDoubleLife) {
+                                    if (crimeDividerNeeded) InsetDivider()
+                                    val activeSecret = character.doubleLife.activeSecret
+                                    val doubleLifeSubtitle = if (activeSecret != null) {
+                                        stringResource(
+                                            R.string.desc_double_life_active,
+                                            activeSecret.codename,
+                                            activeSecret.exposureRisk,
+                                            activeSecret.alibiStrength
+                                        )
+                                    } else {
+                                        stringResource(R.string.desc_double_life_none)
+                                    }
+                                    DrillDownRow(
+                                        title = stringResource(R.string.title_double_life),
+                                        subtitle = doubleLifeSubtitle,
+                                        icon = Icons.Rounded.Lock,
+                                        iconTint = if (activeSecret != null && activeSecret.exposureRisk >= 60) CoralNegative else TealPrimary,
+                                        trailingBadge = if (activeSecret != null) "${activeSecret.exposureRisk}% Risk" else null,
+                                        insideContainer = true,
+                                        onClick = onOpenDoubleLife
+                                    )
+                                }
                             }
                         }
                     }
@@ -1231,6 +1260,8 @@ fun ActionsScreen(
                                 CountryCatalog.flavorFor(character.countryCode).commonTransportMode
                             ),
                             metaLabel = stringResource(R.string.meta_risk_moderate),
+                            riskLabel = stringResource(R.string.action_risk_medium),
+                            energyCost = 1,
                             accent = ActionCardAccent.RISK,
                             onClick = {
                                 activeActionSheet = ActionSheet.NONE
@@ -1242,6 +1273,8 @@ fun ActionsScreen(
                             title = stringResource(R.string.crime_shoplift_title),
                             description = stringResource(R.string.crime_shoplift_desc),
                             metaLabel = stringResource(R.string.meta_risk_moderate),
+                            riskLabel = stringResource(R.string.action_risk_medium),
+                            energyCost = 1,
                             accent = ActionCardAccent.RISK,
                             onClick = {
                                 activeActionSheet = ActionSheet.NONE
@@ -1253,6 +1286,8 @@ fun ActionsScreen(
                             title = stringResource(R.string.crime_fraud_title),
                             description = stringResource(R.string.crime_fraud_desc),
                             metaLabel = stringResource(R.string.meta_risk_high),
+                            riskLabel = stringResource(R.string.action_risk_high),
+                            energyCost = 2,
                             accent = ActionCardAccent.RISK,
                             onClick = {
                                 activeActionSheet = ActionSheet.NONE
@@ -1931,6 +1966,7 @@ private fun SideHustleActionCard(
         title = sideHustleTitle(hustleType),
         description = sideHustleDescription(hustleType),
         metaLabel = metaLabel,
+        energyCost = 2,
         enabled = available,
         accent = ActionCardAccent.GOLD,
         questHint = if (available) questHint else null,

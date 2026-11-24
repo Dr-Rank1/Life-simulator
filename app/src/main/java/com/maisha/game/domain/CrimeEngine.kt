@@ -635,7 +635,7 @@ class CrimeEngine @Inject constructor() {
         LawyerTier.EXPENSIVE -> "expensive legal counsel"
     }
 
-    private fun successChance(
+    internal fun successChance(
         character: Character,
         crimeType: CrimeType,
         priorAttemptsThisYear: Int = character.criminalRecord.crimeAttemptsThisYear
@@ -656,7 +656,7 @@ class CrimeEngine @Inject constructor() {
         return (base / repeatRisk - karmaPenalty - heatPenalty).coerceIn(MIN_SUCCESS_CHANCE, MAX_SUCCESS_CHANCE)
     }
 
-    private fun moneyReward(crimeType: CrimeType, countryCode: String): Int {
+    internal fun moneyReward(crimeType: CrimeType, countryCode: String): Int {
         val base = when (crimeType) {
             CrimeType.PICKPOCKET -> Random.nextInt(500, 2_501)
             CrimeType.SHOPLIFT -> Random.nextInt(2_000, 8_001)

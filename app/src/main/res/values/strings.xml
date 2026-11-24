@@ -2125,4 +2125,318 @@
     <string name="btn_service_asset">Preventative Servicing (%1$s)</string>
     <string name="desc_service_asset">Scheduled maintenance to improve condition and prevent breakdowns</string>
     <string name="msg_asset_serviced">Asset serviced and maintained successfully!</string>
+
+    <!-- Youth Progression & Sibling Dynamics -->
+    <string name="msg_sibling_only">This action is only available for brothers and sisters.</string>
+    <string name="msg_sibling_team_up_success">You and %1$s teamed up for some epic childhood mischief!</string>
+    <string name="msg_sibling_borrow_broke">You broke %1$s\'s item while borrowing it! Major sibling argument.</string>
+    <string name="msg_sibling_borrow_success">You borrowed %1$s\'s item and returned it before they noticed.</string>
+    <string name="msg_sibling_compete_win">You beat %1$s in a rivalry showdown! Bragging rights secured.</string>
+    <string name="msg_sibling_compete_lose">%1$s defeated you in the sibling showdown and won\'t let you forget it.</string>
+    <string name="btn_sibling_team_up">Team Up</string>
+    <string name="btn_sibling_borrow">Borrow Item</string>
+    <string name="btn_sibling_compete">Compete</string>
+    <string name="msg_ask_money_low_trust">%1$s refused: \"Do your chores and bring home better marks before asking for pocket money!\"</string>
+
+    <!-- Ages 4-10: Childhood Aptitudes -->
+    <string name="card_childhood_aptitude_title">Childhood Aptitude</string>
+    <string name="card_childhood_aptitude_desc">Early obsessions shape scholarships, club talents, and future opportunities.</string>
+    <string name="aptitude_none">Exploring Interests</string>
+    <string name="aptitude_athletics">Athletics &amp; Sports</string>
+    <string name="aptitude_arts_music">Arts &amp; Music</string>
+    <string name="aptitude_tech_tinkering">Tech &amp; Tinkering</string>
+    <string name="aptitude_academics">Academics &amp; Trivia</string>
+    <string name="aptitude_street_hustle">Street Hustle &amp; Barter</string>
+    <string name="btn_explore_aptitude">Practice Hobby</string>
+    <string name="label_aptitude_score">Mastery: %1$d/100</string>
+
+    <!-- Ages 11-14: Middle School Cliques & Hustles -->
+    <string name="card_school_clique_title">School Social Standing</string>
+    <string name="clique_unaffiliated">Independent</string>
+    <string name="clique_nerds">Academic Nerds</string>
+    <string name="clique_jocks">Varsity Jocks</string>
+    <string name="clique_rebels">Hallway Rebels</string>
+    <string name="clique_populars">Popular Crowd</string>
+    <string name="clique_outcasts">The Outcasts</string>
+    <string name="label_clique_standing">Clique Standing: %1$d/100</string>
+    <string name="btn_mingle_clique">Hang Out with Clique</string>
+    <string name="school_action_pass_note">Pass Secret Note</string>
+    <string name="school_action_befriend_bully">Befriend Bully</string>
+    <string name="school_action_join_clique">Join Clique</string>
+    <string name="school_activity_playground_hustle">Playground Hustle</string>
+
+    <!-- Ages 15-18: High School Curfew & Parental Trust -->
+    <string name="card_curfew_trust_title">Parental Trust &amp; Curfew</string>
+    <string name="label_curfew_time">Curfew: %1$d:00 PM</string>
+    <string name="label_curfew_lifted">Curfew: Lifted (Adult)</string>
+    <string name="label_parental_trust">Parental Trust: %1$d/100</string>
+    <string name="btn_request_curfew">Request Later Curfew</string>
+    <string name="msg_childhood_aptitude_already_done">You already explored your childhood hobby this year.</string>
+    <string name="msg_childhood_aptitude_too_young">You are too young to pick a childhood hobby.</string>
+    <string name="msg_childhood_aptitude_ineligible">You cannot explore childhood hobbies right now.</string>
+    <string name="msg_clique_already_member">You are already a member of this clique.</string>
+
+    <!-- Contextual "This Year" Strip -->
+    <string name="strip_this_year_title">Focus This Year</string>
+    <string name="strip_action_health_title">Failing Health</string>
+    <string name="strip_action_health_desc">Visit the doctor or clinic to treat exhaustion.</string>
+    <string name="strip_action_happiness_title">Low Mood</string>
+    <string name="strip_action_happiness_desc">Take leisure time, hang out with friends, or travel.</string>
+    <string name="strip_action_aptitude_title">Childhood Hobby</string>
+    <string name="strip_action_aptitude_desc">Dedicate time to develop your childhood obsession.</string>
+    <string name="strip_action_clique_title">School Clique</string>
+    <string name="strip_action_clique_desc">Hang out with peers to boost school social standing.</string>
+    <string name="strip_action_curfew_title">Curfew &amp; Trust</string>
+    <string name="strip_action_curfew_desc">Ask parents for extended curfew or build trust with chores.</string>
+    <string name="strip_action_adulthood_title">Adulthood Crossroads</string>
+    <string name="strip_action_adulthood_desc">Turned 18! Enroll in university or enter the workforce.</string>
+    <string name="strip_action_job_title">Seek Employment</string>
+    <string name="strip_action_job_desc">Apply for full-time or part-time work to earn an income.</string>
+    <string name="strip_action_pip_title">Performance Plan</string>
+    <string name="strip_action_pip_desc">Improve performance or prepare a counter-move at work.</string>
+    <string name="strip_action_debt_title">Manage Debt</string>
+    <string name="strip_action_debt_desc">Pay off loans or restructure your finances.</string>
+    <string name="strip_action_challenge_title">Weekly Objective</string>
+    <string name="strip_action_challenge_desc">Work towards your active weekly challenge.</string>
+
+    <!-- Living NPCs: Personality Tags & Reactive Dialogue -->
+    <string name="npc_tag_devoted">Devoted</string>
+    <string name="npc_tag_friendly">Friendly</string>
+    <string name="npc_tag_distant">Distant</string>
+    <string name="npc_tag_hostile">Hostile</string>
+    <string name="npc_tag_hot_tempered">Hot-tempered</string>
+    <string name="npc_tag_level_headed">Level-headed</string>
+    <string name="npc_tag_generous">Generous</string>
+    <string name="npc_tag_strict_mgr">Strict</string>
+    <string name="npc_tag_supportive_mgr">Supportive</string>
+    <string name="npc_tag_chill_mgr">Hands-off</string>
+    <string name="npc_tag_ambitious_coworker">Ambitious</string>
+    <string name="npc_tag_reliable_coworker">Reliable</string>
+    <string name="npc_tag_slacker_coworker">Slacker</string>
+    <string name="npc_dialogue_high_bond">\"Always good to hear from you! What is on your mind?\"</string>
+    <string name="npc_dialogue_warm">\"Hey there, good to see you today.\"</string>
+    <string name="npc_dialogue_neutral">\"Hello. Did you need something?\"</string>
+    <string name="npc_dialogue_cool">\"I am pretty busy right now, make it quick.\"</string>
+    <string name="npc_dialogue_hostile">\"What do you want from me now? Leave me alone.\"</string>
+    <string name="npc_dialogue_mgr_pleased">\"Great work on that recent deliverable. Keep it up.\"</string>
+    <string name="npc_dialogue_mgr_critical">\"Your recent metrics have been concerning. Step it up.\"</string>
+    <string name="npc_dialogue_mgr_neutral">\"Check in with me if you need clearance on project changes.\"</string>
+    <string name="npc_dialogue_coworker_friendly">\"Let me know if you want to grab lunch or bounce ideas!\"</string>
+    <string name="npc_dialogue_coworker_aloof">\"I have got a deadline to hit, let us talk later.\"</string>
+
+    <!-- Timeline Story Categories -->
+    <string name="timeline_tag_milestone">Milestone</string>
+    <string name="timeline_tag_drama">Incident</string>
+    <string name="timeline_tag_career">Career &amp; School</string>
+    <string name="timeline_tag_family">Family &amp; Social</string>
+    <string name="timeline_tag_health">Health &amp; Life</string>
+    <string name="timeline_tag_general">General</string>
+
+    <!-- Action Card Indicators -->
+    <string name="action_risk_low">Low Risk</string>
+    <string name="action_risk_medium">Moderate Risk</string>
+    <string name="action_risk_high">High Risk</string>
+    <string name="action_energy_cost">%1$d⚡</string>
+
+    <!-- Interactive Mini-Challenges: Exam Focus Check -->
+    <string name="dialog_exam_focus_title">Exam Focus Check</string>
+    <string name="dialog_exam_focus_subtitle">High-stakes exam underway. Choose your mental approach to steady nerves and maximize marks.</string>
+    <string name="btn_tactic_analytical">Analytical Precision</string>
+    <string name="desc_tactic_analytical">Careful, methodical calculation. Eliminates test panic (+Low Risk, +Consistent Marks).</string>
+    <string name="btn_tactic_instinctive">Instinctive Speed</string>
+    <string name="desc_tactic_instinctive">Rapid-fire logic and quick answers under pressure (+High Speed, +Bonus on early finish).</string>
+    <string name="btn_tactic_shortcut">High-Stakes Shortcut</string>
+    <string name="desc_tactic_shortcut">Recall risky formula tricks or shortcut methods (+Huge Boost, -Risk of scrutiny).</string>
+    <string name="label_exam_focus_preparedness">Preparedness: %1$d%%</string>
+    <string name="label_exam_focus_stress">Exam Stress: %1$d%%</string>
+    <string name="label_focus_timer">Focus Window</string>
+
+    <!-- Interactive Mini-Challenges: Push-Your-Luck Crime -->
+    <string name="dialog_push_luck_title">Street Hustle: Push Your Luck</string>
+    <string name="dialog_push_luck_subtitle">Initial grab secured. Do you slip away clean, or dig deeper for a bigger score?</string>
+    <string name="label_push_luck_stage">Round %1$d / %2$d</string>
+    <string name="label_current_loot">Secured Loot: %1$s</string>
+    <string name="label_next_stage_loot">Next Stash: %1$s</string>
+    <string name="label_bust_risk">Police Alert: %1$d%%</string>
+    <string name="btn_cash_out">Cash Out &amp; Escape</string>
+    <string name="desc_cash_out">Take current loot and disappear into the crowd (100%% safe escape).</string>
+    <string name="btn_push_luck">Push Luck (Steal More)</string>
+    <string name="desc_push_luck">Go for the bigger stash before sirens sound (+Bigger Loot, +Rising Heat).</string>
+
+    <!-- Interactive Mini-Challenges: Negotiation & Persuasion -->
+    <string name="dialog_negotiation_title">High-Stakes Negotiation</string>
+    <string name="dialog_negotiation_subtitle">Present your pitch carefully. Counterpart mood and resistance will decide the outcome.</string>
+    <string name="btn_tactic_metrics">Data &amp; Metrics Pitch</string>
+    <string name="desc_tactic_metrics">Present hard numbers, track record, and objective fairness (High success with strict counterparts).</string>
+    <string name="btn_tactic_empathy">Charisma &amp; Empathy</string>
+    <string name="desc_tactic_empathy">Appeal to loyalty, mutual trust, and shared future (Defuses emotional tension and offense).</string>
+    <string name="btn_tactic_leverage">Assertive Leverage</string>
+    <string name="desc_tactic_leverage">Take a firm, non-negotiable stand demanding maximum reward (+Top Upside, -Rejection risk).</string>
+    <string name="label_counterpart_rapport">Rapport: %1$d%%</string>
+    <string name="label_counterpart_resistance">Resistance: %1$d%%</string>
+    <string name="dialog_prenup_title">Prenuptial Agreement Discussion</string>
+    <string name="negotiation_reward_prenup">Signed Prenup &amp; Protected Assets</string>
+    <string name="btn_exam_focus_check">Interactive Focus Check</string>
+    <string name="btn_exam_focus_check_desc">Take a 3-second focus check to steady nerves, boost marks, or apply high-stakes shortcuts.</string>
+
+    <!-- Double Life & Secrets -->
+    <string name="title_double_life">Double Life &amp; Secrets</string>
+    <string name="desc_double_life_none">Maintain shadow identities, secret side-lives, or risky cover stories.</string>
+    <string name="desc_double_life_active">Cover: %1$s (Exposure: %2$d%% • Alibi: %3$d%%)</string>
+    <string name="sheet_double_life_title">Double Life &amp; Secret Covers</string>
+    <string name="sheet_double_life_subtitle">Operate hidden identities beneath a respectable facade. Tension rises with scrutiny; plant alibis to avoid exposure.</string>
+    <string name="label_active_cover">Active Hidden Persona</string>
+    <string name="label_cover_story">Public Cover: %1$s</string>
+    <string name="label_exposure_tension">Exposure Tension: %1$d%%</string>
+    <string name="label_suspicion_level">Suspicion: %1$d%%</string>
+    <string name="label_alibi_strength">Alibi Buffer: %1$d%%</string>
+    <string name="label_annual_payoff">Shadow Payoff: %1$s / year</string>
+    <string name="label_total_earnings">Total Shadow Earnings: %1$s</string>
+    <string name="btn_plant_alibi">Plant Alibi</string>
+    <string name="desc_plant_alibi">Fabricate receipts, decoy schedules, and accomplice alibis (+35 Alibi, -20 Suspicion).</string>
+    <string name="btn_scrub_tracks">Scrub Tracks</string>
+    <string name="desc_scrub_tracks">Destroy burner devices and sanitize surveillance trails (-25%% Exposure).</string>
+    <string name="btn_exploit_secret">Exploit Secret</string>
+    <string name="desc_exploit_secret">Cash in on shadow opportunities (+Immediate Payout, +Rising Scrutiny).</string>
+    <string name="btn_come_clean">Come Clean</string>
+    <string name="desc_come_clean">Voluntarily dissolve the double life before exposure cracks.</string>
+    <string name="label_available_identities">Available Secret Identities</string>
+    <string name="dialog_adopt_secret_title">Establish Cover: %1$s</string>
+    <string name="dialog_adopt_secret_prompt">Choose a secret codename and public cover story for your double life:</string>
+    <string name="label_codename_field">Secret Codename</string>
+    <string name="label_cover_story_field">Public Cover Story</string>
+    <string name="btn_initiate_double_life">Initiate Double Life</string>
+    <string name="section_past_identities">Exposed / Retired Covers</string>
+    <string name="msg_double_life_initiated">Double life established as \'%1$s\'. Guard your alibis carefully.</string>
+    <string name="msg_double_life_come_clean">You came clean voluntarily and severed all double life activities.</string>
+    <string name="dialog_confrontation_title">Cover Cracked: Confrontation</string>
+    <string name="dialog_confrontation_subtitle">Your secret life has been intercepted. Decide how to respond before your facade shatters.</string>
+    <string name="label_confronted_by">Confronted by: %1$s</string>
+    <string name="label_confrontation_reason">Evidence: %1$s</string>
+    <string name="btn_choice_double_down">Double Down &amp; Bluff</string>
+    <string name="desc_choice_double_down">Feint outrage and present counter-evidence using Smarts and Karma.</string>
+    <string name="btn_choice_bribe_silence">Bribe Silence (%1$s)</string>
+    <string name="desc_choice_bribe_silence">Deliver hush money to immediately buy back and incinerate the proof.</string>
+    <string name="btn_choice_cut_ties">Burn Identity &amp; Vanish</string>
+    <string name="desc_choice_cut_ties">Abandon shadow assets and disappear into the night before authorities corner you.</string>
+    <string name="btn_choice_confess">Face the Fallout</string>
+    <string name="desc_choice_confess">Surrender the facts honestly and accept legal, marital, or career penalties.</string>
+
+    <!-- Social Ecosystem: Community Standing, Heritage & Feuds -->
+    <string name="standing_pillar_of_society">Pillar of Society</string>
+    <string name="standing_well_respected">Well-Respected</string>
+    <string name="standing_respectable">Respectable Citizen</string>
+    <string name="standing_distrusted">Distrusted Neighbor</string>
+    <string name="standing_notorious_pariah">Neighborhood Pariah</string>
+    <string name="heritage_humble_roots">Humble Roots</string>
+    <string name="heritage_honored_philanthropists">Honored Philanthropists</string>
+    <string name="heritage_prosperous_dynasty">Prosperous Dynasty</string>
+    <string name="heritage_scandal_tainted">Scandal-Tainted</string>
+    <string name="heritage_ruthless_moguls">Ruthless Moguls</string>
+    <string name="badge_rival">Rival</string>
+    <string name="badge_benefactor">Benefactor</string>
+    <string name="badge_feud">Feud</string>
+    <string name="badge_ally">Ally</string>
+    <string name="badge_mentor">Mentor</string>
+    <string name="section_community_standing">Community Standing &amp; Heritage</string>
+    <string name="label_community_reputation">Neighborhood Standing: %1$d/100</string>
+    <string name="label_feuds_count">%1$d Active Feuds</string>
+    <string name="label_alliances_count">%1$d Family Alliances</string>
+    <string name="btn_feud_olive_branch">Offer Olive Branch (%1$s)</string>
+    <string name="btn_feud_escalate">Escalate Feud</string>
+    <string name="btn_feud_legal">Legal Injunction (%1$s)</string>
+    <string name="btn_benefactor_career">Request Career Endorsement</string>
+    <string name="btn_benefactor_financial">Request Patronage Grant</string>
+    <string name="btn_benefactor_defense">Request Community Backing</string>
+    <string name="btn_reconcile_rivalry">Make Peace with Rival</string>
+    <string name="reactive_feud_desc">Longstanding grievance with the %1$s family (Intensity: %2$d%%).</string>
+    <string name="reactive_ally_desc">Generational alliance with the %1$s family (Trust: %2$d%%).</string>
+    <string name="reactive_rival_desc">A persistent competitor testing your standing in the community.</string>
+    <string name="reactive_benefactor_desc">An influential family patron offering backing and strategic favors.</string>
+    <string name="reactive_mentor_desc">A senior colleague guiding your professional development.</string>
+    <string name="label_prestige_mortgage">Prestige Mortgage (-0.5% APR)</string>
+
+    <!-- Dynamic Life Chapters & Eras -->
+    <string name="label_current_chapter">Chapter: %1$s</string>
+    <string name="chapter_first_steps">First Steps</string>
+    <string name="chapter_fragile_beginnings">Fragile Beginnings</string>
+    <string name="chapter_sunlit_nursery">Sunlit Nursery</string>
+    <string name="chapter_curious_explorer">Curious Explorer</string>
+    <string name="chapter_little_wonder">Little Wonder</string>
+    <string name="chapter_carefree_days">Carefree Days</string>
+    <string name="chapter_playground_champion">Playground Champion</string>
+    <string name="chapter_budding_artist">Budding Artist</string>
+    <string name="chapter_young_tinkerer">Young Tinkerer</string>
+    <string name="chapter_classroom_prodigy">Classroom Prodigy</string>
+    <string name="chapter_streetwise_kid">Streetwise Kid</string>
+    <string name="chapter_schoolyard_days">Schoolyard Days</string>
+    <string name="chapter_troubled_youth">Troubled Youth</string>
+    <string name="chapter_reckless_rebel">Reckless Rebel</string>
+    <string name="chapter_varsity_aspirant">Varsity Aspirant</string>
+    <string name="chapter_academic_focus">Academic Focus</string>
+    <string name="chapter_creative_spark">Creative Spark</string>
+    <string name="chapter_lone_wolf">The Lone Wolf</string>
+    <string name="chapter_social_star">Social Star</string>
+    <string name="chapter_crossing_thresholds">Crossing Thresholds</string>
+    <string name="chapter_juvenile_outlaw">Juvenile Outlaw</string>
+    <string name="chapter_rising_contender">Rising Contender</string>
+    <string name="chapter_honor_roll_bound">Honor Roll Bound</string>
+    <string name="chapter_teenage_breadwinner">Teenage Breadwinner</string>
+    <string name="chapter_crossroads_of_youth">Crossroads of Youth</string>
+    <string name="chapter_behind_bars">Behind Bars</string>
+    <string name="chapter_covert_double_life">Covert Double Life</string>
+    <string name="chapter_campus_grind">Campus Grind</string>
+    <string name="chapter_bootstrap_hustle">Bootstrap Hustle</string>
+    <string name="chapter_climbing_the_ladder">Climbing the Ladder</string>
+    <string name="chapter_chasing_the_dream">Chasing the Dream</string>
+    <string name="chapter_charting_the_path">Charting the Path</string>
+    <string name="chapter_serving_time">Serving Time</string>
+    <string name="chapter_hall_of_power">Halls of Power</string>
+    <string name="chapter_master_of_disguise">Master of Disguise</string>
+    <string name="chapter_underworld_syndicate">Underworld Shadow</string>
+    <string name="chapter_wealth_and_influence">Wealth and Influence</string>
+    <string name="chapter_venture_builder">Venture Builder</string>
+    <string name="chapter_pillar_of_society">Pillar of Society</string>
+    <string name="chapter_family_anchor">The Family Pillar</string>
+    <string name="chapter_corporate_commander">Corporate Commander</string>
+    <string name="chapter_the_working_years">The Working Years</string>
+    <string name="chapter_hardened_convict">Hardened Lifer</string>
+    <string name="chapter_statesperson">The Statesperson</string>
+    <string name="chapter_empire_builder">Empire Builder</string>
+    <string name="chapter_honored_patron">Honored Patron</string>
+    <string name="chapter_repentant_soul">A Life Rebuilt</string>
+    <string name="chapter_beloved_matriarch">The Family Matriarch</string>
+    <string name="chapter_beloved_patriarch">The Family Patriarch</string>
+    <string name="chapter_seasoned_veteran">Seasoned Veteran</string>
+    <string name="chapter_autumn_wisdom">Autumn Wisdom</string>
+    <string name="chapter_end_of_the_line">End of the Line</string>
+    <string name="chapter_venerable_philanthropist">Venerable Philanthropist</string>
+    <string name="chapter_dynasty_elder">Dynasty Elder</string>
+    <string name="chapter_unforgiven_outlaw">The Unforgiven</string>
+    <string name="chapter_honored_grandparent">Honored Grandparent</string>
+    <string name="chapter_quiet_retirement">Quiet Retirement</string>
+    <string name="chapter_the_golden_twilight">The Golden Twilight</string>
+
+    <!-- Evocative End-of-Life Epitaphs -->
+    <string name="label_legacy_epitaph">Epitaph</string>
+    <string name="label_legacy_stamp">Legacy Stamp</string>
+    <string name="heir_torch_carrying">Carrying forward the torch of %1$s</string>
+    <string name="epitaph_saintly_benefactor">A radiant presence whose charity and steady hands lifted neighbors and kin alike. The world was gentler with them in it.</string>
+    <string name="epitaph_tycoon_builder">Started from humble ground and hammered out an enduring commercial dynasty. Their fortune altered the family destiny forever.</string>
+    <string name="epitaph_family_pillar">A steadfast rock who anchored a sprawling household through rain and drought, finding their greatest fortune in their children\'s laughter.</string>
+    <string name="epitaph_shadow_operator">Walked the edge between society and the shadows, answering to no master. Feared by rivals, remembered by few who truly knew them.</string>
+    <string name="epitaph_unforgiven_pariah">Defied the rules, broke the mold, and left a wake of scandal behind them. An unyielding life that refused to apologize.</string>
+    <string name="epitaph_scholar_polymath">Possessed a restless, incisive intellect that never stopped seeking truth. A lifelong learner whose curiosity outlasted the years.</string>
+    <string name="epitaph_public_champion">Stood upon the civic stage to champion the people, leaving an indelible imprint upon the nation\'s public memory.</string>
+    <string name="epitaph_solitary_wanderer">A quiet, enigmatic soul who walked their own solitary path without fanfare or complaint, taking peace in their freedom.</string>
+    <string name="epitaph_everyday_endurance">Weathered the tides of a changing world with quiet dignity and persevering grace. A life fully and honestly lived.</string>
+
+    <!-- Multi-Generational Legacy Stamps -->
+    <string name="stamp_dynasty_founder">Dynasty Founder · Gen %1$d</string>
+    <string name="stamp_civic_luminary">Civic Luminary · Gen %1$d</string>
+    <string name="stamp_honored_ancestor">Honored Ancestor · Gen %1$d</string>
+    <string name="stamp_renegade_legend">Renegade Legend · Gen %1$d</string>
+    <string name="stamp_solitary_pioneer">Solitary Pioneer · Gen %1$d</string>
+    <string name="stamp_steadfast_torchbearer">Steadfast Torchbearer · Gen %1$d</string>
+    <string name="stamp_humble_origin">Humble Origin · Gen %1$d</string>
 </resources>

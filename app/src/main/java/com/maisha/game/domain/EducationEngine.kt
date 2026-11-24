@@ -11,6 +11,7 @@ import com.maisha.game.data.content.TriviaCatalog
 import com.maisha.game.data.model.AvatarConfig
 import com.maisha.game.data.model.Character
 import com.maisha.game.data.model.CareerTrack
+import com.maisha.game.data.model.ChildhoodAptitude
 import com.maisha.game.data.model.EducationState
 import com.maisha.game.data.model.EventChoice
 import com.maisha.game.data.model.ClubPracticeIntensity
@@ -25,6 +26,7 @@ import com.maisha.game.data.model.GraduationHonors
 import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.LifeEvent
 import com.maisha.game.data.model.SchoolActivity
+import com.maisha.game.data.model.SchoolClique
 import com.maisha.game.data.model.SchoolClub
 import com.maisha.game.data.model.SchoolPerson
 import com.maisha.game.data.model.SchoolPersonAction
@@ -52,6 +54,13 @@ sealed class DrivingTestResult {
     data object TooYoung : DrivingTestResult()
     data object AlreadyLicensed : DrivingTestResult()
     data object InsufficientFunds : DrivingTestResult()
+}
+
+sealed class ChildhoodAptitudeResult {
+    data class Success(val character: Character, val message: String) : ChildhoodAptitudeResult()
+    data object TooYoung : ChildhoodAptitudeResult()
+    data object Ineligible : ChildhoodAptitudeResult()
+    data object AlreadyDoneThisYear : ChildhoodAptitudeResult()
 }
 
 sealed class SchoolActionResult {
@@ -271,11 +280,24 @@ class EducationEngine @Inject constructor(
             return character
         }
         val sameClub = character.education.schoolClub == club
+        val aptitudeMatch = when (club) {
+            SchoolClub.FOOTBALL -> character.education.childhoodAptitude == ChildhoodAptitude.ATHLETICS
+            SchoolClub.CODING -> character.education.childhoodAptitude == ChildhoodAptitude.TECH_TINKERING
+            SchoolClub.MUSIC, SchoolClub.DRAMA -> character.education.childhoodAptitude == ChildhoodAptitude.ARTS_MUSIC
+            SchoolClub.DEBATE -> character.education.childhoodAptitude == ChildhoodAptitude.ACADEMICS
+        }
+        val startingSkill = if (sameClub) {
+            character.education.clubSkill
+        } else if (aptitudeMatch) {
+            Random.nextInt(26, 36)
+        } else {
+            Random.nextInt(8, 18)
+        }
         return character.copy(
             education = character.education.copy(
                 schoolClub = club,
                 clubRank = if (sameClub) character.education.clubRank else ClubRank.MEMBER,
-                clubSkill = if (sameClub) character.education.clubSkill else Random.nextInt(8, 18),
+                clubSkill = startingSkill,
                 clubPrestige = if (sameClub) character.education.clubPrestige else Random.nextInt(5, 15),
                 clubActivityDoneThisYear = if (sameClub) character.education.clubActivityDoneThisYear else false,
                 clubMajorEventReady = if (sameClub) character.education.clubMajorEventReady else false,
@@ -1484,7 +1506,16 @@ class EducationEngine @Inject constructor(
         val gpa = character.education.gpa
         val smarts = character.stats.smarts / 100f
         val awards = character.education.clubAwardsWon.coerceAtMost(3) * 0.04f
-        return (0.08f + (gpa / 4f) * 0.45f + smarts * 0.3f + awards).coerceIn(0.05f, 0.75f)
+        val aptitudeBonus = when (character.education.childhoodAptitude) {
+            ChildhoodAptitude.ACADEMICS, ChildhoodAptitude.TECH_TINKERING ->
+                (character.education.aptitudeScore / 100f) * 0.15f
+            ChildhoodAptitude.ATHLETICS ->
+                if (character.education.clubLetterJacket) 0.12f else (character.education.aptitudeScore / 100f) * 0.08f
+            ChildhoodAptitude.ARTS_MUSIC ->
+                (character.education.aptitudeScore / 100f) * 0.10f
+            else -> 0f
+        }
+        return (0.08f + (gpa / 4f) * 0.45f + smarts * 0.3f + awards + aptitudeBonus).coerceIn(0.05f, 0.85f)
     }
 
     fun canEnrollInUniversity(character: Character): Boolean {
@@ -2179,16 +2210,17 @@ class EducationEngine @Inject constructor(
 
     private fun resolveCaughtCheatingOnExamDay(character: Character): Character {
         val expel = Random.nextFloat() < CHEAT_EXPEL_CHANCE
-        val base = character.copy(
+        val base = character.addConsequenceFlag("caughtCheatingOnExam").copy(
             stats = character.stats.copy(
                 karma = clampStat(character.stats.karma - 10),
                 happiness = clampStat(character.stats.happiness - 9)
             ),
-            education = character.education.copy(
+            education = character.education.addConsequenceFlag("caughtCheatingOnExam").copy(
                 plannedCheatOnExam = false,
                 examPrepDoneThisYear = true,
                 examStress = (character.education.examStress + 25).coerceIn(0, 100),
                 gpa = clampGpa(character.education.gpa - 0.35f),
+                parentalTrust = (character.education.parentalTrust - 30).coerceAtLeast(0),
                 lastExamSummary = if (expel) {
                     "Caught cheating — expelled"
                 } else {
@@ -2219,12 +2251,12 @@ class EducationEngine @Inject constructor(
     }
 
     private fun resolveSuccessfulCheatExam(character: Character): Character {
-        val boosted = character.copy(
+        val boosted = character.addConsequenceFlag("cheatedOnExam").copy(
             stats = character.stats.copy(
                 karma = clampStat(character.stats.karma - 5),
                 happiness = clampStat(character.stats.happiness + 4)
             ),
-            education = character.education.copy(
+            education = character.education.addConsequenceFlag("cheatedOnExam").copy(
                 plannedCheatOnExam = false,
                 examPrepDoneThisYear = true,
                 examStress = (character.education.examStress - 8).coerceAtLeast(0),
@@ -2826,6 +2858,15 @@ class EducationEngine @Inject constructor(
                 academicActionDoneThisYear = false,
                 socialActionDoneThisYear = false,
                 examPrepDoneThisYear = false,
+                aptitudeExploredThisYear = false,
+                parentalTrust = if (character.education.detentionCountThisYear == 0 &&
+                    !character.hasConsequenceFlag("caughtSneakingOut")
+                ) {
+                    clampStat(character.education.parentalTrust + 3)
+                } else {
+                    character.education.parentalTrust
+                },
+                curfewHour = if (character.age >= 17) 24 else character.education.curfewHour,
                 // Reset yearly detention tally only when no hearing is queued.
                 detentionCountThisYear = if (character.education.pendingExpulsionHearing) {
                     character.education.detentionCountThisYear
@@ -2938,6 +2979,9 @@ class EducationEngine @Inject constructor(
             list += SchoolActivity.CONFRONT_BULLY
             list += SchoolActivity.START_FIGHT
         }
+        if (character.age in 10..14) {
+            list += SchoolActivity.PLAYGROUND_HUSTLE
+        }
         if (character.education.stage == SchoolStage.SECONDARY &&
             character.age in 15..18
         ) {
@@ -3046,7 +3090,7 @@ class EducationEngine @Inject constructor(
                     ?: return SchoolActionResult.PersonNotFound
                 val won = character.stats.health >= 55 || Random.nextFloat() < 0.45f
                 if (won) {
-                    succeedWithPerson(
+                    val outcome = succeedWithPerson(
                         character = character,
                         person = bully,
                         academic = false,
@@ -3057,6 +3101,14 @@ class EducationEngine @Inject constructor(
                         reputation = 6,
                         message = "You stood up to ${bully.name}. Word spreads that you won't be pushed around."
                     )
+                    if (outcome is SchoolActionResult.Success) {
+                        SchoolActionResult.Success(
+                            outcome.character.addConsequenceFlag("stoodUpToBully"),
+                            outcome.message
+                        )
+                    } else {
+                        outcome
+                    }
                 } else {
                     val bruised = succeedWithPerson(
                         character = character,
@@ -3268,6 +3320,45 @@ class EducationEngine @Inject constructor(
                     ClubActivityResult.Ineligible -> SchoolActionResult.Ineligible
                 }
             }
+            SchoolActivity.PLAYGROUND_HUSTLE -> {
+                val caught = Random.nextFloat() < 0.18f
+                if (caught) {
+                    val teacher = teachers(character).randomOrNull()
+                    val teacherName = teacher?.name ?: "Staff"
+                    val withFlag = character.addConsequenceFlag("playgroundHustler")
+                    val penalized = recordDetention(
+                        withFlag,
+                        reason = "$teacherName shut down your underground playground trading ring.",
+                        reputationHit = 4
+                    )
+                    val withTrust = penalized.copy(
+                        education = penalized.education.copy(
+                            parentalTrust = (penalized.education.parentalTrust - 12).coerceAtLeast(0),
+                            socialActionDoneThisYear = true
+                        )
+                    )
+                    SchoolActionResult.Success(withTrust, "Caught trading on the playground — detention!")
+                } else {
+                    val earn = EconomyScaler.scaleAmount(Random.nextInt(600, 1500), character.countryCode)
+                    val withFlag = character.addConsequenceFlag("playgroundHustler")
+                    val updated = withFlag.copy(
+                        stats = withFlag.stats.copy(
+                            money = withFlag.stats.money + earn,
+                            happiness = clampStat(withFlag.stats.happiness + 3)
+                        ),
+                        education = withFlag.education.copy(
+                            aptitudeScore = (withFlag.education.aptitudeScore + 8).coerceIn(0, 100),
+                            schoolReputation = clampStat(withFlag.education.schoolReputation + 2),
+                            socialActionDoneThisYear = true
+                        ),
+                        eventLog = EventLogCap.prepend(
+                            withFlag.eventLog,
+                            "Your playground trading hustle went smoothly. Pocketed ${formatMoney(earn, character.countryCode)}."
+                        )
+                    )
+                    SchoolActionResult.Success(updated, "Hustle paid off: +${formatMoney(earn, character.countryCode)}.")
+                }
+            }
         }
     }
 
@@ -3298,6 +3389,18 @@ class EducationEngine @Inject constructor(
         )
         if (canAskOut(character, person)) {
             actions += SchoolPersonAction.ASK_OUT
+        }
+        if (person.role != SchoolRole.TEACHER && character.age in 11..17) {
+            actions += SchoolPersonAction.PASS_NOTE
+        }
+        if (person.role == SchoolRole.BULLY && character.age in 6..17) {
+            actions += SchoolPersonAction.BEFRIEND_BULLY
+        }
+        if (person.clique != SchoolClique.UNAFFILIATED &&
+            person.clique != character.education.schoolClique &&
+            character.age in 11..17
+        ) {
+            actions += SchoolPersonAction.JOIN_CLIQUE
         }
         return actions
     }
@@ -3499,6 +3602,88 @@ class EducationEngine @Inject constructor(
                     message = "You gifted ${person.name} something nice (${formatMoney(cost, character.countryCode)}). Bond secured."
                 )
             }
+            SchoolPersonAction.PASS_NOTE -> {
+                val intercepted = Random.nextFloat() < 0.22f
+                if (intercepted) {
+                    val teacher = teachers(character).randomOrNull()
+                    val teacherName = teacher?.name ?: "The teacher"
+                    applyPersonInteraction(
+                        character = character,
+                        person = person,
+                        relationshipDelta = -2,
+                        happinessDelta = -4,
+                        reputationDelta = -3,
+                        karmaDelta = 0,
+                        message = "$teacherName intercepted your note across the aisle! Red-faced embarrassment in front of class."
+                    )
+                } else {
+                    val isCrush = person.role == SchoolRole.CRUSH
+                    val msg = if (isCrush) {
+                        "${person.name} read your folded note, blushed, and slipped a reply into your pencil case."
+                    } else {
+                        "${person.name} caught your note under the desk and grinned. Secret secured."
+                    }
+                    applyPersonInteraction(
+                        character = character,
+                        person = person,
+                        relationshipDelta = Random.nextInt(8, 14),
+                        happinessDelta = 4,
+                        reputationDelta = 1,
+                        karmaDelta = 0,
+                        message = msg
+                    )
+                }
+            }
+            SchoolPersonAction.BEFRIEND_BULLY -> {
+                val won = character.stats.smarts >= 50 || character.stats.karma >= 60 || Random.nextFloat() < 0.45f
+                if (won) {
+                    val converted = person.copy(
+                        role = SchoolRole.CLASSMATE,
+                        status = "Former bully / now on good terms",
+                        relationshipLevel = clampRelationshipLevel(person.relationshipLevel + 35)
+                    )
+                    val updatedPeople = character.education.schoolPeople.map {
+                        if (it.id == person.id) converted else it
+                    }
+                    val withFlag = character.addConsequenceFlag("befriendedBully")
+                    val updated = withFlag.copy(
+                        education = withFlag.education.copy(
+                            schoolPeople = updatedPeople,
+                            schoolReputation = clampStat(withFlag.education.schoolReputation + 10)
+                        ),
+                        stats = withFlag.stats.copy(
+                            happiness = clampStat(withFlag.stats.happiness + 8),
+                            karma = clampStat(withFlag.stats.karma + 10)
+                        ),
+                        eventLog = EventLogCap.prepend(
+                            withFlag.eventLog,
+                            "You shared snacks and stood by ${person.name}. The hostile front melted away — you turned a bully into an ally."
+                        )
+                    )
+                    SchoolInteractionResult.Success(
+                        updated,
+                        "Befriended ${person.name} successfully. The bullying has stopped."
+                    )
+                } else {
+                    applyPersonInteraction(
+                        character = character,
+                        person = person,
+                        relationshipDelta = -6,
+                        happinessDelta = -4,
+                        reputationDelta = -2,
+                        karmaDelta = 2,
+                        message = "${person.name} mocked your peace offering: \"${insultCatalog.nextInsult()}\""
+                    )
+                }
+            }
+            SchoolPersonAction.JOIN_CLIQUE -> {
+                val targetClique = person.clique
+                val result = joinClique(character, targetClique)
+                when (result) {
+                    is SchoolActionResult.Success -> SchoolInteractionResult.Success(result.character, result.message)
+                    else -> SchoolInteractionResult.Ineligible
+                }
+            }
         }
     }
 
@@ -3644,6 +3829,17 @@ class EducationEngine @Inject constructor(
     ): SchoolPerson {
         val gender = if (Random.nextBoolean()) Gender.MALE else Gender.FEMALE
         val traits = randomTraitsFor(role)
+        val clique = when (role) {
+            SchoolRole.TEACHER -> SchoolClique.UNAFFILIATED
+            SchoolRole.BULLY -> SchoolClique.REBELS
+            else -> when {
+                traits.any { it == "Studious" || it == "Teacher's Pet" } -> SchoolClique.NERDS
+                traits.any { it == "Jock" } -> SchoolClique.JOCKS
+                traits.any { it == "Rebellious" } -> SchoolClique.REBELS
+                traits.any { it == "Popular" } -> SchoolClique.POPULARS
+                else -> listOf(SchoolClique.NERDS, SchoolClique.JOCKS, SchoolClique.REBELS, SchoolClique.POPULARS, SchoolClique.OUTCASTS).random()
+            }
+        }
         return SchoolPerson(
             id = UUID.randomUUID().toString(),
             name = NamePool.randomFullName(gender, country),
@@ -3656,19 +3852,45 @@ class EducationEngine @Inject constructor(
             traits = traits,
             secret = randomSecretFor(role, traits),
             status = randomStatusFor(role),
-            secretRevealed = false
+            secretRevealed = false,
+            clique = clique
         )
     }
 
     private fun enrichSchoolPersonIfNeeded(person: SchoolPerson): SchoolPerson {
         if (person.traits.isNotEmpty() || person.secret != null || person.status != null) {
-            return person
+            return if (person.clique == SchoolClique.UNAFFILIATED && person.role != SchoolRole.TEACHER) {
+                person.copy(
+                    clique = when {
+                        person.traits.any { it == "Studious" || it == "Teacher's Pet" } -> SchoolClique.NERDS
+                        person.traits.any { it == "Jock" } -> SchoolClique.JOCKS
+                        person.traits.any { it == "Rebellious" } -> SchoolClique.REBELS
+                        person.traits.any { it == "Popular" } -> SchoolClique.POPULARS
+                        person.role == SchoolRole.BULLY -> SchoolClique.REBELS
+                        else -> listOf(SchoolClique.NERDS, SchoolClique.JOCKS, SchoolClique.REBELS, SchoolClique.POPULARS, SchoolClique.OUTCASTS).random()
+                    }
+                )
+            } else {
+                person
+            }
         }
         val traits = randomTraitsFor(person.role)
+        val clique = when (person.role) {
+            SchoolRole.TEACHER -> SchoolClique.UNAFFILIATED
+            SchoolRole.BULLY -> SchoolClique.REBELS
+            else -> when {
+                traits.any { it == "Studious" || it == "Teacher's Pet" } -> SchoolClique.NERDS
+                traits.any { it == "Jock" } -> SchoolClique.JOCKS
+                traits.any { it == "Rebellious" } -> SchoolClique.REBELS
+                traits.any { it == "Popular" } -> SchoolClique.POPULARS
+                else -> listOf(SchoolClique.NERDS, SchoolClique.JOCKS, SchoolClique.REBELS, SchoolClique.POPULARS, SchoolClique.OUTCASTS).random()
+            }
+        }
         return person.copy(
             traits = traits,
             secret = randomSecretFor(person.role, traits),
-            status = randomStatusFor(person.role)
+            status = randomStatusFor(person.role),
+            clique = clique
         )
     }
 
@@ -3988,6 +4210,265 @@ class EducationEngine @Inject constructor(
         else -> "the local university"
     }
 
+    /**
+     * Explores childhood hobby / aptitude seed (ages 4–10).
+     * Infancy (ages 0–2) strictly protected.
+     */
+    fun exploreChildhoodAptitude(
+        character: Character,
+        aptitude: ChildhoodAptitude
+    ): ChildhoodAptitudeResult {
+        if (character.age < 4) return ChildhoodAptitudeResult.TooYoung
+        if (character.age > 10 || !character.alive) return ChildhoodAptitudeResult.Ineligible
+        if (character.education.aptitudeExploredThisYear) return ChildhoodAptitudeResult.AlreadyDoneThisYear
+
+        val currentObsession = character.education.childhoodAptitude
+        val isFirstObsession = currentObsession == ChildhoodAptitude.NONE
+        val newObsession = if (isFirstObsession) aptitude else currentObsession
+        val scoreBoost = if (aptitude == newObsession) 18 else 10
+        val newScore = (character.education.aptitudeScore + scoreBoost).coerceIn(0, 100)
+
+        val (statBoost, flavorKey) = when (aptitude) {
+            ChildhoodAptitude.ATHLETICS -> {
+                character.stats.copy(
+                    health = clampStat(character.stats.health + 4),
+                    happiness = clampStat(character.stats.happiness + 3)
+                ) to "You spent hours running, playing pickup games, and testing your stamina."
+            }
+            ChildhoodAptitude.ARTS_MUSIC -> {
+                character.stats.copy(
+                    happiness = clampStat(character.stats.happiness + 5),
+                    looks = clampStat(character.stats.looks + 2)
+                ) to "You lost yourself drawing sketches, crafting, and humming tunes."
+            }
+            ChildhoodAptitude.TECH_TINKERING -> {
+                character.stats.copy(
+                    smarts = clampStat(character.stats.smarts + 5),
+                    happiness = clampStat(character.stats.happiness + 2)
+                ) to "You dismantled old gadgets and solved logic puzzles with sheer fascination."
+            }
+            ChildhoodAptitude.ACADEMICS -> {
+                character.stats.copy(
+                    smarts = clampStat(character.stats.smarts + 4),
+                    happiness = clampStat(character.stats.happiness + 2)
+                ) to "You devoured encyclopedias and practiced quiz questions ahead of class."
+            }
+            ChildhoodAptitude.STREET_HUSTLE -> {
+                val cashEarned = EconomyScaler.scaleAmount(500, character.countryCode)
+                character.stats.copy(
+                    money = character.stats.money + cashEarned,
+                    smarts = clampStat(character.stats.smarts + 3),
+                    happiness = clampStat(character.stats.happiness + 3)
+                ) to "You bartered snacks and organized playground trades, earning pocket money."
+            }
+            ChildhoodAptitude.NONE -> character.stats to "You wandered around exploring childhood interests."
+        }
+
+        val updated = character.copy(
+            stats = statBoost,
+            education = character.education.copy(
+                childhoodAptitude = newObsession,
+                aptitudeScore = newScore,
+                aptitudeExploredThisYear = true
+            ),
+            eventLog = EventLogCap.prepend(character.eventLog, flavorKey)
+        )
+        return ChildhoodAptitudeResult.Success(updated, flavorKey)
+    }
+
+    /**
+     * Middle/high school social clique joining (ages 11–17).
+     */
+    fun joinClique(character: Character, targetClique: SchoolClique): SchoolActionResult {
+        if (!isEnrolled(character) || character.age !in 11..17 || !character.alive) return SchoolActionResult.Ineligible
+        if (character.education.schoolClique == targetClique) return SchoolActionResult.AlreadyDone
+
+        val qualified = when (targetClique) {
+            SchoolClique.UNAFFILIATED -> true
+            SchoolClique.NERDS -> character.stats.smarts >= 50 || character.education.childhoodAptitude == ChildhoodAptitude.ACADEMICS
+            SchoolClique.JOCKS -> character.stats.health >= 55 || character.education.childhoodAptitude == ChildhoodAptitude.ATHLETICS
+            SchoolClique.REBELS -> character.stats.karma <= 55 || character.education.detentionCountThisYear > 0 || character.education.childhoodAptitude == ChildhoodAptitude.STREET_HUSTLE
+            SchoolClique.POPULARS -> character.stats.looks >= 55 || character.education.schoolReputation >= 60
+            SchoolClique.OUTCASTS -> true
+        }
+
+        return if (qualified) {
+            val updated = character.copy(
+                education = character.education.copy(
+                    schoolClique = targetClique,
+                    cliqueStanding = 60
+                ),
+                stats = character.stats.copy(
+                    happiness = clampStat(character.stats.happiness + 6)
+                ),
+                eventLog = EventLogCap.prepend(
+                    character.eventLog,
+                    "You found your crowd and joined the ${targetClique.name.lowercase().replaceFirstChar { it.uppercase() }} clique."
+                )
+            )
+            SchoolActionResult.Success(updated, "Joined the ${targetClique.name} clique.")
+        } else {
+            val repHit = character.copy(
+                stats = character.stats.copy(
+                    happiness = clampStat(character.stats.happiness - 3)
+                ),
+                education = character.education.copy(
+                    cliqueStanding = (character.education.cliqueStanding - 8).coerceAtLeast(0)
+                ),
+                eventLog = EventLogCap.prepend(
+                    character.eventLog,
+                    "You tried to sit with the ${targetClique.name.lowercase()} clique, but they gave you cold stares."
+                )
+            )
+            SchoolActionResult.Success(repHit, "The clique didn't accept you yet.")
+        }
+    }
+
+    /**
+     * Mingle and spend time with active school clique (ages 11–17).
+     */
+    fun mingleWithClique(character: Character): SchoolActionResult {
+        if (!isEnrolled(character) || character.age !in 11..17 || !character.alive) return SchoolActionResult.Ineligible
+        val clique = character.education.schoolClique
+        if (clique == SchoolClique.UNAFFILIATED) return SchoolActionResult.Ineligible
+        if (character.education.socialActionDoneThisYear) return SchoolActionResult.AlreadyDone
+
+        val boost = Random.nextInt(8, 15)
+        val updated = character.copy(
+            education = character.education.copy(
+                cliqueStanding = (character.education.cliqueStanding + boost).coerceIn(0, 100),
+                socialActionDoneThisYear = true
+            ),
+            stats = character.stats.copy(
+                happiness = clampStat(character.stats.happiness + 4)
+            ),
+            eventLog = EventLogCap.prepend(
+                character.eventLog,
+                "Spent time hanging out with the ${clique.name.lowercase()} clique. Standing increased."
+            )
+        )
+        return SchoolActionResult.Success(updated, "Mingled with the ${clique.name} clique.")
+    }
+
+    /**
+     * Request curfew extension from parents based on trust score (ages 14–17).
+     */
+    fun requestCurfewExtension(character: Character): Pair<Character, String> {
+        if (character.age !in 14..17 || !character.alive) {
+            return character to "Not eligible for curfew adjustments."
+        }
+        val trust = character.education.parentalTrust
+        val currentCurfew = character.education.curfewHour
+        if (currentCurfew >= 23) {
+            return character to "Your curfew is already as late as it gets (11:00 PM)."
+        }
+        return if (trust >= 70) {
+            val newCurfew = currentCurfew + 1
+            val updated = character.copy(
+                education = character.education.copy(
+                    curfewHour = newCurfew,
+                    parentalTrust = clampStat(trust + 2)
+                ),
+                eventLog = EventLogCap.prepend(
+                    character.eventLog,
+                    "Your parents agreed to extend your curfew to ${newCurfew}:00 PM thanks to your high trust ($trust/100)."
+                )
+            )
+            updated to "Curfew extended to ${newCurfew}:00 PM."
+        } else {
+            val msg = "Your parents denied your request: 'Earn our trust back first' (Trust: $trust/100, requires 70)."
+            character.copy(
+                eventLog = EventLogCap.prepend(character.eventLog, msg)
+            ) to msg
+        }
+    }
+
+    /**
+     * Resolves tension and risk when sneaking out late at night (ages 12–17).
+     */
+    fun resolveSneakOutTension(character: Character): Pair<Character, String> {
+        val curfew = character.education.curfewHour
+        val isRebel = character.education.schoolClique == SchoolClique.REBELS
+        val catchChance = (0.28f + (if (curfew <= 20) 0.20f else 0.05f) - (if (isRebel) 0.12f else 0f))
+            .coerceIn(0.10f, 0.65f)
+        val caught = Random.nextFloat() < catchChance
+
+        return if (caught) {
+            val updatedTrust = (character.education.parentalTrust - 25).coerceAtLeast(0)
+            val updated = character.addConsequenceFlag("caughtSneakingOut").copy(
+                education = character.education.addConsequenceFlag("caughtSneakingOut").copy(
+                    parentalTrust = updatedTrust,
+                    curfewHour = 20
+                ),
+                stats = character.stats.copy(
+                    happiness = clampStat(character.stats.happiness - 6)
+                ),
+                eventLog = EventLogCap.prepend(
+                    character.eventLog,
+                    "Your parents caught you climbing back through the window! You're grounded and curfew cut to 8:00 PM."
+                )
+            )
+            updated to "Caught sneaking out! Grounded and curfew reduced."
+        } else {
+            val updated = character.addConsequenceFlag("snuckOutSuccessfully").copy(
+                stats = character.stats.copy(
+                    happiness = clampStat(character.stats.happiness + 12)
+                ),
+                eventLog = EventLogCap.prepend(
+                    character.eventLog,
+                    "You snuck out and made it back undetected before sunrise. Pure adrenaline."
+                )
+            )
+            updated to "Sneak out successful! Undetected."
+        }
+    }
+
+    /**
+     * Commemorative Age-18 Crossroads evaluation summarizing grades, aptitudes, trust, and finances.
+     */
+    fun evaluateAge18Crossroads(character: Character): Character {
+        if (character.age != 18 || character.hasConsequenceFlag("reached_adulthood_crossroads")) {
+            return character
+        }
+
+        val gpa = character.education.gpa
+        val aptitude = character.education.childhoodAptitude
+        val aptitudeScore = character.education.aptitudeScore
+        val trust = character.education.parentalTrust
+
+        val aptitudeTitle = when {
+            aptitudeScore >= 50 && aptitude == ChildhoodAptitude.ATHLETICS -> "Star Athlete"
+            aptitudeScore >= 50 && aptitude == ChildhoodAptitude.ARTS_MUSIC -> "Creative Virtuoso"
+            aptitudeScore >= 50 && aptitude == ChildhoodAptitude.TECH_TINKERING -> "Tech Innovator"
+            aptitudeScore >= 50 && aptitude == ChildhoodAptitude.ACADEMICS -> "Academic Prodigy"
+            aptitudeScore >= 50 && aptitude == ChildhoodAptitude.STREET_HUSTLE -> "Street-Smart Hustler"
+            else -> "Well-Rounded Youth"
+        }
+
+        val trustTitle = when {
+            trust >= 75 -> "Trusted & Supported"
+            trust <= 40 -> "Rebellious & Independent"
+            else -> "Normal Family Standing"
+        }
+
+        val academicSummary = when {
+            gpa >= 3.5f -> "Graduated high school with high honors (GPA ${"%.2f".format(gpa)})"
+            gpa >= 2.5f -> "Graduated high school in good standing (GPA ${"%.2f".format(gpa)})"
+            else -> "Completed secondary education (GPA ${"%.2f".format(gpa)})"
+        }
+
+        val summaryBanner = "Age 18 Crossroads: $academicSummary. Childhood legacy: $aptitudeTitle. Family standing: $trustTitle. Adulthood unlocks independence, full-time careers, university, and independent finance."
+
+        val withFlags = character.addConsequenceFlag("reached_adulthood_crossroads").addConsequenceFlag("completedYouthChapter")
+        val updated = withFlags.copy(
+            education = withFlags.education.copy(
+                curfewHour = 24
+            ),
+            eventLog = EventLogCap.prepend(withFlags.eventLog, summaryBanner)
+        )
+        return updated
+    }
+
     companion object {
         const val KCPE_RESULT_EVENT_ID = "kcpe_results_system"
         const val KCSE_RESULT_EVENT_ID = "kcse_results_system"
@@ -4077,7 +4558,8 @@ class EducationEngine @Inject constructor(
             SchoolActivity.SKIP_CLASS,
             SchoolActivity.PULL_PRANK,
             SchoolActivity.TALK_BACK,
-            SchoolActivity.SCHOOL_DANCE
+            SchoolActivity.SCHOOL_DANCE,
+            SchoolActivity.PLAYGROUND_HUSTLE
         )
 
         const val SCHOOL_GIFT_BASE_COST_KENYA = 800

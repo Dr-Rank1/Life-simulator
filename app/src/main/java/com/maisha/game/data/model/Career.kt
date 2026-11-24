@@ -124,7 +124,9 @@ data class WorkplacePerson(
     val strictness: Int = 50,
     val isSupervisor: Boolean = false,
     val avatarConfig: AvatarConfig = AvatarConfig.DEFAULT,
-    val interactedThisYear: Boolean = false
+    val interactedThisYear: Boolean = false,
+    val isRival: Boolean = false,
+    val isMentor: Boolean = false
 )
 
 @Serializable

@@ -49,6 +49,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -88,6 +89,7 @@ import com.maisha.game.data.local.OnboardingTips
 import com.maisha.game.data.model.Asset
 import com.maisha.game.data.model.AssetType
 import com.maisha.game.data.model.Character
+import com.maisha.game.data.model.CommunityStandingTier
 import com.maisha.game.data.model.Person
 import com.maisha.game.data.model.RelationType
 import com.maisha.game.domain.FinanceEngine
@@ -154,6 +156,8 @@ fun AssetsScreen(
     val pendingSavingsDeposit = rememberConfirmableAction<Int>()
     val pendingSavingsWithdraw = rememberConfirmableAction<Int>()
     val financeEngine = remember { FinanceEngine() }
+    val isPrestigeEligible = character.socialEcosystem.currentStandingTier == CommunityStandingTier.PILLAR_OF_SOCIETY ||
+        character.socialEcosystem.currentStandingTier == CommunityStandingTier.WELL_RESPECTED
     var activeAssetSheet by rememberSaveable { mutableStateOf(AssetSheet.NONE) }
     var selectedAssetForAction by remember { mutableStateOf<Asset?>(null) }
     var showWillEditor by remember { mutableStateOf(false) }
@@ -640,6 +644,11 @@ fun AssetsScreen(
                         item = catalogItem,
                         countryCode = character.countryCode,
                         canAfford = character.stats.money >= catalogItem.purchasePrice,
+                        prestigeBadge = if (catalogItem.type == AssetType.HOUSE && isPrestigeEligible) {
+                            stringResource(R.string.label_prestige_mortgage)
+                        } else {
+                            null
+                        },
                         onBuy = { pendingPurchase.request(catalogItem) }
                     )
                 }
@@ -785,6 +794,11 @@ fun AssetsScreen(
                             item = catalogItem,
                             countryCode = character.countryCode,
                             canAfford = character.stats.money >= catalogItem.purchasePrice,
+                            prestigeBadge = if (catalogItem.type == AssetType.HOUSE && isPrestigeEligible) {
+                                stringResource(R.string.label_prestige_mortgage)
+                            } else {
+                                null
+                            },
                             onBuy = {
                                 activeAssetSheet = AssetSheet.NONE
                                 pendingPurchase.request(catalogItem)
@@ -1804,6 +1818,7 @@ private fun ShopAssetCard(
     item: CatalogAsset,
     countryCode: String,
     canAfford: Boolean,
+    prestigeBadge: String? = null,
     onBuy: () -> Unit
 ) {
     Card(
@@ -1848,6 +1863,21 @@ private fun ShopAssetCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                if (prestigeBadge != null) {
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = LifeGreen.copy(alpha = 0.15f),
+                        modifier = Modifier.padding(top = 2.dp)
+                    ) {
+                        Text(
+                            text = prestigeBadge,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = LifeGreen,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                }
                 if (!canAfford) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),

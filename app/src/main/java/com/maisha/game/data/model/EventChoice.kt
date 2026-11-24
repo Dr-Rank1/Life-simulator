@@ -78,5 +78,13 @@ data class EventChoice(
      * Fame / paparazzi dilemma: [FameEventAction] name
      * (e.g. `POSE_FOR_CAMERAS`, `ACCEPT_ENDORSEMENT_OFFER`).
      */
-    val fameEventAction: String? = null
+    val fameEventAction: String? = null,
+    /** Multi-year consequence flag to persist on character state. */
+    val setsConsequenceFlag: String? = null,
+    /** Consequence flag to clear/redeem on character state. */
+    val clearsConsequenceFlag: String? = null,
+    /** Delta applied to [EducationState.parentalTrust] (0–100 scale). */
+    val parentalTrustEffect: Int = 0,
+    /** Childhood aptitude name (e.g. `ATHLETICS`, `TECH_TINKERING`) to boost score by 15. */
+    val aptitudeBoost: String? = null
 )

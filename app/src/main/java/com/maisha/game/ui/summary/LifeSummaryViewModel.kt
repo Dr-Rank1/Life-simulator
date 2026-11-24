@@ -27,6 +27,7 @@ import com.maisha.game.domain.FinanceEngine
 import com.maisha.game.domain.GameEngine
 import com.maisha.game.domain.LegacyEngine
 import com.maisha.game.domain.MortalityEngine
+import com.maisha.game.ui.components.LifeArchetypeStrings
 import com.maisha.game.ui.main.EducationFormatter
 import com.maisha.game.ui.share.ShareAchievementBadge
 import com.maisha.game.ui.share.ShareCardData
@@ -47,6 +48,9 @@ data class LifeSummaryUiState(
     val character: Character? = null,
     val deathCauseLabel: String = "",
     val deathFlavorText: String = "",
+    val epitaphText: String = "",
+    val legacyStamp: String = "",
+    val chapterTitle: String = "",
     val netWorth: Int = 0,
     val careerRecap: String = "",
     val educationRecap: String = "",
@@ -118,6 +122,15 @@ class LifeSummaryViewModel @Inject constructor(
                     val netWorth = financeEngine.calculateNetWorth(character)
                     val deathLabel = mortalityEngine.gentleCauseLabel(cause)
                     val achievementProgress = achievementRepository.getProgressSnapshot()
+                    val epitaphKey = LifeArchetypeEngine.resolveEpitaphKey(character, netWorth)
+                    val legacyStampKey = LifeArchetypeEngine.resolveLegacyStampKey(character, netWorth)
+                    val chapterKey = LifeArchetypeEngine.resolveChapterKey(character, netWorth)
+                    val epitaphText = context.getString(LifeArchetypeStrings.epitaphStringRes(epitaphKey))
+                    val legacyStamp = context.getString(
+                        LifeArchetypeStrings.legacyStampStringRes(legacyStampKey),
+                        character.generationNumber.coerceAtLeast(1)
+                    )
+                    val chapterTitle = context.getString(LifeArchetypeStrings.chapterStringRes(chapterKey))
 
                     _uiState.update {
                         it.copy(
@@ -126,6 +139,9 @@ class LifeSummaryViewModel @Inject constructor(
                             character = character,
                             deathCauseLabel = deathLabel,
                             deathFlavorText = mortalityEngine.deathFlavorText(character),
+                            epitaphText = epitaphText,
+                            legacyStamp = legacyStamp,
+                            chapterTitle = chapterTitle,
                             netWorth = netWorth,
                             careerRecap = buildCareerRecap(character),
                             educationRecap = EducationFormatter.formatHighestEducation(

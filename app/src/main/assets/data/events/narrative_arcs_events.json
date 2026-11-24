@@ -623,6 +623,107 @@
           "resultText": "Your home resonates with melody, cementing precious memories for the next generation."
         }
       ]
+    },
+    {
+      "id": "arc_childhood_aptitude_discovery",
+      "minAge": 5,
+      "maxAge": 9,
+      "text": "During a rainy weekend afternoon, your parents leave a box of old supplies, tools, and art paper in the living room for you to explore.",
+      "weight": 6,
+      "tags": ["one_time", "positive"],
+      "choices": [
+        {
+          "label": "Dismantle an old clock radio to see how the gears tick",
+          "statEffects": { "smarts": 3, "happiness": 2 },
+          "aptitudeBoost": "TECH_TINKERING",
+          "setsConsequenceFlag": "earlyTinkerer",
+          "resultText": "You carefully map each spring and wire. Your parents are amazed when you put it back together in working order."
+        },
+        {
+          "label": "Run agility laps and leap over living room cushions",
+          "statEffects": { "health": 3, "happiness": 2 },
+          "aptitudeBoost": "ATHLETICS",
+          "setsConsequenceFlag": "playgroundSpeedster",
+          "resultText": "You invent an obstacle course, setting a personal speed record and bursting with joyful energy."
+        },
+        {
+          "label": "Draw vivid comic strips depicting fantastic city adventures",
+          "statEffects": { "looks": 2, "happiness": 3 },
+          "aptitudeBoost": "ARTS_MUSIC",
+          "setsConsequenceFlag": "youngArtist",
+          "resultText": "Your family pins your colorful drawings to the kitchen wall, praising your storytelling imagination."
+        }
+      ]
+    },
+    {
+      "id": "arc_middle_school_bully_callback",
+      "minAge": 12,
+      "maxAge": 15,
+      "text": "The school corridor is calm as you walk to your homeroom. Younger students know you as the brave classmate who refused to let bullies intimidate people.",
+      "weight": 8,
+      "tags": ["one_time", "education", "requires_flag_stoodUpToBully", "positive"],
+      "choices": [
+        {
+          "label": "Mentor a timid younger student taking the {transportMode} to school",
+          "statEffects": { "karma": 4, "happiness": 3 },
+          "resultText": "You help them with homework and make sure nobody bothers them on the morning commute. You become a beloved protector."
+        },
+        {
+          "label": "Run for class president on a student safety and sports platform",
+          "statEffects": { "smarts": 2, "happiness": 4 },
+          "resultText": "Your classmates rally behind your campaign, electing you with a resounding majority."
+        }
+      ]
+    },
+    {
+      "id": "arc_highschool_cheating_blackmail",
+      "minAge": 15,
+      "maxAge": 18,
+      "text": "A classmate corners you near the {transportMode} terminal after school. They claim they saw your cheat notes during the exam and threaten to inform the principal unless you transfer pocket money via {moneyApp}.",
+      "weight": 8,
+      "tags": ["one_time", "education", "requires_flag_cheatedOnExam"],
+      "choices": [
+        {
+          "label": "Pay them hush money through {moneyApp} to protect your record",
+          "statEffects": { "money": -1500, "happiness": -3 },
+          "resultText": "You send the funds in silence. Your high grades remain intact, but the threat weighs heavily on your mind."
+        },
+        {
+          "label": "Confess to your parents and face the consequences honestly",
+          "statEffects": { "karma": 6, "happiness": -2 },
+          "parentalTrustEffect": -10,
+          "clearsConsequenceFlag": "cheatedOnExam",
+          "resultText": "You tell your parents everything. Though disappointed, they respect your honesty and stand by you as you serve detention."
+        },
+        {
+          "label": "Call their bluff and dare them to prove it without evidence",
+          "statEffects": { "smarts": 2, "happiness": 2 },
+          "resultText": "You stare them down unblinkingly. Intimidated by your composure, they back away and drop the issue."
+        }
+      ]
+    },
+    {
+      "id": "arc_highschool_sneaking_out_consequence",
+      "minAge": 15,
+      "maxAge": 17,
+      "text": "Following your midnight excursion, your parents have tightened household rules: strict check-ins, early curfews, and zero evening outings.",
+      "weight": 8,
+      "tags": ["one_time", "requires_flag_caughtSneakingOut"],
+      "choices": [
+        {
+          "label": "Do extra chores diligently and apologize sincerely to regain trust",
+          "statEffects": { "karma": 3, "happiness": 2 },
+          "parentalTrustEffect": 15,
+          "clearsConsequenceFlag": "caughtSneakingOut",
+          "resultText": "Your parents notice your maturity and dedication. Over time, family warmth returns and house privileges are restored."
+        },
+        {
+          "label": "Complain loudly that an early curfew is embarrassing you in front of friends",
+          "statEffects": { "happiness": -4 },
+          "parentalTrustEffect": -8,
+          "resultText": "Your complaints fall on deaf ears. Your parents remind you that trust is earned through actions, not arguments."
+        }
+      ]
     }
   ]
 }

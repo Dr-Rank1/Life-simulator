@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -25,8 +26,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,6 +64,7 @@ import com.maisha.game.data.model.IllustrationRef
 import com.maisha.game.data.model.Stats
 import com.maisha.game.data.model.ageStageFor
 import com.maisha.game.ui.components.AdaptiveBannerAd
+import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.components.AppLoadingIndicator
 import com.maisha.game.ui.components.CountryFlag
 import com.maisha.game.ui.components.DismissibleTipCard
@@ -191,7 +196,9 @@ fun LifeSummaryScreen(
                     deathCauseLabel = uiState.deathCauseLabel,
                     deathFlavorText = uiState.deathFlavorText,
                     lifeArchetypeLabel = uiState.lifeArchetypeLabel,
-                    ribbon = uiState.ribbon
+                    ribbon = uiState.ribbon,
+                    legacyStamp = uiState.legacyStamp,
+                    epitaph = uiState.epitaphText
                 )
             }
 
@@ -271,7 +278,10 @@ fun LifeSummaryScreen(
                     onHeirSelected = onHeirSelected,
                     onConfirmContinue = onConfirmLegacyContinuation,
                     onDismissConfirmation = onDismissLegacyConfirmation,
-                    onDismiss = onDismissHeirSelection
+                    onDismiss = onDismissHeirSelection,
+                    deceasedName = character.name,
+                    legacyStamp = uiState.legacyStamp,
+                    epitaphText = uiState.epitaphText
                 )
             }
 
@@ -521,7 +531,9 @@ private fun MemorialHeader(
     deathCauseLabel: String,
     deathFlavorText: String,
     lifeArchetypeLabel: String = "",
-    ribbon: com.maisha.game.domain.LifeRibbon = com.maisha.game.domain.LifeRibbon.MEDIOCRE
+    ribbon: com.maisha.game.domain.LifeRibbon = com.maisha.game.domain.LifeRibbon.MEDIOCRE,
+    legacyStamp: String = "",
+    epitaph: String = ""
 ) {
     val deathYear = character.birthYear + character.age
     val stage = ageStageFor(character.age)
@@ -571,9 +583,11 @@ private fun MemorialHeader(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = "🎗️",
-                    style = MaterialTheme.typography.titleMedium
+                Icon(
+                    imageVector = AppIcons.Achievements,
+                    contentDescription = null,
+                    tint = androidx.compose.ui.graphics.Color.White,
+                    modifier = Modifier.size(20.dp)
                 )
                 Text(
                     text = stringResource(ribbonTitleRes),
@@ -682,6 +696,33 @@ private fun MemorialHeader(
                             fontWeight = FontWeight.SemiBold,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                    if (legacyStamp.isNotBlank()) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = GoldAccent.copy(alpha = 0.2f),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, GoldAccent.copy(alpha = 0.6f)),
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            Text(
+                                text = legacyStamp,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = InkPrimary,
+                                letterSpacing = 0.8.sp,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            )
+                        }
+                    }
+                    if (epitaph.isNotBlank()) {
+                        Text(
+                            text = "\"$epitaph\"",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontStyle = FontStyle.Italic,
+                            color = InkPrimary.copy(alpha = 0.85f),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp)
                         )
                     }
                 }

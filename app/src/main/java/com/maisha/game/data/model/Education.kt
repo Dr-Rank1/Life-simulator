@@ -29,6 +29,28 @@ enum class SchoolClub {
     MUSIC
 }
 
+/** Childhood obsession / aptitude seed tracked from early childhood (ages 4–10). */
+@Serializable
+enum class ChildhoodAptitude {
+    NONE,
+    ATHLETICS,
+    ARTS_MUSIC,
+    TECH_TINKERING,
+    ACADEMICS,
+    STREET_HUSTLE
+}
+
+/** Social clique standing in middle and secondary school (ages 11–17). */
+@Serializable
+enum class SchoolClique {
+    UNAFFILIATED,
+    NERDS,
+    JOCKS,
+    REBELS,
+    POPULARS,
+    OUTCASTS
+}
+
 /**
  * Progression rank inside a [SchoolClub].
  * Display titles vary by club (e.g. Starter vs Treasurer, Captain vs President).
@@ -163,7 +185,8 @@ data class SchoolPerson(
     val traits: List<String> = emptyList(),
     val secret: String? = null,
     val status: String? = null,
-    val secretRevealed: Boolean = false
+    val secretRevealed: Boolean = false,
+    val clique: SchoolClique = SchoolClique.UNAFFILIATED
 )
 
 /** Direct BitLife-style interactions with a [SchoolPerson]. */
@@ -174,7 +197,10 @@ enum class SchoolPersonAction {
     INSULT,
     ASK_OUT,
     SPREAD_RUMOR,
-    BRIBE_GIFT
+    BRIBE_GIFT,
+    PASS_NOTE,
+    BEFRIEND_BULLY,
+    JOIN_CLIQUE
 }
 
 /** Player-driven school activities (one academic + one social per year). */
@@ -191,7 +217,8 @@ enum class SchoolActivity {
     TALK_BACK,
     SCHOOL_DANCE,
     CLUB_PRACTICE,
-    GROUP_PROJECT
+    GROUP_PROJECT,
+    PLAYGROUND_HUSTLE
 }
 
 /** Choice at an expulsion hearing after repeated detentions. */
@@ -306,5 +333,25 @@ data class EducationState(
     /** Set when cheat prep succeeds unnoticed — raises catch risk on exam day. */
     val plannedCheatOnExam: Boolean = false,
     /** Short summary of the last exam outcome for the School card. */
-    val lastExamSummary: String? = null
-)
+    val lastExamSummary: String? = null,
+    /** Primary childhood obsession / aptitude seed explored ages 4–10. */
+    val childhoodAptitude: ChildhoodAptitude = ChildhoodAptitude.NONE,
+    /** Aptitude mastery score (0–100) feeding into clubs, scholarships, and careers. */
+    val aptitudeScore: Int = 0,
+    /** Childhood hobby/aptitude exploration claimed this year. */
+    val aptitudeExploredThisYear: Boolean = false,
+    /** Middle/secondary school social clique standing. */
+    val schoolClique: SchoolClique = SchoolClique.UNAFFILIATED,
+    /** Standing within the current school clique (0–100). */
+    val cliqueStanding: Int = 50,
+    /** Parental trust score (0–100) affecting curfew and teen freedom. */
+    val parentalTrust: Int = 80,
+    /** Curfew hour in 24h format (e.g. 21 = 9:00 PM, 22 = 10:00 PM). */
+    val curfewHour: Int = 21,
+    /** Lightweight multi-year narrative consequence flags for callbacks and story arcs. */
+    val consequenceFlags: Set<String> = emptySet()
+) {
+    fun hasConsequenceFlag(flag: String): Boolean = consequenceFlags.contains(flag)
+    fun addConsequenceFlag(flag: String): EducationState = copy(consequenceFlags = consequenceFlags + flag)
+    fun removeConsequenceFlag(flag: String): EducationState = copy(consequenceFlags = consequenceFlags - flag)
+}

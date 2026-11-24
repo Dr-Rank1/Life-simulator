@@ -25,9 +25,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.ChildCare
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.Storefront
@@ -79,6 +81,7 @@ import com.maisha.game.data.EconomyScaler
 import com.maisha.game.data.model.Business
 import com.maisha.game.data.model.BusinessIndustry
 import com.maisha.game.data.model.Character
+import com.maisha.game.data.model.ChildhoodAptitude
 import com.maisha.game.data.model.EducationState
 import com.maisha.game.data.model.Job
 import com.maisha.game.data.model.PoliticalOffice
@@ -93,6 +96,7 @@ import com.maisha.game.data.model.ClubPracticeIntensity
 import com.maisha.game.data.model.ClubRank
 import com.maisha.game.data.model.ExamPrepChoice
 import com.maisha.game.data.model.SchoolActivity
+import com.maisha.game.data.model.SchoolClique
 import com.maisha.game.data.model.SchoolClub
 import com.maisha.game.data.model.SchoolPerson
 import com.maisha.game.data.model.SchoolPersonAction
@@ -134,6 +138,7 @@ import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.InkPrimary
+import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaRadius
@@ -223,6 +228,11 @@ fun CareerScreen(
     onRebutPipWithHR: () -> Unit = {},
     onLeadClubStrategy: () -> Unit = {},
     onMentorClubJunior: () -> Unit = {},
+    onExploreChildhoodAptitude: (ChildhoodAptitude) -> Unit = {},
+    onJoinSchoolClique: (SchoolClique) -> Unit = {},
+    onMingleWithSchoolClique: () -> Unit = {},
+    onRequestCurfewExtension: () -> Unit = {},
+    onTriggerExamFocusCheck: (String?, String?) -> Unit = { _, _ -> },
     onCareerMessageDismissed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -506,8 +516,39 @@ fun CareerScreen(
                         }
                     }
                 }
+                if (character.age in 4..5) {
+                    item(key = "early_aptitude") {
+                        ChildhoodAptitudeCard(
+                            character = character,
+                            onExploreAptitude = onExploreChildhoodAptitude
+                        )
+                    }
+                }
             } else {
                 if (show(CareerCategory.SCHOOL)) {
+                    if (character.age in 6..10) {
+                        item(key = "childhood_aptitude") {
+                            ChildhoodAptitudeCard(
+                                character = character,
+                                onExploreAptitude = onExploreChildhoodAptitude
+                            )
+                        }
+                    } else if (character.age in 11..14) {
+                        item(key = "school_clique") {
+                            SchoolSocialStandingCard(
+                                character = character,
+                                onMingleWithClique = onMingleWithSchoolClique
+                            )
+                        }
+                    } else if (character.age in 15..17) {
+                        item(key = "parental_trust") {
+                            ParentalTrustCurfewCard(
+                                character = character,
+                                onRequestCurfew = onRequestCurfewExtension
+                            )
+                        }
+                    }
+
                     item(
                         key = "education",
                         contentType = CareerListContentType.Education
@@ -519,7 +560,8 @@ fun CareerScreen(
                             onDropOut = { dropOutConfirm.request(Unit) },
                             onSetStudyEffort = onSetStudyEffort,
                             onExamPrepChoice = onExamPrepChoice,
-                            onSyncExamSchedule = onSyncExamSchedule
+                            onSyncExamSchedule = onSyncExamSchedule,
+                            onTriggerExamFocusCheck = onTriggerExamFocusCheck
                         )
                     }
 
@@ -877,7 +919,8 @@ fun CareerScreen(
                             onCampusMixer = onCampusMixer,
                             onProfessorOfficeHours = onProfessorOfficeHours,
                             onExamAllNighter = onExamAllNighter,
-                            onCampusRivalryPrank = onCampusRivalryPrank
+                            onCampusRivalryPrank = onCampusRivalryPrank,
+                            onTriggerExamFocusCheck = onTriggerExamFocusCheck
                         )
                     }
                 }
@@ -1269,7 +1312,8 @@ private fun UniversityDashboardCard(
     onCampusMixer: () -> Unit = {},
     onProfessorOfficeHours: () -> Unit = {},
     onExamAllNighter: () -> Unit = {},
-    onCampusRivalryPrank: () -> Unit = {}
+    onCampusRivalryPrank: () -> Unit = {},
+    onTriggerExamFocusCheck: (String?, String?) -> Unit = { _, _ -> }
 ) {
     val education = character.education
     val canEnroll = remember(character.education, character.age, character.stats, character.alive) {
@@ -1482,6 +1526,13 @@ private fun UniversityDashboardCard(
                         icon = AppIcons.Performance,
                         iconTint = GoldAccent,
                         onClick = onExamAllNighter
+                    )
+                    DrillDownRow(
+                        title = stringResource(R.string.btn_exam_focus_check),
+                        subtitle = stringResource(R.string.btn_exam_focus_check_desc),
+                        icon = AppIcons.Performance,
+                        iconTint = TealPrimary,
+                        onClick = { onTriggerExamFocusCheck(null, null) }
                     )
                     DrillDownRow(
                         title = stringResource(R.string.university_action_prank_title),
@@ -1962,7 +2013,8 @@ private fun EducationSectionCard(
     onDropOut: () -> Unit,
     onSetStudyEffort: (StudyEffort) -> Unit,
     onExamPrepChoice: (ExamPrepChoice) -> Unit,
-    onSyncExamSchedule: () -> Unit
+    onSyncExamSchedule: () -> Unit,
+    onTriggerExamFocusCheck: (String?, String?) -> Unit = { _, _ -> }
 ) {
     val resources = LocalContext.current.resources
     val canDropOut = education.stage == SchoolStage.SECONDARY ||
@@ -2191,6 +2243,37 @@ private fun EducationSectionCard(
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        }
+
+                        if (imminentExams.isNotEmpty() || upcomingExams.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Button(
+                                onClick = {
+                                    val topExam = imminentExams.firstOrNull() ?: upcomingExams.firstOrNull()
+                                    onTriggerExamFocusCheck(topExam?.title, null)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = AppIcons.Performance,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(16.dp),
+                                        tint = Color.White
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.btn_exam_focus_check),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -2673,6 +2756,9 @@ private fun SchoolPersonActionSheet(
                         SchoolPersonAction.INSULT -> stringResource(R.string.school_action_insult)
                         SchoolPersonAction.ASK_OUT -> stringResource(R.string.school_action_ask_out)
                         SchoolPersonAction.SPREAD_RUMOR -> stringResource(R.string.school_action_spread_rumor)
+                        SchoolPersonAction.PASS_NOTE -> stringResource(R.string.school_action_pass_note)
+                        SchoolPersonAction.BEFRIEND_BULLY -> stringResource(R.string.school_action_befriend_bully)
+                        SchoolPersonAction.JOIN_CLIQUE -> stringResource(R.string.school_action_join_clique)
                         SchoolPersonAction.BRIBE_GIFT -> stringResource(
                             R.string.school_action_gift_cost,
                             formatMoney(giftCost, character.countryCode)
@@ -2822,6 +2908,7 @@ private fun schoolActivityLabel(activity: SchoolActivity): String = when (activi
     SchoolActivity.SCHOOL_DANCE -> stringResource(R.string.school_activity_dance)
     SchoolActivity.CLUB_PRACTICE -> stringResource(R.string.school_activity_club_practice)
     SchoolActivity.GROUP_PROJECT -> stringResource(R.string.school_activity_group_project)
+    SchoolActivity.PLAYGROUND_HUSTLE -> stringResource(R.string.school_activity_playground_hustle)
 }
 
 private fun schoolActivityNeedsPersonPick(activity: SchoolActivity): Boolean =
@@ -2841,7 +2928,8 @@ private fun schoolActivityBlocked(character: Character, activity: SchoolActivity
         activity == SchoolActivity.SKIP_CLASS ||
         activity == SchoolActivity.PULL_PRANK ||
         activity == SchoolActivity.TALK_BACK ||
-        activity == SchoolActivity.SCHOOL_DANCE
+        activity == SchoolActivity.SCHOOL_DANCE ||
+        activity == SchoolActivity.PLAYGROUND_HUSTLE
     return if (social) {
         character.education.socialActionDoneThisYear
     } else {
@@ -2869,6 +2957,275 @@ private fun peopleForActivity(character: Character, activity: SchoolActivity): L
                 it.role == SchoolRole.BEST_CLASSMATE ||
                 it.role == SchoolRole.CRUSH ||
                 it.role == SchoolRole.BULLY
+        }
+    }
+}
+
+@Composable
+private fun ChildhoodAptitudeCard(
+    character: Character,
+    onExploreAptitude: (ChildhoodAptitude) -> Unit
+) {
+    val aptitude = character.education.childhoodAptitude
+    val score = character.education.aptitudeScore
+    val alreadyExplored = character.education.aptitudeExploredThisYear
+
+    val aptitudeLabel = when (aptitude) {
+        ChildhoodAptitude.NONE -> stringResource(R.string.aptitude_none)
+        ChildhoodAptitude.ATHLETICS -> stringResource(R.string.aptitude_athletics)
+        ChildhoodAptitude.ARTS_MUSIC -> stringResource(R.string.aptitude_arts_music)
+        ChildhoodAptitude.TECH_TINKERING -> stringResource(R.string.aptitude_tech_tinkering)
+        ChildhoodAptitude.ACADEMICS -> stringResource(R.string.aptitude_academics)
+        ChildhoodAptitude.STREET_HUSTLE -> stringResource(R.string.aptitude_street_hustle)
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaishaRadius.cardShape,
+        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, com.maisha.game.ui.theme.Hairline)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.AutoAwesome,
+                    contentDescription = null,
+                    tint = GoldAccent,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = stringResource(R.string.card_childhood_aptitude_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = InkPrimary
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(R.string.card_childhood_aptitude_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = InkTertiary
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = aptitudeLabel,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = TealPrimary
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            StatBar(
+                type = StatType.SMARTS,
+                value = score,
+                label = stringResource(R.string.label_aptitude_score, score)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            if (aptitude == ChildhoodAptitude.NONE) {
+                Text(
+                    text = "Pick an Interest to Explore:",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = InkSecondary,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                val options = listOf(
+                    ChildhoodAptitude.ATHLETICS to R.string.aptitude_athletics,
+                    ChildhoodAptitude.ARTS_MUSIC to R.string.aptitude_arts_music,
+                    ChildhoodAptitude.TECH_TINKERING to R.string.aptitude_tech_tinkering,
+                    ChildhoodAptitude.ACADEMICS to R.string.aptitude_academics,
+                    ChildhoodAptitude.STREET_HUSTLE to R.string.aptitude_street_hustle
+                )
+                options.chunked(2).forEach { row ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        row.forEach { (optApt, strRes) ->
+                            OutlinedButton(
+                                onClick = { onExploreAptitude(optApt) },
+                                modifier = Modifier.weight(1f),
+                                enabled = !alreadyExplored,
+                                shape = RoundedCornerShape(10.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(strRes),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                        if (row.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            } else {
+                OutlinedButton(
+                    onClick = { onExploreAptitude(aptitude) },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !alreadyExplored,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = if (alreadyExplored) "Practiced This Year" else stringResource(R.string.btn_explore_aptitude),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SchoolSocialStandingCard(
+    character: Character,
+    onMingleWithClique: () -> Unit
+) {
+    val clique = character.education.schoolClique
+    val standing = character.education.cliqueStanding
+    val alreadySocialized = character.education.socialActionDoneThisYear
+
+    val cliqueLabel = when (clique) {
+        SchoolClique.UNAFFILIATED -> stringResource(R.string.clique_unaffiliated)
+        SchoolClique.NERDS -> stringResource(R.string.clique_nerds)
+        SchoolClique.JOCKS -> stringResource(R.string.clique_jocks)
+        SchoolClique.REBELS -> stringResource(R.string.clique_rebels)
+        SchoolClique.POPULARS -> stringResource(R.string.clique_populars)
+        SchoolClique.OUTCASTS -> stringResource(R.string.clique_outcasts)
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaishaRadius.cardShape,
+        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, com.maisha.game.ui.theme.Hairline)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Groups,
+                    contentDescription = null,
+                    tint = TealPrimary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = stringResource(R.string.card_school_clique_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = InkPrimary
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Clique: $cliqueLabel",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = TealPrimary
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            StatBar(
+                type = StatType.HAPPINESS,
+                value = standing,
+                label = stringResource(R.string.label_clique_standing, standing)
+            )
+            if (clique != SchoolClique.UNAFFILIATED) {
+                Spacer(modifier = Modifier.height(10.dp))
+                OutlinedButton(
+                    onClick = onMingleWithClique,
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !alreadySocialized,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = if (alreadySocialized) "Socialized This Year" else stringResource(R.string.btn_mingle_clique),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            } else {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "Interact with classmates in School Life to join their clique.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = InkTertiary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ParentalTrustCurfewCard(
+    character: Character,
+    onRequestCurfew: () -> Unit
+) {
+    val trust = character.education.parentalTrust
+    val curfewHour = character.education.curfewHour
+    val canRequest = curfewHour < 23 && character.age in 14..17
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaishaRadius.cardShape,
+        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, com.maisha.game.ui.theme.Hairline)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Schedule,
+                    contentDescription = null,
+                    tint = GoldAccent,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    text = stringResource(R.string.card_curfew_trust_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = InkPrimary
+                )
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = if (curfewHour >= 24) {
+                    stringResource(R.string.label_curfew_lifted)
+                } else {
+                    stringResource(R.string.label_curfew_time, curfewHour - 12)
+                },
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = InkPrimary
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            StatBar(
+                type = StatType.HEALTH,
+                value = trust,
+                label = stringResource(R.string.label_parental_trust, trust)
+            )
+            if (canRequest) {
+                Spacer(modifier = Modifier.height(10.dp))
+                OutlinedButton(
+                    onClick = onRequestCurfew,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.btn_request_curfew),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }

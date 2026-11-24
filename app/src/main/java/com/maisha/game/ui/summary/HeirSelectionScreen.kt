@@ -45,6 +45,9 @@ fun HeirSelectionDialog(
     slotNumber: Int,
     selectedHeir: Person?,
     showConfirmation: Boolean,
+    deceasedName: String? = null,
+    legacyStamp: String? = null,
+    epitaphText: String? = null,
     onHeirSelected: (Person) -> Unit,
     onConfirmContinue: () -> Unit,
     onDismissConfirmation: () -> Unit,
@@ -71,7 +74,7 @@ fun HeirSelectionDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .widthIn(max = 480.dp)
-                .heightIn(max = 520.dp),
+                .heightIn(max = 560.dp),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
@@ -89,6 +92,43 @@ fun HeirSelectionDialog(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (!deceasedName.isNullOrBlank()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            if (!legacyStamp.isNullOrBlank()) {
+                                Text(
+                                    text = legacyStamp,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = GoldAccent
+                                )
+                            }
+                            Text(
+                                text = stringResource(R.string.heir_torch_carrying, deceasedName),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            if (!epitaphText.isNullOrBlank()) {
+                                Text(
+                                    text = "“$epitaphText”",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
@@ -164,12 +204,17 @@ private fun HeirOptionCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "🧠 ${heir.stats.smarts}%",
+                        text = "${stringResource(R.string.stat_smarts)} ${heir.stats.smarts}%",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "😊 ${heir.stats.happiness}%",
+                        text = "•",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${stringResource(R.string.stat_happiness)} ${heir.stats.happiness}%",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

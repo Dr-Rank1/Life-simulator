@@ -12,6 +12,7 @@ import com.maisha.game.data.model.Person
 import com.maisha.game.data.model.RelationType
 import com.maisha.game.data.model.RelationshipMilestone
 import com.maisha.game.data.model.SchoolStage
+import com.maisha.game.data.model.SocialEcosystemState
 import com.maisha.game.util.clampRelationshipLevel
 import java.util.Calendar
 import javax.inject.Inject
@@ -32,8 +33,12 @@ data class WillValidationResult(
 @Singleton
 class LegacyEngine @Inject constructor(
     private val mortalityEngine: MortalityEngine,
-    private val financeEngine: FinanceEngine
+    private val financeEngine: FinanceEngine,
+    private val socialEcosystemEngine: SocialEcosystemEngine
 ) {
+
+    constructor(mortalityEngine: MortalityEngine, financeEngine: FinanceEngine) :
+        this(mortalityEngine, financeEngine, SocialEcosystemEngine(financeEngine))
 
     /**
      * Living children aged [MIN_HEIR_AGE]+, sorted oldest first — candidates for legacy continuation.
@@ -127,10 +132,21 @@ class LegacyEngine @Inject constructor(
             .map { sibling ->
                 "${sibling.name} was left out of the will and holds a grudge."
             }
+        val inheritedSocial = socialEcosystemEngine.calculateLegacyHeritage(deceased)
+        val heritageLog = buildList {
+            add("Inherited the ${inheritedSocial.familyHeritage.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }} legacy.")
+            inheritedSocial.activeFeuds.forEach { feud ->
+                add("The ancestral feud with the ${feud.rivalFamilyName} family remains unresolved.")
+            }
+            inheritedSocial.activeAlliances.forEach { ally ->
+                add("The ${ally.allyFamilyName} family affirmed their ancestral bond of solidarity.")
+            }
+        }
         val legacyLog = buildList {
             addAll(settlementLog)
             addAll(willLog)
             addAll(grudgeLog)
+            addAll(heritageLog)
             if (heirlooms.isNotEmpty()) {
                 add("Family heirlooms passed down: ${heirlooms.joinToString { it.name }}.")
             }
@@ -157,7 +173,8 @@ class LegacyEngine @Inject constructor(
             criminalRecord = CriminalRecord(),
             activeConditions = emptyList(),
             eventLog = legacyLog,
-            will = null
+            will = null,
+            socialEcosystem = inheritedSocial
         )
     }
 

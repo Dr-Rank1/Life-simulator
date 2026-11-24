@@ -68,7 +68,11 @@ data class Person(
     /** Current romantic relationship progression stage. */
     val stage: RelationshipStage = RelationshipStage.CASUAL,
     /** Interaction types already performed with this person in the current year. Reset on age-up. */
-    val interactedTypesThisYear: List<String> = emptyList()
+    val interactedTypesThisYear: List<String> = emptyList(),
+    /** Dynamic bond connecting this person to family alliances, rivalries, or feuds. */
+    val socialBond: SocialBondType = SocialBondType.NONE,
+    /** Name of the rival or allied household associated with this person if part of a feud/alliance. */
+    val feudFamilyName: String? = null
 ) {
     fun coerceRelationship(): Person = copy(
         relationshipLevel = clampRelationshipLevel(relationshipLevel)

@@ -178,6 +178,47 @@ class LeisureEngine @Inject constructor(
                 character.age
             )
         )
+        if (activity == LeisureActivity.CHORES && character.age in 4..17) {
+            updated = updated.copy(
+                education = updated.education.copy(
+                    parentalTrust = (updated.education.parentalTrust + 6).coerceIn(0, 100)
+                )
+            )
+        }
+        if (activity == LeisureActivity.CHILDHOOD_HOBBY &&
+            updated.education.childhoodAptitude != com.maisha.game.data.model.ChildhoodAptitude.NONE
+        ) {
+            updated = updated.copy(
+                education = updated.education.copy(
+                    aptitudeScore = (updated.education.aptitudeScore + 8).coerceIn(0, 100)
+                )
+            )
+        }
+        if (activity == LeisureActivity.SNEAK_OUT && character.age in 12..17) {
+            val curfew = character.education.curfewHour
+            val isRebel = character.education.schoolClique == com.maisha.game.data.model.SchoolClique.REBELS
+            val catchChance = (0.28f + (if (curfew <= 20) 0.20f else 0.05f) - (if (isRebel) 0.12f else 0f))
+                .coerceIn(0.10f, 0.65f)
+            val caught = Random.nextFloat() < catchChance
+            if (caught) {
+                updated = updated.addConsequenceFlag("caughtSneakingOut").copy(
+                    education = updated.education.addConsequenceFlag("caughtSneakingOut").copy(
+                        parentalTrust = (updated.education.parentalTrust - 25).coerceAtLeast(0),
+                        curfewHour = 20
+                    ),
+                    stats = updated.stats.copy(
+                        happiness = (updated.stats.happiness - 8).coerceIn(0, 100)
+                    ),
+                    eventLog = EventLogCap.prependToCurrentYear(
+                        character.eventLog,
+                        "Your parents caught you climbing back through the window! You're grounded and curfew cut to 8:00 PM.",
+                        character.age
+                    )
+                )
+            } else {
+                updated = updated.addConsequenceFlag("snuckOutSuccessfully")
+            }
+        }
         if (activity == LeisureActivity.VISIT_MUSEUM) {
             updated = maybeCollectPrint(updated, flavor)
         }

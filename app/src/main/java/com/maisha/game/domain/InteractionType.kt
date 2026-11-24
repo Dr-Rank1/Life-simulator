@@ -22,5 +22,11 @@ enum class InteractionType {
     /** Adult child: celebrate wedding, job, etc. */
     CELEBRATE_MILESTONE,
     /** Adult child: talk through life choices. */
-    DISCUSS_LIFE_CHOICES
+    DISCUSS_LIFE_CHOICES,
+    /** Sibling: team up on games, projects, or mischief (ages 4+). */
+    SIBLING_TEAM_UP,
+    /** Sibling: borrow or sneak a toy, clothes, or gadget (ages 6+). */
+    SIBLING_BORROW_ITEM,
+    /** Sibling: friendly or fierce rivalry competition (ages 5+). */
+    SIBLING_COMPETE
 }

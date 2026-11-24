@@ -2,7 +2,12 @@ package com.maisha.game.domain
 
 import com.maisha.game.data.model.CareerTrack
 import com.maisha.game.data.model.Character
+import com.maisha.game.data.model.ChildhoodAptitude
+import com.maisha.game.data.model.CommunityStandingTier
+import com.maisha.game.data.model.FamilyHeritageTag
+import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.RelationType
+import com.maisha.game.data.model.SchoolClique
 import com.maisha.game.data.model.SchoolStage
 import kotlinx.serialization.Serializable
 
@@ -95,6 +100,155 @@ object LifeArchetypeEngine {
             character.age >= 70 -> "archetype_elder"
             character.stats.karma >= 60 -> "archetype_model_citizen"
             else -> "archetype_everyday"
+        }
+    }
+
+    /**
+     * Resolves a dynamic era/chapter title representing the character's dominant life trajectory.
+     */
+    fun resolveChapterKey(character: Character, netWorth: Int = 0): String {
+        val age = character.age
+        return when {
+            // Era 1: Infancy (0–2)
+            age <= 2 -> when {
+                character.stats.health < 40 -> "chapter_fragile_beginnings"
+                character.stats.happiness >= 70 -> "chapter_sunlit_nursery"
+                else -> "chapter_first_steps"
+            }
+            // Era 2: Early Childhood (3–5)
+            age <= 5 -> when {
+                character.stats.smarts >= 70 -> "chapter_little_wonder"
+                character.stats.happiness >= 70 -> "chapter_carefree_days"
+                else -> "chapter_curious_explorer"
+            }
+            // Era 3: Primary School & Aptitudes (6–10)
+            age <= 10 -> when (character.education.childhoodAptitude) {
+                ChildhoodAptitude.ATHLETICS -> "chapter_playground_champion"
+                ChildhoodAptitude.ARTS_MUSIC -> "chapter_budding_artist"
+                ChildhoodAptitude.TECH_TINKERING -> "chapter_young_tinkerer"
+                ChildhoodAptitude.ACADEMICS -> "chapter_classroom_prodigy"
+                ChildhoodAptitude.STREET_HUSTLE -> "chapter_streetwise_kid"
+                ChildhoodAptitude.NONE -> if (character.stats.smarts >= 70) "chapter_classroom_prodigy" else "chapter_schoolyard_days"
+            }
+            // Era 4: Middle School & Cliques (11–14)
+            age <= 14 -> when {
+                character.criminalRecord.heatLevel >= 25 || character.criminalRecord.timesArrested > 0 -> "chapter_troubled_youth"
+                character.education.schoolClique == SchoolClique.REBELS -> "chapter_reckless_rebel"
+                character.education.schoolClique == SchoolClique.JOCKS -> "chapter_varsity_aspirant"
+                character.education.schoolClique == SchoolClique.NERDS -> "chapter_academic_focus"
+                character.education.schoolClique == SchoolClique.POPULARS -> "chapter_social_star"
+                character.education.schoolClique == SchoolClique.OUTCASTS -> "chapter_lone_wolf"
+                else -> "chapter_crossing_thresholds"
+            }
+            // Era 5: High School & Identity (15–18)
+            age <= 18 -> when {
+                character.criminalRecord.currentlyIncarcerated -> "chapter_juvenile_outlaw"
+                character.career.careerTrack == CareerTrack.PRO_SPORTS || character.career.careerTrack == CareerTrack.ENTERTAINMENT -> "chapter_rising_contender"
+                character.education.gpa >= 3.6f -> "chapter_honor_roll_bound"
+                character.stats.money >= 3_000 -> "chapter_teenage_breadwinner"
+                character.criminalRecord.hasRecord -> "chapter_troubled_youth"
+                else -> "chapter_crossroads_of_youth"
+            }
+            // Era 6: Young Adulthood (19–25)
+            age <= 25 -> when {
+                character.criminalRecord.currentlyIncarcerated -> "chapter_behind_bars"
+                character.doubleLife.activeSecret != null -> "chapter_covert_double_life"
+                character.education.stage == SchoolStage.UNIVERSITY -> "chapter_campus_grind"
+                character.businesses.isNotEmpty() -> "chapter_bootstrap_hustle"
+                character.career.currentJob != null -> "chapter_climbing_the_ladder"
+                character.career.careerTrack != CareerTrack.NONE -> "chapter_chasing_the_dream"
+                else -> "chapter_charting_the_path"
+            }
+            // Era 7: Prime Career & Family (26–45)
+            age <= 45 -> when {
+                character.criminalRecord.currentlyIncarcerated -> "chapter_serving_time"
+                character.politics.currentOffice != null -> "chapter_hall_of_power"
+                character.doubleLife.activeSecret != null -> "chapter_master_of_disguise"
+                character.criminalRecord.notoriety >= 40 -> "chapter_underworld_syndicate"
+                netWorth >= 1_000_000 -> "chapter_wealth_and_influence"
+                character.businesses.isNotEmpty() -> "chapter_venture_builder"
+                character.socialEcosystem.currentStandingTier == CommunityStandingTier.PILLAR_OF_SOCIETY -> "chapter_pillar_of_society"
+                character.family.count { it.relation == RelationType.CHILD && it.alive } >= 2 -> "chapter_family_anchor"
+                character.career.currentJob != null && character.career.performance >= 70f -> "chapter_corporate_commander"
+                else -> "chapter_the_working_years"
+            }
+            // Era 8: Mature Adulthood & Midlife (46–65)
+            age <= 65 -> when {
+                character.criminalRecord.currentlyIncarcerated -> "chapter_hardened_convict"
+                character.politics.currentOffice != null -> "chapter_statesperson"
+                netWorth >= 2_000_000 -> "chapter_empire_builder"
+                character.stats.karma >= 75 && character.socialEcosystem.familyHeritage == FamilyHeritageTag.HONORED_PHILANTHROPISTS -> "chapter_honored_patron"
+                character.criminalRecord.recordExpunged -> "chapter_repentant_soul"
+                character.family.count { it.relation == RelationType.CHILD && it.alive } >= 2 -> {
+                    if (character.gender == Gender.FEMALE) "chapter_beloved_matriarch" else "chapter_beloved_patriarch"
+                }
+                character.career.currentJob != null -> "chapter_seasoned_veteran"
+                else -> "chapter_autumn_wisdom"
+            }
+            // Era 9: Senior & Golden Twilight (66+)
+            else -> when {
+                character.criminalRecord.currentlyIncarcerated -> "chapter_end_of_the_line"
+                character.socialEcosystem.familyHeritage == FamilyHeritageTag.HONORED_PHILANTHROPISTS || character.stats.karma >= 80 -> "chapter_venerable_philanthropist"
+                netWorth >= 1_500_000 -> "chapter_dynasty_elder"
+                character.socialEcosystem.currentStandingTier == CommunityStandingTier.NOTORIOUS_PARIAH || character.criminalRecord.notoriety >= 50 -> "chapter_unforgiven_outlaw"
+                character.family.any { it.relation == RelationType.CHILD } -> "chapter_honored_grandparent"
+                character.career.currentJob == null -> "chapter_quiet_retirement"
+                else -> "chapter_the_golden_twilight"
+            }
+        }
+    }
+
+    /**
+     * Resolves an evocative narrative epitaph honoring how the character lived and affected others.
+     */
+    fun resolveEpitaphKey(character: Character, netWorth: Int = 0): String {
+        val livingChildren = character.family.count { it.relation == RelationType.CHILD && it.alive }
+        val timesArrested = character.criminalRecord.timesArrested
+
+        return when {
+            character.stats.karma >= 75 && timesArrested == 0 && character.stats.happiness >= 50 -> {
+                "epitaph_saintly_benefactor"
+            }
+            netWorth >= 1_000_000 -> {
+                "epitaph_tycoon_builder"
+            }
+            character.politics.currentOffice != null -> {
+                "epitaph_public_champion"
+            }
+            character.doubleLife.activeSecret != null || character.criminalRecord.notoriety >= 45 || (character.criminalRecord.hasRecord && character.stats.money >= 300_000) -> {
+                "epitaph_shadow_operator"
+            }
+            timesArrested >= 3 || character.criminalRecord.currentlyIncarcerated || character.socialEcosystem.currentStandingTier == CommunityStandingTier.NOTORIOUS_PARIAH -> {
+                "epitaph_unforgiven_pariah"
+            }
+            livingChildren >= 2 && character.stats.happiness >= 55 -> {
+                "epitaph_family_pillar"
+            }
+            character.education.stage == SchoolStage.GRADUATED && character.stats.smarts >= 80 -> {
+                "epitaph_scholar_polymath"
+            }
+            character.family.none { it.relation == RelationType.SPOUSE || it.relation == RelationType.CHILD } && (character.isLivingAbroad() || character.ancestryHistory.isNotEmpty()) -> {
+                "epitaph_solitary_wanderer"
+            }
+            else -> {
+                "epitaph_everyday_endurance"
+            }
+        }
+    }
+
+    /**
+     * Resolves a multi-generational legacy stamp summarizing the character's lasting family footprint.
+     */
+    fun resolveLegacyStampKey(character: Character, netWorth: Int = 0): String {
+        val hasChildren = character.family.any { it.relation == RelationType.CHILD }
+        return when {
+            netWorth >= 500_000 && hasChildren -> "stamp_dynasty_founder"
+            character.politics.currentOffice != null || character.socialEcosystem.currentStandingTier == CommunityStandingTier.PILLAR_OF_SOCIETY -> "stamp_civic_luminary"
+            hasChildren && character.stats.karma >= 65 -> "stamp_honored_ancestor"
+            character.criminalRecord.notoriety >= 40 || character.doubleLife.activeSecret != null -> "stamp_renegade_legend"
+            character.isLivingAbroad() && !hasChildren -> "stamp_solitary_pioneer"
+            character.generationNumber >= 2 -> "stamp_steadfast_torchbearer"
+            else -> "stamp_humble_origin"
         }
     }
 }

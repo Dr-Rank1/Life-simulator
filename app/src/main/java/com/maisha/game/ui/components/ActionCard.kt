@@ -41,6 +41,11 @@ import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.TealPrimary
 
 
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.Surface
+import androidx.compose.ui.unit.sp
+
 enum class ActionCardAccent {
     DEFAULT,
     CARE,
@@ -60,7 +65,9 @@ fun ActionCard(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     accent: ActionCardAccent = ActionCardAccent.DEFAULT,
-    questHint: String? = null
+    questHint: String? = null,
+    riskLabel: String? = null,
+    energyCost: Int? = null
 ) {
     val view = LocalView.current
     val feedbackManager = LocalFeedbackManager.current
@@ -100,20 +107,65 @@ fun ActionCard(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(iconBg),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
             ) {
-                MaishaIcon(
-                    icon = icon,
-                    contentDescription = null,
-                    size = 24.dp,
-                    tint = iconTint
-                )
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(iconBg),
+                    contentAlignment = Alignment.Center
+                ) {
+                    MaishaIcon(
+                        icon = icon,
+                        contentDescription = null,
+                        size = 24.dp,
+                        tint = iconTint
+                    )
+                }
+
+                if (riskLabel != null || energyCost != null) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        energyCost?.let { energy ->
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = GoldAccent.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = "${energy}⚡",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = GoldAccent,
+                                    fontSize = 10.sp,
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                        riskLabel?.let { risk ->
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = if (accent == ActionCardAccent.RISK) CoralNegative.copy(alpha = 0.15f) else InkTertiary.copy(alpha = 0.12f)
+                            ) {
+                                Text(
+                                    text = risk,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (accent == ActionCardAccent.RISK) CoralNegative else InkSecondary,
+                                    fontSize = 10.sp,
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                    }
+                }
             }
+
             Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(
                     text = title,

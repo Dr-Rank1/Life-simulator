@@ -42,25 +42,29 @@ flowchart LR
 - **Visuals:** Avatar displays infant chubby cheeks and no hair/minimal baby tufts. Facial hair and accessories are strictly forbidden.
 
 ### Stage 2: Early Childhood (Ages 3–5)
-- **Mechanics:** Exploration of the home environment and preschool.
-- **Available Actions:** Playing with toys, spending time with parents, early sibling rivalries, and adopting domestic pets.
-- **Career/School Tab:** Displays a clean `EarlyChildhoodCard` informing the player that school enrollment begins at age 6.
+- **Mechanics:** Exploration of the home environment and preschool. Infancy protections (0-2) strictly preserved.
+- **Childhood Aptitude Seeds (Ages 4-10):** Characters begin exploring obsessions across 5 tracks: *Athletics*, *Arts & Music*, *Tech & Tinkering*, *Academics*, and *Street Hustle*. Practicing hobbies builds mastery scores and stat boosts that carry into high school clubs, university scholarships, and adult careers.
+- **Available Actions:** Exploring childhood hobbies, playing with toys, spending time with parents, doing chores (boosting parental trust), and interacting with siblings (team ups, borrowing items with break risks, and sibling rivalry flags).
+- **Career/School Tab:** Displays `EarlyChildhoodCard` and an interactive `ChildhoodAptitudeCard` for discovering and practicing early talents.
 
-### Stage 3: Primary School (Ages 6–12)
+### Stage 3: Primary & Middle School (Ages 6–14)
 - **Mechanics:** Automatic enrollment into local primary school. Academic GPA (0.0–4.0) tracking begins.
-- **Agency:**
-  - *Study Effort:* Slacker, Normal, or Grind.
-  - *School People Roster:* Dynamic Classmates, Best Classmate, Teachers, and School Bully.
-  - *School Activities:* Limited to 1 academic and 1 social activity per year (Study groups, library cram, teacher consultation, confronting bullies, social hangouts).
-  - *Discipline:* Misbehavior leads to detention, principal hearings, and disciplinary records.
-  - *Childhood Actions:* Ask parents for allowance, do chores, explore hobbies.
+- **Ages 6–10 (Elementary):** Focus on foundational habits, chores, hobbies, and sibling relationships. Parental allowance requests are gated by parental trust (minimum 45/100).
+- **Ages 11–14 (Middle School, Cliques & Reputation):**
+  - *School Social Cliques:* Characters can join and socialize with distinct cliques: *Academic Nerds*, *Varsity Jocks*, *Hallway Rebels*, *Popular Crowd*, and *The Outcasts*. Joining cliques checks stat qualifications or childhood aptitudes.
+  - *Social Agency:* Hang out with cliques to raise standing, pass secret notes between classmates, confront or befriend school bullies, and execute playground trading hustles (age 10-14) for pocket cash with detention risk.
+  - *School People Roster:* Dynamic Classmates, Best Classmate, Teachers, and School Bully on `education.schoolPeople` (never in `Character.family`).
+  - *School Activities:* 1 academic and 1 social activity per year (Study groups, library cram, teacher consultation, confronting bullies, playground hustles).
+  - *Discipline:* Misbehavior leads to detentions, parental trust deductions, and expulsion hearings.
 - **National Milestone:** Primary School Leaving Exam (e.g. KCPE in Kenya, DepEd NAT in Philippines).
 
-### Stage 4: Secondary / High School (Ages 13–17)
-- **Mechanics:** Transition to secondary school. Unlocks deeper social and extracurricular dynamics.
-- **School Clubs:** Join Debate, Football/Soccer, Drama, Coding, or Music clubs. Progress through ranks (*Member* &rarr; *Officer* &rarr; *Captain*), set practice intensity (*Light*, *Normal*, *Intense*), lead club fundraisers, and compete in cross-school rivalry matches.
-- **Social Agency:** School Crushes appear, attend the School Dance, sneak out after curfew, mall hangouts, gaming marathons.
-- **Student Part-Time Jobs:** Unlocks at age 16. Characters manage energy levels while balancing hard study and earning their first paychecks.
+### Stage 4: Secondary / High School (Ages 15–18)
+- **Mechanics:** Transition to secondary school with high school social dynamics, rebellion, and parental oversight.
+- **Parental Trust & Curfew Tension:** Teen characters have a dynamic curfew hour (default 9:00 PM / 21:00). High trust (70+) allows requesting later curfews (up to 11:00 PM). Sneaking out after curfew risks getting caught, causing strict groundings, trust penalties (-25), and curfew tightening to 8:00 PM.
+- **School Clubs:** Join Debate, Football/Soccer, Drama, Coding, or Music clubs with skill bonuses derived from childhood aptitudes. Progress through ranks (*Member* &rarr; *Officer* &rarr; *Captain*), lead fundraisers, and compete in rivalries.
+- **Student Part-Time Jobs:** Unlocks at age 16. Characters manage energy levels while balancing hard study, side hustles, and first paychecks.
+- **Exam Integrity:** Choose to study hard, study normal, cram, or cheat on high school exams. Cheating risks immediate expulsion hearings or sets long-lasting consequence flags (`cheatedOnExam`, `caughtCheatingOnExam`).
+- **Age 18 Crossroads Milestone:** Transitioning from age 17 to 18 automatically triggers a commemorative milestone evaluation summarizing academic graduation honors, childhood aptitude mastery, and family trust standing, while lifting curfews and unlocking adult autonomy.
 - **National Milestone:** High school graduation exams (e.g. KCSE, WAEC, SAT, GCSE, Abitur, Baccalauréat).
 
 ### Stage 5: University & Higher Education (Ages 18–22+)
@@ -110,7 +114,10 @@ com.maisha.game.domain/
   ├── YearQuestEngine.kt          (Annual player quests and reward streaks)
   ├── WeeklyChallengeEngine.kt    (Themed multi-requirement community challenges)
   ├── BucketListEngine.kt         (Player life goals and bucket list items)
-  └── LifeArchetypeEngine.kt      (Silk-sash tombstone ribbon resolution)
+  ├── MiniChallengeEngine.kt      (Interactive exam focus, push-your-luck crime, negotiations)
+  ├── DoubleLifeEngine.kt         (Undercover rackets, secret romance, shadow persona, confrontations)
+  ├── SocialEcosystemEngine.kt    (Community standing, recurring rivals, benefactors, family feuds/alliances)
+  └── LifeArchetypeEngine.kt      (Silk-sash ribbons, dynamic chapter titles, evocative epitaphs, legacy stamps)
 ```
 
 ### Detailed Engine Specifications
@@ -190,17 +197,66 @@ com.maisha.game.domain/
 - **Relocation:** Applying for tourist visas, work permits, permanent residency, or naturalized citizenship across 15 countries.
 
 #### 9. `LifeArchetypeEngine`
-- **Role:** Resolves BitLife-style silk-sash tombstone ribbons upon player death.
-- **Archetypes:**
-  - 🏅 *Loaded:* Net worth in the top economic percentile.
-  - 🎓 *Academic:* High GPA, advanced degrees, intellectual mastery.
-  - 🎭 *Fame Icon:* Celebrity status in pro sports or entertainment.
-  - 🕊️ *Saint:* Maximum karma, charitable donations, pristine relationships.
-  - 👑 *Family Anchor:* Devoted parent/spouse, raised large family.
-  - 💼 *Workaholic:* Reached executive corporate leadership.
-  - 🕵️ *Cunning:* High-notoriety criminal who executed successful heists.
-  - ⚡ *Scandalous:* High drama, prison sentences, public infamy.
-  - 🍃 *Mediocre:* Ordinary, low-risk, quiet life.
+- **Role:** Resolves silk-sash memorial ribbons, dynamic life chapter titles, evocative narrative epitaphs, and multi-generational legacy stamps upon player death and throughout life progression.
+- **Dynamic Chapter Titles:**
+  - Updates continuously across nine life eras (Infancy 0-2, Early Childhood 3-5, Primary School & Aptitudes 6-10, Middle School & Cliques 11-14, High School & Identity 15-18, Young Adulthood 19-25, Prime Career & Family 26-45, Mature Adulthood 46-65, Senior & Golden Twilight 66+).
+  - Computed purely from live character state, career trajectories, academic standing, childhood aptitudes, school cliques, secret covers, community standing, and criminal records (e.g., *Campus Grind*, *Reckless Rebel*, *Honor Roll Bound*, *Empire Builder*, *Beloved Matriarch*, *Venerable Philanthropist*), prominently featured on the LifeScreen HUD.
+- **Evocative Memorial Epitaphs:**
+  - Replaces generic mortality summaries with rich narrative epitaphs tailored to who the character affected, loved, or crossed (e.g., *Saintly Benefactor*, *Tycoon Builder*, *Public Champion*, *Shadow Operator*, *Unforgiven Pariah*, *Family Pillar*, *Scholar & Polymath*, *Solitary Wanderer*, *Everyday Endurance*).
+- **Multi-Generational Legacy Stamps:**
+  - Dignified heirloom badges awarded on the memorial and heir selection dialogs, honoring ancestral lineage footprints across family generations (e.g., *Dynasty Founder*, *Civic Luminary*, *Honored Ancestor*, *Renegade Legend*, *Solitary Pioneer*, *Steadfast Torchbearer*, *Humble Origin*).
+- **Silk-Sash Memorial Ribbons:**
+  - *Loaded:* Net worth in the top economic percentile ($2M+).
+  - *Academic:* High GPA, advanced degrees, intellectual mastery.
+  - *Fame Icon:* Celebrity status in pro sports or entertainment.
+  - *Saint:* High karma, clean criminal record, pristine relationships.
+  - *Family Anchor:* Devoted parent/spouse, raised large family.
+  - *Workaholic:* Reached executive corporate leadership or long career tenure.
+  - *Cunning:* High-notoriety criminal or covert operator who executed successful heists.
+  - *Scandalous:* High drama, prison sentences, public infamy.
+  - *Mediocre:* Ordinary, low-risk, quiet life.
+
+#### 10. `MiniChallengeEngine`
+- **Role:** Replaces instant RNG-only resolution on high-stakes turning points with fast, 3-second interactive mini-challenges that give players direct agency in the outcome.
+- **Key Mechanics:**
+  - **Exam & Academic Focus Check:** During major primary, secondary, and university exams, players choose a mental approach (`ANALYTICAL_PRECISION`, `INSTINCTIVE_SPEED`, `HIGH_STAKES_SHORTCUT`) within an animated countdown timer. Steady analytical methods defuse exam stress and yield consistent marks; rapid-fire instincts award quick-thinking bonuses; high-stakes shortcuts can score massive grade boosts but carry proctor scrutiny risks.
+  - **Push-Your-Luck Crime Escalation:** For street crimes and heists, players receive an initial grab (`CrimePushLuckSession`) and actively decide whether to *Cash Out & Escape* (100% safe bank, minor heat) or *Push Luck* across up to 3 escalating rounds (1.8x / 2.8x jackpot multipliers vs rising police alert and bust risk).
+  - **High-Stakes Negotiation & Persuasion Mini-Check:** When asking for a salary raise, corporate promotion, proposing with a prenuptial agreement, or confronting a school bully, players select a targeted pitch (`VALUE_METRICS`, `CHARISMA_EMPATHY`, `ASSERTIVE_LEVERAGE`). Outlines counterpart relationship, resistance, and player stats: data pitches win over strict managers, empathy disarms volatile partners and defuses hallway bullies, and assertive leverage secures top-tier financial rewards while risking rejection.
+
+#### 11. `DoubleLifeEngine`
+- **Role:** Models dual identities, clandestine side-lives, and covert operations where characters manage suspicion, alibi strength, and exposure tension across age-ups.
+- **Secret Identity Types:**
+  - `UNDERCOVER_SYNDICATE`: Double-agent underworld racket earning passive shadow income; exposure spikes with police heat.
+  - `SECRET_ROMANCE`: Clandestine relationship behind partner's back; suspicion accelerates if partner has volatile or suspicious traits.
+  - `HIDDEN_CREATOR`: Masked artist/creator persona generating royalties; exposed if fame outpaces privacy alibis.
+  - `SHADOW_OPERATOR`: Corporate or campus spy siphoning confidential resources; cracked by career stress or performance audits.
+  - `BLACKMAIL_VAULT`: High-leverage dossier holding compromising intel over elites; high risk of targeted confrontation.
+- **Key Mechanics:**
+  - `plantAlibi`: Spend cash and Smarts to build alibi cover (`alibiStrength +20–30`).
+  - `scrubTracks`: Lower exposure risk by covering digital and physical tracks (`exposureRisk -25`).
+  - `exploitSecret`: Cash in or leverage secret influence for immediate payout/intel while generating suspicion.
+  - `comeClean`: Voluntarily disband cover story with reduced reputational fallout before being caught.
+  - **Dynamic Confrontations:** When exposure hits critical thresholds or an age-up confrontation triggers, the character faces 4 choices:
+    - *Double Down & Bluff:* Uses Smarts and Karma to deceive the accuser.
+    - *Bribe Silence:* Uses scaled liquid funds to pay off the accuser.
+    - *Burn Identity & Vanish:* Sacrifices cash to erase the persona and avoid criminal/relationship fallout.
+    - *Face the Fallout:* Surrenders to public exposure, suffering legal or relationship penalties.
+
+#### 19. `SocialEcosystemEngine`
+- **Role:** Simulates a living community reputation, generational family heritage, persistent feuds, family alliances, and recurring NPC rivals/mentors.
+- **Key Systems:**
+  - **Community Standing Tiers:** Characters occupy five reputation tiers (`PILLAR_OF_SOCIETY`, `WELL_RESPECTED`, `RESPECTABLE`, `DISTRUSTED`, `NOTORIOUS_PARIAH`) based on score [0–100]. Standing drifts annually based on Karma, heat, and criminal incarceration.
+  - **Generational Family Heritage:** Families accumulate lasting heritage tags (`HUMBLE_ROOTS`, `HONORED_PHILANTHROPISTS`, `PROSPEROUS_DYNASTY`, `SCANDAL_TAINTED`, `RUTHLESS_MOGULS`) derived from net worth, karma, and criminal arrest history.
+  - **Persistent & Ancestral Feuds:** Clashing houses track feud intensity [0–100]. Players can offer an olive branch parley, escalate public hostilities, or file legal cease-and-desist injunctions. Feuds with intensity $\ge 30$ carry down to heirs as ancestral grudges.
+  - **Family Alliances & Benefactors:** Allied families provide patronage and strategic favors once per year:
+    - *Career Endorsement:* +22 workplace performance boost.
+    - *Patronage Grant:* Scaled cash injection.
+    - *Community Defense:* Public defense statement granting +15 Community Standing.
+    Alliances with trust $\ge 50$ persist across generations.
+  - **Recurring Rivals & Workplace Mentors:** Senior colleagues can mentor the character (easing promotion requirements), while persistent rivals challenge standing. Players can reconcile with rivals through candid parley or mutual respect.
+  - **Economic & Career Privileges:** High community standing grants tangible advantages:
+    - *Prestige Mortgage:* Up to 0.5% APR discount on property mortgages.
+    - *Hiring Advantage:* Up to +15% hire chance bonus for Pillars of Society (and -20% penalty for Pariahs).
 
 ---
 
@@ -315,6 +371,11 @@ Maisha has undergone a complete **Material 3 modernization**:
 3. **`InsetCardContainer`:** Elevated card surfaces utilizing warm neutral canvas backgrounds (`#F8F9FA`), pure paper white cards (`#FFFFFF`), and refined 1dp hairline outlines (`#E2E8F0`).
 4. **`DrillDownRow` List Architecture:** Eliminates overwhelming nested card walls on 360dp screens by presenting clean, discoverable drill-down lists that open dedicated `ModalBottomSheet`s.
 5. **Tactile `3D AgeUpButton`:** Custom 3D button with layered depth, gradient face, spring depression physics, and synchronized audio-haptic feedback.
+6. **Elevated `FloatingStatChange` Delta Layer:** Real-time floating status and currency badges with scale-in and ease-out float animation, dark translucent slate surfaces (`#0F172A`), category icons, and non-blocking tap passthrough for instant visual feedback on actions and age-ups.
+7. **Contextual `This Year` Focus Strip:** A dynamic, compact card atop the Life timeline highlighting 2–3 timely priorities (e.g. failing health, low mood, childhood hobbies, school cliques, curfews, adulthood crossroads, performance improvement plans, or weekly challenges) with direct tactile action shortcuts.
+8. **Classified Story Timeline Cards:** Narrative logs grouped into semantic story categories (`MILESTONE`, `CRIME_DRAMA`, `CAREER_SCHOOL`, `FAMILY_ROMANCE`, `HEALTH_WELLNESS`, `GENERAL`) with distinctive golden milestone cards, incident badges, and category iconography.
+9. **Living NPCs (Personality Tags & Reactive Dialogue):** Relationship (`PersonDetailSheet`) and workplace (`WorkplaceRosterSheet`) sheets featuring dynamic personality tag chips (*Devoted*, *Friendly*, *Distant*, *Hot-tempered*, *Level-headed*, *Strict*, *Supportive*, *Ambitious*, *Slacker*) and reactive 1-line dialogue speech bubbles responding to relationship standing.
+10. **Rich Tactical `ActionCard`s:** Activity cards featuring risk level chips (*Low Risk*, *Moderate Risk*, *High Risk*) and energy drain indicators (*1⚡*, *2⚡*) alongside icon art and category accents.
 
 ---
 

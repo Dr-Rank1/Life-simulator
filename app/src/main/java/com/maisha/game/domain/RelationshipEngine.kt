@@ -565,7 +565,31 @@ class RelationshipEngine @Inject constructor(
             )
             return SeekFriendshipResult.NoLuck(updated)
         }
-        val friend = PersonGenerator.buildFriend(updated, MIN_FRIEND_AGE)
+        val baseFriend = PersonGenerator.buildFriend(updated, MIN_FRIEND_AGE)
+        val bondType = when {
+            updated.socialEcosystem.activeFeuds.isNotEmpty() && Random.nextFloat() < 0.12f -> com.maisha.game.data.model.SocialBondType.FAMILY_FEUD
+            updated.socialEcosystem.activeAlliances.isNotEmpty() && Random.nextFloat() < 0.18f -> com.maisha.game.data.model.SocialBondType.FAMILY_ALLY
+            Random.nextFloat() < 0.10f -> com.maisha.game.data.model.SocialBondType.RECURRING_RIVAL
+            updated.socialEcosystem.communityStandingScore >= 70 && Random.nextFloat() < 0.12f -> com.maisha.game.data.model.SocialBondType.BENEFACTOR_MENTOR
+            else -> com.maisha.game.data.model.SocialBondType.NONE
+        }
+        val feudFam = when (bondType) {
+            com.maisha.game.data.model.SocialBondType.FAMILY_FEUD -> updated.socialEcosystem.activeFeuds.random().rivalFamilyName
+            com.maisha.game.data.model.SocialBondType.FAMILY_ALLY -> updated.socialEcosystem.activeAlliances.random().allyFamilyName
+            else -> null
+        }
+        val friend = baseFriend.copy(
+            socialBond = bondType,
+            feudFamilyName = feudFam,
+            relation = if (bondType == com.maisha.game.data.model.SocialBondType.FAMILY_FEUD) RelationType.ENEMY else baseFriend.relation,
+            relationshipLevel = when (bondType) {
+                com.maisha.game.data.model.SocialBondType.FAMILY_FEUD -> 15
+                com.maisha.game.data.model.SocialBondType.FAMILY_ALLY -> 75
+                com.maisha.game.data.model.SocialBondType.RECURRING_RIVAL -> 35
+                com.maisha.game.data.model.SocialBondType.BENEFACTOR_MENTOR -> 65
+                else -> baseFriend.relationshipLevel
+            }
+        )
         updated = updated.copy(
             family = updated.family + friend,
             stats = updated.stats.copy(
@@ -702,10 +726,20 @@ class RelationshipEngine @Inject constructor(
         } else if (character.age < 6) {
             val allowedForToddler = interactionType == InteractionType.SPEND_TIME ||
                 interactionType == InteractionType.COMPLIMENT ||
-                interactionType == InteractionType.ARGUE
+                interactionType == InteractionType.ARGUE ||
+                interactionType == InteractionType.SIBLING_TEAM_UP
             if (!allowedForToddler) {
                 return FamilyInteractionResult(character, "msg_interaction_too_young")
             }
+        }
+        val isSiblingOnly = interactionType == InteractionType.SIBLING_TEAM_UP ||
+            interactionType == InteractionType.SIBLING_BORROW_ITEM ||
+            interactionType == InteractionType.SIBLING_COMPETE
+        if (isSiblingOnly && member.relation != RelationType.SIBLING) {
+            return FamilyInteractionResult(character, "msg_sibling_only")
+        }
+        if ((interactionType == InteractionType.SIBLING_BORROW_ITEM || interactionType == InteractionType.SIBLING_COMPETE) && character.age < 5) {
+            return FamilyInteractionResult(character, "msg_interaction_too_young")
         }
         if (interactionType == InteractionType.TRAVEL_TOGETHER && character.age < 16) {
             return FamilyInteractionResult(character, "msg_travel_requires_age_16")
@@ -749,6 +783,9 @@ class RelationshipEngine @Inject constructor(
             InteractionType.FINANCIAL_SUPPORT -> applyFinancialSupport(character, memberIndex, member)
             InteractionType.CELEBRATE_MILESTONE -> applyCelebrateMilestone(character, memberIndex, member)
             InteractionType.DISCUSS_LIFE_CHOICES -> applyDiscussLifeChoices(character, memberIndex, member)
+            InteractionType.SIBLING_TEAM_UP -> applySiblingTeamUp(character, memberIndex, member)
+            InteractionType.SIBLING_BORROW_ITEM -> applySiblingBorrowItem(character, memberIndex, member)
+            InteractionType.SIBLING_COMPETE -> applySiblingCompete(character, memberIndex, member)
         }
     }
 
@@ -1132,6 +1169,17 @@ class RelationshipEngine @Inject constructor(
                 character = character,
                 messageKey = "msg_ask_money_not_applicable"
             )
+        }
+        if ((member.relation == RelationType.MOTHER || member.relation == RelationType.FATHER) && character.age in 4..17) {
+            if (character.education.parentalTrust < 45) {
+                return FamilyInteractionResult(
+                    character = character.copy(
+                        stats = character.stats.copy(happiness = clampStat(character.stats.happiness - 2))
+                    ),
+                    messageKey = "msg_ask_money_low_trust",
+                    messageArgs = listOf(member.name)
+                )
+            }
         }
         if (member.relationshipLevel <= 60) {
             return FamilyInteractionResult(
@@ -1596,6 +1644,123 @@ class RelationshipEngine @Inject constructor(
                 recordFirstQualityTime = true
             ),
             messageKey = "msg_discuss_life_success",
+            messageArgs = listOf(member.name)
+        )
+    }
+
+    private fun applySiblingTeamUp(
+        character: Character,
+        memberIndex: Int,
+        member: Person
+    ): FamilyInteractionResult {
+        val updatedMember = member.copy(
+            relationshipLevel = clampRelationshipLevel(member.relationshipLevel + 12)
+        ).coerceRelationship()
+        val logLine = "You and ${member.name} teamed up to build a secret hideout and pull off childhood schemes."
+        return FamilyInteractionResult(
+            character = commitMemberUpdate(
+                character.copy(
+                    stats = character.stats.copy(
+                        happiness = clampStat(character.stats.happiness + 7)
+                    ),
+                    eventLog = EventLogCap.prepend(character.eventLog, logLine)
+                ),
+                memberIndex,
+                updatedMember,
+                interactionType = InteractionType.SIBLING_TEAM_UP,
+                recordFirstQualityTime = true
+            ),
+            messageKey = "msg_sibling_team_up_success",
+            messageArgs = listOf(member.name)
+        )
+    }
+
+    private fun applySiblingBorrowItem(
+        character: Character,
+        memberIndex: Int,
+        member: Person
+    ): FamilyInteractionResult {
+        val brokeItem = Random.nextFloat() < 0.30f
+        return if (brokeItem) {
+            val updatedMember = member.copy(
+                relationshipLevel = clampRelationshipLevel(member.relationshipLevel - 14)
+            ).coerceRelationship()
+            val logLine = "You borrowed ${member.name}'s prized item without asking and broke it! Screaming match ensued."
+            val withFlag = character.addConsequenceFlag("siblingRivalry")
+            FamilyInteractionResult(
+                character = commitMemberUpdate(
+                    withFlag.copy(
+                        stats = withFlag.stats.copy(
+                            happiness = clampStat(withFlag.stats.happiness - 4)
+                        ),
+                        eventLog = EventLogCap.prepend(withFlag.eventLog, logLine)
+                    ),
+                    memberIndex,
+                    updatedMember,
+                    interactionType = InteractionType.SIBLING_BORROW_ITEM
+                ),
+                messageKey = "msg_sibling_borrow_broke",
+                messageArgs = listOf(member.name)
+            )
+        } else {
+            val updatedMember = member.copy(
+                relationshipLevel = clampRelationshipLevel(member.relationshipLevel + 2)
+            ).coerceRelationship()
+            val logLine = "You borrowed ${member.name}'s gadget and had a blast before secretly returning it."
+            FamilyInteractionResult(
+                character = commitMemberUpdate(
+                    character.copy(
+                        stats = character.stats.copy(
+                            happiness = clampStat(character.stats.happiness + 5)
+                        ),
+                        eventLog = EventLogCap.prepend(character.eventLog, logLine)
+                    ),
+                    memberIndex,
+                    updatedMember,
+                    interactionType = InteractionType.SIBLING_BORROW_ITEM
+                ),
+                messageKey = "msg_sibling_borrow_success",
+                messageArgs = listOf(member.name)
+            )
+        }
+    }
+
+    private fun applySiblingCompete(
+        character: Character,
+        memberIndex: Int,
+        member: Person
+    ): FamilyInteractionResult {
+        val playerWins = Random.nextBoolean()
+        val withFlag = character.addConsequenceFlag("siblingRivalry")
+        val updatedMember = member.copy(
+            relationshipLevel = clampRelationshipLevel(member.relationshipLevel + if (playerWins) -3 else 4)
+        ).coerceRelationship()
+        val (happinessDelta, messageKey, logLine) = if (playerWins) {
+            Triple(
+                6,
+                "msg_sibling_compete_win",
+                "You defeated ${member.name} in a rivalry showdown! Bragging rights secured."
+            )
+        } else {
+            Triple(
+                -2,
+                "msg_sibling_compete_lose",
+                "${member.name} bested you in the sibling showdown and bragged endlessly."
+            )
+        }
+        return FamilyInteractionResult(
+            character = commitMemberUpdate(
+                withFlag.copy(
+                    stats = withFlag.stats.copy(
+                        happiness = clampStat(withFlag.stats.happiness + happinessDelta)
+                    ),
+                    eventLog = EventLogCap.prepend(withFlag.eventLog, logLine)
+                ),
+                memberIndex,
+                updatedMember,
+                interactionType = InteractionType.SIBLING_COMPETE
+            ),
+            messageKey = messageKey,
             messageArgs = listOf(member.name)
         )
     }

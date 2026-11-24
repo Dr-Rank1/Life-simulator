@@ -50,7 +50,10 @@ object TestFixtures {
         lastRelocationAge: Int? = null,
         hasDrivingLicense: Boolean = false,
         questYearStreak: Int = 0,
-        bucketList: List<com.maisha.game.data.model.BucketGoal> = emptyList()
+        bucketList: List<com.maisha.game.data.model.BucketGoal> = emptyList(),
+        doubleLife: com.maisha.game.data.model.DoubleLifeState = com.maisha.game.data.model.DoubleLifeState(),
+        socialEcosystem: com.maisha.game.data.model.SocialEcosystemState = com.maisha.game.data.model.SocialEcosystemState(),
+        politics: com.maisha.game.data.model.PoliticalState = com.maisha.game.data.model.PoliticalState()
     ): Character = Character(
         name = name,
         age = age,
@@ -79,7 +82,10 @@ object TestFixtures {
         relocationHistory = relocationHistory,
         lastRelocationAge = lastRelocationAge,
         questYearStreak = questYearStreak,
-        bucketList = bucketList
+        bucketList = bucketList,
+        doubleLife = doubleLife,
+        socialEcosystem = socialEcosystem,
+        politics = politics
     )
 
     fun person(
@@ -200,7 +206,10 @@ object TestFixtures {
             legacyEngine = LegacyEngine(MortalityEngine(), financeEngine),
             milestoneEngine = MilestoneEngine(),
             bucketListEngine = BucketListEngine(),
-            leisureEngine = LeisureEngine()
+            leisureEngine = LeisureEngine(),
+            miniChallengeEngine = MiniChallengeEngine(CrimeEngine()),
+            doubleLifeEngine = DoubleLifeEngine(CrimeEngine()),
+            socialEcosystemEngine = SocialEcosystemEngine(financeEngine)
         )
     }
 }

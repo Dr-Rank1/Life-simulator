@@ -93,8 +93,10 @@ object ExpressionResolver {
         com.maisha.game.domain.InteractionType.MAKE_PEACE,
         com.maisha.game.domain.InteractionType.FINANCIAL_SUPPORT,
         com.maisha.game.domain.InteractionType.CELEBRATE_MILESTONE,
-        com.maisha.game.domain.InteractionType.DISCUSS_LIFE_CHOICES -> EventOutcome.Positive(1)
-        com.maisha.game.domain.InteractionType.PRANK -> EventOutcome.Surprising(1)
+        com.maisha.game.domain.InteractionType.DISCUSS_LIFE_CHOICES,
+        com.maisha.game.domain.InteractionType.SIBLING_TEAM_UP -> EventOutcome.Positive(1)
+        com.maisha.game.domain.InteractionType.PRANK,
+        com.maisha.game.domain.InteractionType.SIBLING_COMPETE -> EventOutcome.Surprising(1)
         else -> EventOutcome.Neutral
     }
 }

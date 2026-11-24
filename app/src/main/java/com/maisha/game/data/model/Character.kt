@@ -75,7 +75,9 @@ data class Character(
     val unlockedMilestoneIds: List<String> = emptyList(),
     val bucketList: List<BucketGoal> = emptyList(),
     /** Master-skill showcase payout claimed this year. */
-    val skillShowcaseDoneThisYear: Boolean = false
+    val skillShowcaseDoneThisYear: Boolean = false,
+    val doubleLife: DoubleLifeState = DoubleLifeState(),
+    val socialEcosystem: SocialEcosystemState = SocialEcosystemState()
 ) {
     /** Passports held; falls back to birth country for pre-immigration saves. */
     fun passportsHeld(): List<String> =
@@ -85,4 +87,8 @@ data class Character(
         countryCode in passportsHeld()
 
     fun isLivingAbroad(): Boolean = !holdsCitizenship(countryCode)
+
+    fun hasConsequenceFlag(flag: String): Boolean = education.hasConsequenceFlag(flag)
+    fun addConsequenceFlag(flag: String): Character = copy(education = education.addConsequenceFlag(flag))
+    fun removeConsequenceFlag(flag: String): Character = copy(education = education.removeConsequenceFlag(flag))
 }

@@ -150,7 +150,14 @@ class FinanceEngine @Inject constructor(
         if (character.stats.money < downPayment) return MortgagePurchaseResult.InsufficientFunds
 
         val principal = purchasePrice - downPayment
-        val monthlyRate = MORTGAGE_ANNUAL_RATE / 12.0
+        val standingTier = character.socialEcosystem.currentStandingTier
+        val rateDiscount = when (standingTier) {
+            com.maisha.game.data.model.CommunityStandingTier.PILLAR_OF_SOCIETY -> 0.005
+            com.maisha.game.data.model.CommunityStandingTier.WELL_RESPECTED -> 0.0025
+            else -> 0.0
+        }
+        val effectiveRate = (MORTGAGE_ANNUAL_RATE - rateDiscount).coerceAtLeast(0.04)
+        val monthlyRate = effectiveRate / 12.0
         val annualPayment = if (principal <= 0) 0 else {
             val monthly = principal * monthlyRate /
                 (1.0 - Math.pow(1.0 + monthlyRate, -MORTGAGE_TERM_MONTHS.toDouble()))

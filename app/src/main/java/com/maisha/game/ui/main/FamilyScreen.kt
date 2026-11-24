@@ -1,7 +1,9 @@
 // app/src/main/java/com/maisha/game/ui/main/FamilyScreen.kt
 package com.maisha.game.ui.main
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,8 +13,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -21,10 +25,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -38,16 +44,26 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.maisha.game.R
 import com.maisha.game.data.EconomyScaler
 import com.maisha.game.data.local.OnboardingTips
+import com.maisha.game.data.model.BenefactorFavorType
 import com.maisha.game.data.model.Character
+import com.maisha.game.data.model.CommunityStandingTier
+import com.maisha.game.data.model.FamilyAlliance
+import com.maisha.game.data.model.FamilyFeud
+import com.maisha.game.data.model.FamilyHeritageTag
+import com.maisha.game.data.model.FeudAction
 import com.maisha.game.data.model.Person
 import com.maisha.game.data.model.Pet
+import com.maisha.game.data.model.SocialEcosystemState
 import com.maisha.game.data.model.PetSpecies
 import com.maisha.game.data.model.RelationType
 import com.maisha.game.domain.GiftTier
@@ -81,7 +97,10 @@ import com.maisha.game.ui.components.TabPageHero
 import com.maisha.game.ui.components.rememberConfirmableAction
 import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.theme.AccentPink
+import com.maisha.game.ui.theme.CoralNegative
+import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.InkPrimary
+import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
@@ -89,6 +108,8 @@ import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaSpacing
 import com.maisha.game.ui.theme.NavyDeep
+import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
 
 private enum class FamilyCategory { ALL, FAMILY, FRIENDS, PETS }
@@ -125,10 +146,15 @@ fun FamilyScreen(
     onDismissFamilyDatingTip: () -> Unit,
     onDismissFamilyDetailTip: () -> Unit,
     onThrowParty: (Int) -> Unit,
+    onResolveFeudAction: (String, FeudAction) -> Unit = { _, _ -> },
+    onCallInBenefactorFavor: (String, BenefactorFavorType) -> Unit = { _, _ -> },
+    onReconcileRivalry: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val partyConfirm = rememberConfirmableAction<Int>()
     var showPartyTiers by remember { mutableStateOf(false) }
+    var activeFeudToManage by remember { mutableStateOf<FamilyFeud?>(null) }
+    var activeAllianceToManage by remember { mutableStateOf<FamilyAlliance?>(null) }
     val partyModest = EconomyScaler.scaleAmount(
         RelationshipEngine.PARTY_BUDGET_MIN_KENYA,
         character.countryCode
@@ -351,6 +377,14 @@ fun FamilyScreen(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    item(key = "section_community_standing") {
+                        CommunityStandingCard(
+                            state = character.socialEcosystem,
+                            countryCode = character.countryCode,
+                            onFeudClick = { activeFeudToManage = it },
+                            onAllianceClick = { activeAllianceToManage = it }
+                        )
+                    }
                     if (partner.isNotEmpty()) {
                         item(key = "section_partner") {
                             InsetCardContainer(title = stringResource(R.string.section_partner)) {
@@ -564,9 +598,33 @@ fun FamilyScreen(
                 onPropose = { onPropose(member.id) },
                 onProposeWithPrenup = { onProposeWithPrenup(member.id) },
                 onBreakUp = { onBreakUp(member.id) },
-                onHaveChild = onHaveChild
+                onHaveChild = onHaveChild,
+                onReconcileRivalry = onReconcileRivalry
             )
         }
+    }
+
+    activeFeudToManage?.let { feud ->
+        FeudManageDialog(
+            feud = feud,
+            countryCode = character.countryCode,
+            onAction = { action ->
+                activeFeudToManage = null
+                onResolveFeudAction(feud.id, action)
+            },
+            onDismiss = { activeFeudToManage = null }
+        )
+    }
+
+    activeAllianceToManage?.let { ally ->
+        AllianceManageDialog(
+            alliance = ally,
+            onFavor = { favor ->
+                activeAllianceToManage = null
+                onCallInBenefactorFavor(ally.id, favor)
+            },
+            onDismiss = { activeAllianceToManage = null }
+        )
     }
 
     uiState.selectedPet?.let { pet ->
@@ -774,4 +832,361 @@ private fun relationLabel(member: Person): String = when (member.relation) {
     RelationType.FRIEND -> stringResource(R.string.relation_friend)
     RelationType.BEST_FRIEND -> stringResource(R.string.relation_best_friend)
     RelationType.ENEMY -> stringResource(R.string.relation_enemy)
+}
+
+@Composable
+fun CommunityStandingCard(
+    state: SocialEcosystemState,
+    countryCode: String,
+    onFeudClick: (FamilyFeud) -> Unit,
+    onAllianceClick: (FamilyAlliance) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.section_community_standing),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = TealPrimary.copy(alpha = 0.15f)
+                ) {
+                    Text(
+                        text = heritageLabel(state.familyHeritage),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TealPrimary,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = standingTierLabel(state.currentStandingTier),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = when (state.currentStandingTier) {
+                        CommunityStandingTier.PILLAR_OF_SOCIETY,
+                        CommunityStandingTier.WELL_RESPECTED -> LifeGreen
+                        CommunityStandingTier.DISTRUSTED,
+                        CommunityStandingTier.NOTORIOUS_PARIAH -> CoralNegative
+                        else -> MaterialTheme.colorScheme.onSurface
+                    }
+                )
+                Text(
+                    text = stringResource(R.string.label_community_reputation, state.communityStandingScore),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            LinearProgressIndicator(
+                progress = { state.communityStandingScore / 100f },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp)),
+                color = when (state.currentStandingTier) {
+                    CommunityStandingTier.PILLAR_OF_SOCIETY,
+                    CommunityStandingTier.WELL_RESPECTED -> LifeGreen
+                    CommunityStandingTier.DISTRUSTED,
+                    CommunityStandingTier.NOTORIOUS_PARIAH -> CoralNegative
+                    else -> TealPrimary
+                },
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            if (state.activeFeuds.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.label_feuds_count, state.activeFeuds.size),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = CoralNegative
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    state.activeFeuds.forEach { feud ->
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = CoralNegative.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, CoralNegative.copy(alpha = 0.3f)),
+                            modifier = Modifier.clickable { onFeudClick(feud) }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = feud.rivalFamilyName,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = CoralNegative
+                                )
+                                Text(
+                                    text = "${feud.intensity}%",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (state.activeAlliances.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.label_alliances_count, state.activeAlliances.size),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = LifeGreen
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    state.activeAlliances.forEach { ally ->
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = LifeGreen.copy(alpha = 0.12f),
+                            border = BorderStroke(1.dp, LifeGreen.copy(alpha = 0.3f)),
+                            modifier = Modifier.clickable { onAllianceClick(ally) }
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = ally.allyFamilyName,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = LifeGreen
+                                )
+                                Text(
+                                    text = "${ally.trustLevel}%",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun standingTierLabel(tier: CommunityStandingTier): String = when (tier) {
+    CommunityStandingTier.PILLAR_OF_SOCIETY -> stringResource(R.string.standing_pillar_of_society)
+    CommunityStandingTier.WELL_RESPECTED -> stringResource(R.string.standing_well_respected)
+    CommunityStandingTier.RESPECTABLE -> stringResource(R.string.standing_respectable)
+    CommunityStandingTier.DISTRUSTED -> stringResource(R.string.standing_distrusted)
+    CommunityStandingTier.NOTORIOUS_PARIAH -> stringResource(R.string.standing_notorious_pariah)
+}
+
+@Composable
+private fun heritageLabel(tag: FamilyHeritageTag): String = when (tag) {
+    FamilyHeritageTag.HUMBLE_ROOTS -> stringResource(R.string.heritage_humble_roots)
+    FamilyHeritageTag.HONORED_PHILANTHROPISTS -> stringResource(R.string.heritage_honored_philanthropists)
+    FamilyHeritageTag.PROSPEROUS_DYNASTY -> stringResource(R.string.heritage_prosperous_dynasty)
+    FamilyHeritageTag.SCANDAL_TAINTED -> stringResource(R.string.heritage_scandal_tainted)
+    FamilyHeritageTag.RUTHLESS_MOGULS -> stringResource(R.string.heritage_ruthless_moguls)
+}
+
+@Composable
+fun FeudManageDialog(
+    feud: FamilyFeud,
+    countryCode: String,
+    onAction: (FeudAction) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val oliveBranchCost = EconomyScaler.scaleAmount(1_500, countryCode)
+    val legalFee = EconomyScaler.scaleAmount(3_000, countryCode)
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "${feud.rivalFamilyName} Family Feud",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = CoralNegative
+                )
+
+                Text(
+                    text = stringResource(R.string.reactive_feud_desc, feud.rivalFamilyName, feud.intensity),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                if (feud.originReason.isNotBlank()) {
+                    Text(
+                        text = feud.originReason,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Button(
+                    onClick = { onAction(FeudAction.OFFER_OLIVE_BRANCH) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = LifeGreen)
+                ) {
+                    Text(stringResource(R.string.btn_feud_olive_branch, formatMoney(oliveBranchCost, countryCode)))
+                }
+
+                OutlinedButton(
+                    onClick = { onAction(FeudAction.ESCALATE_FEUD) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = CoralNegative),
+                    border = BorderStroke(1.dp, CoralNegative)
+                ) {
+                    Text(stringResource(R.string.btn_feud_escalate))
+                }
+
+                OutlinedButton(
+                    onClick = { onAction(FeudAction.LEGAL_INJUNCTION) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(stringResource(R.string.btn_feud_legal, formatMoney(legalFee, countryCode)))
+                }
+
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
+                    Text(stringResource(R.string.btn_cancel))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AllianceManageDialog(
+    alliance: FamilyAlliance,
+    onFavor: (BenefactorFavorType) -> Unit,
+    onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "${alliance.allyFamilyName} Family Alliance",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = LifeGreen
+                )
+
+                Text(
+                    text = stringResource(R.string.reactive_ally_desc, alliance.allyFamilyName, alliance.trustLevel),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                if (alliance.pactReason.isNotBlank()) {
+                    Text(
+                        text = alliance.pactReason,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Button(
+                    onClick = { onFavor(BenefactorFavorType.CAREER_RECOMMENDATION) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
+                ) {
+                    Text(stringResource(R.string.btn_benefactor_career))
+                }
+
+                Button(
+                    onClick = { onFavor(BenefactorFavorType.FINANCIAL_BACKING) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
+                ) {
+                    Text(stringResource(R.string.btn_benefactor_financial))
+                }
+
+                Button(
+                    onClick = { onFavor(BenefactorFavorType.COMMUNITY_DEFENSE) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
+                ) {
+                    Text(stringResource(R.string.btn_benefactor_defense))
+                }
+
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                ) {
+                    Text(stringResource(R.string.btn_cancel))
+                }
+            }
+        }
+    }
 }

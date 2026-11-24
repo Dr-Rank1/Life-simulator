@@ -22,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -42,6 +43,13 @@ import com.maisha.game.ui.components.DrillDownRow
 import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.theme.AccentPink
 import com.maisha.game.ui.theme.AppIcons
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.material3.Surface
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.unit.sp
+import com.maisha.game.ui.theme.Hairline
+import com.maisha.game.ui.theme.InkSecondary
+import com.maisha.game.ui.theme.SurfaceMuted
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.InkPrimary
@@ -68,7 +76,8 @@ fun PersonDetailSheet(
     onPropose: () -> Unit,
     onProposeWithPrenup: () -> Unit = onPropose,
     onBreakUp: () -> Unit,
-    onHaveChild: () -> Unit
+    onHaveChild: () -> Unit,
+    onReconcileRivalry: (String) -> Unit = {}
 ) {
     val isSpouse = member.relation == RelationType.SPOUSE
     val isChild = member.relation == RelationType.CHILD
@@ -394,6 +403,130 @@ fun PersonDetailSheet(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            // NPC Personality Tags
+            val personalityTags: List<Int> = remember(member) {
+                val tags = mutableListOf<Int>()
+                when {
+                    member.relationshipLevel >= 80 -> tags.add(R.string.npc_tag_devoted)
+                    member.relationshipLevel >= 50 -> tags.add(R.string.npc_tag_friendly)
+                    member.relationshipLevel >= 25 -> tags.add(R.string.npc_tag_distant)
+                    else -> tags.add(R.string.npc_tag_hostile)
+                }
+                when {
+                    member.crazy >= 70 -> tags.add(R.string.npc_tag_hot_tempered)
+                    member.crazy <= 30 -> tags.add(R.string.npc_tag_level_headed)
+                }
+                tags
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                personalityTags.forEach { tagRes ->
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        border = BorderStroke(0.5.dp, Hairline)
+                    ) {
+                        Text(
+                            text = stringResource(tagRes),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 11.sp,
+                            modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
+
+            // Reactive Dialogue Quote Box
+            val dialogueQuoteRes = remember(member.relationshipLevel) {
+                when {
+                    member.relationshipLevel >= 80 -> R.string.npc_dialogue_high_bond
+                    member.relationshipLevel >= 55 -> R.string.npc_dialogue_warm
+                    member.relationshipLevel >= 35 -> R.string.npc_dialogue_neutral
+                    member.relationshipLevel >= 15 -> R.string.npc_dialogue_cool
+                    else -> R.string.npc_dialogue_hostile
+                }
+            }
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+                color = SurfaceMuted.copy(alpha = 0.6f),
+                border = BorderStroke(0.5.dp, Hairline)
+            ) {
+                Text(
+                    text = stringResource(dialogueQuoteRes),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = InkSecondary,
+                    fontStyle = FontStyle.Italic,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                )
+            }
+
+            if (member.socialBond != com.maisha.game.data.model.SocialBondType.NONE) {
+                val (bondBadgeColor, bondBadgeText, bondDesc) = when (member.socialBond) {
+                    com.maisha.game.data.model.SocialBondType.RECURRING_RIVAL -> Triple(
+                        GoldAccent,
+                        stringResource(R.string.badge_rival),
+                        stringResource(R.string.reactive_rival_desc)
+                    )
+                    com.maisha.game.data.model.SocialBondType.BENEFACTOR_MENTOR -> Triple(
+                        TealPrimary,
+                        stringResource(R.string.badge_benefactor),
+                        stringResource(R.string.reactive_benefactor_desc)
+                    )
+                    com.maisha.game.data.model.SocialBondType.FAMILY_FEUD -> Triple(
+                        CoralNegative,
+                        stringResource(R.string.badge_feud),
+                        stringResource(R.string.reactive_feud_desc, member.feudFamilyName ?: "Rival", 65)
+                    )
+                    com.maisha.game.data.model.SocialBondType.FAMILY_ALLY -> Triple(
+                        LifeGreen,
+                        stringResource(R.string.badge_ally),
+                        stringResource(R.string.reactive_ally_desc, member.feudFamilyName ?: "Allied", 75)
+                    )
+                    com.maisha.game.data.model.SocialBondType.NONE -> Triple(androidx.compose.ui.graphics.Color.Transparent, "", "")
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = bondBadgeColor.copy(alpha = 0.12f),
+                    border = BorderStroke(1.dp, bondBadgeColor.copy(alpha = 0.4f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = bondBadgeColor
+                        ) {
+                            Text(
+                                text = bondBadgeText.uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = com.maisha.game.ui.theme.PaperWhite,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                                fontSize = 10.sp
+                            )
+                        }
+                        Text(
+                            text = bondDesc,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = InkPrimary,
+                            maxLines = 2,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
         }
 
         Column(
@@ -608,6 +741,31 @@ fun PersonDetailSheet(
                 }
 
                 SheetSectionTitle(stringResource(R.string.section_fun_risk_actions))
+                if (member.relation == RelationType.SIBLING && playerAge >= 3) {
+                    val teamUpDone = member.interactedTypesThisYear.contains(InteractionType.SIBLING_TEAM_UP.name)
+                    DetailSheetButton(
+                        text = stringResource(R.string.btn_sibling_team_up),
+                        subtitle = if (teamUpDone) stringResource(R.string.interaction_done_this_year) else null,
+                        enabled = !teamUpDone,
+                        onClick = { onInteraction(InteractionType.SIBLING_TEAM_UP, null) }
+                    )
+                    if (playerAge >= 5) {
+                        val borrowDone = member.interactedTypesThisYear.contains(InteractionType.SIBLING_BORROW_ITEM.name)
+                        DetailSheetButton(
+                            text = stringResource(R.string.btn_sibling_borrow),
+                            subtitle = if (borrowDone) stringResource(R.string.interaction_done_this_year) else null,
+                            enabled = !borrowDone,
+                            onClick = { onInteraction(InteractionType.SIBLING_BORROW_ITEM, null) }
+                        )
+                        val competeDone = member.interactedTypesThisYear.contains(InteractionType.SIBLING_COMPETE.name)
+                        DetailSheetButton(
+                            text = stringResource(R.string.btn_sibling_compete),
+                            subtitle = if (competeDone) stringResource(R.string.interaction_done_this_year) else null,
+                            enabled = !competeDone,
+                            onClick = { onInteraction(InteractionType.SIBLING_COMPETE, null) }
+                        )
+                    }
+                }
                 val prankDone = member.interactedTypesThisYear.contains(InteractionType.PRANK.name)
                 DetailSheetButton(
                     text = stringResource(R.string.btn_prank),
@@ -658,11 +816,11 @@ fun PersonDetailSheet(
                 }
             }
 
-            if (isEnemy) {
+            if (isEnemy || member.socialBond == com.maisha.game.data.model.SocialBondType.RECURRING_RIVAL) {
                 SheetSectionTitle(stringResource(R.string.section_rival_actions))
                 DetailSheetButton(
-                    text = stringResource(R.string.btn_make_peace),
-                    onClick = { onInteraction(InteractionType.MAKE_PEACE, null) },
+                    text = stringResource(R.string.btn_reconcile_rivalry),
+                    onClick = { onReconcileRivalry(member.id) },
                     emphasizeGreen = true
                 )
             }
