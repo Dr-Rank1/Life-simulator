@@ -1,9 +1,12 @@
 package com.maisha.game.domain
 
+import com.maisha.game.data.model.CrimeTarget
 import com.maisha.game.data.model.CrimeType
 import com.maisha.game.data.model.CriminalRecord
 import com.maisha.game.data.model.EducationState
 import com.maisha.game.data.model.LawyerTier
+import com.maisha.game.data.model.PrisonActivity
+import com.maisha.game.data.model.PrisonGang
 import com.maisha.game.data.model.SchoolStage
 import com.maisha.game.data.model.Stats
 import org.junit.Assert.assertEquals
@@ -176,5 +179,137 @@ class CrimeEngineTest {
             "Higher smarts should improve crime success rate",
             highSuccesses > lowSuccesses
         )
+    }
+
+    @Test
+    fun performPrisonActivity_workDetailBoostsStandingAndCommissary() {
+        val inmate = TestFixtures.character(
+            age = 25,
+            stats = Stats(money = 100),
+            criminalRecord = CriminalRecord(
+                currentlyIncarcerated = true,
+                totalSentenceYears = 5,
+                yearsRemaining = 5,
+                cellblockStanding = 50,
+                prisonJobDoneThisYear = false
+            )
+        )
+        val result = engine.performPrisonActivity(inmate, PrisonActivity.WORK_DETAIL)
+        assertTrue(result is PrisonActivityResult.Success)
+        val updated = (result as PrisonActivityResult.Success).character
+        assertTrue(updated.stats.money > 100)
+        assertTrue(updated.criminalRecord.prisonJobDoneThisYear)
+        assertTrue(updated.criminalRecord.cellblockStanding > 50)
+    }
+
+    @Test
+    fun performPrisonActivity_gangAffiliationIncreasesStandingAndRivalryHeat() {
+        val inmate = TestFixtures.character(
+            age = 28,
+            criminalRecord = CriminalRecord(
+                currentlyIncarcerated = true,
+                totalSentenceYears = 10,
+                yearsRemaining = 10,
+                cellblockStanding = 40,
+                inmateRivalryHeat = 0,
+                prisonGang = PrisonGang.NONE
+            )
+        )
+        val result = engine.performPrisonActivity(inmate, PrisonActivity.PRISON_YARD_GANG)
+        assertTrue(result is PrisonActivityResult.Success)
+        val updated = (result as PrisonActivityResult.Success).character
+        assertEquals(PrisonGang.YARD_SYNDICATE, updated.criminalRecord.prisonGang)
+        assertTrue(updated.criminalRecord.cellblockStanding > 40)
+        assertTrue(updated.criminalRecord.inmateRivalryHeat > 0)
+    }
+
+    @Test
+    fun calculateEscapeChance_scalesWithSmartsStandingAndGangBonus() {
+        val noviceInmate = TestFixtures.character(
+            stats = Stats(smarts = 20),
+            criminalRecord = CriminalRecord(
+                cellblockStanding = 20,
+                notoriety = 10,
+                prisonGang = PrisonGang.NONE
+            )
+        )
+        val veteranInmate = TestFixtures.character(
+            stats = Stats(smarts = 85),
+            criminalRecord = CriminalRecord(
+                cellblockStanding = 85,
+                notoriety = 80,
+                prisonGang = PrisonGang.YARD_SYNDICATE
+            )
+        )
+        val noviceOdds = engine.calculateEscapeChance(noviceInmate)
+        val veteranOdds = engine.calculateEscapeChance(veteranInmate)
+        assertTrue("Veteran crew member should have significantly higher escape odds", veteranOdds > noviceOdds)
+    }
+
+    @Test
+    fun calculateProsecutionStrength_increasesWithHeatAndCrimeSeverity() {
+        val pettyClean = TestFixtures.character(
+            criminalRecord = CriminalRecord(
+                pendingCrimeType = CrimeType.PICKPOCKET.name,
+                heatLevel = 5,
+                timesArrested = 1
+            )
+        )
+        val majorHot = TestFixtures.character(
+            criminalRecord = CriminalRecord(
+                pendingCrimeType = CrimeType.FRAUD.name,
+                heatLevel = 85,
+                timesArrested = 4
+            )
+        )
+        val lowPros = engine.calculateProsecutionStrength(pettyClean)
+        val highPros = engine.calculateProsecutionStrength(majorHot)
+        assertTrue("High heat and repeated felony should raise prosecution strength", highPros > lowPros)
+    }
+
+    @Test
+    fun calculateAcquittalChance_scalesWithLawyerTier() {
+        val defendant = TestFixtures.character(
+            stats = Stats(smarts = 60, karma = 50),
+            criminalRecord = CriminalRecord(
+                pendingCrimeType = CrimeType.SHOPLIFT.name,
+                heatLevel = 30
+            )
+        )
+        val publicOdds = engine.calculateAcquittalChance(defendant, LawyerTier.PUBLIC_DEFENDER)
+        val averageOdds = engine.calculateAcquittalChance(defendant, LawyerTier.AVERAGE)
+        val expensiveOdds = engine.calculateAcquittalChance(defendant, LawyerTier.EXPENSIVE)
+        assertTrue(expensiveOdds > averageOdds)
+        assertTrue(averageOdds > publicOdds)
+    }
+
+    @Test
+    fun calculateTargetCrimeSuccessChance_incorporatesCasingBonusAndPenalties() {
+        val uncased = TestFixtures.character(
+            stats = Stats(smarts = 70),
+            criminalRecord = CriminalRecord(heatLevel = 10, casedTarget = null)
+        )
+        val cased = TestFixtures.character(
+            stats = Stats(smarts = 70),
+            criminalRecord = CriminalRecord(heatLevel = 10, casedTarget = CrimeTarget.BURGLARY_MANSION)
+        )
+        val uncasedChance = engine.calculateTargetCrimeSuccessChance(uncased, CrimeTarget.BURGLARY_MANSION)
+        val casedChance = engine.calculateTargetCrimeSuccessChance(cased, CrimeTarget.BURGLARY_MANSION)
+        assertTrue("Casing blueprint should improve target success chance", casedChance > uncasedChance)
+    }
+
+    @Test
+    fun coolDownYear_resetsPrisonJobFlagAndCoolsRivalryHeat() {
+        val character = TestFixtures.character(
+            criminalRecord = CriminalRecord(
+                heatLevel = 60,
+                prisonJobDoneThisYear = true,
+                inmateRivalryHeat = 40
+            )
+        )
+        val cooled = engine.coolDownYear(character)
+        assertFalse(cooled.criminalRecord.prisonJobDoneThisYear)
+        assertTrue(cooled.criminalRecord.heatLevel < 60)
+        assertTrue(cooled.criminalRecord.inmateRivalryHeat < 40)
     }
 }

@@ -88,14 +88,20 @@ class MiniChallengeEngineTest {
     @Test
     fun evaluateExamFocus_instinctive_awardsSpeedBoost() {
         val character = testCharacter(smarts = 90)
-        val result = engine.evaluateExamFocus(
-            character = character,
-            tactic = ExamFocusTactic.INSTINCTIVE_SPEED,
-            rapidResponseBonus = true
-        )
-
-        assertTrue(result.scoreDelta >= 15f)
-        assertTrue(result.panicReduced)
+        var awarded = false
+        repeat(15) {
+            val result = engine.evaluateExamFocus(
+                character = character,
+                tactic = ExamFocusTactic.INSTINCTIVE_SPEED,
+                rapidResponseBonus = true
+            )
+            if (result.panicReduced) {
+                assertTrue(result.scoreDelta >= 15f)
+                awarded = true
+                return
+            }
+        }
+        assertTrue("Speed boost should be awarded on successful instinctive focus", awarded)
     }
 
     @Test

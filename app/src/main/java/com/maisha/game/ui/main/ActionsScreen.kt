@@ -103,6 +103,8 @@ import com.maisha.game.ui.components.ActionCardAccent
 import com.maisha.game.ui.components.ActivityGridCard
 import com.maisha.game.ui.components.ActivityRiskLevel
 import com.maisha.game.ui.components.CategoryFilterChipRow
+import com.maisha.game.ui.components.CrimeHeistBoard
+import com.maisha.game.ui.components.PrisonYardBoard
 import com.maisha.game.ui.components.ConditionBadge
 import com.maisha.game.ui.components.ConfirmActionDialog
 import com.maisha.game.ui.components.ConfirmSeverity
@@ -1238,160 +1240,34 @@ fun ActionsScreen(
                     title = stringResource(R.string.act_cat_crime_title),
                     onDismiss = { activeActionSheet = ActionSheet.NONE }
                 ) {
-                    // Notoriety Banner
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(containerColor = CoralNegative.copy(alpha = 0.12f))
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.crime_notoriety_title),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = CoralNegative
-                                )
-                                Text(
-                                    text = when {
-                                        character.criminalRecord.notoriety >= 75 -> stringResource(R.string.notoriety_kingpin)
-                                        character.criminalRecord.notoriety >= 40 -> stringResource(R.string.notoriety_infamous)
-                                        character.criminalRecord.notoriety >= 15 -> stringResource(R.string.notoriety_hustler)
-                                        else -> stringResource(R.string.notoriety_amateur)
-                                    },
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            Text(
-                                text = "${character.criminalRecord.notoriety}%",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = CoralNegative
-                            )
+                    CrimeHeistBoard(
+                        character = character,
+                        crimeEngine = crimeEngine,
+                        onAttemptStreetCrime = { type ->
+                            activeActionSheet = ActionSheet.NONE
+                            pendingAction.request(PendingAction.Crime(type))
+                        },
+                        onAttemptTargetedCrime = { target ->
+                            activeActionSheet = ActionSheet.NONE
+                            pendingAction.request(PendingAction.TargetedCrime(target))
+                        },
+                        onCaseTarget = { target ->
+                            activeActionSheet = ActionSheet.NONE
+                            onCaseCrimeTarget(target)
+                        },
+                        onLayLow = {
+                            activeActionSheet = ActionSheet.NONE
+                            onLayLowCrime()
+                        },
+                        onBribeInformant = {
+                            activeActionSheet = ActionSheet.NONE
+                            onBribeInformantCrime()
+                        },
+                        onRequestExpungement = {
+                            activeActionSheet = ActionSheet.NONE
+                            pendingAction.request(PendingAction.RequestExpungement)
                         }
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    if (showCrimeActions) {
-                        if (character.criminalRecord.heatLevel > 0) {
-                            PoliceHeatMeterCard(
-                                heatLevel = character.criminalRecord.heatLevel,
-                                heatActionDone = character.criminalRecord.heatActionDoneThisYear,
-                                onLayLow = {
-                                    activeActionSheet = ActionSheet.NONE
-                                    onLayLowCrime()
-                                },
-                                onBribeInformant = {
-                                    activeActionSheet = ActionSheet.NONE
-                                    onBribeInformantCrime()
-                                }
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-
-                        ActionCard(
-                            icon = AppIcons.CrimePickpocket,
-                            title = stringResource(R.string.crime_pickpocket_title),
-                            description = stringResource(
-                                R.string.crime_pickpocket_desc,
-                                CountryCatalog.flavorFor(character.countryCode).commonTransportMode
-                            ),
-                            metaLabel = stringResource(R.string.meta_risk_moderate),
-                            riskLabel = stringResource(R.string.action_risk_medium),
-                            energyCost = 1,
-                            accent = ActionCardAccent.RISK,
-                            onClick = {
-                                activeActionSheet = ActionSheet.NONE
-                                pendingAction.request(PendingAction.Crime(CrimeType.PICKPOCKET))
-                            }
-                        )
-                        ActionCard(
-                            icon = AppIcons.CrimeShoplift,
-                            title = stringResource(R.string.crime_shoplift_title),
-                            description = stringResource(R.string.crime_shoplift_desc),
-                            metaLabel = stringResource(R.string.meta_risk_moderate),
-                            riskLabel = stringResource(R.string.action_risk_medium),
-                            energyCost = 1,
-                            accent = ActionCardAccent.RISK,
-                            onClick = {
-                                activeActionSheet = ActionSheet.NONE
-                                pendingAction.request(PendingAction.Crime(CrimeType.SHOPLIFT))
-                            }
-                        )
-                        ActionCard(
-                            icon = AppIcons.CrimeFraud,
-                            title = stringResource(R.string.crime_fraud_title),
-                            description = stringResource(R.string.crime_fraud_desc),
-                            metaLabel = stringResource(R.string.meta_risk_high),
-                            riskLabel = stringResource(R.string.action_risk_high),
-                            energyCost = 2,
-                            accent = ActionCardAccent.RISK,
-                            onClick = {
-                                activeActionSheet = ActionSheet.NONE
-                                pendingAction.request(PendingAction.Crime(CrimeType.FRAUD))
-                            }
-                        )
-
-                        // Specialized Crime Targets (Burglary, GTA, Heists)
-                        CrimeTarget.entries.forEach { target ->
-                            val scaledReward = EconomyScaler.scaleAmount(target.baseReward, character.countryCode)
-                            val isCased = character.criminalRecord.casedTarget == target
-                            val riskLabel = when {
-                                isCased -> stringResource(R.string.btn_cased_target_badge)
-                                target.difficulty >= 0.75f -> "Extreme Risk"
-                                target.difficulty >= 0.50f -> "High Risk"
-                                else -> "Moderate Risk"
-                            }
-                            ActionCard(
-                                icon = AppIcons.CrimePickpocket,
-                                title = "${target.category}: ${target.name.lowercase().replace('_', ' ').replaceFirstChar { it.titlecase() }}",
-                                description = "Take: ~${formatMoney(scaledReward, character.countryCode)} · Notoriety: +${target.notorietyGain}%" +
-                                    if (isCased) " [Cased: +20% Odds]" else "",
-                                metaLabel = riskLabel,
-                                accent = ActionCardAccent.RISK,
-                                onClick = {
-                                    activeActionSheet = ActionSheet.NONE
-                                    pendingAction.request(PendingAction.TargetedCrime(target))
-                                }
-                            )
-
-                            if (!isCased && character.criminalRecord.heatLevel < 85) {
-                                ActionCard(
-                                    icon = AppIcons.CrimeFraud,
-                                    title = "Case ${target.name.lowercase().replace('_', ' ').replaceFirstChar { it.titlecase() }}",
-                                    description = "Scope out guards and security before moving (+Planning bonus, +5 Heat)",
-                                    metaLabel = stringResource(R.string.btn_case_target),
-                                    accent = ActionCardAccent.RISK,
-                                    onClick = {
-                                        activeActionSheet = ActionSheet.NONE
-                                        onCaseCrimeTarget(target)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    if (showExpungement) {
-                        ActionCard(
-                            icon = AppIcons.Career,
-                            title = stringResource(R.string.btn_request_expungement),
-                            description = stringResource(
-                                R.string.dialog_expunge_body,
-                                formatMoney(crimeEngine.expungementFee(character), character.countryCode)
-                            ),
-                            accent = ActionCardAccent.RISK,
-                            onClick = {
-                                activeActionSheet = ActionSheet.NONE
-                                pendingAction.request(PendingAction.RequestExpungement)
-                            }
-                        )
-                    }
+                    )
                 }
             }
             ActionSheet.PRISON -> {
@@ -1399,21 +1275,14 @@ fun ActionsScreen(
                     title = stringResource(R.string.act_cat_prison_title),
                     onDismiss = { activeActionSheet = ActionSheet.NONE }
                 ) {
-                    if (crimeStatus.kind != CrimeStatusKind.CLEAR) {
-                        CrimeStatusCard(statusKind = crimeStatus.kind, yearsRemaining = crimeStatus.yearsRemaining)
-                    }
-                    PrisonActivity.entries.forEach { activity ->
-                        ActionCard(
-                            icon = AppIcons.Health,
-                            title = prisonActivityTitle(activity),
-                            description = prisonActivityDescription(activity),
-                            accent = ActionCardAccent.CARE,
-                            onClick = {
-                                activeActionSheet = ActionSheet.NONE
-                                onPerformPrisonActivity(activity)
-                            }
-                        )
-                    }
+                    PrisonYardBoard(
+                        character = character,
+                        crimeEngine = crimeEngine,
+                        onPerformActivity = { activity ->
+                            activeActionSheet = ActionSheet.NONE
+                            onPerformPrisonActivity(activity)
+                        }
+                    )
                 }
             }
             ActionSheet.NONE -> Unit

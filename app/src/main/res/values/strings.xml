@@ -3107,4 +3107,56 @@
     <string name="heir_inheritance_share">Inheritance: %1$s (%2$d%% share)</string>
     <string name="heir_no_heirs_notice">No living children aged 16 or older survived to carry forward the family torch.</string>
     <string name="heir_successor_badge">Successor</string>
+
+    <!-- Crime Heist Board & Underworld Heat -->
+    <string name="underworld_board_title">Underworld Syndicate Board</string>
+    <string name="heat_meter_title">Police Heat Level</string>
+    <string name="heat_status_cold">Cold (Clean Radar)</string>
+    <string name="heat_status_monitored">Monitored (Patrols Alerted)</string>
+    <string name="heat_status_hot">Hot (Task Force Assembled)</string>
+    <string name="heat_status_critical">Critical (Raid Imminent)</string>
+    <string name="heat_status_most_wanted">Most Wanted (Full Manhunt)</string>
+    <string name="btn_lay_low_safehouse">Lay Low (Safehouse)</string>
+    <string name="btn_bribe_police_informant">Bribe Informant (%1$s)</string>
+    <string name="tab_street_crimes">Street Crimes</string>
+    <string name="tab_property_gta">Burglary &amp; GTA</string>
+    <string name="tab_major_heists">Major Heists</string>
+    <string name="label_payout_range">Expected Score: %1$s</string>
+    <string name="label_heat_risk">Police Heat: +%1$d</string>
+    <string name="label_success_chance">Success Odds: %1$d%%</string>
+    <string name="label_target_cased_bonus">Cased (+20%% Plan Bonus)</string>
+    <string name="btn_execute_crime">Execute Strike</string>
+    <string name="btn_case_blueprint">Case Target (+5 Heat)</string>
+    <string name="label_age_gate_heist">Requires Age 18+</string>
+
+    <!-- Courtroom Trial & Verdict -->
+    <string name="court_proceedings_title">Criminal Court of Justice</string>
+    <string name="court_case_heading">The State v. %1$s</string>
+    <string name="court_charge_dossier">Charged Offense: %1$s</string>
+    <string name="court_prosecution_meter">Prosecution Evidence Strength: %1$d%%</string>
+    <string name="court_defense_odds_pill">Projected Acquittal Odds: %1$d%%</string>
+    <string name="court_max_sentence_warning">Maximum Sentence Exposure: %1$d Years</string>
+    <string name="btn_enter_court_defense">Enter Plea &amp; Await Verdict</string>
+    <string name="court_verdict_not_guilty">NOT GUILTY — ALL CHARGES DISMISSED</string>
+    <string name="court_verdict_guilty_sentenced">FOUND GUILTY — SENTENCED TO %1$d YEARS</string>
+    <string name="court_verdict_probation">FOUND GUILTY — RELEASED ON PROBATION</string>
+
+    <!-- Prison Yard & Cellblock Life -->
+    <string name="prison_yard_dashboard_title">Penitentiary Incarceration Board</string>
+    <string name="prison_facility_label">Facility: %1$s</string>
+    <string name="prison_sentence_tracker">Sentence: Year %1$d of %2$d Served (%3$d Remaining)</string>
+    <string name="prison_cellblock_respect">Cellblock Standing: %1$d/100</string>
+    <string name="prison_crew_affiliation">Yard Crew: %1$s</string>
+    <string name="prison_inmate_rivalry">Rivalry Heat: %1$d/100</string>
+    <string name="btn_prison_labor_action">Work Prison Detail</string>
+    <string name="btn_prison_law_library">Study Legal Case Law</string>
+    <string name="btn_yard_iron_workout">Yard Iron Workout</string>
+    <string name="btn_quiet_good_behavior">Quiet Good Behavior</string>
+    <string name="btn_align_yard_crew">Seek Crew Protection</string>
+    <string name="btn_petition_parole_board">Petition Parole Board</string>
+    <string name="btn_attempt_breakout">Attempt Prison Break</string>
+    <string name="parole_status_eligible">Eligible for Early Release Review</string>
+    <string name="parole_status_ineligible">Ineligible (Need %1$d More Years Served &amp; Zero Infractions)</string>
+    <string name="escape_warning_notice">Perimeter wire electrified, armed guard towers on high alert. If caught: +4 years added to sentence.</string>
+    <string name="escape_odds_meter">Breakout Probability: %1$d%%</string>
 </resources>

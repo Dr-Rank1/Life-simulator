@@ -59,6 +59,7 @@ import com.maisha.game.domain.ExamFocusTactic
 import com.maisha.game.domain.NegotiationChallenge
 import com.maisha.game.domain.NegotiationTactics
 import com.maisha.game.domain.PushLuckAction
+import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.BorderCardSlate
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.DeepSlate
@@ -304,19 +305,38 @@ fun CrimePushLuckSheet(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
-                    Text(
-                        text = stringResource(R.string.dialog_push_luck_title),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = InkPrimary
-                    )
-                    Text(
-                        text = stringResource(R.string.label_push_luck_stage, session.stage, session.maxStages),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = GoldAccent,
-                        fontWeight = FontWeight.Bold
-                    )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = CoralNegative.copy(alpha = 0.12f),
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = AppIcons.HeistMask,
+                                contentDescription = null,
+                                tint = CoralNegative,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                    }
+                    Column {
+                        Text(
+                            text = stringResource(R.string.dialog_push_luck_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = InkPrimary
+                        )
+                        Text(
+                            text = stringResource(R.string.label_push_luck_stage, session.stage, session.maxStages),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = GoldAccent,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
                 Surface(
                     shape = RoundedCornerShape(8.dp),

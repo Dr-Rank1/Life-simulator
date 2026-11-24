@@ -713,6 +713,151 @@ object AppIcons {
         close()
     }
 
+    val CourtGavel: ImageVector = icon("CourtGavel") {
+        // Sound block base
+        moveTo(3f, 19f)
+        lineTo(21f, 19f)
+        lineTo(21f, 21f)
+        lineTo(3f, 21f)
+        close()
+        // Gavel head
+        moveTo(12f, 3.5f)
+        lineTo(18.5f, 10f)
+        lineTo(16f, 12.5f)
+        lineTo(9.5f, 6f)
+        close()
+        // Gavel handle
+        moveTo(11.5f, 10.5f)
+        lineTo(4.5f, 17.5f)
+        lineTo(6f, 19f)
+        lineTo(13f, 12f)
+        close()
+    }
+
+    val PrisonBars: ImageVector = icon("PrisonBars") {
+        // Outer cell frame
+        moveTo(3f, 3f)
+        lineTo(21f, 3f)
+        lineTo(21f, 5f)
+        lineTo(3f, 5f)
+        close()
+        moveTo(3f, 19f)
+        lineTo(21f, 19f)
+        lineTo(21f, 21f)
+        lineTo(3f, 21f)
+        close()
+        // Vertical bars
+        moveTo(5f, 5f)
+        lineTo(7f, 5f)
+        lineTo(7f, 19f)
+        lineTo(5f, 19f)
+        close()
+        moveTo(10f, 5f)
+        lineTo(12f, 5f)
+        lineTo(12f, 19f)
+        lineTo(10f, 19f)
+        close()
+        moveTo(15f, 5f)
+        lineTo(17f, 5f)
+        lineTo(17f, 19f)
+        lineTo(15f, 19f)
+        close()
+    }
+
+    val Handcuffs: ImageVector = icon("Handcuffs") {
+        // Left cuff
+        moveTo(7f, 6f)
+        arcTo(4f, 4f, 0f, true, false, 7f, 14f)
+        arcTo(4f, 4f, 0f, true, false, 7f, 6f)
+        close()
+        moveTo(7f, 8f)
+        arcTo(2f, 2f, 0f, true, true, 7f, 12f)
+        arcTo(2f, 2f, 0f, true, true, 7f, 8f)
+        close()
+        // Right cuff
+        moveTo(17f, 10f)
+        arcTo(4f, 4f, 0f, true, false, 17f, 18f)
+        arcTo(4f, 4f, 0f, true, false, 17f, 10f)
+        close()
+        moveTo(17f, 12f)
+        arcTo(2f, 2f, 0f, true, true, 17f, 16f)
+        arcTo(2f, 2f, 0f, true, true, 17f, 12f)
+        close()
+        // Center chain link
+        moveTo(10f, 9.5f)
+        lineTo(14f, 12.5f)
+        lineTo(13f, 14f)
+        lineTo(9f, 11f)
+        close()
+    }
+
+    val PrisonEscape: ImageVector = icon("PrisonEscape") {
+        // Broken fence left
+        moveTo(4f, 4f)
+        lineTo(8f, 4f)
+        lineTo(8f, 10f)
+        lineTo(4f, 10f)
+        close()
+        moveTo(4f, 14f)
+        lineTo(8f, 14f)
+        lineTo(8f, 20f)
+        lineTo(4f, 20f)
+        close()
+        // Broken fence right
+        moveTo(16f, 4f)
+        lineTo(20f, 4f)
+        lineTo(20f, 20f)
+        lineTo(16f, 20f)
+        close()
+        // Breakout arrow through middle
+        moveTo(9f, 12f)
+        lineTo(15f, 8f)
+        lineTo(15f, 11f)
+        lineTo(12f, 11f)
+        lineTo(12f, 13f)
+        lineTo(15f, 13f)
+        lineTo(15f, 16f)
+        close()
+    }
+
+    val HeistMask: ImageVector = icon("HeistMask") {
+        // Balaclava head shape
+        moveTo(7f, 3f)
+        lineTo(17f, 3f)
+        curveTo(20f, 3f, 20f, 8f, 20f, 13f)
+        curveTo(20f, 18f, 17f, 21f, 12f, 21f)
+        curveTo(7f, 21f, 4f, 18f, 4f, 13f)
+        curveTo(4f, 8f, 4f, 3f, 7f, 3f)
+        close()
+        // Eye slit
+        moveTo(7f, 9f)
+        lineTo(17f, 9f)
+        lineTo(17f, 11.5f)
+        lineTo(7f, 11.5f)
+        close()
+        // Mouth cutout
+        moveTo(9f, 15.5f)
+        lineTo(15f, 15.5f)
+        lineTo(15f, 17f)
+        lineTo(9f, 17f)
+        close()
+    }
+
+    val UnderworldHeat: ImageVector = icon("UnderworldHeat") {
+        // Siren / Alert beacon
+        moveTo(12f, 3f)
+        lineTo(15f, 8f)
+        lineTo(20f, 9f)
+        lineTo(16.5f, 13f)
+        lineTo(18f, 18f)
+        lineTo(12f, 15f)
+        lineTo(6f, 18f)
+        lineTo(7.5f, 13f)
+        lineTo(4f, 9f)
+        lineTo(9f, 8f)
+        close()
+    }
+
     fun forStat(type: StatType): ImageVector = when (type) {
         StatType.HEALTH -> Health
         StatType.HAPPINESS -> Happiness

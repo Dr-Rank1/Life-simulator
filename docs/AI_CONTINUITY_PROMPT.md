@@ -177,12 +177,21 @@ Completely offline Canvas drawing engine (1,180+ lines):
 - Prenup agreements: Partner reaction driven by Crazy and Karma attributes.
 - Anti-farming: `interactedTypesThisYear` prevents spamming interactions on the same NPC in a single turn across infants, toddlers, young children, adult children, and spouses.
 
-### Targeted Crime & Incarceration
-- Specializations with minor age-gates: Petty crimes (14+ shoplifting/pickpocketing), Burglary & GTA (16+), Armed Heists (18+).
-- Crime planning: Target casing (`caseTarget`) grants a +20% success boost on the subsequent crime at the cost of +5 Heat.
-- Police Heat system: Dynamic `heatLevel` [0–100] meter with color-coded risk bar; active penalties on criminal operations; countermeasures via `layLow` and `bribeInformant`.
-- Trials: Public Defender vs Elite Defense Attorney.
-- Prison life: Prison gangs, prison jobs, parole board hearings, escape attempts.
+### Underworld Crime, Courtroom Trials & Prison Life
+- **Crime Heist Board (`CrimeHeistBoard.kt`):**
+  - Police heat meter with 5 alertness states (*Cold*, *Monitored*, *Hot*, *Critical*, *Most Wanted*) and safehouse lay low & bribe informant countermeasures.
+  - 3 crime escalation paths: Street Crimes (Pickpocketing, Shoplifting, Fraud), Property & GTA (Burglary, Sedan/SUV/Supercar theft), and Major Armed Heists (Bank Vault, Jewelry, Convenience store).
+  - Target casing mechanics (`caseTarget`) granting +20% plan execution bonus (+5 Heat).
+- **High-Stakes Courtroom Verdicts (`ArrestTrialDialog.kt`):**
+  - "The State v. [Defendant]" caption, charged offense dossier, maximum sentence exposure warning, and prosecution evidence strength meter.
+  - 3 Defense Strategies: Public Defender, Retained Private Attorney, Elite Defense Firm comparing retainer fees, acquittal probabilities, and sentence mitigation profiles.
+  - Immediate verdict reveal with sound and haptic cues.
+- **Penitentiary Incarceration & Prison Yard (`PrisonYardBoard.kt`):**
+  - Security tier classifications (*County Detention*, *Medium Security*, *Maximum Security*) and sentence tracker (years served vs remaining).
+  - Cellblock Respect (0-100), Inmate Rivalry Heat (0-100), and Yard Crew alliances (`Yard Syndicate`, `Lifer Crew`, `Block Brotherhood`).
+  - Daily routine: Prison detail labor (commissary cash), law library research (+Smarts, +Parole prep), yard workout (+Health, +Respect), quiet good behavior (+2 Parole credit).
+  - Early parole petitions with transparent criteria (>=33% served, zero infractions) and board approval odds.
+  - Perimeter wire escape attempts with calculated breakout chances and +4-year capture penalty.
 
 ### Assets, Mortgages & Personal Finance Ecosystem
 - **Credit Score (300-850):** Dynamic scoring tracking on-time debt payment streaks, default drops (-35), DTI ratio drag, and criminal record penalties. Gates mortgage down-payment tiers (10% to 40%), APR interest rates (5.5% to 12.0%), and approvals (minimum 500 score required).
@@ -241,6 +250,7 @@ Completely offline Canvas drawing engine (1,180+ lines):
 | `feature` | Mobile Life-Sim Visual & Tactile Arcade UI Overhaul: Procedural `StageBackdropCanvas` scene backdrop, rolling HUD counter transitions, 4-ring arc gauges (`StatGaugeCluster`), edge-glow windfall/critical alert overlays, 2-column arcade activity grid (`ActivityGridCard`), expressive Relationship Cards (`PersonCard`) with temperament pills, 5-segment bond meters & instant 1-tap quick actions, visual rank progression steppers, opportunity stamps (`JobOpportunityCard`), home equity gauges, and modal `CharacterDossierSheet` |
 | `feature` | Game-Feel Character Creation, Commemorative Monument Dossier & Rich Heir Succession: `StartingStatArchetype` presets, instant shuffle, country preview cards, arched monument tombstone with silk-sash banner & carved metrics, and `HeirCandidatePreview` dossier cards with inheritance shares |
 | `feature` | Entrepreneurship Stages, Politics Campaigns & Creator Economy Progression Boards: `BusinessEngine` 5-stage lifecycle, valuation milestones & founder agency (`BusinessProgressionCard`), `PoliticsEngine` campaign-to-governance boards (`PoliticalCampaignBoard`), and `SocialMediaEngine` 5-tier fame ribbon, creator burnout & brand deals (`FameSocialMediaBoard`) |
+| `feature` | Underworld Crime Board, Courtroom Verdicts & Prison Yard Life: `CrimeEngine` prison gangs, cellblock respect & escape calculations, `CrimeHeistBoard` 3-tier heists & heat meter, `ArrestTrialDialog` high-stakes court proceedings, and `PrisonYardBoard` cellblock routines, parole petitions & breakouts |
 
 ---
 

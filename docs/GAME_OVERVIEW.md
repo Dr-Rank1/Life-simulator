@@ -201,15 +201,25 @@ com.maisha.game.domain/
   - Healthcare tiers: Public Community Clinics, Private Specialists, and Alternative Medicine Healers.
   - Diets, gym memberships, plastic surgery, and mental health therapy.
 
-#### 7. `CrimeEngine`
-- **Role:** Simulates petty theft, organized crime, criminal justice, and incarceration.
+#### 7. `CrimeEngine` & Underworld Syndicate Ecosystem
+- **Role:** Simulates street crimes, major heists, underworld notoriety, criminal court verdicts, and prison incarceration.
 - **Key Systems:**
-  - Targeted crime specializations with minor age-gates: Petty crimes (14+ for shoplifting and pickpocketing), Burglary & GTA (16+), and Armed Heists (18+).
-  - **Crime Planning & Casing:** `caseTarget` allows criminals to scope out security measures prior to striking (+20% success boost on the next attempt, +5 Heat).
-  - **Police Heat System:** Dynamic `heatLevel` [0–100] meter with color-coded risk bar; high heat penalizes success rates across all underworld activities. Players can manage heat by laying low (`layLow`) or bribing police informants (`bribeInformant`).
-  - Police apprehension rolls based on character Smarts, crime tier difficulty, and police heat.
-  - Legal representation: Public Defenders vs High-Priced Elite Defense Attorneys.
-  - Prison yard life: Gang affiliations, prison jobs, parole board hearings, and escape attempts.
+  - **Police Heat & Wanted Status (`CrimeHeistBoard`):** Dynamic `heatLevel` [0-100] tracking 5 alertness states (*Cold*, *Monitored*, *Hot*, *Critical*, *Most Wanted*). Heat degrades execution odds and spikes arrest rolls; mitigations include staying off the radar (`layLow`) or bribing police informants (`bribeInformant`).
+  - **3 Escalation Tiers:**
+    - *Street Crimes:* Pickpocketing, Shoplifting, and Fraud with quick payouts and entry-level risk.
+    - *Property Infiltration & GTA:* Burglary (Apartment, Suburb, Mansion) and Grand Theft Auto (Sedan, Luxury SUV, Supercar).
+    - *Major Armed Heists:* High-stakes Armed Convenience Store, Jewelry Store, and Bank Vault heists gated to adults (18+).
+  - **Reconnaissance & Blueprint Casing:** `caseTarget` scopes out security rhythms (+20% plan bonus on execution, +5 Heat).
+  - **High-Stakes Courtroom Verdicts (`ArrestTrialDialog`):**
+    - "The State v. [Defendant]" criminal proceedings with charged offense dossier and maximum sentence exposure.
+    - Prosecution evidence strength meter vs. defendant smarts and karma mitigations.
+    - 3 Defense Strategies: Public Defender ($0, court-appointed, maximum sentence exposure), Retained Private Attorney (balanced fee), Elite Defense Firm (top retainer, highest acquittal odds, forensic suppression).
+  - **Penitentiary Incarceration & Prison Yard Board (`PrisonYardBoard`):**
+    - Security facility classification (*County Detention*, *Medium Security Correctional Center*, *Maximum Security Penitentiary*) with years served vs. total sentence tracker.
+    - Dynamic Cellblock Respect (0-100), Inmate Rivalry Heat (0-100), and Yard Crew alliances (`Yard Syndicate`, `Lifer Crew`, `Block Brotherhood`).
+    - Rehabilitation & Routine: Prison Labor Detail (commissary cash), Legal Case Law Library (+Smarts, +Parole prep), Iron Yard Workout (+Health, +Cellblock intimidation), Quiet Good Behavior (+2 Parole points).
+    - Parole Board Petitions: Early release eligibility check (minimum 33% served, zero infractions) and board favor odds.
+    - Prison Breakouts: High-tension perimeter fence breakout with calculated escape probability based on Smarts, Cellblock Respect, and Crew allies (+4 years penalty if captured).
 
 #### 8. `BusinessEngine` & Interactive Entrepreneurship
 - **Role:** Simulates the founder journey from scrappy bootstrapped venture to enterprise conglomerate.

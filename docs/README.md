@@ -33,7 +33,7 @@ Built specifically for modern Android with **Jetpack Compose and Material 3**, M
   - [9. Routine Micro-Dilemmas & Snap Decisions](#9-routine-micro-dilemmas--snap-decisions)
   - [10. Dynamic Chapter Titles & Evocative Epitaphs](#10-dynamic-chapter-titles--evocative-epitaphs)
   - [11. 15-Country Personal Finance, Economy & Dynasty Vault](#11-15-country-personal-finance-economy--dynasty-vault)
-  - [12. Targeted Crime, Incarceration & Police Heat](#12-targeted-crime-incarceration--police-heat)
+  - [12. Underworld Crime Board, Courtroom Trials & Prison Life](#12-underworld-crime-board-courtroom-trials--prison-life)
   - [13. Health, Wellness & Medical Care](#13-health-wellness--medical-care)
   - [14. Mortality, Tombstone Ribbons & Heir Succession](#14-mortality-tombstone-ribbons--heir-succession)
 - [True Global Flavor (15 Countries)](#true-global-flavor-15-countries)
@@ -205,11 +205,24 @@ flowchart TD
 - **Tactile Financial Dashboard (`AssetsScreen.kt`):** `FinanceSummaryCard` at the top of the assets tab displaying Net Worth, Liquid Cash, Net Cash Flow (+/-), Credit Rating meter, and Economic Climate chip, backed by tactile bottom sheets: `CashFlowLedgerSheet`, `DebtLiabilitiesSheet`, `CountryFinanceSheet`, `RemittanceSheet`, and `DynastyVaultStoreSheet`.
 - **Luxury Assets & Preventative Servicing:** Houses, cars, speedboats, yachts, and private jets with country-scaled pricing, depreciation, and upkeep. Preventative servicing grants annual immunity to wear and critical breakdowns.
 
-### 12. Targeted Crime, Incarceration & Police Heat
-- **Targeted Crime Specializations:** Attempt *Pickpocketing*, *Shoplifting*, *Grand Theft Auto (GTA)*, *Burglary*, or *Armed Bank Heists* with varying risk/reward ratios.
-- **Target Casing & Police Heat:** Pre-casing targets (`caseTarget`) grants a +20% success boost on the subsequent crime at the cost of +5 Heat. Dynamic `heatLevel` [0–100] meter with color-coded risk bar; active penalties on criminal operations; countermeasures via `layLow` and `bribeInformant`.
-- **Legal System & Trials:** Arrested characters can hire Public Defenders or high-priced Elite Defense Attorneys to avoid conviction or reduce prison sentences.
-- **Incarceration & Prison Yard:** Inmates manage gang standing, work prison jobs, petition for parole, or plan elaborate prison breaks.
+### 12. Underworld Crime Board, Courtroom Trials & Prison Life
+- **Underworld Syndicate Heist Board (`CrimeHeistBoard.kt`):**
+  - *Police Heat & Wanted Status:* Live `heatLevel` [0-100] gauge progressing through 5 alertness states (*Cold*, *Monitored*, *Hot*, *Critical*, *Most Wanted*). Active heat penalties degrade success odds across underworld activities; countermeasures include *Lay Low (Safehouse)* and *Bribe Informant* with country-scaled fees.
+  - *3-Tier Escalation Path:*
+    - *Street Hustles:* Pickpocketing, Shoplifting, and Wire Fraud with quick payouts and entry-level risk.
+    - *Property & GTA:* Infiltrate Apartments, Suburbs, or Mansions; boost grand theft auto targets from Sedans to Luxury SUVs and Supercars.
+    - *Major Armed Heists:* High-stakes Armed Convenience, Jewelry Store, and Bank Vault heists yielding massive fortunes and notoriety gains, gated to adults (18+).
+  - *Target Blueprint Casing:* Scope out security rhythms and guard patrols (`caseTarget`) to lock in a +20% planning bonus on execution at the cost of +5 Heat.
+- **High-Stakes Courtroom Verdict Screen (`ArrestTrialDialog.kt`):**
+  - *Case Dossier:* "The State v. [Defendant]" caption, charged offense badge, maximum sentence exposure warning, and prosecution evidence strength meter.
+  - *Defense Strategy Comparison:* Compare Court-Appointed Public Defender ($0, low acquittal odds, maximum sentence risk), Retained Private Attorney (balanced fee, solid defense), and Elite Defense Firm (top retainer, highest acquittal odds, forensic evidence suppression).
+  - *Dramatic Verdict Resolution:* Enter plea and hear final verdict with instant sound and haptic waveforms for acquittal or sentencing.
+- **Penitentiary Incarceration & Prison Yard Board (`PrisonYardBoard.kt`):**
+  - *Facility Security & Sentence Tracker:* Facility assignment (*County Detention*, *Medium Security Correctional Center*, *Maximum Security Penitentiary*) with years served vs. total sentence stepper.
+  - *Cellblock Dynamics:* Dynamic Cellblock Standing (0-100), Inmate Rivalry Heat (0-100), and Yard Crew alliances (*Independent Inmate*, *Yard Syndicate*, *Lifer Crew*, *Block Brotherhood*).
+  - *Daily Routine & Rehabilitation:* Work Prison Detail for commissary funds, study in the Prison Law Library (+Smarts, +Parole prep), hit the Iron Yard Workout (+Health, +Cellblock intimidation), or maintain Quiet Good Behavior (+2 Parole points).
+  - *Parole Board Petitions:* Transparent eligibility requirements (served >= 33% of sentence, 0 negative infractions) and parole board favor odds meter.
+  - *High-Tension Prison Breakouts:* Plan perimeter wire escapes with odds calculated from Smarts, Cellblock Respect, and Crew alliances, balanced against severe capture penalties (+4 years added to sentence).
 
 ### 13. Health, Wellness & Medical Care
 - **Dynamic Medical System:** Characters can contract common ailments (flu, food poisoning), acute emergencies, or chronic conditions (hypertension, asthma, depression).

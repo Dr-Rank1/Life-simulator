@@ -39,8 +39,26 @@ data class CriminalRecord(
     /** Targeted crime currently cased and prepared for execution. */
     val casedTarget: CrimeTarget? = null,
     /** Heat mitigation action (lay low / bribe) used this year. */
-    val heatActionDoneThisYear: Boolean = false
+    val heatActionDoneThisYear: Boolean = false,
+    /** Respect and safety within the prison cellblock (0–100). */
+    val cellblockStanding: Int = 50,
+    /** Active affiliation with a prison yard crew. */
+    val prisonGang: PrisonGang = PrisonGang.NONE,
+    /** Cumulative prison escape attempts across life. */
+    val escapeAttemptsCount: Int = 0,
+    /** Prison work detail completed in the current year. */
+    val prisonJobDoneThisYear: Boolean = false,
+    /** Friction and tension with rival cellblock factions (0–100). */
+    val inmateRivalryHeat: Int = 0
 )
+
+@Serializable
+enum class PrisonGang {
+    NONE,
+    YARD_SYNDICATE,
+    LIFER_CREW,
+    BLOCK_BROTHERHOOD
+}
 
 @Serializable
 enum class CrimeType {

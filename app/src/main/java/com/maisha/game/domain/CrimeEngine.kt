@@ -8,6 +8,7 @@ import com.maisha.game.data.model.CrimeType
 import com.maisha.game.data.model.CriminalRecord
 import com.maisha.game.data.model.LawyerTier
 import com.maisha.game.data.model.PrisonActivity
+import com.maisha.game.data.model.PrisonGang
 import com.maisha.game.util.clampStat
 import com.maisha.game.util.formatMoney
 import javax.inject.Inject
@@ -222,7 +223,9 @@ class CrimeEngine @Inject constructor() {
             criminalRecord = record.copy(
                 heatLevel = newHeat,
                 heatActionDoneThisYear = false,
-                crimeAttemptsThisYear = 0
+                crimeAttemptsThisYear = 0,
+                prisonJobDoneThisYear = false,
+                inmateRivalryHeat = (record.inmateRivalryHeat - 15).coerceAtLeast(0)
             )
         )
     }
@@ -400,7 +403,9 @@ class CrimeEngine @Inject constructor() {
         val updatedRecord = record.copy(
             yearsServed = yearsServed,
             yearsRemaining = remaining,
-            currentlyIncarcerated = stillInside
+            currentlyIncarcerated = stillInside,
+            prisonJobDoneThisYear = false,
+            inmateRivalryHeat = (record.inmateRivalryHeat - 10).coerceAtLeast(0)
         )
 
         if (!stillInside) {
@@ -429,87 +434,185 @@ class CrimeEngine @Inject constructor() {
     fun paroleChance(record: CriminalRecord): Float =
         (PAROLE_BASE_CHANCE + record.paroleBonus * PAROLE_BONUS_PER_POINT).coerceAtMost(PAROLE_MAX_CHANCE)
 
+    fun calculateTargetCrimeSuccessChance(character: Character, target: CrimeTarget): Float {
+        val record = character.criminalRecord
+        val smartsFactor = character.stats.smarts / 100f * 0.35f
+        val notorietyFactor = (record.notoriety / 100f) * 0.15f
+        val attemptPenalty = (record.crimeAttemptsThisYear * 0.15f)
+        val heatPenalty = (record.heatLevel / 100f * 0.25f)
+        val casedBonus = if (record.casedTarget == target) 0.20f else 0.0f
+        return (1.0f - target.difficulty + smartsFactor + notorietyFactor + casedBonus - attemptPenalty - heatPenalty).coerceIn(0.08f, 0.90f)
+    }
+
+    fun calculateProsecutionStrength(character: Character): Float {
+        val record = character.criminalRecord
+        val baseFromHeat = (record.heatLevel / 100f) * 0.45f
+        val arrestDrag = (record.timesArrested * 0.08f).coerceAtMost(0.30f)
+        val crimeSeverity = when (record.pendingCrimeType) {
+            CrimeType.FRAUD.name -> 0.35f
+            CrimeType.SHOPLIFT.name -> 0.20f
+            CrimeType.PICKPOCKET.name -> 0.15f
+            else -> 0.25f
+        }
+        return (crimeSeverity + baseFromHeat + arrestDrag).coerceIn(0.20f, 0.95f)
+    }
+
+    fun calculateAcquittalChance(character: Character, tier: LawyerTier): Float {
+        val prosStrength = calculateProsecutionStrength(character)
+        val smartsDefense = (character.stats.smarts / 100f) * 0.15f
+        val karmaBonus = if (character.stats.karma >= 60) 0.10f else 0.0f
+        val lawyerSkill = when (tier) {
+            LawyerTier.PUBLIC_DEFENDER -> 0.10f
+            LawyerTier.AVERAGE -> 0.40f
+            LawyerTier.EXPENSIVE -> 0.75f
+        }
+        return (lawyerSkill + smartsDefense + karmaBonus - prosStrength * 0.5f).coerceIn(0.04f, 0.92f)
+    }
+
+    fun calculateEscapeChance(character: Character): Float {
+        val record = character.criminalRecord
+        val smartsFactor = (character.stats.smarts / 100f) * 0.35f
+        val standingFactor = (record.cellblockStanding / 100f) * 0.25f
+        val notorietyFactor = (record.notoriety / 100f) * 0.20f
+        val gangBonus = if (record.prisonGang != PrisonGang.NONE) 0.15f else 0.0f
+        val pastAttemptPenalty = (record.escapeAttemptsCount * 0.08f).coerceAtMost(0.24f)
+        return (smartsFactor + standingFactor + notorietyFactor + gangBonus - pastAttemptPenalty).coerceIn(0.10f, 0.75f)
+    }
+
+    fun prisonFacilityName(sentenceYears: Int): String = when {
+        sentenceYears >= 15 -> "Maximum Security Penitentiary"
+        sentenceYears >= 5 -> "Medium Security Correctional Center"
+        else -> "County Detention Facility"
+    }
+
+    fun gangLabel(gang: PrisonGang): String = when (gang) {
+        PrisonGang.NONE -> "Independent Inmate"
+        PrisonGang.YARD_SYNDICATE -> "Yard Syndicate"
+        PrisonGang.LIFER_CREW -> "Lifer Crew"
+        PrisonGang.BLOCK_BROTHERHOOD -> "Block Brotherhood"
+    }
+
     fun performPrisonActivity(character: Character, activity: PrisonActivity): PrisonActivityResult {
         if (!character.alive || !character.criminalRecord.currentlyIncarcerated) {
             return PrisonActivityResult.Ineligible
         }
+        val record = character.criminalRecord
         val updated = when (activity) {
             PrisonActivity.WORK_DETAIL -> {
                 val pay = EconomyScaler.scaleAmount(PRISON_WORK_PAY_KENYA, character.countryCode)
+                val newStanding = (record.cellblockStanding + 4).coerceIn(0, 100)
                 character.copy(
                     stats = character.stats.copy(
                         money = character.stats.money + pay,
                         happiness = clampStat(character.stats.happiness + 2)
                     ),
+                    criminalRecord = record.copy(
+                        cellblockStanding = newStanding,
+                        prisonJobDoneThisYear = true
+                    ),
                     eventLog = EventLogCap.prepend(
                         character.eventLog,
-                        "You worked prison detail and earned ${formatMoney(pay, character.countryCode)}."
+                        "You worked prison detail and earned ${formatMoney(pay, character.countryCode)} (+4 Cellblock Respect)."
                     )
                 )
             }
-            PrisonActivity.LIBRARY -> character.copy(
-                stats = character.stats.copy(
-                    smarts = clampStat(character.stats.smarts + 2),
-                    happiness = clampStat(character.stats.happiness + 1)
-                ),
-                eventLog = EventLogCap.prepend(character.eventLog, "You read in the prison library.")
-            )
-            PrisonActivity.EXERCISE -> character.copy(
-                stats = character.stats.copy(
-                    health = clampStat(character.stats.health + 3),
-                    happiness = clampStat(character.stats.happiness + 1)
-                ),
-                eventLog = EventLogCap.prepend(character.eventLog, "You exercised in the yard.")
-            )
-            PrisonActivity.GOOD_BEHAVIOR -> character.copy(
-                criminalRecord = character.criminalRecord.copy(
-                    paroleBonus = character.criminalRecord.paroleBonus + 1
-                ),
-                stats = character.stats.copy(
-                    happiness = clampStat(character.stats.happiness - 1)
-                ),
-                eventLog = EventLogCap.prepend(
-                    character.eventLog,
-                    "You kept your head down and earned good behavior credit."
-                )
-            )
-            PrisonActivity.PRISON_YARD_GANG -> {
-                val newNotoriety = (character.criminalRecord.notoriety + 10).coerceIn(0, 100)
+            PrisonActivity.LIBRARY -> {
+                val newSmarts = clampStat(character.stats.smarts + 2)
                 character.copy(
-                    criminalRecord = character.criminalRecord.copy(
+                    stats = character.stats.copy(
+                        smarts = newSmarts,
+                        happiness = clampStat(character.stats.happiness + 1)
+                    ),
+                    criminalRecord = record.copy(paroleBonus = record.paroleBonus + 1),
+                    eventLog = EventLogCap.prepend(
+                        character.eventLog,
+                        "You studied criminal law and case precedents in the prison library (+1 Parole Prep)."
+                    )
+                )
+            }
+            PrisonActivity.EXERCISE -> {
+                val newHealth = clampStat(character.stats.health + 3)
+                val newStanding = (record.cellblockStanding + 5).coerceIn(0, 100)
+                character.copy(
+                    stats = character.stats.copy(
+                        health = newHealth,
+                        happiness = clampStat(character.stats.happiness + 1)
+                    ),
+                    criminalRecord = record.copy(cellblockStanding = newStanding),
+                    eventLog = EventLogCap.prepend(
+                        character.eventLog,
+                        "You hit the iron weights in the yard (+5 Cellblock Respect, intimidation up)."
+                    )
+                )
+            }
+            PrisonActivity.GOOD_BEHAVIOR -> {
+                val newHeat = (record.inmateRivalryHeat - 10).coerceAtLeast(0)
+                character.copy(
+                    criminalRecord = record.copy(
+                        paroleBonus = record.paroleBonus + 2,
+                        inmateRivalryHeat = newHeat
+                    ),
+                    stats = character.stats.copy(
+                        happiness = clampStat(character.stats.happiness - 1)
+                    ),
+                    eventLog = EventLogCap.prepend(
+                        character.eventLog,
+                        "You kept your head down, avoided prison drama, and earned good behavior credit (+2 Parole Points)."
+                    )
+                )
+            }
+            PrisonActivity.PRISON_YARD_GANG -> {
+                val nextGang = when (record.prisonGang) {
+                    PrisonGang.NONE -> PrisonGang.YARD_SYNDICATE
+                    PrisonGang.YARD_SYNDICATE -> PrisonGang.LIFER_CREW
+                    PrisonGang.LIFER_CREW -> PrisonGang.BLOCK_BROTHERHOOD
+                    PrisonGang.BLOCK_BROTHERHOOD -> PrisonGang.BLOCK_BROTHERHOOD
+                }
+                val newNotoriety = (record.notoriety + 12).coerceIn(0, 100)
+                val newStanding = (record.cellblockStanding + 18).coerceIn(0, 100)
+                val newRivalry = (record.inmateRivalryHeat + 20).coerceIn(0, 100)
+                character.copy(
+                    criminalRecord = record.copy(
+                        prisonGang = nextGang,
                         notoriety = newNotoriety,
-                        paroleBonus = (character.criminalRecord.paroleBonus - 1).coerceAtLeast(0)
+                        cellblockStanding = newStanding,
+                        inmateRivalryHeat = newRivalry,
+                        paroleBonus = (record.paroleBonus - 1).coerceAtLeast(0)
                     ),
                     stats = character.stats.copy(
                         happiness = clampStat(character.stats.happiness + 4)
                     ),
                     eventLog = EventLogCap.prepend(
                         character.eventLog,
-                        "Joined the prison yard clique for protection and gained respect (+10 Notoriety)."
+                        "Aligned with the ${gangLabel(nextGang)} in the prison yard (+18 Respect, +12 Notoriety, -1 Parole Bonus)."
                     )
                 )
             }
             PrisonActivity.PRISON_ESCAPE_ATTEMPT -> {
-                val escapeChance = ((character.stats.smarts * 0.4f + character.criminalRecord.notoriety * 0.3f) / 100f).coerceIn(0.12f, 0.65f)
+                val escapeChance = calculateEscapeChance(character)
+                val newAttempts = record.escapeAttemptsCount + 1
                 if (Random.nextFloat() < escapeChance) {
                     val released = releaseFromPrison(
                         character,
-                        "Escaped from maximum security prison through the utility duct! You are now a fugitive on the run."
+                        "Escaped from prison through a maintenance duct! You are now an active fugitive on the run."
                     )
                     released.copy(
                         criminalRecord = released.criminalRecord.copy(
-                            notoriety = (released.criminalRecord.notoriety + 30).coerceIn(0, 100)
+                            notoriety = (released.criminalRecord.notoriety + 35).coerceIn(0, 100),
+                            heatLevel = 90,
+                            escapeAttemptsCount = newAttempts
                         ),
                         stats = released.stats.copy(happiness = clampStat(released.stats.happiness + 25))
                     )
                 } else {
-                    val currentRecord = character.criminalRecord
                     val penaltyYears = 4
                     character.copy(
-                        criminalRecord = currentRecord.copy(
-                            yearsRemaining = currentRecord.yearsRemaining + penaltyYears,
-                            totalSentenceYears = currentRecord.totalSentenceYears + penaltyYears,
-                            negativePrisonEvents = currentRecord.negativePrisonEvents + 1
+                        criminalRecord = record.copy(
+                            yearsRemaining = record.yearsRemaining + penaltyYears,
+                            totalSentenceYears = record.totalSentenceYears + penaltyYears,
+                            negativePrisonEvents = record.negativePrisonEvents + 1,
+                            escapeAttemptsCount = newAttempts,
+                            inmateRivalryHeat = (record.inmateRivalryHeat + 15).coerceIn(0, 100)
                         ),
                         stats = character.stats.copy(
                             happiness = clampStat(character.stats.happiness - 20),
@@ -517,14 +620,14 @@ class CrimeEngine @Inject constructor() {
                         ),
                         eventLog = EventLogCap.prepend(
                             character.eventLog,
-                            "Escape attempt failed! Guards caught you at the perimeter wire (+4 years added to sentence)."
+                            "Escape attempt failed! Guards trapped you at the perimeter fence (+4 years added to sentence)."
                         )
                     )
                 }
             }
             PrisonActivity.PAROLE_HEARING_APPEAL -> {
-                if (paroleEligible(character.criminalRecord)) {
-                    val chance = paroleChance(character.criminalRecord)
+                if (paroleEligible(record)) {
+                    val chance = paroleChance(record)
                     if (Random.nextFloat() < chance) {
                         releaseFromPrison(character, "Granted early parole by the board! You walked free.")
                     } else {
