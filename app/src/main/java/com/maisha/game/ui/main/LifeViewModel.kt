@@ -1,12 +1,16 @@
 // app/src/main/java/com/maisha/game/ui/main/LifeViewModel.kt (modified — celebration + stat delta triggers)
 package com.maisha.game.ui.main
 
+import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maisha.game.R
 import com.maisha.game.ads.AdFrequencyController
+import com.maisha.game.billing.BillingManager
+import com.maisha.game.billing.BillingProducts
+import com.maisha.game.billing.BillingPurchaseEvent
 import com.maisha.game.data.content.CarMakeCatalog
 import com.maisha.game.data.content.StreetCatalog
 import com.maisha.game.data.AchievementRepository
@@ -199,7 +203,12 @@ data class LifeUiState(
     val socialEcosystemMessage: String? = null,
     val activeRoutineDilemma: com.maisha.game.data.model.RoutineDilemma? = null,
     val routineDilemmaPrompt: String? = null,
-    val activeJobInterview: com.maisha.game.data.model.JobInterviewSession? = null
+    val activeJobInterview: com.maisha.game.data.model.JobInterviewSession? = null,
+    val billingConnected: Boolean = false,
+    val billingAvailable: Boolean = true,
+    val billingProducts: Map<String, com.android.billingclient.api.ProductDetails> = emptyMap(),
+    val isAdFree: Boolean = false,
+    val isCreatorPass: Boolean = false
 )
 
 @HiltViewModel
@@ -218,6 +227,7 @@ class LifeViewModel @Inject constructor(
     private val adFrequencyController: AdFrequencyController,
     private val notificationScheduler: NotificationScheduler,
     private val routineDilemmaEngine: com.maisha.game.domain.RoutineDilemmaEngine,
+    val billingManager: BillingManager,
     val carMakeCatalog: CarMakeCatalog,
     val streetCatalog: StreetCatalog
 ) : ViewModel() {
@@ -241,6 +251,36 @@ class LifeViewModel @Inject constructor(
     val uiState: StateFlow<LifeUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            billingManager.isConnected.collect { conn ->
+                _uiState.update { it.copy(billingConnected = conn) }
+            }
+        }
+        viewModelScope.launch {
+            billingManager.isServiceAvailable.collect { avail ->
+                _uiState.update { it.copy(billingAvailable = avail) }
+            }
+        }
+        viewModelScope.launch {
+            billingManager.products.collect { prods ->
+                _uiState.update { it.copy(billingProducts = prods) }
+            }
+        }
+        viewModelScope.launch {
+            billingManager.isAdFree.collect { adFree ->
+                _uiState.update { it.copy(isAdFree = adFree) }
+            }
+        }
+        viewModelScope.launch {
+            billingManager.isCreatorPass.collect { pass ->
+                _uiState.update { it.copy(isCreatorPass = pass) }
+            }
+        }
+        viewModelScope.launch {
+            billingManager.purchaseEvents.collect { event ->
+                handleBillingPurchaseEvent(event)
+            }
+        }
         viewModelScope.launch {
             val seenTips = settingsRepository.getSeenTipsSnapshot()
             _uiState.update { it.copy(seenTipIds = seenTips, tipsLoaded = true) }
@@ -907,12 +947,9 @@ class LifeViewModel @Inject constructor(
                         )
                     }
                 }
-                is FinanceEngine.InvestmentResult.InsufficientFunds -> {
-                    _uiState.update {
-                        it.copy(assetsMessage = context.getString(R.string.msg_invest_cannot_afford))
-                    }
-                }
-                is FinanceEngine.InvestmentResult.InvalidAmount -> {
+                is FinanceEngine.InvestmentResult.InsufficientFunds,
+                is FinanceEngine.InvestmentResult.InvalidAmount,
+                is FinanceEngine.InvestmentResult.BelowMinimum -> {
                     _uiState.update {
                         it.copy(assetsMessage = context.getString(R.string.msg_invest_cannot_afford))
                     }
@@ -937,7 +974,8 @@ class LifeViewModel @Inject constructor(
                     }
                 }
                 is FinanceEngine.InvestmentResult.InsufficientFunds,
-                is FinanceEngine.InvestmentResult.InvalidAmount -> {
+                is FinanceEngine.InvestmentResult.InvalidAmount,
+                is FinanceEngine.InvestmentResult.BelowMinimum -> {
                     _uiState.update {
                         it.copy(assetsMessage = context.getString(R.string.msg_withdraw_insufficient))
                     }
@@ -963,7 +1001,8 @@ class LifeViewModel @Inject constructor(
                     }
                 }
                 is FinanceEngine.InvestmentResult.InsufficientFunds,
-                is FinanceEngine.InvestmentResult.InvalidAmount -> {
+                is FinanceEngine.InvestmentResult.InvalidAmount,
+                is FinanceEngine.InvestmentResult.BelowMinimum -> {
                     _uiState.update {
                         it.copy(assetsMessage = context.getString(R.string.msg_savings_cannot_afford))
                     }
@@ -988,7 +1027,8 @@ class LifeViewModel @Inject constructor(
                     }
                 }
                 is FinanceEngine.InvestmentResult.InsufficientFunds,
-                is FinanceEngine.InvestmentResult.InvalidAmount -> {
+                is FinanceEngine.InvestmentResult.InvalidAmount,
+                is FinanceEngine.InvestmentResult.BelowMinimum -> {
                     _uiState.update {
                         it.copy(assetsMessage = context.getString(R.string.msg_savings_cannot_afford))
                     }
@@ -1018,6 +1058,149 @@ class LifeViewModel @Inject constructor(
                         it.copy(assetsMessage = context.getString(R.string.msg_savings_cannot_afford))
                     }
                 }
+                is FinanceEngine.InvestmentResult.BelowMinimum -> Unit
+            }
+        }
+    }
+
+    private fun handleBillingPurchaseEvent(event: BillingPurchaseEvent) {
+        when (event) {
+            is BillingPurchaseEvent.CashVoucherPurchased -> {
+                val current = _uiState.value.character ?: return
+                val scaledCash = EconomyScaler.scaleAmount(event.baseCashAmountKenya, current.countryCode)
+                val updatedMoney = current.stats.money + scaledCash
+                val voucherTitle = when (event.productId) {
+                    BillingProducts.PRODUCT_CASH_STARTER -> "Starter Vault Voucher"
+                    BillingProducts.PRODUCT_CASH_FORTUNE -> "Fortune Vault Voucher"
+                    BillingProducts.PRODUCT_CASH_TYCOON -> "Tycoon Treasury Voucher"
+                    else -> "Dynasty Cash Voucher"
+                }
+                val log = "Redeemed $voucherTitle for ${com.maisha.game.util.formatMoney(scaledCash, current.countryCode)} in local currency."
+                val updatedCharacter = current.copy(
+                    stats = current.stats.copy(money = updatedMoney),
+                    eventLog = com.maisha.game.domain.EventLogCap.prepend(current.eventLog, log)
+                )
+                viewModelScope.launch {
+                    persist(updatedCharacter)
+                    _uiState.update {
+                        it.copy(
+                            character = updatedCharacter,
+                            netWorth = financeEngine.calculateNetWorth(updatedCharacter),
+                            actionMessage = log
+                        )
+                    }
+                }
+            }
+            is BillingPurchaseEvent.PermanentUnlockPurchased -> {
+                val message = when (event.productId) {
+                    BillingProducts.PRODUCT_UNLOCK_AD_FREE -> "Ad-Free Dynasty unlocked! All ads permanently removed."
+                    BillingProducts.PRODUCT_UNLOCK_CREATOR_PASS -> "Dynasty Creator Pass unlocked! Custom editor enabled."
+                    else -> "Permanent unlock activated!"
+                }
+                _uiState.update { it.copy(actionMessage = message) }
+            }
+            is BillingPurchaseEvent.PurchaseFailed -> {
+                _uiState.update { it.copy(actionMessage = event.message) }
+            }
+        }
+    }
+
+    fun onLaunchPurchaseFlow(activity: Activity, productId: String) {
+        billingManager.launchPurchaseFlow(activity, productId)
+    }
+
+    fun onDepositCountryInstrument(amount: Int) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            when (val result = gameEngine.depositCountryInstrument(character, amount)) {
+                is FinanceEngine.InvestmentResult.Success -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            assetsMessage = result.character.eventLog.firstOrNull(),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is FinanceEngine.InvestmentResult.BelowMinimum -> {
+                    _uiState.update {
+                        it.copy(
+                            assetsMessage = context.getString(
+                                R.string.country_finance_min_deposit,
+                                com.maisha.game.util.formatMoney(result.minAmount, character.countryCode)
+                            )
+                        )
+                    }
+                }
+                is FinanceEngine.InvestmentResult.InsufficientFunds,
+                is FinanceEngine.InvestmentResult.InvalidAmount -> {
+                    _uiState.update {
+                        it.copy(assetsMessage = context.getString(R.string.msg_savings_cannot_afford))
+                    }
+                }
+            }
+        }
+    }
+
+    fun onWithdrawCountryInstrument(amount: Int) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            when (val result = gameEngine.withdrawCountryInstrument(character, amount)) {
+                is FinanceEngine.InvestmentResult.Success -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            assetsMessage = result.character.eventLog.firstOrNull(),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is FinanceEngine.InvestmentResult.InsufficientFunds,
+                is FinanceEngine.InvestmentResult.InvalidAmount -> {
+                    _uiState.update {
+                        it.copy(assetsMessage = context.getString(R.string.msg_savings_cannot_afford))
+                    }
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    fun onSendRemittance(amount: Int) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        viewModelScope.launch {
+            when (val result = gameEngine.remitMoneyHome(character, amount)) {
+                is FinanceEngine.RemittanceResult.Success -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            assetsMessage = result.character.eventLog.firstOrNull(),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is FinanceEngine.RemittanceResult.InsufficientFunds -> {
+                    _uiState.update {
+                        it.copy(assetsMessage = context.getString(R.string.msg_savings_cannot_afford))
+                    }
+                }
+                is FinanceEngine.RemittanceResult.NotLivingAbroad -> {
+                    _uiState.update {
+                        it.copy(assetsMessage = context.getString(R.string.remittance_not_abroad))
+                    }
+                }
+                is FinanceEngine.RemittanceResult.NoFamilyAtHome -> {
+                    _uiState.update {
+                        it.copy(assetsMessage = context.getString(R.string.remittance_no_family))
+                    }
+                }
+                is FinanceEngine.RemittanceResult.InvalidAmount -> Unit
             }
         }
     }

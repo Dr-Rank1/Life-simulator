@@ -61,5 +61,13 @@ data class PersonalFinanceState(
     val juniorTrustBalance: Int = 0,
     val onTimePaymentStreak: Int = 0,
     val missedPaymentsCount: Int = 0,
-    val lastCashFlow: AnnualCashFlow = AnnualCashFlow()
+    val lastCashFlow: AnnualCashFlow = AnnualCashFlow(),
+    /** Active balance invested in the character's country-specific financial vehicle. */
+    val countryInstrumentBalance: Int = 0,
+    /** Id of the country vehicle (e.g. "sacco_chama_ke", "tbills_ng", "401k_us"). */
+    val countryInstrumentId: String? = null,
+    /** Outstanding mobile overdraft balance drawn (e.g. Fuliza in Kenya). */
+    val mobileOverdraftUsed: Int = 0,
+    /** Cumulative foreign remittances sent home to family abroad in resident currency. */
+    val lifetimeRemittancesSent: Int = 0
 )

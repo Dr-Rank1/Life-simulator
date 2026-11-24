@@ -39,6 +39,24 @@ object EconomyScaler {
         return (baseAmount * multiplier).toInt().coerceAtLeast(1)
     }
 
+    fun getMultiplier(countryCode: String): Double {
+        return multipliers[countryCode] ?: NEUTRAL_BASELINE_MULTIPLIER
+    }
+
+    /**
+     * Converts a scaled cash amount from [fromCountryCode] to [toCountryCode] based on the
+     * relative economy scale factors (e.g. 100,000 KES in KE -> 25,000 USD in US).
+     */
+    fun convertCurrency(amount: Int, fromCountryCode: String, toCountryCode: String): Int {
+        if (amount <= 0) return 0
+        if (fromCountryCode == toCountryCode) return amount
+        val fromMult = multipliers[fromCountryCode] ?: NEUTRAL_BASELINE_MULTIPLIER
+        val toMult = multipliers[toCountryCode] ?: NEUTRAL_BASELINE_MULTIPLIER
+        if (fromMult <= 0.0) return amount
+        val converted = (amount.toDouble() / fromMult) * toMult
+        return kotlin.math.round(converted).toInt().coerceAtLeast(0)
+    }
+
     /** Scales gift/travel costs by life stage so teens aren't priced out of relationships. */
     fun scaleRelationshipCost(baseAmount: Int, countryCode: String, age: Int): Int {
         val ageMultiplier = when {

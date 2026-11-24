@@ -138,6 +138,25 @@ class RelocationEngine @Inject constructor() {
         val visaYears = if (grantedVisa == null) 0 else defaultVisaYears(grantedVisa)
 
         val happinessDip = Random.nextInt(RELOCATION_HAPPINESS_DIP_MIN, RELOCATION_HAPPINESS_DIP_MAX + 1)
+        val originCountry = CountryCatalog.getCountry(character.countryCode)
+        val convertedMoney = EconomyScaler.convertCurrency(character.stats.money, character.countryCode, newCountry.code)
+        val convertedSavings = EconomyScaler.convertCurrency(character.savingsBalance, character.countryCode, newCountry.code)
+        val convertedTrust = EconomyScaler.convertCurrency(character.finance.juniorTrustBalance, character.countryCode, newCountry.code)
+        val liquidatedInstrument = EconomyScaler.convertCurrency(character.finance.countryInstrumentBalance, character.countryCode, newCountry.code)
+        val totalLiquidMoney = convertedMoney + liquidatedInstrument
+
+        val updatedFinance = character.finance.copy(
+            creditScore = 600,
+            onTimePaymentStreak = 0,
+            missedPaymentsCount = 0,
+            juniorTrustBalance = convertedTrust,
+            countryInstrumentBalance = 0,
+            countryInstrumentId = null,
+            mobileOverdraftUsed = 0
+        )
+
+        val moveLog = "Relocated from ${originCountry.displayName} to ${newCountry.displayName}. Converted funds to ${newCountry.currencyCode} (${newCountry.currencySymbol}${totalLiquidMoney}) and established a fresh credit profile."
+
         return character.copy(
             countryCode = newCountry.code,
             relocationCount = character.relocationCount + 1,
@@ -147,9 +166,13 @@ class RelocationEngine @Inject constructor() {
             currentVisa = grantedVisa,
             visaYearsRemaining = visaYears,
             career = updatedCareer,
+            savingsBalance = convertedSavings,
+            finance = updatedFinance,
             stats = character.stats.copy(
+                money = totalLiquidMoney,
                 happiness = clampStat(character.stats.happiness - happinessDip)
-            )
+            ),
+            eventLog = listOf(moveLog) + character.eventLog
         )
     }
 

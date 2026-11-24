@@ -91,6 +91,25 @@ class SettingsRepository @Inject constructor(
         prefs[CLAIMED_CHALLENGES_KEY] ?: emptySet()
     }
 
+    val isAdFree: Flow<Boolean> = preferencesFlow().map { prefs ->
+        prefs[AD_FREE_KEY] ?: false
+    }
+
+    val isCreatorPass: Flow<Boolean> = preferencesFlow().map { prefs ->
+        prefs[CREATOR_PASS_KEY] ?: false
+    }
+
+    suspend fun setAdFree(enabled: Boolean) {
+        dataStore.edit { it[AD_FREE_KEY] = enabled }
+    }
+
+    suspend fun setCreatorPass(enabled: Boolean) {
+        dataStore.edit { it[CREATOR_PASS_KEY] = enabled }
+    }
+
+    suspend fun isAdFreeNow(): Boolean = isAdFree.first()
+    suspend fun isCreatorPassNow(): Boolean = isCreatorPass.first()
+
     suspend fun getEarnedRibbonsSnapshot(): Set<String> =
         preferencesFlow().first()[EARNED_RIBBONS_KEY] ?: emptySet()
 
@@ -213,5 +232,7 @@ class SettingsRepository @Inject constructor(
         private val FLAG_EMOJI_FALLBACK_KEY = booleanPreferencesKey("flag_emoji_fallback")
         private val EARNED_RIBBONS_KEY = stringSetPreferencesKey("earned_ribbon_ids")
         private val CLAIMED_CHALLENGES_KEY = stringSetPreferencesKey("claimed_challenge_ids")
+        private val AD_FREE_KEY = booleanPreferencesKey("dynasty_ad_free")
+        private val CREATOR_PASS_KEY = booleanPreferencesKey("dynasty_creator_pass")
     }
 }

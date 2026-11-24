@@ -2,7 +2,10 @@
 package com.maisha.game.data
 
 import com.maisha.game.data.model.Country
+import com.maisha.game.data.model.CountryFinanceProfile
+import com.maisha.game.data.model.CountryFinancialInstrument
 import com.maisha.game.data.model.CountryFlavor
+import com.maisha.game.data.model.FinancialRiskLevel
 import com.maisha.game.data.model.HolidayFlavor
 
 /**
@@ -275,6 +278,229 @@ object CountryCatalog {
         guardianHonorific = "Mom"
     )
 
+    private val financeProfiles: Map<String, CountryFinanceProfile> = listOf(
+        CountryFinanceProfile(
+            countryCode = "KE",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "sacco_chama_ke",
+                name = "SACCO Share Capital & Chama",
+                localName = "SACCO / Chama",
+                description = "Cooperative savings society providing regular annual dividend shares and access to member development loans.",
+                annualYieldPercent = 0.115,
+                minimumDepositKenya = 5_000,
+                riskLevel = FinancialRiskLevel.LOW,
+                allowsOverdraft = true,
+                overdraftLimitKenya = 15_000
+            ),
+            familyObligationFraction = 0.08,
+            mobileOverdraftFacility = true,
+            mobileOverdraftLimitKenya = 15_000
+        ),
+        CountryFinanceProfile(
+            countryCode = "NG",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "tbills_fd_ng",
+                name = "Treasury Bills & High-Yield Fixed Deposit",
+                localName = "T-Bills & Fixed Deposit",
+                description = "Sovereign treasury bills and commercial bank fixed deposits offering high nominal yield against inflation.",
+                annualYieldPercent = 0.140,
+                minimumDepositKenya = 20_000,
+                riskLevel = FinancialRiskLevel.LOW
+            ),
+            familyObligationFraction = 0.12,
+            mobileOverdraftFacility = false
+        ),
+        CountryFinanceProfile(
+            countryCode = "ZA",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "stokvel_fund_za",
+                name = "Stokvel Community Investment Club",
+                localName = "Stokvel",
+                description = "Traditional pooled community savings scheme with rotation payouts and disciplined group dividends.",
+                annualYieldPercent = 0.095,
+                minimumDepositKenya = 5_000,
+                riskLevel = FinancialRiskLevel.GUARANTEED
+            ),
+            familyObligationFraction = 0.06
+        ),
+        CountryFinanceProfile(
+            countryCode = "EG",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "national_cd_eg",
+                name = "National High-Yield Certificate of Deposit",
+                localName = "Shahadat El-Estesmar",
+                description = "Public bank savings certificates guaranteeing competitive interest rates.",
+                annualYieldPercent = 0.160,
+                minimumDepositKenya = 10_000,
+                riskLevel = FinancialRiskLevel.GUARANTEED
+            ),
+            familyObligationFraction = 0.07
+        ),
+        CountryFinanceProfile(
+            countryCode = "US",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "retirement_401k_us",
+                name = "401(k) & Roth IRA Retirement Index",
+                localName = "401(k) / Roth IRA",
+                description = "Tax-sheltered retirement account compounding across broad market index equities.",
+                annualYieldPercent = 0.085,
+                minimumDepositKenya = 2_000,
+                riskLevel = FinancialRiskLevel.MODERATE,
+                isRetirementTaxAdvantaged = true
+            ),
+            familyObligationFraction = 0.02
+        ),
+        CountryFinanceProfile(
+            countryCode = "CA",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "tfsa_rrsp_ca",
+                name = "TFSA & RRSP Index Portfolio",
+                localName = "TFSA / RRSP",
+                description = "Tax-Free Savings Account and Registered Retirement Savings Plan compounding tax-sheltered wealth.",
+                annualYieldPercent = 0.080,
+                minimumDepositKenya = 2_000,
+                riskLevel = FinancialRiskLevel.MODERATE,
+                isRetirementTaxAdvantaged = true
+            ),
+            familyObligationFraction = 0.02
+        ),
+        CountryFinanceProfile(
+            countryCode = "GB",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "stocks_isa_gb",
+                name = "Stocks & Shares ISA",
+                localName = "Stocks & Shares ISA",
+                description = "UK Individual Savings Account protecting annual investment gains from capital gains and dividend taxes.",
+                annualYieldPercent = 0.075,
+                minimumDepositKenya = 2_000,
+                riskLevel = FinancialRiskLevel.MODERATE,
+                isRetirementTaxAdvantaged = true
+            ),
+            familyObligationFraction = 0.02
+        ),
+        CountryFinanceProfile(
+            countryCode = "FR",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "livret_a_fr",
+                name = "Livret A & Assurance-Vie",
+                localName = "Livret A",
+                description = "Guaranteed tax-free state-regulated savings account ensuring steady capital preservation.",
+                annualYieldPercent = 0.040,
+                minimumDepositKenya = 1_000,
+                riskLevel = FinancialRiskLevel.GUARANTEED,
+                isRetirementTaxAdvantaged = true
+            ),
+            familyObligationFraction = 0.03
+        ),
+        CountryFinanceProfile(
+            countryCode = "DE",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "festgeld_de",
+                name = "Festgeld & Bausparvertrag",
+                localName = "Festgeld / Bausparvertrag",
+                description = "Secured fixed-term deposit and building society savings agreement for disciplined capital security.",
+                annualYieldPercent = 0.045,
+                minimumDepositKenya = 2_000,
+                riskLevel = FinancialRiskLevel.GUARANTEED
+            ),
+            familyObligationFraction = 0.02
+        ),
+        CountryFinanceProfile(
+            countryCode = "IN",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "ppf_fd_in",
+                name = "Public Provident Fund & Bank FD",
+                localName = "PPF & Bank FD",
+                description = "Government-backed long-term provident savings and fixed deposit schemes with tax deductions.",
+                annualYieldPercent = 0.078,
+                minimumDepositKenya = 4_000,
+                riskLevel = FinancialRiskLevel.GUARANTEED,
+                isRetirementTaxAdvantaged = true
+            ),
+            familyObligationFraction = 0.09
+        ),
+        CountryFinanceProfile(
+            countryCode = "JP",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "nisa_jp",
+                name = "NISA & Postal Savings",
+                localName = "NISA & Yucho",
+                description = "Nippon Individual Savings Account providing tax exemption on capital gains and steady postal deposits.",
+                annualYieldPercent = 0.060,
+                minimumDepositKenya = 4_000,
+                riskLevel = FinancialRiskLevel.LOW,
+                isRetirementTaxAdvantaged = true
+            ),
+            familyObligationFraction = 0.03
+        ),
+        CountryFinanceProfile(
+            countryCode = "PH",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "pagibig_mp2_ph",
+                name = "Pag-IBIG Modified MP2 Fund",
+                localName = "Pag-IBIG MP2",
+                description = "High-yielding government voluntary savings program offering tax-free annual dividends.",
+                annualYieldPercent = 0.072,
+                minimumDepositKenya = 2_000,
+                riskLevel = FinancialRiskLevel.GUARANTEED
+            ),
+            familyObligationFraction = 0.10
+        ),
+        CountryFinanceProfile(
+            countryCode = "ID",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "deposito_arisan_id",
+                name = "Deposito Berjangka & Arisan",
+                localName = "Deposito & Arisan",
+                description = "Commercial bank fixed-term deposit combined with community rotating credit network.",
+                annualYieldPercent = 0.065,
+                minimumDepositKenya = 4_000,
+                riskLevel = FinancialRiskLevel.LOW
+            ),
+            familyObligationFraction = 0.08
+        ),
+        CountryFinanceProfile(
+            countryCode = "BR",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "tesouro_selic_br",
+                name = "Tesouro Direto & CDB",
+                localName = "Tesouro Selic / CDB",
+                description = "National treasury bond linked to basic interest rate offering robust inflation-indexed returns.",
+                annualYieldPercent = 0.110,
+                minimumDepositKenya = 2_000,
+                riskLevel = FinancialRiskLevel.LOW
+            ),
+            familyObligationFraction = 0.05
+        ),
+        CountryFinanceProfile(
+            countryCode = "MX",
+            primaryInstrument = CountryFinancialInstrument(
+                id = "cetes_directo_mx",
+                name = "Cetes Directo Treasury",
+                localName = "Cetes Directo",
+                description = "Federal treasury certificates backed by Banco de México offering accessible, risk-free yields.",
+                annualYieldPercent = 0.105,
+                minimumDepositKenya = 2_000,
+                riskLevel = FinancialRiskLevel.GUARANTEED
+            ),
+            familyObligationFraction = 0.05
+        )
+    ).associateBy { it.countryCode }
+
+    private val genericFinanceProfile = CountryFinanceProfile(
+        countryCode = "XX",
+        primaryInstrument = CountryFinancialInstrument(
+            id = "index_savings_xx",
+            name = "High-Yield Savings & Index Fund",
+            localName = "Treasury & Index Fund",
+            description = "Diversified sovereign bonds and index fund offering steady long-term appreciation.",
+            annualYieldPercent = 0.060,
+            minimumDepositKenya = 2_000,
+            riskLevel = FinancialRiskLevel.LOW
+        ),
+        familyObligationFraction = 0.03
+    )
+
     private val unknownCountry = Country("XX", "International", "USD", "$")
 
     private val byCode: Map<String, Country> = countries.associateBy { it.code }
@@ -286,6 +512,11 @@ object CountryCatalog {
 
     fun flavorFor(countryCode: String): CountryFlavor =
         flavors[countryCode] ?: genericFlavor
+
+    fun financeProfileFor(countryCode: String): CountryFinanceProfile =
+        financeProfiles[countryCode] ?: genericFinanceProfile
+
+    fun allFinanceProfiles(): List<CountryFinanceProfile> = financeProfiles.values.toList()
 
     fun hasResearchedFlavor(countryCode: String): Boolean = countryCode in flavors
 

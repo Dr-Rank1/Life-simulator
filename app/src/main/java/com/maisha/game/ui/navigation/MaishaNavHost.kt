@@ -353,6 +353,12 @@ fun MaishaNavHost(
                 onDepositSavings = viewModel::onDepositSavings,
                 onWithdrawSavings = viewModel::onWithdrawSavings,
                 onDepositJuniorTrust = viewModel::onDepositJuniorTrust,
+                onPurchaseProduct = { productId ->
+                    activity?.let { act -> viewModel.onLaunchPurchaseFlow(act, productId) }
+                },
+                onDepositCountryInstrument = viewModel::onDepositCountryInstrument,
+                onWithdrawCountryInstrument = viewModel::onWithdrawCountryInstrument,
+                onSendRemittance = viewModel::onSendRemittance,
                 onSetLivingStandard = viewModel::onSetLivingStandard,
                 onSetPortfolioStrategy = viewModel::onSetPortfolioStrategy,
                 onAssetsMessageDismissed = viewModel::onAssetsMessageDismissed,

@@ -2,6 +2,7 @@
 package com.maisha.game.domain
 
 import com.maisha.game.data.AssetCatalog
+import com.maisha.game.data.CountryCatalog
 import com.maisha.game.data.EconomyScaler
 import com.maisha.game.data.PetCatalog
 import com.maisha.game.data.content.CarMakeCatalog
@@ -15,6 +16,7 @@ import com.maisha.game.data.model.Character
 import com.maisha.game.data.model.CreditRatingTier
 import com.maisha.game.data.model.EconomicClimate
 import com.maisha.game.data.model.EconomicState
+import com.maisha.game.data.model.FinancialRiskLevel
 import com.maisha.game.data.model.PersonalFinanceState
 import com.maisha.game.data.model.PortfolioStrategy
 import com.maisha.game.data.model.PoliticalOffice
@@ -712,7 +714,9 @@ class FinanceEngine @Inject constructor(
         return character.stats.money + assetValue + businessValue +
             character.investmentPortfolioValue.coerceAtLeast(0) +
             character.savingsBalance.coerceAtLeast(0) +
-            character.finance.juniorTrustBalance.coerceAtLeast(0) -
+            character.finance.juniorTrustBalance.coerceAtLeast(0) +
+            character.finance.countryInstrumentBalance.coerceAtLeast(0) -
+            character.finance.mobileOverdraftUsed.coerceAtLeast(0) -
             character.education.studentLoanBalance.coerceAtLeast(0) -
             totalMortgages
     }
@@ -943,7 +947,18 @@ class FinanceEngine @Inject constructor(
         if (cost <= 0) return character
 
         val paid = minOf(cost, character.stats.money)
-        val shortfall = cost - paid
+        val rawShortfall = cost - paid
+
+        val profile = CountryCatalog.financeProfileFor(character.countryCode)
+        val maxOverdraft = if (profile.mobileOverdraftFacility) {
+            EconomyScaler.scaleAmount(profile.mobileOverdraftLimitKenya, character.countryCode)
+        } else 0
+        val remainingOverdraft = (maxOverdraft - character.finance.mobileOverdraftUsed).coerceAtLeast(0)
+        val coveredByOverdraft = if (rawShortfall > 0 && remainingOverdraft > 0) {
+            minOf(rawShortfall, remainingOverdraft)
+        } else 0
+        val shortfall = rawShortfall - coveredByOverdraft
+
         var happinessDelta = 0
         var healthDelta = 0
         when (character.lifestyle.livingStandard) {
@@ -963,21 +978,39 @@ class FinanceEngine @Inject constructor(
             ) {
                 happinessDelta -= LUXURY_SHORTFALL_EXTRA_HAPPINESS
             }
+        } else if (coveredByOverdraft > 0) {
+            // Cushioned by mobile overdraft: mild stress instead of severe health drop
+            happinessDelta -= (COL_SHORTFALL_HAPPINESS / 2)
+        }
+
+        var remainingCash = (character.stats.money - paid).coerceAtLeast(0)
+        var newOverdraft = character.finance.mobileOverdraftUsed + coveredByOverdraft
+        if (newOverdraft > 0 && remainingCash > 0) {
+            val repaid = minOf(remainingCash, newOverdraft)
+            remainingCash -= repaid
+            newOverdraft -= repaid
         }
 
         var updated = character.copy(
             stats = character.stats.copy(
-                money = (character.stats.money - paid).coerceAtLeast(0),
+                money = remainingCash,
                 happiness = clampStat(character.stats.happiness + happinessDelta),
                 health = clampStat(character.stats.health + healthDelta)
-            )
+            ),
+            finance = character.finance.copy(mobileOverdraftUsed = newOverdraft)
         )
-        val log = if (shortfall > 0) {
-            "Living costs ${formatMoney(cost, character.countryCode)} — " +
-                "short by ${formatMoney(shortfall, character.countryCode)}. Stress mounted."
-        } else {
-            "Paid ${formatMoney(cost, character.countryCode)} in living costs " +
-                "(${character.lifestyle.livingStandard.name.lowercase()})."
+        val log = when {
+            shortfall > 0 && coveredByOverdraft > 0 ->
+                "Living costs ${formatMoney(cost, character.countryCode)} — " +
+                    "buffered ${formatMoney(coveredByOverdraft, character.countryCode)} via mobile overdraft, but short by ${formatMoney(shortfall, character.countryCode)}."
+            shortfall > 0 ->
+                "Living costs ${formatMoney(cost, character.countryCode)} — " +
+                    "short by ${formatMoney(shortfall, character.countryCode)}. Stress mounted."
+            coveredByOverdraft > 0 ->
+                "Paid ${formatMoney(cost, character.countryCode)} living costs with ${formatMoney(coveredByOverdraft, character.countryCode)} mobile overdraft buffer."
+            else ->
+                "Paid ${formatMoney(cost, character.countryCode)} in living costs " +
+                    "(${character.lifestyle.livingStandard.name.lowercase()})."
         }
         return updated.copy(eventLog = EventLogCap.prepend(updated.eventLog, log))
     }
@@ -993,6 +1026,147 @@ class FinanceEngine @Inject constructor(
         data class Success(val character: Character) : InvestmentResult()
         data object InsufficientFunds : InvestmentResult()
         data object InvalidAmount : InvestmentResult()
+        data class BelowMinimum(val minAmount: Int) : InvestmentResult()
+    }
+
+    sealed class RemittanceResult {
+        data class Success(
+            val character: Character,
+            val sentAmount: Int,
+            val receivedAmount: Int,
+            val familyRelationBoost: Int
+        ) : RemittanceResult()
+        data object InsufficientFunds : RemittanceResult()
+        data object NotLivingAbroad : RemittanceResult()
+        data object NoFamilyAtHome : RemittanceResult()
+        data object InvalidAmount : RemittanceResult()
+    }
+
+    /**
+     * Deposits into the country-specific financial vehicle (e.g. Kenya SACCO, US 401(k), Nigeria T-Bills).
+     */
+    fun depositCountryInstrument(character: Character, amount: Int): InvestmentResult {
+        if (amount <= 0) return InvestmentResult.InvalidAmount
+        if (character.stats.money < amount) return InvestmentResult.InsufficientFunds
+        val profile = CountryCatalog.financeProfileFor(character.countryCode)
+        val minDeposit = EconomyScaler.scaleAmount(profile.primaryInstrument.minimumDepositKenya, character.countryCode)
+        if (character.finance.countryInstrumentBalance == 0 && amount < minDeposit) {
+            return InvestmentResult.BelowMinimum(minDeposit)
+        }
+        val newBalance = character.finance.countryInstrumentBalance + amount
+        val updatedCharacter = character.copy(
+            stats = character.stats.copy(money = character.stats.money - amount),
+            finance = character.finance.copy(
+                countryInstrumentBalance = newBalance,
+                countryInstrumentId = profile.primaryInstrument.id
+            ),
+            eventLog = EventLogCap.prepend(
+                character.eventLog,
+                "Deposited ${formatMoney(amount, character.countryCode)} into ${profile.primaryInstrument.name} (${profile.primaryInstrument.localName})."
+            )
+        )
+        return InvestmentResult.Success(updatedCharacter)
+    }
+
+    /**
+     * Withdraws funds from the country-specific financial vehicle back to liquid cash.
+     */
+    fun withdrawCountryInstrument(character: Character, amount: Int): InvestmentResult {
+        if (amount <= 0) return InvestmentResult.InvalidAmount
+        if (character.finance.countryInstrumentBalance < amount) return InvestmentResult.InsufficientFunds
+        val profile = CountryCatalog.financeProfileFor(character.countryCode)
+        val newBalance = character.finance.countryInstrumentBalance - amount
+        val updatedCharacter = character.copy(
+            stats = character.stats.copy(money = character.stats.money + amount),
+            finance = character.finance.copy(
+                countryInstrumentBalance = newBalance,
+                countryInstrumentId = if (newBalance > 0) profile.primaryInstrument.id else null
+            ),
+            eventLog = EventLogCap.prepend(
+                character.eventLog,
+                "Withdrew ${formatMoney(amount, character.countryCode)} from ${profile.primaryInstrument.localName}."
+            )
+        )
+        return InvestmentResult.Success(updatedCharacter)
+    }
+
+    /**
+     * Generates annual yields or dividend payouts from the country-specific financial vehicle.
+     */
+    fun tickCountryInstrument(character: Character): Character {
+        if (character.finance.countryInstrumentBalance <= 0) return character
+        val profile = CountryCatalog.financeProfileFor(character.countryCode)
+        val instrument = profile.primaryInstrument
+        val climateShift = when (character.economicState.climate) {
+            EconomicClimate.BOOM -> 0.020
+            EconomicClimate.STEADY -> 0.0
+            EconomicClimate.INFLATION_SURGE -> 0.010
+            EconomicClimate.RECESSION -> if (instrument.riskLevel == FinancialRiskLevel.GUARANTEED) 0.0 else -0.025
+        }
+        val effectiveRate = (instrument.annualYieldPercent + climateShift).coerceAtLeast(0.01)
+        val dividend = (character.finance.countryInstrumentBalance * effectiveRate).toInt()
+        if (dividend <= 0) return character
+
+        val log = "Received ${formatMoney(dividend, character.countryCode)} in annual dividend yields from ${instrument.localName}."
+        return character.copy(
+            stats = character.stats.copy(money = character.stats.money + dividend),
+            eventLog = EventLogCap.prepend(character.eventLog, log)
+        )
+    }
+
+    /**
+     * Sends international remittances from resident country to living family in birth country.
+     */
+    fun remitMoneyHome(character: Character, amount: Int): RemittanceResult {
+        if (amount <= 0) return RemittanceResult.InvalidAmount
+        if (character.stats.money < amount) return RemittanceResult.InsufficientFunds
+        val isAbroad = character.isLivingAbroad() || character.countryCode != character.birthCountryCode
+        if (!isAbroad) return RemittanceResult.NotLivingAbroad
+        val livingFamily = character.family.filter { it.alive }
+        if (livingFamily.isEmpty()) return RemittanceResult.NoFamilyAtHome
+
+        val receivedAmount = EconomyScaler.convertCurrency(
+            amount,
+            fromCountryCode = character.countryCode,
+            toCountryCode = character.birthCountryCode
+        )
+
+        val relationBoost = when {
+            amount >= EconomyScaler.scaleAmount(50_000, character.countryCode) -> 25
+            amount >= EconomyScaler.scaleAmount(15_000, character.countryCode) -> 15
+            else -> 10
+        }
+
+        val updatedFamily = character.family.map { member ->
+            if (member.alive) {
+                member.copy(
+                    relationshipLevel = (member.relationshipLevel + relationBoost).coerceAtMost(100)
+                )
+            } else member
+        }
+
+        val homeCountryName = CountryCatalog.getCountry(character.birthCountryCode).displayName
+        val log = "Sent ${formatMoney(amount, character.countryCode)} in foreign remittances to family in $homeCountryName. They received ${formatMoney(receivedAmount, character.birthCountryCode)} with deep gratitude."
+
+        val updatedCharacter = character.copy(
+            stats = character.stats.copy(
+                money = character.stats.money - amount,
+                happiness = clampStat(character.stats.happiness + 8),
+                karma = clampStat(character.stats.karma + 10)
+            ),
+            family = updatedFamily,
+            finance = character.finance.copy(
+                lifetimeRemittancesSent = character.finance.lifetimeRemittancesSent + amount
+            ),
+            eventLog = EventLogCap.prepend(character.eventLog, log)
+        )
+
+        return RemittanceResult.Success(
+            character = updatedCharacter,
+            sentAmount = amount,
+            receivedAmount = receivedAmount,
+            familyRelationBoost = relationBoost
+        )
     }
 
     /** Moves liquid cash into the investment portfolio. */

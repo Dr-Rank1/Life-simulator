@@ -55,6 +55,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var characterRepository: CharacterRepository
 
+    @Inject
+    lateinit var billingManager: com.maisha.game.billing.BillingManager
+
     private var deepLinkSlotId by mutableIntStateOf(-1)
     private val keepSplashOnScreen = AtomicBoolean(true)
     private val coldStartTraceActive = AtomicBoolean(true)
@@ -131,6 +134,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        billingManager.refreshPurchases()
         lifecycleScope.launch {
             settingsRepository.updateLastOpenedTimestamp()
         }

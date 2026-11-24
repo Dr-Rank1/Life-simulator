@@ -116,6 +116,7 @@ dependencies {
 
     implementation(libs.play.services.ads)
     implementation(libs.play.services.games)
+    implementation(libs.play.billing)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.appcompat)

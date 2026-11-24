@@ -2945,4 +2945,47 @@
     <string name="debt_student_loan_title">Student Loan Debt</string>
     <string name="debt_student_loan_balance">Loan Balance: %1$s</string>
     <string name="debt_pay_student_button">Repay Student Loan</string>
+
+    <!-- Google Play Billing Store & Dynasty Vault -->
+    <string name="store_vault_title">Dynasty Vault</string>
+    <string name="store_vault_subtitle">Country-scaled currency vouchers and permanent unlocks</string>
+    <string name="store_permanent_unlocks">Permanent Unlocks</string>
+    <string name="store_cash_vouchers">Dynasty Cash Vouchers</string>
+    <string name="store_owned">OWNED</string>
+    <string name="store_offline_notice">Google Play Billing is currently offline. Purchases require an internet connection.</string>
+    <string name="store_ad_free_title">Ad-Free Dynasty</string>
+    <string name="store_ad_free_desc">Permanently remove all interstitial and banner advertisements.</string>
+    <string name="store_creator_pass_title">Dynasty Creator Pass</string>
+    <string name="store_creator_pass_desc">Unlock custom character editor, unlimited re-rolls, and golden dynasty badge.</string>
+    <string name="store_starter_title">Starter Vault Voucher</string>
+    <string name="store_fortune_title">Fortune Vault Voucher</string>
+    <string name="store_tycoon_title">Tycoon Treasury Voucher</string>
+    <string name="store_buy_button">Unlock</string>
+    <string name="store_credits_scaled">Grants %1$s</string>
+
+    <!-- Country-Specific Savings & Investments -->
+    <string name="country_finance_title">Country Savings &amp; Investments</string>
+    <string name="country_finance_invested_balance">Invested Balance</string>
+    <string name="country_finance_annual_yield">Annual Yield</string>
+    <string name="country_finance_projected_dividend">Annual Dividend Projection</string>
+    <string name="country_finance_deposit">Deposit Funds</string>
+    <string name="country_finance_withdraw">Withdraw Funds</string>
+    <string name="country_finance_min_deposit">Minimum initial deposit: %1$s</string>
+    <string name="country_finance_tax_advantaged">Tax-Advantaged</string>
+    <string name="country_finance_standard_tax">Standard Account</string>
+    <string name="country_finance_overdraft_title">Mobile Overdraft Buffer</string>
+    <string name="country_finance_overdraft_desc">Emergency mobile credit buffer protecting against living expense shortfalls.</string>
+    <string name="country_finance_overdraft_used">Overdraft Used: %1$s / %2$s</string>
+
+    <!-- International Remittances -->
+    <string name="remittance_title">Send Remittance Home</string>
+    <string name="remittance_subtitle">Wire money to family living in %1$s</string>
+    <string name="remittance_fx_label">Recipient receives approximately</string>
+    <string name="remittance_send_button">Send Remittance</string>
+    <string name="remittance_not_abroad">Remittances can only be sent when residing outside your birth country.</string>
+    <string name="remittance_no_family">You have no living family members back home to receive remittances.</string>
+    <string name="remittance_lifetime">Lifetime remittances sent: %1$s</string>
+    <string name="remittance_relation_preview">Relationship boost: +%1$d with all family back home</string>
+    <string name="finance_action_store">Vault Store</string>
+    <string name="finance_action_remittance">Remit Home</string>
 </resources>

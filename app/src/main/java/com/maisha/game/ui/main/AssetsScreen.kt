@@ -27,14 +27,21 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.rounded.Apartment
+import androidx.compose.material.icons.rounded.AccountBalance
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.DirectionsCar
 import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Savings
+import androidx.compose.material.icons.rounded.TrendingUp
+import com.maisha.game.data.CountryCatalog
 import com.maisha.game.ui.components.CategoryFilterChipRow
 import com.maisha.game.ui.components.ConfirmActionDialog
 import com.maisha.game.ui.components.ConfirmSeverity
 import com.maisha.game.ui.components.ConfirmableActionHost
+import com.maisha.game.ui.components.CountryFinanceSheet
+import com.maisha.game.ui.components.DynastyVaultStoreSheet
+import com.maisha.game.ui.components.RemittanceSheet
 import com.maisha.game.ui.components.TabPageHero
 import com.maisha.game.ui.components.rememberConfirmableAction
 import androidx.compose.material3.AlertDialog
@@ -117,7 +124,8 @@ import com.maisha.game.util.formatMoney
 
 private enum class AssetsCategory { ALL, OVERVIEW, OWNED, SHOP, MARKETS, ESTATE }
 private enum class AssetSheet {
-    NONE, REAL_ESTATE, VEHICLES, MARKETS, LIVING_STANDARD, CASH_FLOW_LEDGER, DEBT_LIABILITIES
+    NONE, REAL_ESTATE, VEHICLES, MARKETS, LIVING_STANDARD, CASH_FLOW_LEDGER, DEBT_LIABILITIES,
+    STORE, COUNTRY_FINANCE, REMITTANCE
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -149,6 +157,15 @@ fun AssetsScreen(
     onServiceAsset: (String) -> Unit = {},
     onDepositJuniorTrust: (Int) -> Unit = {},
     onRepayStudentLoan: (Int) -> Unit = {},
+    billingProducts: Map<String, com.android.billingclient.api.ProductDetails> = emptyMap(),
+    isBillingConnected: Boolean = false,
+    isBillingAvailable: Boolean = true,
+    isAdFree: Boolean = false,
+    isCreatorPass: Boolean = false,
+    onPurchaseProduct: (String) -> Unit = {},
+    onDepositCountryInstrument: (Int) -> Unit = {},
+    onWithdrawCountryInstrument: (Int) -> Unit = {},
+    onSendRemittance: (Int) -> Unit = {},
     carMakeCatalog: com.maisha.game.data.content.CarMakeCatalog =
         com.maisha.game.data.content.FallbackCarMakeCatalog,
     streetCatalog: com.maisha.game.data.content.StreetCatalog =
@@ -404,6 +421,9 @@ fun AssetsScreen(
                     character = character,
                     netWorth = netWorth,
                     cashFlow = cashFlow,
+                    onOpenStore = { activeAssetSheet = AssetSheet.STORE },
+                    onOpenCountryFinance = { activeAssetSheet = AssetSheet.COUNTRY_FINANCE },
+                    onOpenRemittance = { activeAssetSheet = AssetSheet.REMITTANCE },
                     onOpenLedger = { activeAssetSheet = AssetSheet.CASH_FLOW_LEDGER },
                     onOpenBanking = { activeAssetSheet = AssetSheet.MARKETS },
                     onOpenDebt = { activeAssetSheet = AssetSheet.DEBT_LIABILITIES },
@@ -1051,6 +1071,42 @@ fun AssetsScreen(
                 onRepayStudentLoan = { amount ->
                     activeAssetSheet = AssetSheet.NONE
                     onRepayStudentLoan(amount)
+                },
+                onDismiss = { activeAssetSheet = AssetSheet.NONE }
+            )
+        }
+        AssetSheet.STORE -> {
+            DynastyVaultStoreSheet(
+                character = character,
+                billingProducts = billingProducts,
+                isBillingConnected = isBillingConnected,
+                isBillingAvailable = isBillingAvailable,
+                isAdFree = isAdFree,
+                isCreatorPass = isCreatorPass,
+                onPurchaseProduct = onPurchaseProduct,
+                onDismiss = { activeAssetSheet = AssetSheet.NONE }
+            )
+        }
+        AssetSheet.COUNTRY_FINANCE -> {
+            CountryFinanceSheet(
+                character = character,
+                onDeposit = { amount ->
+                    activeAssetSheet = AssetSheet.NONE
+                    onDepositCountryInstrument(amount)
+                },
+                onWithdraw = { amount ->
+                    activeAssetSheet = AssetSheet.NONE
+                    onWithdrawCountryInstrument(amount)
+                },
+                onDismiss = { activeAssetSheet = AssetSheet.NONE }
+            )
+        }
+        AssetSheet.REMITTANCE -> {
+            RemittanceSheet(
+                character = character,
+                onSendRemittance = { amount ->
+                    activeAssetSheet = AssetSheet.NONE
+                    onSendRemittance(amount)
                 },
                 onDismiss = { activeAssetSheet = AssetSheet.NONE }
             )
@@ -2136,6 +2192,9 @@ private fun FinanceSummaryCard(
     character: Character,
     netWorth: Int,
     cashFlow: AnnualCashFlow,
+    onOpenStore: () -> Unit,
+    onOpenCountryFinance: () -> Unit,
+    onOpenRemittance: () -> Unit,
     onOpenLedger: () -> Unit,
     onOpenBanking: () -> Unit,
     onOpenDebt: () -> Unit,
@@ -2377,6 +2436,26 @@ private fun FinanceSummaryCard(
                     .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                FinanceQuickActionButton(
+                    label = stringResource(R.string.finance_action_store),
+                    icon = Icons.Rounded.AccountBalance,
+                    color = GoldAccent,
+                    onClick = onOpenStore
+                )
+                FinanceQuickActionButton(
+                    label = CountryCatalog.financeProfileFor(character.countryCode).primaryInstrument.localName,
+                    icon = Icons.Rounded.TrendingUp,
+                    color = TealPrimary,
+                    onClick = onOpenCountryFinance
+                )
+                if (character.isLivingAbroad() || character.countryCode != character.birthCountryCode) {
+                    FinanceQuickActionButton(
+                        label = stringResource(R.string.finance_action_remittance),
+                        icon = Icons.Rounded.Public,
+                        color = AccentPink,
+                        onClick = onOpenRemittance
+                    )
+                }
                 FinanceQuickActionButton(
                     label = stringResource(R.string.finance_action_ledger),
                     icon = Icons.Rounded.Description,

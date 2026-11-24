@@ -11,6 +11,10 @@ import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.maisha.game.data.local.SettingsRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,17 +22,26 @@ typealias AdDismissAction = () -> Unit
 typealias AdRewardAction = () -> Unit
 
 @Singleton
-class AdManager @Inject constructor() {
+class AdManager @Inject constructor(
+    private val settingsRepository: SettingsRepository
+) {
 
     private var interstitialAd: InterstitialAd? = null
     private var rewardedAd: RewardedAd? = null
     
     private var isLoadingInterstitial = false
     private var isLoadingRewarded = false
+    private var isAdFree: Boolean = false
+
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            settingsRepository.isAdFree.collect { isAdFree = it }
+        }
+    }
 
     @MainThread
     fun preloadInterstitial(context: Context) {
-        if (!AdUnitConfig.isInterstitialEnabled || interstitialAd != null || isLoadingInterstitial) return
+        if (isAdFree || !AdUnitConfig.isInterstitialEnabled || interstitialAd != null || isLoadingInterstitial) return
         
         isLoadingInterstitial = true
         
@@ -52,6 +65,10 @@ class AdManager @Inject constructor() {
 
     @MainThread
     fun showInterstitialIfReady(activity: Activity, onDismissed: AdDismissAction) {
+        if (isAdFree) {
+            onDismissed()
+            return
+        }
         val ad = interstitialAd
         if (ad == null) {
             preloadInterstitial(activity.applicationContext)

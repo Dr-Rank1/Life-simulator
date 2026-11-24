@@ -189,9 +189,12 @@ Completely offline Canvas drawing engine (1,180+ lines):
 - **4-State Macroeconomic Cycle:** Simulates `BOOM`, `STEADY`, `INFLATION_SURGE`, and `RECESSION` cycles, impacting property valuations, living costs, investment returns, and corporate layoff frequency. Fully backwards-compatible with legacy saves via `EconomicClimateSerializer`.
 - **Junior Trust Piggy Bank:** Safely stashes childhood gift money for minors (0-17), maturing into liquid wallet cash at age 18. Infancy zero-stress protection is strictly preserved.
 - **Mortgage Engine & Prepayments:** 30-year fixed amortization with credit-based APR. `prepayMortgagePrincipal` reduces principal balance, lowers future annual installments, and boosts credit score (+15 for prepayment, +25 for full payoff).
+- **15 Country-Authentic Financial Instruments:** Tailored financial instruments across all 15 countries with authentic localized naming, risk profiles, and yield rates (Kenya SACCO + Fuliza mobile overdraft living cost buffer, Nigeria FGN T-Bills, South Africa Stokvel, USA 401(k), UK ISA, India PPF, Japan NISA, Philippines Pag-IBIG MP2, Brazil Tesouro Direto, etc.) manageable via `CountryFinanceSheet`.
+- **Relocation FX & International Remittances:** Cross-border relocation through `RelocationEngine` converts wealth via `EconomyScaler.convertCurrency` PPP ratios and resets credit baseline to 600. Expatriates can remit cash back home via `RemittanceSheet` to boost family relationships, Happiness, and Karma.
+- **Google Play Billing Store (`DynastyVaultStoreSheet`):** Injected `@Singleton BillingManager` with `billing-ktx` 7.1.1, automatic reconnects, and `onResume` pending-purchase recovery. Consumable Dynasty Cash Vouchers scaled dynamically by country economy multipliers, plus permanent unlocks (`unlock_ad_free` disabling AdMob ads, `unlock_creator_pass` granting custom starting stats and perks).
 - **Preventative Asset Servicing:** `serviceAsset` restores condition, marks `servicedThisYear`, and shields vehicles/properties from annual wear and critical breakdown failure events.
 - **Luxury vehicles:** Cars, speedboats, yachts, private jets with realistic depreciation and upkeep. Dedicated leisure activities (`YACHT_DAY`, `PRIVATE_JET_TRIP`).
-- **Tactile UI Dashboard (`AssetsScreen`):** Prominent `FinanceSummaryCard` at the top of the tab with Net Worth, Liquid Cash, Net Cash Flow (+/-), Credit Rating meter, and Economic Climate chip, backed by `CashFlowLedgerSheet` and `DebtLiabilitiesSheet`.
+- **Tactile UI Dashboard (`AssetsScreen`):** Prominent `FinanceSummaryCard` at the top of the tab with Net Worth, Liquid Cash, Net Cash Flow (+/-), Credit Rating meter, and Economic Climate chip, backed by `CashFlowLedgerSheet`, `DebtLiabilitiesSheet`, `CountryFinanceSheet`, `RemittanceSheet`, and `DynastyVaultStoreSheet`.
 
 ### Mortality & Dynasty Legacy
 - Natural and accidental mortality checks.
@@ -219,6 +222,7 @@ Completely offline Canvas drawing engine (1,180+ lines):
 | `feature` | Multi-Year Narrative Story Arcs & 15-Country Events: `narrative_arcs_events.json`, `requires_event_<id>` / `conflicts_with_event_<id>` gating, 6 multi-step arcs, and authentic universal life stage events |
 | `feature` | Compose UI/UX Ergonomics & Adaptive Navigation Pass: Adaptive `BoxWithConstraints` (bottom bar for <600dp compact phones vs `LeftNavRail` for >=600dp wide layouts), memoized `ProceduralAvatarPortrait`, bounded `EventDialogStyled` & `HeirSelectionScreen`, flexible font-scaling on `DrillDownRow` & `AgeUpButton`, and insets polish |
 | `hardening` | Persistence, Engine Edge-Cases, AdMob/Play Games & Release Configuration Audit: Kotlinx Serialization null/default coercion (`coerceInputValues = true`), net worth mortgage liability deduction, extreme lifecycle age-gates (0, 13, 14, 16, 18, 60, 100+), zero/multi-heir and estate insolvency guards, Play Games v2 init, and 507 unit tests |
+| `feature` | 15-Country Financial Instruments, Relocation FX & Play Billing Store: Localized instruments & SACCO/overdraft, relocation PPP conversions & remittances, Play Billing v7 Dynasty Vault store (`DynastyVaultStoreSheet`, `CountryFinanceSheet`, `RemittanceSheet`), and 586 unit tests |
 
 ---
 
