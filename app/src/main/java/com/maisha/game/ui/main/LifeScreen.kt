@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,8 +70,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maisha.game.R
+import com.maisha.game.data.EconomyScaler
 import com.maisha.game.data.local.OnboardingTips
 import com.maisha.game.data.model.BenefactorFavorType
+import com.maisha.game.data.model.BucketGoal
 import com.maisha.game.data.model.BucketGoalKind
 import com.maisha.game.data.model.CareerState
 import com.maisha.game.data.model.Character
@@ -533,6 +537,7 @@ fun LifeScreen(
             weeklyChallenge = uiState.weeklyChallenge,
             weeklyChallengeCompleted = uiState.weeklyChallengeCompleted,
             countryCode = character.countryCode,
+            bucketList = character.bucketList,
             onDismiss = { showQuestsSheet = false }
         )
     }
@@ -1815,6 +1820,7 @@ private fun YearQuestsSheet(
     quests: List<YearQuest>,
     progress: List<YearQuestProgress>,
     countryCode: String,
+    bucketList: List<BucketGoal> = emptyList(),
     weeklyChallenge: com.maisha.game.domain.WeeklyChallenge? = null,
     weeklyChallengeCompleted: Boolean = false,
     onDismiss: () -> Unit
@@ -1829,6 +1835,7 @@ private fun YearQuestsSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
@@ -1889,6 +1896,81 @@ private fun YearQuestsSheet(
                             style = MaterialTheme.typography.bodySmall,
                             color = InkSecondary
                         )
+                    }
+                }
+            }
+
+            val activeBucketGoals = bucketList.filter { !it.completed }
+            if (activeBucketGoals.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.section_bucket_list),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = InkPrimary
+                        )
+                        Text(
+                            text = "${bucketList.count { it.completed }}/${bucketList.size}",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = GoldAccent
+                        )
+                    }
+                    activeBucketGoals.forEach { goal ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = CardDefaults.cardColors(containerColor = CreamMuted),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, Hairline)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(
+                                    modifier = Modifier.weight(1f),
+                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                ) {
+                                    Text(
+                                        text = bucketSpotlightTitle(goal.kind),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = InkPrimary
+                                    )
+                                    if (goal.commitmentPaid > 0) {
+                                        Text(
+                                            text = stringResource(
+                                                R.string.format_bucket_commitment,
+                                                formatMoney(goal.commitmentPaid, countryCode)
+                                            ),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = InkSecondary
+                                        )
+                                    }
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(99.dp))
+                                        .background(GoldAccent.copy(alpha = 0.15f))
+                                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.bucket_spotlight_pending),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = GoldAccent
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1962,6 +2044,44 @@ private fun YearQuestsSheet(
                                         .clip(RoundedCornerShape(3.dp)),
                                     color = GoldAccent,
                                     trackColor = Hairline
+                                )
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                val rewardText = buildString {
+                                    append("+${quest.rewardKarma} Karma")
+                                    if (quest.rewardHappiness > 0) append(" · +${quest.rewardHappiness} Happiness")
+                                    if (quest.rewardCashKenya > 0) {
+                                        val scaled = EconomyScaler.scaleAmount(quest.rewardCashKenya, countryCode)
+                                        append(" · +${formatMoney(scaled, countryCode)}")
+                                    }
+                                }
+                                Text(
+                                    text = rewardText,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = GoldAccent,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                val tabHintRes = when (quest.kind) {
+                                    YearQuestKind.RAISE_HAPPINESS,
+                                    YearQuestKind.RAISE_HEALTH,
+                                    YearQuestKind.STAY_OUT_OF_TROUBLE -> R.string.nav_actions
+                                    YearQuestKind.BOND_FAMILY -> R.string.nav_family
+                                    YearQuestKind.STUDY_SMARTS,
+                                    YearQuestKind.HOLD_JOB,
+                                    YearQuestKind.RAISE_SKILL -> R.string.nav_career
+                                    YearQuestKind.EARN_MONEY,
+                                    YearQuestKind.GROW_SAVINGS,
+                                    YearQuestKind.GROW_FOLLOWERS -> R.string.nav_assets
+                                }
+                                Text(
+                                    text = stringResource(tabHintRes),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = TealPrimary,
+                                    fontWeight = FontWeight.Medium
                                 )
                             }
                         }

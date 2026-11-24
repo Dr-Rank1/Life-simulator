@@ -836,6 +836,7 @@
     <string name="event_category_school">School</string>
     <string name="event_category_health">Health</string>
     <string name="event_category_underworld">Underworld</string>
+    <string name="event_category_holiday">National Holiday</string>
 
     <!-- Achievements -->
     <string name="achievement_unlocked_title">Achievement Unlocked!</string>

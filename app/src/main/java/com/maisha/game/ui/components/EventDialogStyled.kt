@@ -76,6 +76,7 @@ import com.maisha.game.data.model.CountryFlavor
 import com.maisha.game.data.model.EventChoice
 import com.maisha.game.data.model.Expression
 import com.maisha.game.data.model.Gender
+import com.maisha.game.data.model.HolidayFlavor
 import com.maisha.game.data.model.LifeEvent
 import com.maisha.game.data.model.Person
 import com.maisha.game.data.model.Stats
@@ -150,8 +151,13 @@ fun EventDialogStyled(
     }
 
     val flavor = remember(character.countryCode) { CountryCatalog.flavorFor(character.countryCode) }
-    val resolvedNarrativeText = remember(event.text, flavor) {
-        FlavorInterpolator.interpolate(event.text, flavor)
+    val holiday = remember(event.tags, flavor) {
+        if (FlavorInterpolator.HOLIDAY_TAG in event.tags.map { it.lowercase() }) {
+            flavor.notableHolidays.randomOrNull()
+        } else null
+    }
+    val resolvedNarrativeText = remember(event.text, flavor, holiday) {
+        FlavorInterpolator.interpolate(event.text, flavor, holiday)
     }
     val category = remember(event.tags) { categoryVisualFor(event) }
     val tone = remember(event.tags) { toneFor(event) }
@@ -199,6 +205,8 @@ fun EventDialogStyled(
                             category = category,
                             tone = tone,
                             playerAge = playerAge,
+                            countryCode = character.countryCode,
+                            holiday = holiday,
                             showQueue = eventQueueTotal > 1,
                             eventQueueIndex = eventQueueIndex,
                             eventQueueTotal = eventQueueTotal
@@ -227,6 +235,7 @@ fun EventDialogStyled(
                                         index = index + 1,
                                         choice = choice,
                                         flavor = flavor,
+                                        holiday = holiday,
                                         countryCode = character.countryCode,
                                         accent = category.accent,
                                         enabled = !selectionLocked,
@@ -252,6 +261,8 @@ private fun EventDialogHeroHeader(
     category: EventCategoryVisual,
     tone: EventTone,
     playerAge: Int,
+    countryCode: String,
+    holiday: HolidayFlavor?,
     showQueue: Boolean,
     eventQueueIndex: Int,
     eventQueueTotal: Int
@@ -293,7 +304,7 @@ private fun EventDialogHeroHeader(
                     }
                     Column {
                         Text(
-                            text = stringResource(category.titleRes),
+                            text = if (holiday != null) holiday.name else stringResource(category.titleRes),
                             style = MaterialTheme.typography.labelMedium,
                             color = category.accent,
                             fontWeight = FontWeight.SemiBold
@@ -306,19 +317,38 @@ private fun EventDialogHeroHeader(
                         )
                     }
                 }
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(PaperWhite)
-                        .border(1.dp, Hairline, RoundedCornerShape(20.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = stringResource(R.string.event_age_badge, playerAge),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = InkPrimary,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(category.accent.copy(alpha = 0.12f))
+                            .border(1.dp, category.accent.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = countryCode.uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = category.accent,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(PaperWhite)
+                            .border(1.dp, Hairline, RoundedCornerShape(20.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.event_age_badge, playerAge),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = InkPrimary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
 
@@ -476,6 +506,7 @@ private fun EventChoiceCard(
     index: Int,
     choice: EventChoice,
     flavor: CountryFlavor,
+    holiday: HolidayFlavor? = null,
     countryCode: String,
     accent: Color,
     enabled: Boolean,
@@ -493,8 +524,8 @@ private fun EventChoiceCard(
     var flashing by remember { mutableStateOf(false) }
     var pendingClick by remember { mutableStateOf(false) }
 
-    val resolvedLabel = remember(choice.label, flavor) {
-        FlavorInterpolator.interpolate(choice.label, flavor)
+    val resolvedLabel = remember(choice.label, flavor, holiday) {
+        FlavorInterpolator.interpolate(choice.label, flavor, holiday)
     }
 
     LaunchedEffect(eventId, index) {
@@ -581,9 +612,25 @@ private fun EventChoiceCard(
                     }
                 }
             }
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 14.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Box(
+            modifier = Modifier
+                .size(28.dp)
+                .clip(CircleShape)
+                .background(accent.copy(alpha = 0.12f))
+                .border(1.dp, accent.copy(alpha = 0.35f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = index.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = accent
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -731,6 +778,11 @@ private fun categoryVisualFor(event: LifeEvent): EventCategoryVisual {
             R.string.event_category_family,
             AppIcons.Family,
             StatRelationship
+        )
+        FlavorInterpolator.HOLIDAY_TAG in tags || "holiday" in tags -> EventCategoryVisual(
+            R.string.event_category_holiday,
+            AppIcons.Happiness,
+            GoldAccent
         )
         else -> EventCategoryVisual(
             R.string.event_category_life,

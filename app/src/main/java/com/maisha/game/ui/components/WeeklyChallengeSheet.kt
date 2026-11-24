@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,6 +48,7 @@ import com.maisha.game.data.EconomyScaler
 import com.maisha.game.domain.ChallengeRequirement
 import com.maisha.game.domain.RequirementUnit
 import com.maisha.game.domain.WeeklyChallengeProgress
+import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.BorderCardSlate
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.InkPrimary
@@ -246,14 +248,16 @@ fun WeeklyChallengeSheet(
                     ) {
                         // Cash bonus
                         RewardRow(
-                            icon = "💰",
+                            icon = AppIcons.Money,
+                            iconTint = LifeGreen,
                             text = stringResource(R.string.challenge_reward_cash, formattedCash),
                             highlight = true
                         )
 
                         // Silk Ribbon
                         RewardRow(
-                            icon = "🎗️",
+                            icon = AppIcons.Achievements,
+                            iconTint = GoldAccent,
                             text = stringResource(R.string.challenge_reward_ribbon, resolveRibbonName(reward.ribbonKey)),
                             highlight = false
                         )
@@ -264,13 +268,15 @@ fun WeeklyChallengeSheet(
                             horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             RewardRow(
-                                icon = "✨",
+                                icon = AppIcons.Looks,
+                                iconTint = GoldAccent,
                                 text = stringResource(R.string.challenge_reward_karma, reward.karmaBonus),
                                 highlight = false,
                                 modifier = Modifier.weight(1f)
                             )
                             RewardRow(
-                                icon = "😊",
+                                icon = AppIcons.Happiness,
+                                iconTint = GoldAccent,
                                 text = stringResource(R.string.challenge_reward_happiness, reward.happinessBonus),
                                 highlight = false,
                                 modifier = Modifier.weight(1f)
@@ -280,7 +286,8 @@ fun WeeklyChallengeSheet(
                         // Unlockable Title (if defined)
                         if (reward.titleKey.isNotBlank()) {
                             RewardRow(
-                                icon = "👑",
+                                icon = AppIcons.HeirCrown,
+                                iconTint = GoldAccent,
                                 text = stringResource(R.string.challenge_reward_title_label, resolveTitleName(reward.titleKey)),
                                 highlight = false
                             )
@@ -469,7 +476,8 @@ private fun formatRequirementProgress(req: ChallengeRequirement): String = when 
 
 @Composable
 private fun RewardRow(
-    icon: String,
+    icon: ImageVector,
+    iconTint: Color,
     text: String,
     highlight: Boolean,
     modifier: Modifier = Modifier
@@ -479,7 +487,12 @@ private fun RewardRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(text = icon, fontSize = 16.sp)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(16.dp)
+        )
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,

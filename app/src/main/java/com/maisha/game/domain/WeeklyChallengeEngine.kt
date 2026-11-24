@@ -173,7 +173,7 @@ class WeeklyChallengeEngine @Inject constructor() {
             ),
             eventLog = EventLogCap.prepend(
                 character.eventLog,
-                "🏆 Claimed Weekly Challenge rewards for ${challenge.ribbonKey}! +${formatMoney(scaledCash, character.countryCode)}."
+                "Claimed Weekly Challenge rewards for ${challenge.ribbonKey}! +${formatMoney(scaledCash, character.countryCode)}."
             )
         )
 
