@@ -16,6 +16,7 @@ import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.Stats
 import com.maisha.game.data.remote.RandomNameService
 import com.maisha.game.domain.FamilyGenerator
+import com.maisha.game.domain.StartingStatArchetype
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,14 +36,8 @@ data class CharacterCreationUiState(
     val selectedCountryCode: String = "US",
     val countrySearchQuery: String = "",
     val avatarConfig: AvatarConfig = AvatarConfig.random().copy(facialHair = null, eyewear = null),
-    val selectedStats: Stats = Stats(
-        health = Random.nextInt(50, 95),
-        happiness = Random.nextInt(50, 95),
-        smarts = Random.nextInt(50, 95),
-        looks = Random.nextInt(50, 95),
-        money = 0,
-        karma = 50
-    ),
+    val selectedArchetype: StartingStatArchetype? = StartingStatArchetype.BALANCED,
+    val selectedStats: Stats = StartingStatArchetype.BALANCED.buildInitialStats(),
     val nameError: String? = null,
     val isSaving: Boolean = false,
     val navigateToAvatarPicker: Boolean = false,
@@ -71,20 +66,15 @@ class CharacterCreationViewModel @Inject constructor(
             val defaultGender = if (Random.nextBoolean()) Gender.MALE else Gender.FEMALE
             val defaultName = NamePool.randomFullName(defaultGender, defaultCountry)
             val defaultAvatar = AvatarConfig.random().copy(facialHair = null, eyewear = null)
-            val defaultStats = Stats(
-                health = Random.nextInt(50, 95),
-                happiness = Random.nextInt(50, 95),
-                smarts = Random.nextInt(50, 95),
-                looks = Random.nextInt(50, 95),
-                money = 0,
-                karma = 50
-            )
+            val defaultArchetype = StartingStatArchetype.BALANCED
+            val defaultStats = defaultArchetype.buildInitialStats()
             CharacterCreationUiState(
                 name = defaultName,
                 hasUserEditedName = false,
                 selectedGender = defaultGender,
                 selectedCountryCode = defaultCountry,
                 avatarConfig = defaultAvatar,
+                selectedArchetype = defaultArchetype,
                 selectedStats = defaultStats
             )
         }
@@ -197,14 +187,8 @@ class CharacterCreationViewModel @Inject constructor(
         val gender = if (Random.nextBoolean()) Gender.MALE else Gender.FEMALE
         val name = NamePool.randomFullName(gender, country)
         val avatar = AvatarConfig.random().copy(facialHair = null, eyewear = null)
-        val stats = Stats(
-            health = Random.nextInt(50, 95),
-            happiness = Random.nextInt(50, 95),
-            smarts = Random.nextInt(50, 95),
-            looks = Random.nextInt(50, 95),
-            money = 0,
-            karma = 50
-        )
+        val archetype = StartingStatArchetype.values().random()
+        val stats = archetype.buildInitialStats()
         _uiState.update {
             it.copy(
                 selectedCountryCode = country,
@@ -212,9 +196,19 @@ class CharacterCreationViewModel @Inject constructor(
                 name = name,
                 hasUserEditedName = false,
                 avatarConfig = avatar,
+                selectedArchetype = archetype,
                 selectedStats = stats,
                 countrySearchQuery = "",
                 nameError = null
+            )
+        }
+    }
+
+    fun onArchetypeSelected(archetype: StartingStatArchetype) {
+        _uiState.update {
+            it.copy(
+                selectedArchetype = archetype,
+                selectedStats = archetype.buildInitialStats()
             )
         }
     }
@@ -243,6 +237,7 @@ class CharacterCreationViewModel @Inject constructor(
     fun onStatsChange(stats: Stats) {
         _uiState.update {
             it.copy(
+                selectedArchetype = null,
                 selectedStats = stats.copy(
                     // Keep these fixed for new life creation.
                     money = 0,

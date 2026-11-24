@@ -70,6 +70,7 @@ data class LifeSummaryUiState(
     val isShareCapturing: Boolean = false,
     val shareErrorMessage: String? = null,
     val eligibleHeirs: List<com.maisha.game.data.model.Person> = emptyList(),
+    val heirPreviews: List<com.maisha.game.domain.HeirCandidatePreview> = emptyList(),
     val showHeirSelection: Boolean = false,
     val selectedHeir: com.maisha.game.data.model.Person? = null,
     val showLegacyConfirmation: Boolean = false,
@@ -170,7 +171,8 @@ class LifeSummaryViewModel @Inject constructor(
                                     .filter { progress -> progress.unlocked }
                                     .map { progress -> progress.achievementId }
                             ),
-                            eligibleHeirs = legacyEngine.eligibleHeirs(character)
+                            eligibleHeirs = legacyEngine.eligibleHeirs(character),
+                            heirPreviews = legacyEngine.previewHeirCandidates(character)
                         )
                     }
                 }

@@ -9,7 +9,68 @@ import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.RelationType
 import com.maisha.game.data.model.SchoolClique
 import com.maisha.game.data.model.SchoolStage
+import com.maisha.game.data.model.Stats
 import kotlinx.serialization.Serializable
+
+@Serializable
+enum class StartingStatArchetype(
+    val titleKey: String,
+    val descriptionKey: String,
+    val health: Int,
+    val happiness: Int,
+    val smarts: Int,
+    val looks: Int
+) {
+    BALANCED(
+        titleKey = "archetype_preset_balanced",
+        descriptionKey = "archetype_preset_balanced_desc",
+        health = 75,
+        happiness = 75,
+        smarts = 75,
+        looks = 75
+    ),
+    PRODIGY(
+        titleKey = "archetype_preset_prodigy",
+        descriptionKey = "archetype_preset_prodigy_desc",
+        health = 70,
+        happiness = 70,
+        smarts = 95,
+        looks = 65
+    ),
+    ATHLETE(
+        titleKey = "archetype_preset_athlete",
+        descriptionKey = "archetype_preset_athlete_desc",
+        health = 95,
+        happiness = 80,
+        smarts = 60,
+        looks = 80
+    ),
+    CHARMER(
+        titleKey = "archetype_preset_charmer",
+        descriptionKey = "archetype_preset_charmer_desc",
+        health = 70,
+        happiness = 85,
+        smarts = 65,
+        looks = 95
+    ),
+    HUSTLER(
+        titleKey = "archetype_preset_hustler",
+        descriptionKey = "archetype_preset_hustler_desc",
+        health = 75,
+        happiness = 75,
+        smarts = 85,
+        looks = 80
+    );
+
+    fun buildInitialStats(): Stats = Stats(
+        health = health,
+        happiness = happiness,
+        smarts = smarts,
+        looks = looks,
+        money = 0,
+        karma = 50
+    )
+}
 
 @Serializable
 enum class LifeRibbon(

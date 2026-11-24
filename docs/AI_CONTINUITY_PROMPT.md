@@ -200,7 +200,8 @@ Completely offline Canvas drawing engine (1,180+ lines):
 ### Mortality & Dynasty Legacy
 - Natural and accidental mortality checks.
 - BitLife-style silk-sash tombstone ribbons (*Loaded*, *Academic*, *Saint*, *Scandalous*, *Fame Icon*, *Cunning*, *Family Anchor*, *Workaholic*, *Mediocre*).
-- Continue dynasty as an adult child heir, inheriting wealth per the character's will.
+- **Commemorative Monument Dossier (`MemorialHeader` & `LifeSummaryScreen`):** Arched gravestone slab with stone bevel styling, top Silk Sash Life Ribbon Banner with custom vector crest (`AppIcons.Tombstone`), gilded medallion holding `ProceduralAvatarPortrait` with peaceful expression, carved monument metrics strip (Lifetime Net Worth, Pinnacle Career, Family Lineage), cause-of-death plaque, and a prominent hero-grade "Continue as Heir" CTA button.
+- **Rich Heir Succession (`HeirSelectionDialog`):** `previewHeirCandidates` in `LegacyEngine` calculates exact inheritance cash and percentage estate share based on will or equal division. Presents surviving children as selectable heir dossier cards showing 56dp `ProceduralAvatarPortrait`, relationship bond %, stats preview, and gold inheritance share pill.
 
 ---
 
@@ -225,6 +226,7 @@ Completely offline Canvas drawing engine (1,180+ lines):
 | `hardening` | Persistence, Engine Edge-Cases, AdMob/Play Games & Release Configuration Audit: Kotlinx Serialization null/default coercion (`coerceInputValues = true`), net worth mortgage liability deduction, extreme lifecycle age-gates (0, 13, 14, 16, 18, 60, 100+), zero/multi-heir and estate insolvency guards, Play Games v2 init, and 507 unit tests |
 | `feature` | 15-Country Financial Instruments, Relocation FX & Play Billing Store: Localized instruments & SACCO/overdraft, relocation PPP conversions & remittances, Play Billing v7 Dynasty Vault store (`DynastyVaultStoreSheet`, `CountryFinanceSheet`, `RemittanceSheet`), and 586 unit tests |
 | `feature` | Mobile Life-Sim Visual & Tactile Arcade UI Overhaul: Procedural `StageBackdropCanvas` scene backdrop, rolling HUD counter transitions, 4-ring arc gauges (`StatGaugeCluster`), edge-glow windfall/critical alert overlays, 2-column arcade activity grid (`ActivityGridCard`), expressive Relationship Cards (`PersonCard`) with temperament pills, 5-segment bond meters & instant 1-tap quick actions, visual rank progression steppers, opportunity stamps (`JobOpportunityCard`), home equity gauges, and modal `CharacterDossierSheet` |
+| `feature` | Game-Feel Character Creation, Commemorative Monument Dossier & Rich Heir Succession: `StartingStatArchetype` presets, instant shuffle, country preview cards, arched monument tombstone with silk-sash banner & carved metrics, and `HeirCandidatePreview` dossier cards with inheritance shares |
 
 ---
 

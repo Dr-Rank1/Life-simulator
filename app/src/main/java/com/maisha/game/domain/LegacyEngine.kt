@@ -30,6 +30,13 @@ data class WillValidationResult(
     val errorMessage: String? = null
 )
 
+data class HeirCandidatePreview(
+    val heir: Person,
+    val inheritanceCash: Int,
+    val estateSharePercent: Int,
+    val relationshipLevel: Int
+)
+
 @Singleton
 class LegacyEngine @Inject constructor(
     private val mortalityEngine: MortalityEngine,
@@ -49,6 +56,31 @@ class LegacyEngine @Inject constructor(
                 person.relation == RelationType.CHILD && person.alive && person.age >= MIN_HEIR_AGE
             }
             .sortedByDescending { it.age }
+
+    /**
+     * Calculates rich preview metadata for each eligible heir, including their inheritance cash
+     * and estate percentage share based on the deceased's will or equal division.
+     */
+    fun previewHeirCandidates(deceased: Character): List<HeirCandidatePreview> {
+        val eligible = eligibleHeirs(deceased)
+        if (eligible.isEmpty()) return emptyList()
+        val settlement = calculateEstateSettlement(deceased)
+        val distributable = settlement.distributableCash
+        return eligible.map { heir ->
+            val cash = calculateMoneyInheritance(deceased, distributable, heir)
+            val percent = if (distributable > 0) {
+                ((cash.toLong() * 100L) / distributable).toInt().coerceIn(0, 100)
+            } else {
+                0
+            }
+            HeirCandidatePreview(
+                heir = heir,
+                inheritanceCash = cash,
+                estateSharePercent = percent,
+                relationshipLevel = heir.relationshipLevel
+            )
+        }
+    }
 
     /** Spouse and living children who may appear in a custom will. */
     fun willBeneficiaries(character: Character): List<Person> =

@@ -6,6 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +42,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -59,10 +61,12 @@ import com.maisha.game.data.IllustrationCatalog
 import com.maisha.game.data.model.AchievementCategory
 import com.maisha.game.data.model.AvatarConfig
 import com.maisha.game.data.model.Character
+import com.maisha.game.data.model.Expression
 import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.IllustrationRef
 import com.maisha.game.data.model.Stats
 import com.maisha.game.data.model.ageStageFor
+import com.maisha.game.ui.avatar.ProceduralAvatarPortrait
 import com.maisha.game.ui.components.AdaptiveBannerAd
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.components.AppLoadingIndicator
@@ -198,8 +202,45 @@ fun LifeSummaryScreen(
                     lifeArchetypeLabel = uiState.lifeArchetypeLabel,
                     ribbon = uiState.ribbon,
                     legacyStamp = uiState.legacyStamp,
-                    epitaph = uiState.epitaphText
+                    epitaph = uiState.epitaphText,
+                    netWorth = uiState.netWorth,
+                    careerRecap = uiState.careerRecap,
+                    childrenCount = uiState.childrenCount
                 )
+            }
+
+            if (uiState.eligibleHeirs.isNotEmpty()) {
+                CascadeCard(visible = cascadeVisible, index = 1) {
+                    Button(
+                        onClick = onContinueLegacy,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(54.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = GoldAccent,
+                            contentColor = InkPrimary
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = AppIcons.HeirCrown,
+                                contentDescription = null,
+                                tint = InkPrimary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.btn_continue_as_heir_count, uiState.eligibleHeirs.size),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
             }
 
             if (uiState.showAchievementsCarryOverTip) {
@@ -275,6 +316,7 @@ fun LifeSummaryScreen(
                     slotNumber = uiState.slotId + 1,
                     selectedHeir = uiState.selectedHeir,
                     showConfirmation = uiState.showLegacyConfirmation,
+                    heirPreviews = uiState.heirPreviews,
                     onHeirSelected = onHeirSelected,
                     onConfirmContinue = onConfirmLegacyContinuation,
                     onDismissConfirmation = onDismissLegacyConfirmation,
@@ -533,7 +575,10 @@ private fun MemorialHeader(
     lifeArchetypeLabel: String = "",
     ribbon: com.maisha.game.domain.LifeRibbon = com.maisha.game.domain.LifeRibbon.MEDIOCRE,
     legacyStamp: String = "",
-    epitaph: String = ""
+    epitaph: String = "",
+    netWorth: Int = 0,
+    careerRecap: String = "",
+    childrenCount: Int = 0
 ) {
     val deathYear = character.birthYear + character.age
     val stage = ageStageFor(character.age)
@@ -562,21 +607,20 @@ private fun MemorialHeader(
     val col1 = androidx.compose.ui.graphics.Color(ribbon.primaryColorHex)
     val col2 = androidx.compose.ui.graphics.Color(ribbon.secondaryColorHex)
 
+    // Arched Monument Gravestone Dossier
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = PaperWhite
-        ),
-        border = androidx.compose.foundation.BorderStroke(1.dp, OutlineInk),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 16.dp, bottomEnd = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = PaperWhite),
+        border = androidx.compose.foundation.BorderStroke(2.dp, OutlineInk),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        // High-contrast Silk Sash Life Ribbon Banner
+        // High-contrast Silk Sash Life Ribbon Banner at Monument Crest
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(col1, col2)))
-                .padding(vertical = 10.dp, horizontal = 16.dp),
+                .padding(vertical = 12.dp, horizontal = 16.dp),
             contentAlignment = Alignment.Center
         ) {
             Row(
@@ -584,7 +628,7 @@ private fun MemorialHeader(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
-                    imageVector = AppIcons.Achievements,
+                    imageVector = AppIcons.Tombstone,
                     contentDescription = null,
                     tint = androidx.compose.ui.graphics.Color.White,
                     modifier = Modifier.size(20.dp)
@@ -594,7 +638,7 @@ private fun MemorialHeader(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
                     color = androidx.compose.ui.graphics.Color.White,
-                    letterSpacing = 1.5.sp
+                    letterSpacing = 2.sp
                 )
             }
         }
@@ -605,13 +649,25 @@ private fun MemorialHeader(
                 .padding(horizontal = 16.dp, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            PersonAvatar(
-                avatarConfig = character.avatarConfig,
-                size = 88,
-                age = character.age,
-                seed = character.name
-            )
+            // Ornamental Gilded Medallion Holding Procedural Avatar
+            Box(
+                modifier = Modifier
+                    .size(96.dp)
+                    .clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(androidx.compose.ui.graphics.Color.White)
+                    .border(3.dp, GoldAccent, androidx.compose.foundation.shape.CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                ProceduralAvatarPortrait(
+                    config = character.avatarConfig,
+                    age = character.age,
+                    expression = Expression.NEUTRAL,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
             Spacer(modifier = Modifier.height(10.dp))
+
             Text(
                 text = stringResource(ribbonDescRes),
                 style = MaterialTheme.typography.bodySmall,
@@ -619,19 +675,24 @@ private fun MemorialHeader(
                 fontWeight = FontWeight.SemiBold,
                 textAlign = TextAlign.Center
             )
+
             Spacer(modifier = Modifier.height(6.dp))
+
             Text(
-                text = stringResource(R.string.section_memorial),
-                style = MaterialTheme.typography.labelLarge,
+                text = stringResource(R.string.section_memorial).uppercase(),
+                style = MaterialTheme.typography.labelSmall,
                 color = GoldAccent,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.2.sp
             )
+
             Spacer(modifier = Modifier.height(6.dp))
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                CountryFlag(countryCode = character.countryCode, size = 22.dp)
+                CountryFlag(countryCode = character.countryCode, size = 24.dp)
                 Text(
                     text = character.name,
                     style = MaterialTheme.typography.headlineSmall,
@@ -642,6 +703,7 @@ private fun MemorialHeader(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+
             Text(
                 text = stringResource(
                     R.string.format_life_span,
@@ -654,6 +716,7 @@ private fun MemorialHeader(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 4.dp)
             )
+
             Text(
                 text = stage.name.lowercase().replaceFirstChar { it.titlecase() },
                 style = MaterialTheme.typography.labelMedium,
@@ -661,12 +724,16 @@ private fun MemorialHeader(
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(top = 2.dp)
             )
+
             Spacer(modifier = Modifier.height(12.dp))
+
+            // Cause of Death Commemorative Plaque
             Card(
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = CoralNegative.copy(alpha = 0.18f)
-                )
+                    containerColor = CoralNegative.copy(alpha = 0.14f)
+                ),
+                border = androidx.compose.foundation.BorderStroke(1.dp, CoralNegative.copy(alpha = 0.4f))
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -675,7 +742,7 @@ private fun MemorialHeader(
                     Text(
                         text = deathCauseLabel,
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
+                        fontWeight = FontWeight.Bold,
                         color = InkPrimary,
                         textAlign = TextAlign.Center
                     )
@@ -683,7 +750,7 @@ private fun MemorialHeader(
                         Text(
                             text = deathFlavorText,
                             style = MaterialTheme.typography.bodySmall,
-                            color = InkPrimary.copy(alpha = 0.8f),
+                            color = InkPrimary.copy(alpha = 0.85f),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -693,7 +760,7 @@ private fun MemorialHeader(
                             text = lifeArchetypeLabel,
                             style = MaterialTheme.typography.labelLarge,
                             color = GoldAccent,
-                            fontWeight = FontWeight.SemiBold,
+                            fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 8.dp)
                         )
@@ -701,7 +768,7 @@ private fun MemorialHeader(
                     if (legacyStamp.isNotBlank()) {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = GoldAccent.copy(alpha = 0.2f),
+                            color = GoldAccent.copy(alpha = 0.25f),
                             border = androidx.compose.foundation.BorderStroke(1.dp, GoldAccent.copy(alpha = 0.6f)),
                             modifier = Modifier.padding(top = 8.dp)
                         ) {
@@ -720,13 +787,83 @@ private fun MemorialHeader(
                             text = "\"$epitaph\"",
                             style = MaterialTheme.typography.bodySmall,
                             fontStyle = FontStyle.Italic,
-                            color = InkPrimary.copy(alpha = 0.85f),
+                            color = InkPrimary.copy(alpha = 0.9f),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp)
                         )
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // 3-Column Carved Monument Metrics Strip
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                MonumentMetricChip(
+                    icon = AppIcons.Money,
+                    label = stringResource(R.string.monument_lifetime_wealth),
+                    value = formatMoney(netWorth, character.countryCode),
+                    modifier = Modifier.weight(1f)
+                )
+                MonumentMetricChip(
+                    icon = AppIcons.Career,
+                    label = stringResource(R.string.label_career),
+                    value = careerRecap.split("·").firstOrNull()?.trim() ?: "Independent",
+                    modifier = Modifier.weight(1f)
+                )
+                MonumentMetricChip(
+                    icon = AppIcons.Family,
+                    label = stringResource(R.string.label_family),
+                    value = "$childrenCount Children",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MonumentMetricChip(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(10.dp),
+        color = CreamBg,
+        border = androidx.compose.foundation.BorderStroke(1.dp, OutlineInk)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = TealPrimary,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = InkPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                color = InkSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -1016,7 +1153,7 @@ private fun LifeSummaryScreenPreview() {
                     achievementBadges = listOf(
                         ShareAchievementBadge(
                             titleRes = R.string.app_name,
-                            emoji = "🏆",
+                            emoji = "",
                             category = AchievementCategory.FAMILY
                         )
                     )

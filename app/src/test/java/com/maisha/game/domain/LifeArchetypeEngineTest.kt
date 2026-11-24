@@ -247,4 +247,28 @@ class LifeArchetypeEngineTest {
         )
         assertEquals("stamp_humble_origin", LifeArchetypeEngine.resolveLegacyStampKey(humble))
     }
+
+    @Test
+    fun startingStatArchetypes_provideExpectedPresetValues() {
+        val balanced = StartingStatArchetype.BALANCED.buildInitialStats()
+        assertEquals(75, balanced.health)
+        assertEquals(75, balanced.happiness)
+        assertEquals(75, balanced.smarts)
+        assertEquals(75, balanced.looks)
+        assertEquals(0, balanced.money)
+        assertEquals(50, balanced.karma)
+
+        val prodigy = StartingStatArchetype.PRODIGY.buildInitialStats()
+        assertEquals(95, prodigy.smarts)
+
+        val athlete = StartingStatArchetype.ATHLETE.buildInitialStats()
+        assertEquals(95, athlete.health)
+
+        val charmer = StartingStatArchetype.CHARMER.buildInitialStats()
+        assertEquals(95, charmer.looks)
+
+        val hustler = StartingStatArchetype.HUSTLER.buildInitialStats()
+        assertEquals(85, hustler.smarts)
+        assertEquals(80, hustler.looks)
+    }
 }

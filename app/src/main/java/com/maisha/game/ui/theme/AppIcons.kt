@@ -465,6 +465,131 @@ object AppIcons {
         lineTo(16f, 16f)
     }
 
+    val Dice: ImageVector = icon("Dice") {
+        moveTo(5f, 3f)
+        lineTo(19f, 3f)
+        curveTo(20.1f, 3f, 21f, 3.9f, 21f, 5f)
+        lineTo(21f, 19f)
+        curveTo(21f, 20.1f, 20.1f, 21f, 19f, 21f)
+        lineTo(5f, 21f)
+        curveTo(3.9f, 21f, 3f, 20.1f, 3f, 19f)
+        lineTo(3f, 5f)
+        curveTo(3f, 3.9f, 3.9f, 3f, 5f, 3f)
+        close()
+        // Center pip
+        moveTo(12f, 11f)
+        lineTo(12f, 13f)
+        // Corner pips
+        moveTo(7f, 6f)
+        lineTo(8f, 8f)
+        moveTo(16f, 16f)
+        lineTo(17f, 18f)
+        moveTo(16f, 6f)
+        lineTo(17f, 8f)
+        moveTo(7f, 16f)
+        lineTo(8f, 18f)
+    }
+
+    val Male: ImageVector = icon("Male") {
+        moveTo(17.5f, 3f)
+        lineTo(21f, 3f)
+        lineTo(21f, 6.5f)
+        moveTo(20.5f, 3.5f)
+        lineTo(14.5f, 9.5f)
+        moveTo(11f, 7f)
+        arcTo(6f, 6f, 0f, true, false, 11f, 19f)
+        arcTo(6f, 6f, 0f, true, false, 11f, 7f)
+        close()
+    }
+
+    val Female: ImageVector = icon("Female") {
+        moveTo(12f, 4f)
+        arcTo(6f, 6f, 0f, true, false, 12f, 16f)
+        arcTo(6f, 6f, 0f, true, false, 12f, 4f)
+        close()
+        moveTo(12f, 16f)
+        lineTo(12f, 22f)
+        moveTo(9f, 19f)
+        lineTo(15f, 19f)
+    }
+
+    val Tombstone: ImageVector = icon("Tombstone") {
+        moveTo(4f, 21f)
+        lineTo(20f, 21f)
+        lineTo(20f, 19f)
+        lineTo(18f, 19f)
+        lineTo(18f, 10f)
+        curveTo(18f, 6.7f, 15.3f, 4f, 12f, 4f)
+        curveTo(8.7f, 4f, 6f, 6.7f, 6f, 10f)
+        lineTo(6f, 19f)
+        lineTo(4f, 19f)
+        close()
+        // Memorial Cross in center
+        moveTo(12f, 8f)
+        lineTo(12f, 15f)
+        moveTo(10f, 10.5f)
+        lineTo(14f, 10.5f)
+    }
+
+    val HeirCrown: ImageVector = icon("HeirCrown") {
+        moveTo(3f, 18f)
+        lineTo(21f, 18f)
+        lineTo(21f, 20f)
+        lineTo(3f, 20f)
+        close()
+        moveTo(4f, 16f)
+        lineTo(6f, 8f)
+        lineTo(10f, 12f)
+        lineTo(12f, 6f)
+        lineTo(14f, 12f)
+        lineTo(18f, 8f)
+        lineTo(20f, 16f)
+        close()
+    }
+
+    val Exam: ImageVector = icon("Exam") {
+        moveTo(6f, 3f)
+        lineTo(18f, 3f)
+        curveTo(19.1f, 3f, 20f, 3.9f, 20f, 5f)
+        lineTo(20f, 19f)
+        curveTo(20f, 20.1f, 19.1f, 21f, 18f, 21f)
+        lineTo(6f, 21f)
+        curveTo(4.9f, 21f, 4f, 20.1f, 4f, 19f)
+        lineTo(4f, 5f)
+        curveTo(4f, 3.9f, 4.9f, 3f, 6f, 3f)
+        close()
+        moveTo(8f, 7f)
+        lineTo(16f, 7f)
+        moveTo(8f, 11f)
+        lineTo(16f, 11f)
+        moveTo(8f, 15f)
+        lineTo(13f, 15f)
+    }
+
+    val Transport: ImageVector = icon("Transport") {
+        moveTo(6f, 4f)
+        lineTo(18f, 4f)
+        curveTo(19.1f, 4f, 20f, 4.9f, 20f, 6f)
+        lineTo(20f, 16f)
+        lineTo(18f, 16f)
+        lineTo(18f, 19f)
+        lineTo(16f, 19f)
+        lineTo(16f, 16f)
+        lineTo(8f, 16f)
+        lineTo(8f, 19f)
+        lineTo(6f, 19f)
+        lineTo(6f, 16f)
+        lineTo(4f, 16f)
+        lineTo(4f, 6f)
+        curveTo(4f, 4.9f, 4.9f, 4f, 6f, 4f)
+        close()
+        moveTo(6f, 7f)
+        lineTo(18f, 7f)
+        lineTo(18f, 12f)
+        lineTo(6f, 12f)
+        close()
+    }
+
     fun forStat(type: StatType): ImageVector = when (type) {
         StatType.HEALTH -> Health
         StatType.HAPPINESS -> Happiness

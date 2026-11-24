@@ -2995,4 +2995,40 @@
     <string name="remittance_relation_preview">Relationship boost: +%1$d with all family back home</string>
     <string name="finance_action_store">Vault Store</string>
     <string name="finance_action_remittance">Remit Home</string>
+
+    <!-- Character Creation & Archetypes -->
+    <string name="archetype_preset_balanced">Balanced</string>
+    <string name="archetype_preset_balanced_desc">All-around steady starting attributes across health, happiness, smarts, and looks.</string>
+    <string name="archetype_preset_prodigy">Prodigy</string>
+    <string name="archetype_preset_prodigy_desc">High starting smarts with natural scholastic aptitude.</string>
+    <string name="archetype_preset_athlete">Athlete</string>
+    <string name="archetype_preset_athlete_desc">Peak physical health, vitality, and athletic vigor.</string>
+    <string name="archetype_preset_charmer">Charmer</string>
+    <string name="archetype_preset_charmer_desc">Striking looks, charisma, and social magnetism.</string>
+    <string name="archetype_preset_hustler">Hustler</string>
+    <string name="archetype_preset_hustler_desc">Resourceful, street-smart, and ambitious.</string>
+    <string name="archetype_preset_custom">Custom</string>
+    <string name="archetype_preset_custom_desc">Fine-tune each starting attribute manually.</string>
+    <string name="label_starting_aptitude">Starting Aptitude</string>
+    <string name="label_starting_aptitude_subtitle">Choose a starting preset or fine-tune attributes</string>
+    <string name="label_birthplace_dossier">Birthplace &amp; Origin</string>
+    <string name="label_exam_preview">Exam: %1$s</string>
+    <string name="label_commute_preview">Transit: %1$s</string>
+    <string name="label_wallet_preview">Wallet: %1$s</string>
+    <string name="btn_change_country">Change Country</string>
+    <string name="btn_quick_roll">Quick Roll</string>
+    <string name="btn_fine_tune_stats">Fine-Tune Stats</string>
+
+    <!-- Commemorative Monument & Heir Selection -->
+    <string name="monument_title">Commemorative Monument</string>
+    <string name="monument_epitaph_header">Memorial Inscription</string>
+    <string name="monument_lifetime_wealth">Lifetime Wealth</string>
+    <string name="monument_estate_cash">Estate Cash</string>
+    <string name="monument_dynasty_label">Generation %1$d Dynasty</string>
+    <string name="monument_pinnacle_title">Pinnacle Achievements</string>
+    <string name="btn_continue_as_heir_count">Continue as Heir (%1$d Available)</string>
+    <string name="heir_relationship_bond">Bond: %1$d%%</string>
+    <string name="heir_inheritance_share">Inheritance: %1$s (%2$d%% share)</string>
+    <string name="heir_no_heirs_notice">No living children aged 16 or older survived to carry forward the family torch.</string>
+    <string name="heir_successor_badge">Successor</string>
 </resources>

@@ -269,4 +269,33 @@ class LegacyEngineTest {
         assertTrue(sibling.milestones.any { it.kind == MilestoneKind.GRUDGE.name })
         assertTrue(legacy.eventLog.any { it.contains("grudge", ignoreCase = true) })
     }
+
+    @Test
+    fun `previewHeirCandidates calculates correct inheritance shares and percentages`() {
+        val heir1 = TestFixtures.child("c1", age = 22, relationship = 85)
+        val heir2 = TestFixtures.child("c2", age = 19, relationship = 70)
+        val minorChild = TestFixtures.child("c3", age = 10, relationship = 90) // Under 16, not eligible
+        val deceased = Character(
+            name = "Parent",
+            age = 65,
+            gender = Gender.FEMALE,
+            stats = Stats(money = 200_000),
+            birthYear = 1960,
+            alive = false,
+            family = listOf(heir1, heir2, minorChild)
+        )
+
+        val previews = engine.previewHeirCandidates(deceased)
+        assertEquals(2, previews.size)
+        // Deceased has 3 living children, so equal split is 200_000 / 3 = 66,666 each
+        assertEquals("c1", previews[0].heir.id)
+        assertEquals(66_666, previews[0].inheritanceCash)
+        assertEquals(33, previews[0].estateSharePercent)
+        assertEquals(85, previews[0].relationshipLevel)
+
+        assertEquals("c2", previews[1].heir.id)
+        assertEquals(66_666, previews[1].inheritanceCash)
+        assertEquals(33, previews[1].estateSharePercent)
+        assertEquals(70, previews[1].relationshipLevel)
+    }
 }

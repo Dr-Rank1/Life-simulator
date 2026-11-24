@@ -89,8 +89,9 @@ flowchart TD
 ## Comprehensive Gameplay Systems
 
 ### 1. Character Creation & Procedural 2D Portrait Engine
-- **Single-Screen "New Life" Setup:** Fast, tactile character creation allowing players to choose their name, gender (Male, Female, Non-Binary), country, or roll random profiles.
-- **Stat Budget Allocation:** Starting stats (Happiness, Health, Smarts, Looks, Karma) can be custom-allocated using a 140-point extra budget or quick presets (*Balanced*, *Genius*, *Athlete*, *Charmer*, *Hustler*). Starting stats fundamentally shape life outcomes, scholarship eligibility, and career gates.
+- **Single-Screen "New Life" Setup:** Fast, tactile character creation featuring a bold game header ("NEW LIFE"), quick-roll profile dice action (`AppIcons.Dice`), gender selection with custom vector icons (Male, Female, Non-Binary), and centered baby avatar preview with a layered halo backdrop.
+- **Country Opportunity Card:** Live preview card displaying country flag, local currency symbol, authentic commute transport mode (`{transportMode}`), and secondary exam qualification (`{secondaryExam}`).
+- **Starting Aptitude Archetypes (`StartingStatArchetype`):** Select quick stat presets (*Balanced*, *Prodigy*, *Athlete*, *Charmer*, *Hustler*, *Custom*) with a live 4-stat meters HUD (Health, Happiness, Smarts, Looks) or custom allocate stats using the fine-tune slider budget. Starting stats fundamentally shape life outcomes, scholarship eligibility, and career gates.
 - **100% Offline Procedural 2D Avatar (`ProceduralAvatarPortrait.kt`):** A custom Canvas rendering engine draws illustrated portraits dynamically. It composits facial structures, skin tones, hair textures and styles, expressive eyes, eyebrows, noses, mouths, facial hair (beards, goatees, mustaches), and accessories (glasses, hats, earrings, necklaces, collars).
 - **Life Stage & Emotional Aging:** Avatars physically age from baby chubby cheeks to wrinkled elders with graying hair. Facial expressions dynamically react to player happiness, stress, depression, and severe illness. Minors under 14 are strictly protected from adult facial hair or eyeglasses.
 
@@ -204,7 +205,8 @@ flowchart TD
 
 ### 14. Mortality, Tombstone Ribbons & Heir Succession
 - **Mortality Calculation:** Annual death probabilities scale realistically based on health deterioration, old age (80+), lifestyle hazards, or fatal accidents.
-- **BitLife-Style Silk-Sash Tombstone Ribbons (`LifeArchetypeEngine`):** Upon death, characters are immortalized with an epitaph and an exclusive silk ribbon sash:
+- **Commemorative Monument Dossier (`LifeSummaryScreen.kt`):** Upon death, characters are immortalized with an arched stone slab monument, top Silk Sash Life Ribbon Banner with custom vector tombstone emblem (`AppIcons.Tombstone`), gilded medallion oval holding a peaceful `ProceduralAvatarPortrait`, carved lifetime metrics strip (Lifetime Net Worth, Pinnacle Career, Family Lineage), cause-of-death plaque, and evocative narrative epitaph.
+- **BitLife-Style Silk-Sash Tombstone Ribbons (`LifeArchetypeEngine`):** Characters earn an exclusive silk ribbon sash based on their dominant life arc:
   - [Loaded]: Massive accumulated wealth.
   - [Academic]: High GPA, multiple degrees, intellectual achievements.
   - [Fame Icon]: Global celebrity or sports legend status.
@@ -214,7 +216,12 @@ flowchart TD
   - [Cunning]: Master criminal who pulled off high-stakes heists.
   - [Scandalous]: Chronic notoriety, prison stints, and public drama.
   - [Mediocre]: A quiet, ordinary, unremarkable life.
-- **Dynasty Succession (`HeirSelectionScreen.kt`):** Seamlessly continue playing as one of your adult children, inheriting cash, properties, and the family legacy across generations.
+- **Hero-Grade Heir Continuity CTA:** A prominent "Continue as Heir" CTA button directly below the monument allows immediate succession into surviving lineage.
+- **Rich Heir Succession Dossier (`HeirSelectionScreen.kt` & `LegacyEngine.kt`):**
+  - Selectable heir candidate cards with 56dp `ProceduralAvatarPortrait` synced to relationship bond.
+  - Transparent estate inheritance share calculations (exact cash amount and estate percentage share based on will or equal division).
+  - Four key stat meters (Health, Smarts, Looks, Happiness) and relationship bond percentage.
+  - Tactile "Choose Heir" action button with crown vector emblem (`AppIcons.HeirCrown`).
 
 ---
 

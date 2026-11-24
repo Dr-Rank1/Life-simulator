@@ -176,6 +176,7 @@ fun MaishaNavHost(
                 onRandomName = viewModel::onRandomName,
                 onCycleAvatar = viewModel::onCycleAvatar,
                 onRandomizeLife = viewModel::onRandomizeLife,
+                onArchetypeSelected = viewModel::onArchetypeSelected,
                 onStatsChange = viewModel::onStatsChange,
                 onStartLife = viewModel::onStartLife,
                 onContinueToAvatar = viewModel::onContinueToAvatarPicker
