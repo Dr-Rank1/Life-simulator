@@ -117,7 +117,7 @@ flowchart TD
 - **Honors & Career Fast-Tracks:** Graduate with *Cum Laude*, *Magna Cum Laude*, or *Summa Cum Laude* to unlock exclusive post-graduate career track offers (e.g. Software Engineer, Corporate Associate, Medical Resident, Law Associate).
 
 ### 5. Careers, Corporate Ladders & Workplace Agency
-- **Another Life Style Career Dashboard:** High-impact Career Hero Card featuring custom vector role badges, corporate tier stepper (*Entry* &rarr; *Mid* &rarr; *Senior* &rarr; *Lead* &rarr; *Director* &rarr; *Executive*), salary + annual raise projection pill, performance meter with color states, and burnout/stress warning bar.
+- **Another Life Style Career Dashboard:** High-impact Career Hero Card featuring custom vector role badges, corporate tier stepper (*Entry* -> *Mid* -> *Senior* -> *Lead* -> *Director* -> *Executive*), salary + annual raise projection pill, performance meter with color states, and burnout/stress warning bar.
 - **Dynamic Job Market & Opportunities:** Real opportunity cards displaying requirement badges (Degree, Smarts, Looks, Experience), salary range, and punchy 2-question interview mini-checks before hiring.
 - **Workplace Roster & Tactile Agency (`WorkplaceRosterSheet.kt`):** Active jobs generate a Supervisor (with Strictness and Competence attributes) and diverse Coworkers. Players can:
   - *Schmooze Boss:* Flatter supervisors to improve standing and fast-track promotions.
@@ -127,11 +127,24 @@ flowchart TD
   - *Report to HR:* Report toxic or credit-stealing colleagues.
   - *Pitch Project / Mentorship:* Innovate on deliverables or request senior guidance.
 - **Workplace Hazards & PIP Counter-Moves:** Performance Improvement Plans (PIPs), credit stealing, burnout, and corporate layoffs. Dedicated `PipAlertCard` provides interactive recovery via `workPipDeliverable` (+20% performance, guaranteed clearance) and `rebutPipWithHR` (HR appeal).
+- **Interactive Entrepreneurship & Startups (`BusinessProgressionCard.kt`):**
+  - *5-Tier Company Lifecycle:* Progress from `Bootstrap` -> `Seed Stage` -> `Growth Stage` -> `Expansion` -> `Enterprise` based on valuation milestones.
+  - *Startup Dashboard:* Live Revenue vs. Burn Rate indicator pill, Equity Ownership %, Company Valuation, Team Morale, and Product Quality gauges.
+  - *Tactile Founder Agency:* Launch new products and services, scale headcount, pivot industry, raise outside venture capital (diluting equity for cash injections), sell company for equity payout, or liquidate assets.
+- **Political Campaigns & Public Office (`PoliticalCampaignBoard.kt`):**
+  - *Elected Offices:* Run for City Mayor, State Governor, or Head of State / President.
+  - *Campaign Progression:* Select signature campaign agendas (*Infrastructure*, *Education*, *Healthcare*, *Tax Relief*, *Anti-Corruption*), track polling support vs. opponent, manage campaign war chest funds, hold grassroots rallies, fundraise donors, and cast ballots on Election Day.
+  - *Governance Dashboard:* Active officeholders manage 4-year term countdowns, public approval meters, and controversy heat. Deliver state addresses, enact signature legislative reforms, manage political scandals, or resign from office.
 - **Part-Time & Side Hustles:** Student part-time jobs (ages 16+) with energy management, alongside youth and adult side hustles (freelance coding, streaming, craft sales).
 
-### 6. Talent Hub & Fame Pathways
+### 6. Fame, Creator Economy & Talent Hub
+- **5-Tier Fame Ribbon (`FameSocialMediaBoard.kt`):** Visual tier ribbon progression (*Unknown*, *Rising Star*, *Micro Influencer*, *Viral Celeb*, *Global Icon*) with verified creator badge styling.
+- **Creator Economy Agency:**
+  - *Audience & Burnout Meters:* Balance follower reach, Audience Trust (0-100), and Creator Burnout (0-100).
+  - *Interactive Creator Actions:* Post viral content, negotiate country-scaled brand sponsorship deals, collaborate with fellow creators, take digital detox mental breaks, and monetize ad streams.
+  - *Cancel Culture & Drama PR:* React to public controversies and viral drama by taking accountability or pushing back to restore reputation.
 - **Specialized Talent Tracks:** Pro Athlete and Entertainment/Music pathways.
-- **Skill Meters & Gigs:** Athleticism and Musical Talent bars. Engage in gym training, music lessons, street busking, and exhibition matches.
+- **Skill Meters & Gigs:** Athleticism and Musical Talent bars. Engage in gym sessions, sports drills, music lessons, stage practice, street busking, and exhibition matches.
 - **Fame Economy:** Idle fame decay, paparazzi interactions, public scandals, high-paying brand endorsements, and book deals.
 
 ### 7. Family, Interactive Matchmaking & Character Sheets

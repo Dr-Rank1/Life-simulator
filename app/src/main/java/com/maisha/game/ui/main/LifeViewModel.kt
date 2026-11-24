@@ -831,6 +831,150 @@ class LifeViewModel @Inject constructor(
         }
     }
 
+    fun onLaunchProductService(businessId: String) {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            val statsBefore = character.stats
+            when (val result = gameEngine.launchProductService(character, businessId)) {
+                is BusinessResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message ?: context.getString(R.string.msg_business_product_launched),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is BusinessResult.Failed -> {
+                    val msg = when (result.reason) {
+                        BusinessFailure.ACTION_ALREADY_DONE -> context.getString(R.string.msg_business_action_done)
+                        else -> context.getString(R.string.msg_business_ineligible)
+                    }
+                    _uiState.update { it.copy(careerMessage = msg) }
+                }
+            }
+        }
+    }
+
+    fun onScaleExpandBusiness(businessId: String) {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            val statsBefore = character.stats
+            when (val result = gameEngine.scaleExpandBusiness(character, businessId)) {
+                is BusinessResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message ?: context.getString(R.string.msg_business_scaled, result.business?.name.orEmpty()),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is BusinessResult.Failed -> {
+                    val msg = when (result.reason) {
+                        BusinessFailure.INSUFFICIENT_FUNDS -> context.getString(R.string.msg_business_insufficient)
+                        BusinessFailure.ACTION_ALREADY_DONE -> context.getString(R.string.msg_business_action_done)
+                        else -> context.getString(R.string.msg_business_ineligible)
+                    }
+                    _uiState.update { it.copy(careerMessage = msg) }
+                }
+            }
+        }
+    }
+
+    fun onPivotBusiness(businessId: String, newIndustry: BusinessIndustry) {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            val statsBefore = character.stats
+            when (val result = gameEngine.pivotBusiness(character, businessId, newIndustry)) {
+                is BusinessResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message.orEmpty(),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is BusinessResult.Failed -> {
+                    val msg = when (result.reason) {
+                        BusinessFailure.INSUFFICIENT_FUNDS -> context.getString(R.string.msg_business_insufficient)
+                        BusinessFailure.CANNOT_PIVOT -> context.getString(R.string.msg_business_pivot_failed)
+                        BusinessFailure.ACTION_ALREADY_DONE -> context.getString(R.string.msg_business_action_done)
+                        else -> context.getString(R.string.msg_business_ineligible)
+                    }
+                    _uiState.update { it.copy(careerMessage = msg) }
+                }
+            }
+        }
+    }
+
+    fun onRaiseCapital(businessId: String) {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            val statsBefore = character.stats
+            when (val result = gameEngine.raiseCapital(character, businessId)) {
+                is BusinessResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message ?: context.getString(R.string.msg_business_capital_raised),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is BusinessResult.Failed -> {
+                    val msg = when (result.reason) {
+                        BusinessFailure.CANNOT_RAISE_CAPITAL -> context.getString(R.string.msg_business_capital_unavailable)
+                        BusinessFailure.ACTION_ALREADY_DONE -> context.getString(R.string.msg_business_action_done)
+                        else -> context.getString(R.string.msg_business_ineligible)
+                    }
+                    _uiState.update { it.copy(careerMessage = msg) }
+                }
+            }
+        }
+    }
+
+    fun onLiquidateBusiness(businessId: String) {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            val statsBefore = character.stats
+            when (val result = gameEngine.liquidateBusiness(character, businessId)) {
+                is BusinessResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = context.getString(
+                                R.string.msg_business_liquidated,
+                                result.business?.name.orEmpty(),
+                                formatMoney(result.cashDelta, result.character.countryCode)
+                            ),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is BusinessResult.Failed -> {
+                    _uiState.update { it.copy(careerMessage = context.getString(R.string.msg_business_ineligible)) }
+                }
+            }
+        }
+    }
+
     fun onPurchaseAsset(catalogId: String) {
         val character = _uiState.value.character ?: return
         if (!character.alive) return
@@ -3977,6 +4121,106 @@ class LifeViewModel @Inject constructor(
         }
     }
 
+    fun onAcceptBrandSponsorship() {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            val statsBefore = character.stats
+            when (val result = gameEngine.acceptBrandSponsorship(character)) {
+                is SocialMediaResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message ?: context.getString(R.string.msg_social_sponsored),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is SocialMediaResult.Failed -> {
+                    val msg = when (result.reason) {
+                        SocialMediaFailure.BELOW_SPONSORSHIP_THRESHOLD -> context.getString(R.string.msg_social_no_sponsorship)
+                        SocialMediaFailure.ALREADY_SPONSORED_THIS_YEAR -> context.getString(R.string.msg_campaign_action_done)
+                        else -> context.getString(R.string.msg_social_ineligible)
+                    }
+                    _uiState.update { it.copy(careerMessage = msg) }
+                }
+            }
+        }
+    }
+
+    fun onCollaborateWithCreator() {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            val statsBefore = character.stats
+            when (val result = gameEngine.collaborateWithCreator(character)) {
+                is SocialMediaResult.Success -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message ?: context.getString(R.string.msg_social_collab)
+                        )
+                    }
+                }
+                is SocialMediaResult.Failed -> {
+                    val msg = when (result.reason) {
+                        SocialMediaFailure.ACTION_ALREADY_DONE -> context.getString(R.string.msg_campaign_action_done)
+                        else -> context.getString(R.string.msg_social_ineligible)
+                    }
+                    _uiState.update { it.copy(careerMessage = msg) }
+                }
+            }
+        }
+    }
+
+    fun onTakeDigitalDetox() {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            val statsBefore = character.stats
+            when (val result = gameEngine.takeDigitalDetox(character)) {
+                is SocialMediaResult.Success -> {
+                    persist(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message ?: context.getString(R.string.msg_social_detox)
+                        )
+                    }
+                }
+                is SocialMediaResult.Failed -> {
+                    _uiState.update { it.copy(careerMessage = context.getString(R.string.msg_campaign_action_done)) }
+                }
+            }
+        }
+    }
+
+    fun onHandleSocialDrama(apologize: Boolean) {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            val statsBefore = character.stats
+            when (val result = gameEngine.handleSocialDrama(character, apologize)) {
+                is SocialMediaResult.Success -> {
+                    persist(result.character)
+                    appendStatDeltas(buildStatDeltas(statsBefore, result.character.stats))
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message ?: context.getString(R.string.msg_social_drama_resolved)
+                        )
+                    }
+                }
+                is SocialMediaResult.Failed -> {
+                    _uiState.update { it.copy(careerMessage = context.getString(R.string.msg_social_ineligible)) }
+                }
+            }
+        }
+    }
+
     fun onPracticeSkill(skillType: SkillType) {
         val character = _uiState.value.character ?: return
         viewModelScope.launch {
@@ -4179,6 +4423,208 @@ class LifeViewModel @Inject constructor(
                     }
                     _uiState.update { it.copy(careerMessage = message) }
                 }
+                else -> Unit
+            }
+        }
+    }
+
+    fun onStartCampaignRun(
+        office: com.maisha.game.data.model.PoliticalOffice,
+        agenda: com.maisha.game.data.model.CampaignAgenda,
+        investment: Int
+    ) {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            when (val result = gameEngine.startCampaignRun(character, office, agenda, investment)) {
+                is com.maisha.game.domain.CampaignResult.InProgress -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message ?: context.getString(R.string.msg_campaign_filed, office.name),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is com.maisha.game.domain.CampaignResult.Failed -> {
+                    val msg = when (result.reason) {
+                        com.maisha.game.domain.CampaignFailure.INSUFFICIENT_FUNDS -> context.getString(R.string.msg_campaign_cannot_afford)
+                        com.maisha.game.domain.CampaignFailure.ALREADY_IN_OFFICE -> context.getString(R.string.msg_campaign_already_in_office)
+                        com.maisha.game.domain.CampaignFailure.ALREADY_CAMPAIGNED -> context.getString(R.string.msg_campaign_already_this_year)
+                        else -> context.getString(R.string.msg_campaign_ineligible)
+                    }
+                    _uiState.update { it.copy(careerMessage = msg) }
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    fun onHoldCampaignRally() {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            when (val result = gameEngine.holdCampaignRally(character)) {
+                is com.maisha.game.domain.CampaignResult.InProgress -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message.orEmpty()
+                        )
+                    }
+                }
+                is com.maisha.game.domain.CampaignResult.Failed -> {
+                    val msg = when (result.reason) {
+                        com.maisha.game.domain.CampaignFailure.ACTION_ALREADY_DONE -> context.getString(R.string.msg_campaign_action_done)
+                        com.maisha.game.domain.CampaignFailure.NO_ACTIVE_CAMPAIGN -> context.getString(R.string.msg_campaign_no_active)
+                        else -> context.getString(R.string.msg_campaign_ineligible)
+                    }
+                    _uiState.update { it.copy(careerMessage = msg) }
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    fun onFundraiseCampaign() {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            when (val result = gameEngine.fundraiseCampaign(character)) {
+                is com.maisha.game.domain.CampaignResult.InProgress -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message.orEmpty()
+                        )
+                    }
+                }
+                is com.maisha.game.domain.CampaignResult.Failed -> {
+                    val msg = when (result.reason) {
+                        com.maisha.game.domain.CampaignFailure.ACTION_ALREADY_DONE -> context.getString(R.string.msg_campaign_action_done)
+                        com.maisha.game.domain.CampaignFailure.NO_ACTIVE_CAMPAIGN -> context.getString(R.string.msg_campaign_no_active)
+                        else -> context.getString(R.string.msg_campaign_ineligible)
+                    }
+                    _uiState.update { it.copy(careerMessage = msg) }
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    fun onResolveElection() {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            when (val result = gameEngine.resolveElection(character)) {
+                is com.maisha.game.domain.CampaignResult.Won -> {
+                    persist(result.character)
+                    processMidLifeAchievements(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message ?: context.getString(R.string.msg_campaign_won),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is com.maisha.game.domain.CampaignResult.Lost -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message ?: context.getString(R.string.msg_campaign_lost),
+                            netWorth = financeEngine.calculateNetWorth(result.character)
+                        )
+                    }
+                }
+                is com.maisha.game.domain.CampaignResult.Failed -> {
+                    _uiState.update { it.copy(careerMessage = context.getString(R.string.msg_campaign_no_active)) }
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    fun onDeliverStateAddress() {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            when (val result = gameEngine.deliverStateAddress(character)) {
+                is com.maisha.game.domain.CampaignResult.InProgress -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message.orEmpty()
+                        )
+                    }
+                }
+                is com.maisha.game.domain.CampaignResult.Failed -> {
+                    val msg = when (result.reason) {
+                        com.maisha.game.domain.CampaignFailure.ACTION_ALREADY_DONE -> context.getString(R.string.msg_campaign_action_done)
+                        com.maisha.game.domain.CampaignFailure.NOT_IN_OFFICE -> context.getString(R.string.msg_politics_not_in_office)
+                        else -> context.getString(R.string.msg_campaign_ineligible)
+                    }
+                    _uiState.update { it.copy(careerMessage = msg) }
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    fun onEnactSignatureReform(agenda: com.maisha.game.data.model.CampaignAgenda) {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            when (val result = gameEngine.enactSignatureReform(character, agenda)) {
+                is com.maisha.game.domain.CampaignResult.InProgress -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message.orEmpty()
+                        )
+                    }
+                }
+                is com.maisha.game.domain.CampaignResult.Failed -> {
+                    val msg = when (result.reason) {
+                        com.maisha.game.domain.CampaignFailure.ACTION_ALREADY_DONE -> context.getString(R.string.msg_campaign_action_done)
+                        com.maisha.game.domain.CampaignFailure.NOT_IN_OFFICE -> context.getString(R.string.msg_politics_not_in_office)
+                        else -> context.getString(R.string.msg_campaign_ineligible)
+                    }
+                    _uiState.update { it.copy(careerMessage = msg) }
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    fun onHandlePoliticalScandal(coverUp: Boolean) {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            when (val result = gameEngine.handlePoliticalScandal(character, coverUp)) {
+                is com.maisha.game.domain.CampaignResult.InProgress -> {
+                    persist(result.character)
+                    _uiState.update {
+                        it.copy(
+                            character = result.character,
+                            careerMessage = result.message.orEmpty()
+                        )
+                    }
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    fun onResignPoliticalOffice() {
+        val character = _uiState.value.character ?: return
+        viewModelScope.launch {
+            val updated = gameEngine.resignFromPoliticalOffice(character, "Resigned voluntarily from public office.")
+            persist(updated)
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    careerMessage = context.getString(R.string.msg_politics_resigned)
+                )
             }
         }
     }

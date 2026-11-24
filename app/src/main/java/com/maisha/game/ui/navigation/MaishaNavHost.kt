@@ -452,7 +452,24 @@ fun MaishaNavHost(
                 onDismissSocialEcosystemMessage = viewModel::onDismissSocialEcosystemMessage,
                 onResolveRoutineDilemma = viewModel::onResolveRoutineDilemma,
                 onDismissRoutineDilemma = viewModel::onDismissRoutineDilemma,
-                onCommuteTransit = viewModel::onCommuteTransit
+                onCommuteTransit = viewModel::onCommuteTransit,
+                onLaunchProductService = viewModel::onLaunchProductService,
+                onScaleExpandBusiness = viewModel::onScaleExpandBusiness,
+                onPivotBusiness = viewModel::onPivotBusiness,
+                onRaiseCapital = viewModel::onRaiseCapital,
+                onLiquidateBusiness = viewModel::onLiquidateBusiness,
+                onStartCampaignRun = viewModel::onStartCampaignRun,
+                onHoldCampaignRally = viewModel::onHoldCampaignRally,
+                onFundraiseCampaign = viewModel::onFundraiseCampaign,
+                onResolveElection = viewModel::onResolveElection,
+                onDeliverStateAddress = viewModel::onDeliverStateAddress,
+                onEnactSignatureReform = viewModel::onEnactSignatureReform,
+                onHandlePoliticalScandal = viewModel::onHandlePoliticalScandal,
+                onResignPoliticalOffice = viewModel::onResignPoliticalOffice,
+                onBrandSponsorship = viewModel::onAcceptBrandSponsorship,
+                onCreatorCollab = viewModel::onCollaborateWithCreator,
+                onDigitalDetox = viewModel::onTakeDigitalDetox,
+                onHandleSocialDrama = viewModel::onHandleSocialDrama
             )
 
             NotificationPermissionEffect(

@@ -113,12 +113,15 @@ import com.maisha.game.data.model.WorkplacePerson
 import com.maisha.game.domain.BusinessEngine
 import com.maisha.game.domain.CareerEngine
 import com.maisha.game.domain.EducationEngine
+import com.maisha.game.domain.FinanceEngine
 import com.maisha.game.domain.HealthEngine
 import com.maisha.game.domain.PoliticsEngine
 import com.maisha.game.domain.RelocationEngine
 import com.maisha.game.ui.avatar.AvatarImage
 import com.maisha.game.data.model.InterviewChoice
+import com.maisha.game.data.model.CampaignAgenda
 import com.maisha.game.ui.components.AcademicDossierCard
+import com.maisha.game.ui.components.BusinessProgressionCard
 import com.maisha.game.ui.components.CareerHeroCard
 import com.maisha.game.ui.components.CategoryFilterChipRow
 import com.maisha.game.ui.components.ConfirmActionDialog
@@ -126,11 +129,13 @@ import com.maisha.game.ui.components.ConfirmSeverity
 import com.maisha.game.ui.components.ConfirmableActionHost
 import com.maisha.game.ui.components.DrillDownRow
 import com.maisha.game.ui.components.EmptyStateCard
+import com.maisha.game.ui.components.FameSocialMediaBoard
 import com.maisha.game.ui.components.IllustrationImage
 import com.maisha.game.ui.components.InsetCardContainer
 import com.maisha.game.ui.components.InsetDivider
 import com.maisha.game.ui.components.JobInterviewDialog
 import com.maisha.game.ui.components.JobOpportunityCard
+import com.maisha.game.ui.components.PoliticalCampaignBoard
 import com.maisha.game.ui.components.RecordBadge
 import com.maisha.game.ui.components.StatBar
 import com.maisha.game.ui.components.StatType
@@ -244,6 +249,26 @@ fun CareerScreen(
     onStartJobInterview: (String) -> Unit = {},
     onAnswerJobInterview: (InterviewChoice) -> Unit = {},
     onDismissJobInterview: () -> Unit = {},
+    onLaunchProductService: (String) -> Unit = {},
+    onScaleExpandBusiness: (String) -> Unit = {},
+    onPivotBusiness: (String, BusinessIndustry) -> Unit = { _, _ -> },
+    onRaiseCapital: (String) -> Unit = {},
+    onLiquidateBusiness: (String) -> Unit = {},
+    onStartCampaignRun: (PoliticalOffice, CampaignAgenda, Int) -> Unit = { _, _, _ -> },
+    onHoldCampaignRally: () -> Unit = {},
+    onFundraiseCampaign: () -> Unit = {},
+    onResolveElection: () -> Unit = {},
+    onDeliverStateAddress: () -> Unit = {},
+    onEnactSignatureReform: (CampaignAgenda) -> Unit = {},
+    onHandlePoliticalScandal: (Boolean) -> Unit = {},
+    onResignPoliticalOffice: () -> Unit = {},
+    onCreateSocialAccount: () -> Unit = {},
+    onPostSocialContent: () -> Unit = {},
+    onBrandSponsorship: () -> Unit = {},
+    onCreatorCollab: () -> Unit = {},
+    onDigitalDetox: () -> Unit = {},
+    onMonetizeSocialAds: () -> Unit = {},
+    onHandleSocialDrama: (Boolean) -> Unit = {},
     onCareerMessageDismissed: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -251,6 +276,10 @@ fun CareerScreen(
     val retireConfirm = rememberConfirmableAction<Unit>()
     val startBusinessConfirm = rememberConfirmableAction<Unit>()
     val sellBusinessConfirm = rememberConfirmableAction<Business>()
+    val scaleBusinessConfirm = rememberConfirmableAction<Business>()
+    val raiseCapitalConfirm = rememberConfirmableAction<Business>()
+    val liquidateBusinessConfirm = rememberConfirmableAction<Business>()
+    var activePivotBusiness by remember { mutableStateOf<Business?>(null) }
     val campaignConfirm = rememberConfirmableAction<PoliticalOffice>()
     val taxPolicyConfirm = rememberConfirmableAction<TaxPolicyType>()
     var selectedOffice by remember { mutableStateOf(PoliticalOffice.MAYOR) }
@@ -336,6 +365,91 @@ fun CareerScreen(
         )
     }
 
+    ConfirmableActionHost(
+        state = scaleBusinessConfirm,
+        onConfirmed = { business -> onScaleExpandBusiness(business.id) }
+    ) { business, onConfirm, onDismiss ->
+        val cost = EconomyScaler.scaleAmount(25_000, character.countryCode) * (business.stage.ordinal + 1)
+        ConfirmActionDialog(
+            title = stringResource(R.string.dialog_scale_title),
+            description = stringResource(R.string.dialog_scale_desc, formatMoney(cost, character.countryCode)),
+            confirmLabel = stringResource(R.string.btn_scale_expand),
+            severity = ConfirmSeverity.NEUTRAL,
+            onConfirm = onConfirm,
+            onDismiss = onDismiss
+        )
+    }
+
+    ConfirmableActionHost(
+        state = raiseCapitalConfirm,
+        onConfirmed = { business -> onRaiseCapital(business.id) }
+    ) { business, onConfirm, onDismiss ->
+        ConfirmActionDialog(
+            title = stringResource(R.string.dialog_raise_capital_title),
+            description = stringResource(R.string.dialog_raise_capital_desc),
+            confirmLabel = stringResource(R.string.btn_raise_capital),
+            severity = ConfirmSeverity.NEUTRAL,
+            onConfirm = onConfirm,
+            onDismiss = onDismiss
+        )
+    }
+
+    ConfirmableActionHost(
+        state = liquidateBusinessConfirm,
+        onConfirmed = { business -> onLiquidateBusiness(business.id) }
+    ) { business, onConfirm, onDismiss ->
+        val estPayout = ((business.valuation * 0.20f) * (business.equityShare / 100f)).toInt()
+        ConfirmActionDialog(
+            title = stringResource(R.string.dialog_liquidate_title),
+            description = stringResource(
+                R.string.dialog_liquidate_desc,
+                business.name,
+                formatMoney(estPayout, character.countryCode)
+            ),
+            confirmLabel = stringResource(R.string.btn_liquidate_business),
+            severity = ConfirmSeverity.WARNING,
+            onConfirm = onConfirm,
+            onDismiss = onDismiss
+        )
+    }
+
+    activePivotBusiness?.let { biz ->
+        var selectedIndustry by remember { mutableStateOf(BusinessIndustry.entries.first { it != biz.industry }) }
+        val cost = EconomyScaler.scaleAmount(15_000, character.countryCode)
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { activePivotBusiness = null },
+            title = { Text(stringResource(R.string.dialog_pivot_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(stringResource(R.string.dialog_pivot_desc, formatMoney(cost, character.countryCode)))
+                    BusinessIndustry.entries.filter { it != biz.industry }.forEach { industry ->
+                        FilterChip(
+                            selected = selectedIndustry == industry,
+                            onClick = { selectedIndustry = industry },
+                            label = { Text(businessIndustryLabel(industry)) }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        onPivotBusiness(biz.id, selectedIndustry)
+                        activePivotBusiness = null
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
+                ) {
+                    Text(stringResource(R.string.btn_pivot_business))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { activePivotBusiness = null }) {
+                    Text(stringResource(R.string.btn_cancel))
+                }
+            }
+        )
+    }
+
     val campaignInvestment = EconomyScaler.scaleAmount(
         when (selectedOffice) {
             PoliticalOffice.MAYOR -> 50_000
@@ -412,6 +526,7 @@ fun CareerScreen(
         !character.criminalRecord.awaitingTrial
     val resources = LocalContext.current.resources
     val careerEngine = remember { CareerEngine(HealthEngine(), RelocationEngine()) }
+    val politicsEngine = remember { PoliticsEngine(FinanceEngine()) }
     val hireChance = if (!isRetired && currentJob == null && character.alive) {
         (careerEngine.hireSuccessChance(character) * 100f).toInt()
     } else {
@@ -652,31 +767,19 @@ fun CareerScreen(
                         key = "politics",
                         contentType = CareerListContentType.Politics
                     ) {
-                        if (politicsEligible || character.politics.currentOffice != null) {
-                            PoliticsSection(
-                                character = character,
-                                selectedOffice = selectedOffice,
-                                onOfficeSelected = { selectedOffice = it },
-                                campaignInvestment = campaignInvestment,
-                                onLaunchCampaign = { campaignConfirm.request(selectedOffice) },
-                                onPassTaxPolicy = { taxPolicyConfirm.request(it) }
-                            )
-                        } else {
-                            Column {
-                                Text(
-                                    text = stringResource(R.string.section_politics),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = TealPrimary
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = stringResource(R.string.politics_locked_hint),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = InkTertiary
-                                )
-                            }
-                        }
+                        PoliticalCampaignBoard(
+                            character = character,
+                            politicsEngine = politicsEngine,
+                            onStartCampaign = onStartCampaignRun,
+                            onHoldRally = onHoldCampaignRally,
+                            onFundraise = onFundraiseCampaign,
+                            onCastBallots = onResolveElection,
+                            onStateAddress = onDeliverStateAddress,
+                            onSignatureReform = onEnactSignatureReform,
+                            onHandleScandal = onHandlePoliticalScandal,
+                            onResignOffice = onResignPoliticalOffice,
+                            onPassTaxPolicy = { taxPolicyConfirm.request(it) }
+                        )
                     }
                 }
 
@@ -828,10 +931,15 @@ fun CareerScreen(
                             key = { it.id },
                             contentType = { CareerListContentType.BusinessCard }
                         ) { business ->
-                            BusinessCard(
+                            BusinessProgressionCard(
                                 business = business,
                                 countryCode = character.countryCode,
-                                onSell = { sellBusinessConfirm.request(business) }
+                                onLaunchProduct = { onLaunchProductService(it) },
+                                onScaleTeam = { scaleBusinessConfirm.request(business) },
+                                onPivot = { activePivotBusiness = business },
+                                onRaiseCapital = { raiseCapitalConfirm.request(business) },
+                                onSellBusiness = { sellBusinessConfirm.request(business) },
+                                onLiquidateBusiness = { liquidateBusinessConfirm.request(business) }
                             )
                         }
                     }
@@ -957,9 +1065,16 @@ fun CareerScreen(
                             .padding(16.dp)
                             .verticalScroll(rememberScrollState())
                     ) {
-                        FameAndTalentHubCard(
+                        FameSocialMediaBoard(
                             character = character,
                             careerEngine = careerEngine,
+                            onCreateAccount = onCreateSocialAccount,
+                            onPostContent = onPostSocialContent,
+                            onBrandSponsorship = onBrandSponsorship,
+                            onCreatorCollab = onCreatorCollab,
+                            onDigitalDetox = onDigitalDetox,
+                            onMonetizeAds = onMonetizeSocialAds,
+                            onHandleDrama = onHandleSocialDrama,
                             onTrainTalent = onTrainTalent,
                             onSignEndorsement = onSignEndorsement,
                             onDropEndorsement = onDropEndorsement,

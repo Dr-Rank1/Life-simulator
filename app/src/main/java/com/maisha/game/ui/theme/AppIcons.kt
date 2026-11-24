@@ -590,6 +590,129 @@ object AppIcons {
         close()
     }
 
+    val Rocket: ImageVector = icon("Rocket") {
+        moveTo(12f, 2.5f)
+        curveTo(9f, 4.5f, 7f, 8f, 7f, 13f)
+        lineTo(5f, 15f)
+        lineTo(7f, 16f)
+        lineTo(7f, 18f)
+        lineTo(9f, 18f)
+        lineTo(9.5f, 16f)
+        lineTo(14.5f, 16f)
+        lineTo(15f, 18f)
+        lineTo(17f, 18f)
+        lineTo(17f, 16f)
+        lineTo(19f, 15f)
+        lineTo(17f, 13f)
+        curveTo(17f, 8f, 15f, 4.5f, 12f, 2.5f)
+        close()
+        moveTo(12f, 8f)
+        arcTo(1.5f, 1.5f, 0f, true, true, 12f, 11f)
+        arcTo(1.5f, 1.5f, 0f, true, true, 12f, 8f)
+    }
+
+    val Megaphone: ImageVector = icon("Megaphone") {
+        moveTo(4f, 9f)
+        lineTo(10f, 9f)
+        lineTo(16f, 5f)
+        lineTo(16f, 19f)
+        lineTo(10f, 15f)
+        lineTo(4f, 15f)
+        close()
+        moveTo(6f, 15f)
+        lineTo(6f, 19f)
+        lineTo(8f, 19f)
+        lineTo(8f, 15f)
+        moveTo(18f, 9.5f)
+        curveTo(19.2f, 10.5f, 19.2f, 13.5f, 18f, 14.5f)
+    }
+
+    val VoteBallot: ImageVector = icon("VoteBallot") {
+        moveTo(4f, 8f)
+        lineTo(20f, 8f)
+        lineTo(20f, 20f)
+        lineTo(4f, 20f)
+        close()
+        moveTo(7f, 4f)
+        lineTo(17f, 4f)
+        lineTo(17f, 8f)
+        lineTo(7f, 8f)
+        close()
+        moveTo(9f, 14f)
+        lineTo(11f, 16f)
+        lineTo(15f, 12f)
+    }
+
+    val GovernmentSeal: ImageVector = icon("GovernmentSeal") {
+        moveTo(12f, 2f)
+        lineTo(21f, 6f)
+        lineTo(21f, 11f)
+        curveTo(21f, 16.5f, 17f, 21.2f, 12f, 22.5f)
+        curveTo(7f, 21.2f, 3f, 16.5f, 3f, 11f)
+        lineTo(3f, 6f)
+        close()
+        moveTo(12f, 7f)
+        lineTo(16f, 12f)
+        lineTo(8f, 12f)
+        close()
+        moveTo(9f, 13f)
+        lineTo(9f, 17f)
+        lineTo(11f, 17f)
+        lineTo(11f, 13f)
+        close()
+        moveTo(13f, 13f)
+        lineTo(13f, 17f)
+        lineTo(15f, 17f)
+        lineTo(15f, 13f)
+        close()
+    }
+
+    val BrandSponsor: ImageVector = icon("BrandSponsor") {
+        moveTo(12f, 2f)
+        lineTo(15f, 8f)
+        lineTo(21.5f, 9f)
+        lineTo(16.5f, 14f)
+        lineTo(18f, 20.5f)
+        lineTo(12f, 17.5f)
+        lineTo(6f, 20.5f)
+        lineTo(7.5f, 14f)
+        lineTo(2.5f, 9f)
+        lineTo(9f, 8f)
+        close()
+    }
+
+    val CreatorCollab: ImageVector = icon("CreatorCollab") {
+        moveTo(9f, 11f)
+        arcTo(4f, 4f, 0f, true, true, 9f, 3f)
+        arcTo(4f, 4f, 0f, true, true, 9f, 11f)
+        close()
+        moveTo(16f, 9f)
+        arcTo(3f, 3f, 0f, true, true, 16f, 3f)
+        arcTo(3f, 3f, 0f, true, true, 16f, 9f)
+        close()
+        moveTo(2f, 20f)
+        curveTo(2f, 16.5f, 5.5f, 14.5f, 9f, 14.5f)
+        curveTo(12.5f, 14.5f, 16f, 16.5f, 16f, 20f)
+        close()
+        moveTo(16.5f, 16f)
+        curveTo(18.5f, 16.5f, 21f, 17.8f, 21f, 20f)
+    }
+
+    val DigitalDetox: ImageVector = icon("DigitalDetox") {
+        moveTo(12f, 3f)
+        curveTo(7f, 3f, 3f, 7f, 3f, 12f)
+        curveTo(3f, 17f, 7f, 21f, 12f, 21f)
+        curveTo(17f, 21f, 21f, 17f, 21f, 12f)
+        curveTo(21f, 7f, 17f, 3f, 12f, 3f)
+        close()
+        moveTo(12f, 6f)
+        curveTo(13.5f, 8.5f, 15f, 11f, 15f, 13f)
+        curveTo(15f, 15f, 13.5f, 16.5f, 12f, 16.5f)
+        curveTo(10.5f, 16.5f, 9f, 15f, 9f, 13f)
+        curveTo(9f, 11f, 10.5f, 8.5f, 12f, 6f)
+        close()
+    }
+
     fun forStat(type: StatType): ImageVector = when (type) {
         StatType.HEALTH -> Health
         StatType.HAPPINESS -> Happiness

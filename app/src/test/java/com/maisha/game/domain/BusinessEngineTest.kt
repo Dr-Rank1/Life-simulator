@@ -2,8 +2,11 @@ package com.maisha.game.domain
 
 import com.maisha.game.data.model.Business
 import com.maisha.game.data.model.BusinessIndustry
+import com.maisha.game.data.model.CompanyStage
 import com.maisha.game.data.model.Stats
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -32,12 +35,151 @@ class BusinessEngineTest {
                 val business = result.character.businesses.first()
                 assertEquals("Acme Labs", business.name)
                 assertEquals(BusinessIndustry.TECH, business.industry)
+                assertEquals(CompanyStage.BOOTSTRAP, business.stage)
+                assertEquals(100, business.equityShare)
                 assertTrue(business.valuation > 0)
                 assertTrue(business.revenue > 0)
+                assertTrue(business.annualBurn > 0)
                 assertTrue(business.employeeCount >= 1)
                 assertEquals(1_000_000 - investment, result.character.stats.money)
             }
             is BusinessResult.Failed -> error("Expected start success: ${result.reason}")
+        }
+    }
+
+    @Test
+    fun launchProductService_updatesQualityAndMorale() {
+        val business = Business(
+            id = "b1",
+            name = "App Factory",
+            industry = BusinessIndustry.TECH,
+            valuation = 200_000,
+            revenue = 100_000,
+            employeeCount = 4,
+            stage = CompanyStage.BOOTSTRAP,
+            productQuality = 85,
+            teamMorale = 90
+        )
+        val character = TestFixtures.character(
+            age = 32,
+            stats = Stats(money = 50_000, smarts = 80),
+            businesses = listOf(business)
+        )
+        when (val result = engine.launchProductService(character, "b1")) {
+            is BusinessResult.Success -> {
+                val updated = result.character.businesses.first()
+                assertTrue(updated.actionDoneThisYear)
+                assertTrue(updated.productQuality >= 85)
+            }
+            is BusinessResult.Failed -> error("Expected launch success: ${result.reason}")
+        }
+    }
+
+    @Test
+    fun scaleExpand_hiresEmployeesAndIncreasesBurn() {
+        val business = Business(
+            id = "b1",
+            name = "Cafe Empire",
+            industry = BusinessIndustry.FOOD,
+            valuation = 300_000,
+            revenue = 120_000,
+            employeeCount = 5,
+            stage = CompanyStage.BOOTSTRAP
+        )
+        val character = TestFixtures.character(
+            age = 35,
+            stats = Stats(money = 500_000),
+            businesses = listOf(business)
+        )
+        when (val result = engine.scaleExpand(character, "b1")) {
+            is BusinessResult.Success -> {
+                val updated = result.character.businesses.first()
+                assertTrue(updated.employeeCount > 5)
+                assertTrue(updated.revenue > 120_000)
+                assertTrue(result.character.stats.money < 500_000)
+                assertTrue(updated.actionDoneThisYear)
+            }
+            is BusinessResult.Failed -> error("Expected scale success: ${result.reason}")
+        }
+    }
+
+    @Test
+    fun pivotBusiness_changesIndustryAndRetainsEntity() {
+        val business = Business(
+            id = "b1",
+            name = "Pivot Co",
+            industry = BusinessIndustry.RETAIL,
+            valuation = 150_000,
+            revenue = 60_000,
+            employeeCount = 3
+        )
+        val character = TestFixtures.character(
+            age = 29,
+            stats = Stats(money = 100_000),
+            businesses = listOf(business)
+        )
+        when (val result = engine.pivotBusiness(character, "b1", BusinessIndustry.TECH)) {
+            is BusinessResult.Success -> {
+                val updated = result.character.businesses.first()
+                assertEquals(BusinessIndustry.TECH, updated.industry)
+                assertTrue(updated.actionDoneThisYear)
+                assertTrue(result.character.stats.money < 100_000)
+            }
+            is BusinessResult.Failed -> error("Expected pivot success: ${result.reason}")
+        }
+    }
+
+    @Test
+    fun raiseCapital_dilutesEquityAndGrantsFounderLiquidity() {
+        val business = Business(
+            id = "b1",
+            name = "Unicorn AI",
+            industry = BusinessIndustry.TECH,
+            valuation = 500_000,
+            revenue = 150_000,
+            employeeCount = 6,
+            stage = CompanyStage.BOOTSTRAP,
+            equityShare = 100
+        )
+        val character = TestFixtures.character(
+            age = 33,
+            stats = Stats(money = 10_000),
+            businesses = listOf(business)
+        )
+        when (val result = engine.raiseCapital(character, "b1")) {
+            is BusinessResult.Success -> {
+                val updated = result.character.businesses.first()
+                assertEquals(85, updated.equityShare)
+                assertTrue(updated.valuation > 500_000)
+                assertEquals(CompanyStage.SEED, updated.stage)
+                assertTrue(result.character.stats.money > 10_000)
+            }
+            is BusinessResult.Failed -> error("Expected raise capital success: ${result.reason}")
+        }
+    }
+
+    @Test
+    fun liquidateBusiness_removesEntityAndGrantsLiquidationPayout() {
+        val business = Business(
+            id = "b1",
+            name = "Struggling Co",
+            industry = BusinessIndustry.RETAIL,
+            valuation = 100_000,
+            revenue = 10_000,
+            employeeCount = 2,
+            equityShare = 100
+        )
+        val character = TestFixtures.character(
+            age = 38,
+            stats = Stats(money = 5_000),
+            businesses = listOf(business)
+        )
+        when (val result = engine.liquidateBusiness(character, "b1")) {
+            is BusinessResult.Success -> {
+                assertTrue(result.character.businesses.isEmpty())
+                assertTrue(result.character.stats.money > 5_000)
+            }
+            is BusinessResult.Failed -> error("Expected liquidate success: ${result.reason}")
         }
     }
 
@@ -50,7 +192,9 @@ class BusinessEngineTest {
             valuation = 200_000,
             revenue = 100_000,
             employeeCount = 3,
-            lastYearProfit = 0
+            lastYearProfit = 0,
+            annualBurn = 50_000,
+            equityShare = 100
         )
         val character = TestFixtures.character(
             age = 35,
@@ -60,10 +204,9 @@ class BusinessEngineTest {
         val after = engine.processBusinessYear(character)
         assertEquals(1, after.businesses.size)
         val updated = after.businesses.first()
-        val expectedMoney = (50_000 + updated.lastYearProfit).coerceAtLeast(0)
-        assertEquals(expectedMoney, after.stats.money)
+        assertFalse(updated.actionDoneThisYear)
         assertTrue(updated.valuation >= 1_000)
-        assertTrue(updated.lastYearProfit != 0 || after.stats.money != 50_000)
+        assertTrue(updated.annualBurn > 0)
     }
 
     @Test
@@ -74,7 +217,8 @@ class BusinessEngineTest {
             industry = BusinessIndustry.FOOD,
             valuation = 250_000,
             revenue = 40_000,
-            employeeCount = 5
+            employeeCount = 5,
+            equityShare = 100
         )
         val character = TestFixtures.character(
             age = 40,

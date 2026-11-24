@@ -203,6 +203,19 @@ Completely offline Canvas drawing engine (1,180+ lines):
 - **Commemorative Monument Dossier (`MemorialHeader` & `LifeSummaryScreen`):** Arched gravestone slab with stone bevel styling, top Silk Sash Life Ribbon Banner with custom vector crest (`AppIcons.Tombstone`), gilded medallion holding `ProceduralAvatarPortrait` with peaceful expression, carved monument metrics strip (Lifetime Net Worth, Pinnacle Career, Family Lineage), cause-of-death plaque, and a prominent hero-grade "Continue as Heir" CTA button.
 - **Rich Heir Succession (`HeirSelectionDialog`):** `previewHeirCandidates` in `LegacyEngine` calculates exact inheritance cash and percentage estate share based on will or equal division. Presents surviving children as selectable heir dossier cards showing 56dp `ProceduralAvatarPortrait`, relationship bond %, stats preview, and gold inheritance share pill.
 
+### Entrepreneurship, Politics & Creator Economy Boards
+- **Business & Startups (`BusinessProgressionCard.kt`, `BusinessEngine.kt`):**
+  - 5-Tier Company Lifecycle: `BOOTSTRAP` -> `SEED` -> `GROWTH` -> `EXPANSION` -> `ENTERPRISE` based on country-scaled valuation milestones.
+  - Startup progression board displaying Revenue vs. Burn Rate indicator pill, Equity Ownership %, Company Valuation, Team Morale, and Product Quality gauges.
+  - Interactive founder agency: Launch product/service, scale headcount, pivot industry, raise venture capital (equity dilution), sell company, or liquidate assets.
+- **Politics & Public Office (`PoliticalCampaignBoard.kt`, `PoliticsEngine.kt`):**
+  - Run for Mayor, Governor, or President with 5 signature Campaign Agendas (`INFRASTRUCTURE`, `EDUCATION`, `HEALTHCARE`, `TAX_RELIEF`, `ANTI_CORRUPTION`).
+  - Active Campaign Loop: Polling support meters, war chest funds, campaign rallies, donor fundraising, and Election Day polling resolution.
+  - Officeholder Governance Dashboard: 4-year term countdown, public approval rating gauge, controversy heat meter, state addresses, signature reforms, and scandal damage control.
+- **Fame & Creator Economy (`FameSocialMediaBoard.kt`, `SocialMediaEngine.kt`):**
+  - 5-Tier Fame Ribbon: `UNKNOWN`, `RISING_STAR`, `MICRO_INFLUENCER`, `VIRAL_CELEB`, `GLOBAL_ICON` with verified badge indicator.
+  - Creator actions: Post viral content, high-yield country-scaled brand sponsorship deals, creator collaborations, digital detox burnout resets, platform ad monetization, and viral drama/cancel culture PR management.
+
 ---
 
 ## 8. Commit Timeline (Recent Highlights)
@@ -227,6 +240,7 @@ Completely offline Canvas drawing engine (1,180+ lines):
 | `feature` | 15-Country Financial Instruments, Relocation FX & Play Billing Store: Localized instruments & SACCO/overdraft, relocation PPP conversions & remittances, Play Billing v7 Dynasty Vault store (`DynastyVaultStoreSheet`, `CountryFinanceSheet`, `RemittanceSheet`), and 586 unit tests |
 | `feature` | Mobile Life-Sim Visual & Tactile Arcade UI Overhaul: Procedural `StageBackdropCanvas` scene backdrop, rolling HUD counter transitions, 4-ring arc gauges (`StatGaugeCluster`), edge-glow windfall/critical alert overlays, 2-column arcade activity grid (`ActivityGridCard`), expressive Relationship Cards (`PersonCard`) with temperament pills, 5-segment bond meters & instant 1-tap quick actions, visual rank progression steppers, opportunity stamps (`JobOpportunityCard`), home equity gauges, and modal `CharacterDossierSheet` |
 | `feature` | Game-Feel Character Creation, Commemorative Monument Dossier & Rich Heir Succession: `StartingStatArchetype` presets, instant shuffle, country preview cards, arched monument tombstone with silk-sash banner & carved metrics, and `HeirCandidatePreview` dossier cards with inheritance shares |
+| `feature` | Entrepreneurship Stages, Politics Campaigns & Creator Economy Progression Boards: `BusinessEngine` 5-stage lifecycle, valuation milestones & founder agency (`BusinessProgressionCard`), `PoliticsEngine` campaign-to-governance boards (`PoliticalCampaignBoard`), and `SocialMediaEngine` 5-tier fame ribbon, creator burnout & brand deals (`FameSocialMediaBoard`) |
 
 ---
 

@@ -211,13 +211,53 @@ com.maisha.game.domain/
   - Legal representation: Public Defenders vs High-Priced Elite Defense Attorneys.
   - Prison yard life: Gang affiliations, prison jobs, parole board hearings, and escape attempts.
 
-#### 8. `LeisureEngine`, `BusinessEngine`, `PoliticsEngine`, `RelocationEngine`
+#### 8. `BusinessEngine` & Interactive Entrepreneurship
+- **Role:** Simulates the founder journey from scrappy bootstrapped venture to enterprise conglomerate.
+- **Key Systems:**
+  - **5-Tier Company Lifecycle:** Companies advance through `BOOTSTRAP`, `SEED`, `GROWTH`, `EXPANSION`, and `ENTERPRISE` stages, triggered when valuations cross country-scaled milestones.
+  - **Financial Metrics & Burn Rate:** Transparent annual balance sheet tracking Gross Revenue vs Annual Burn Rate (payroll, office leases, server costs, marketing), calculating net annual company profit/loss.
+  - **Valuation & Equity Ownership:** Starting founders hold 100% equity; equity dilutes upon raising venture funding rounds.
+  - **Team Morale & Product Quality:** Morale reacts dynamically to profitability, layoffs, or salary cuts. Product quality gates customer churn and organic revenue growth.
+  - **Interactive Founder Agency:**
+    - *Launch Product/Service:* Invest in R&D to boost product quality and annual revenue.
+    - *Scale Headcount:* Expand engineering/sales teams to accelerate growth stage.
+    - *Pivot Industry:* Realign the company to an adjacent sector for a country-scaled retooling cost.
+    - *Raise Capital:* Dilute 10-25% equity for immediate liquid cash injection into company reserves.
+    - *Sell Business / Liquidate:* Cash out equity for personal net worth or orderly liquidation.
+
+#### 9. `PoliticsEngine` & Public Office Governance
+- **Role:** Simulates democratic political campaigns, electoral outcomes, and executive governance.
+- **Key Systems:**
+  - **Offices of State:** City Mayor (Age 21+), State Governor (Age 25+), and Head of State / President (Age 35+).
+  - **Campaign Agendas:** Choose a signature platform: `INFRASTRUCTURE`, `EDUCATION`, `HEALTHCARE`, `TAX_RELIEF`, or `ANTI_CORRUPTION`.
+  - **Active Campaign Loop:** Manage voter polling support (0-100), war chest donations, grassroots campaign rallies, and donor fundraising banquets.
+  - **Election Day Resolution:** Evaluates final voter support against candidate Smarts, Karma, and opponent standing to resolve victory or defeat.
+  - **Officeholder Governance Board:**
+    - 4-year term countdown with maximum term-limits enforcement.
+    - Dynamic Public Approval Rating (0-100) and Scandal Heat meter.
+    - Deliver State Addresses to rally national morale and voter confidence.
+    - Enact Signature Legislative Reforms delivering lasting civic stat boosts.
+    - Manage political scandals through public transparency or cover-ups.
+    - Impeachment proceedings if approval drops below critical threshold (20%).
+
+#### 10. `SocialMediaEngine` & Creator Economy
+- **Role:** Models influencer culture, social media platforms, audience trust, and monetization.
+- **Key Systems:**
+  - **5-Tier Fame Ribbon:** Progression across `UNKNOWN`, `RISING_STAR`, `MICRO_INFLUENCER`, `VIRAL_CELEB`, and `GLOBAL_ICON` with verified checkmark status.
+  - **Audience Trust & Creator Burnout:** Balance viral reach against Audience Trust (0-100) and Creator Burnout (0-100). High burnout degrades health and content quality.
+  - **Interactive Creator Agency:**
+    - *Post Content:* Generate viral posts to grow follower count and build momentum.
+    - *Brand Sponsorship Deals:* High-yield country-scaled sponsor payouts scaled to follower count and trust.
+    - *Creator Collaborations:* Cross-promote with fellow influencers for mutual follower growth.
+    - *Digital Detox:* Step away from social feeds to reset burnout to zero.
+    - *Ad Monetization:* Turn on platform creator funds for passive annual ad dividends.
+    - *Drama & Cancel Culture PR:* Handle controversies through public accountability or pushing back against cancel mobs.
+
+#### 11. `LeisureEngine` & `RelocationEngine`
 - **Leisure:** Hobbies, gym workouts, meditation, vacations, yacht days, private jet trips.
-- **Business:** Founding startups, funding rounds, hiring staff, scaling revenue, selling companies.
-- **Politics:** Running for school council, municipal mayor, parliament/congress, or head of state.
 - **Relocation:** Applying for tourist visas, work permits, permanent residency, or naturalized citizenship across 15 countries.
 
-#### 9. `LifeArchetypeEngine`
+#### 12. `LifeArchetypeEngine`
 - **Role:** Resolves silk-sash memorial ribbons, dynamic life chapter titles, evocative narrative epitaphs, and multi-generational legacy stamps upon player death and throughout life progression.
 - **Dynamic Chapter Titles:**
   - Updates continuously across nine life eras (Infancy 0-2, Early Childhood 3-5, Primary School & Aptitudes 6-10, Middle School & Cliques 11-14, High School & Identity 15-18, Young Adulthood 19-25, Prime Career & Family 26-45, Mature Adulthood 46-65, Senior & Golden Twilight 66+).

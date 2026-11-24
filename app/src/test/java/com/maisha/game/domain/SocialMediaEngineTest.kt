@@ -1,8 +1,10 @@
 package com.maisha.game.domain
 
+import com.maisha.game.data.model.FameTier
 import com.maisha.game.data.model.SocialMediaState
 import com.maisha.game.data.model.Stats
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -31,6 +33,74 @@ class SocialMediaEngineTest {
 
         assertTrue("High stats growth ($highGrowth) should exceed low stats growth ($lowGrowth)", highGrowth > lowGrowth)
         assertTrue(lowGrowth > 0)
+    }
+
+    @Test
+    fun acceptBrandSponsorship_grantsPayoutAndIncreasesBurnout() {
+        val creator = accountHolder(looks = 80, smarts = 70).copy(
+            socialMedia = SocialMediaState(
+                hasAccount = true,
+                followers = 50_000,
+                reputation = 85,
+                creatorBurnout = 10
+            )
+        )
+        val result = engine.acceptBrandSponsorship(creator)
+        assertTrue(result is SocialMediaResult.Success)
+        val after = (result as SocialMediaResult.Success).character
+        assertTrue(after.stats.money > 0)
+        assertTrue(after.socialMedia.brandDealDoneThisYear)
+        assertTrue(after.socialMedia.creatorBurnout > 10)
+        assertTrue(after.socialMedia.activeBrandDeal != null)
+    }
+
+    @Test
+    fun collaborateWithCreator_boostsFollowersSignificantly() {
+        val creator = accountHolder(looks = 80, smarts = 70).copy(
+            socialMedia = SocialMediaState(
+                hasAccount = true,
+                followers = 20_000,
+                reputation = 80
+            )
+        )
+        val result = engine.collaborateWithCreator(creator)
+        assertTrue(result is SocialMediaResult.Success)
+        val after = (result as SocialMediaResult.Success).character
+        assertTrue(after.socialMedia.followers > 20_000)
+        assertTrue(after.socialMedia.collabDoneThisYear)
+    }
+
+    @Test
+    fun takeDigitalDetox_reducesCreatorBurnoutAndRestoresHappiness() {
+        val burnedOut = accountHolder(looks = 70, smarts = 70).copy(
+            stats = Stats(happiness = 40, health = 60),
+            socialMedia = SocialMediaState(
+                hasAccount = true,
+                creatorBurnout = 70
+            )
+        )
+        val result = engine.takeDigitalDetox(burnedOut)
+        assertTrue(result is SocialMediaResult.Success)
+        val after = (result as SocialMediaResult.Success).character
+        assertTrue(after.socialMedia.creatorBurnout < 70)
+        assertTrue(after.stats.happiness > 40)
+        assertTrue(after.socialMedia.detoxDoneThisYear)
+    }
+
+    @Test
+    fun handleDrama_apologizeRestoresReputation() {
+        val creator = accountHolder(looks = 70, smarts = 70).copy(
+            socialMedia = SocialMediaState(
+                hasAccount = true,
+                reputation = 50,
+                dramaActive = true
+            )
+        )
+        val result = engine.handleDrama(creator, apologize = true)
+        assertTrue(result is SocialMediaResult.Success)
+        val after = (result as SocialMediaResult.Success).character
+        assertTrue(after.socialMedia.reputation > 50)
+        assertFalse(after.socialMedia.dramaActive)
     }
 
     @Test

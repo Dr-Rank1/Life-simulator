@@ -768,6 +768,18 @@ class GameEngine @Inject constructor(
     fun monetizeSocialMediaAccount(character: Character): SocialMediaResult =
         socialMediaEngine.monetizeAccount(character)
 
+    fun acceptBrandSponsorship(character: Character): SocialMediaResult =
+        socialMediaEngine.acceptBrandSponsorship(character)
+
+    fun collaborateWithCreator(character: Character): SocialMediaResult =
+        socialMediaEngine.collaborateWithCreator(character)
+
+    fun takeDigitalDetox(character: Character): SocialMediaResult =
+        socialMediaEngine.takeDigitalDetox(character)
+
+    fun handleSocialDrama(character: Character, apologize: Boolean): SocialMediaResult =
+        socialMediaEngine.handleDrama(character, apologize)
+
     fun practiceSkill(
         character: Character,
         skillType: com.maisha.game.data.model.SkillType
@@ -801,6 +813,24 @@ class GameEngine @Inject constructor(
     fun sellBusiness(character: Character, businessId: String): BusinessResult =
         businessEngine.sellBusiness(character, businessId)
 
+    fun launchProductService(character: Character, businessId: String): BusinessResult =
+        businessEngine.launchProductService(character, businessId)
+
+    fun scaleExpandBusiness(character: Character, businessId: String): BusinessResult =
+        businessEngine.scaleExpand(character, businessId)
+
+    fun pivotBusiness(
+        character: Character,
+        businessId: String,
+        newIndustry: com.maisha.game.data.model.BusinessIndustry
+    ): BusinessResult = businessEngine.pivotBusiness(character, businessId, newIndustry)
+
+    fun raiseCapital(character: Character, businessId: String): BusinessResult =
+        businessEngine.raiseCapital(character, businessId)
+
+    fun liquidateBusiness(character: Character, businessId: String): BusinessResult =
+        businessEngine.liquidateBusiness(character, businessId)
+
     fun businessInvestmentTiers(character: Character): List<Int> =
         businessEngine.investmentTiers(character)
 
@@ -823,6 +853,36 @@ class GameEngine @Inject constructor(
         office: com.maisha.game.data.model.PoliticalOffice,
         investment: Int
     ): CampaignResult = politicsEngine.launchCampaign(character, office, investment)
+
+    fun startCampaignRun(
+        character: Character,
+        office: com.maisha.game.data.model.PoliticalOffice,
+        agenda: com.maisha.game.data.model.CampaignAgenda,
+        investment: Int
+    ): CampaignResult = politicsEngine.startCampaignRun(character, office, agenda, investment)
+
+    fun holdCampaignRally(character: Character): CampaignResult =
+        politicsEngine.holdCampaignRally(character)
+
+    fun fundraiseCampaign(character: Character): CampaignResult =
+        politicsEngine.fundraiseCampaign(character)
+
+    fun resolveElection(character: Character): CampaignResult =
+        politicsEngine.resolveElection(character)
+
+    fun deliverStateAddress(character: Character): CampaignResult =
+        politicsEngine.deliverStateAddress(character)
+
+    fun enactSignatureReform(
+        character: Character,
+        agenda: com.maisha.game.data.model.CampaignAgenda
+    ): CampaignResult = politicsEngine.enactSignatureReform(character, agenda)
+
+    fun handlePoliticalScandal(character: Character, coverUp: Boolean): CampaignResult =
+        politicsEngine.handlePoliticalScandal(character, coverUp)
+
+    fun resignFromPoliticalOffice(character: Character, reason: String): Character =
+        politicsEngine.resignFromOffice(character, reason)
 
     fun passTaxPolicy(
         character: Character,
