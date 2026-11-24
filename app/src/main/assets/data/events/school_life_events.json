@@ -6,21 +6,33 @@
       "maxAge": 17,
       "text": "Your closest classmate pulls you aside after the bell and asks you to keep a secret about something that happened at home.",
       "weight": 5,
-      "tags": ["education", "positive"],
+      "tags": [
+        "education",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Listen and keep it quiet",
-          "statEffects": { "happiness": 3, "karma": 3 },
+          "statEffects": {
+            "happiness": 3,
+            "karma": 3
+          },
           "resultText": "They trust you more. At school, that kind of loyalty gets noticed."
         },
         {
           "label": "Tell them to talk to a teacher",
-          "statEffects": { "smarts": 2, "karma": 2 },
+          "statEffects": {
+            "smarts": 2,
+            "karma": 2
+          },
           "resultText": "You push them toward help. It feels heavy, but adult, and they don't hate you for it."
         },
         {
           "label": "Gossip about it later",
-          "statEffects": { "happiness": -2, "karma": -4 },
+          "statEffects": {
+            "happiness": -2,
+            "karma": -4
+          },
           "resultText": "Word spreads by lunch. Your reputation takes a hit with people who matter."
         }
       ]
@@ -31,21 +43,33 @@
       "maxAge": 22,
       "text": "Your group project partner has done almost nothing. Presentation day is tomorrow and the slides are a mess.",
       "weight": 6,
-      "tags": ["education"],
+      "tags": [
+        "education"
+      ],
       "choices": [
         {
           "label": "Stay up late and finish it yourself",
-          "statEffects": { "smarts": 3, "happiness": -2, "health": -1 },
+          "statEffects": {
+            "smarts": 3,
+            "happiness": -2,
+            "health": -1
+          },
           "resultText": "You carry the grade. The teacher praises the work — and somehow your partner still takes credit."
         },
         {
           "label": "Confront them and split the work now",
-          "statEffects": { "happiness": 1, "smarts": 1 },
+          "statEffects": {
+            "happiness": 1,
+            "smarts": 1
+          },
           "resultText": "It's awkward, but they scramble. The project is average and fair."
         },
         {
           "label": "Tell the teacher the truth",
-          "statEffects": { "karma": 2, "happiness": -1 },
+          "statEffects": {
+            "karma": 2,
+            "happiness": -1
+          },
           "resultText": "Staff intervene. You look responsible — and a little lonely at lunch for a week."
         }
       ]
@@ -56,21 +80,33 @@
       "maxAge": 18,
       "text": "A teacher starts calling on you more and praising your answers. Other students notice — and not all of them smile about it.",
       "weight": 4,
-      "tags": ["education", "positive"],
+      "tags": [
+        "education",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Lean into it and ask for extra work",
-          "statEffects": { "smarts": 4, "happiness": 1 },
+          "statEffects": {
+            "smarts": 4,
+            "happiness": 1
+          },
           "resultText": "Your grades climb. A few classmates roll their eyes, but staff clearly respect you."
         },
         {
           "label": "Downplay it so you don't get targeted",
-          "statEffects": { "happiness": 2, "karma": 1 },
+          "statEffects": {
+            "happiness": 2,
+            "karma": 1
+          },
           "resultText": "You keep the peace. You still learn, just with less spotlight."
         },
         {
           "label": "Use the attention to mock a rival",
-          "statEffects": { "happiness": 1, "karma": -3 },
+          "statEffects": {
+            "happiness": 1,
+            "karma": -3
+          },
           "resultText": "You score a cheap laugh. The teacher looks disappointed, and so do people you like."
         }
       ]
@@ -81,21 +117,31 @@
       "maxAge": 18,
       "text": "You catch your crush laughing at something you said in class. After school they linger near your locker like they might say hello.",
       "weight": 5,
-      "tags": ["education", "positive"],
+      "tags": [
+        "education",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Walk over and talk",
-          "statEffects": { "happiness": 5, "looks": 1 },
+          "statEffects": {
+            "happiness": 5,
+            "looks": 1
+          },
           "resultText": "It's awkward for thirty seconds, then easy. School feels brighter the rest of the week."
         },
         {
           "label": "Smile and keep walking",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "resultText": "Safe. Also unfinished. You replay the moment all evening."
         },
         {
           "label": "Panic and hide behind friends",
-          "statEffects": { "happiness": -1 },
+          "statEffects": {
+            "happiness": -1
+          },
           "resultText": "Your friends tease you for days. The crush probably didn't even notice — you hope."
         }
       ]
@@ -106,21 +152,33 @@
       "maxAge": 16,
       "text": "The school bully corners you between buildings and demands your lunch money — or worse, your dignity in front of a crowd.",
       "weight": 5,
-      "tags": ["education", "negative"],
+      "tags": [
+        "education",
+        "negative"
+      ],
       "choices": [
         {
           "label": "Stand your ground",
-          "statEffects": { "happiness": 2, "health": -2 },
+          "statEffects": {
+            "happiness": 2,
+            "health": -2
+          },
           "resultText": "It gets rough, but people stop laughing. Word spreads that you don't fold."
         },
         {
           "label": "Walk away and tell staff",
-          "statEffects": { "smarts": 2, "karma": 2 },
+          "statEffects": {
+            "smarts": 2,
+            "karma": 2
+          },
           "resultText": "Adults finally get involved. Detention for them; quiet respect for you."
         },
         {
           "label": "Hand over what they want",
-          "statEffects": { "happiness": -4, "money": -200 },
+          "statEffects": {
+            "happiness": -4,
+            "money": -200
+          },
           "resultText": "It's over quickly. The shame lasts longer than the cash."
         }
       ]
@@ -131,21 +189,34 @@
       "maxAge": 18,
       "text": "Someone starts a rumor that you got detention for cheating — even if you didn't. The hallway chatter is loud.",
       "weight": 4,
-      "tags": ["education", "negative"],
+      "tags": [
+        "education",
+        "negative"
+      ],
       "choices": [
         {
           "label": "Ignore it and keep your grades clean",
-          "statEffects": { "smarts": 2, "karma": 1 },
+          "statEffects": {
+            "smarts": 2,
+            "karma": 1
+          },
           "resultText": "The rumor dies without fuel. Your next test score does the talking."
         },
         {
           "label": "Confront the rumor-starter",
-          "statEffects": { "happiness": 1, "health": -1 },
+          "statEffects": {
+            "happiness": 1,
+            "health": -1
+          },
           "resultText": "It gets heated. Some people believe you more; some just enjoy the drama."
         },
         {
           "label": "Lean into the bad-kid image",
-          "statEffects": { "happiness": 2, "karma": -2, "smarts": -1 },
+          "statEffects": {
+            "happiness": 2,
+            "karma": -2,
+            "smarts": -1
+          },
           "resultText": "You get a few laughs and lose a little staff goodwill. Reputation is a strange currency."
         }
       ]
@@ -156,21 +227,34 @@
       "maxAge": 17,
       "text": "Your school club has a showcase night. Parents, teachers, and half the student body will be watching.",
       "weight": 4,
-      "tags": ["education", "positive"],
+      "tags": [
+        "education",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Practice hard and take a lead role",
-          "statEffects": { "happiness": 4, "smarts": 2, "looks": 1 },
+          "statEffects": {
+            "happiness": 4,
+            "smarts": 2,
+            "looks": 1
+          },
           "resultText": "You shine. A teacher suggests you keep going with this outside school."
         },
         {
           "label": "Help backstage and support the team",
-          "statEffects": { "happiness": 3, "karma": 2 },
+          "statEffects": {
+            "happiness": 3,
+            "karma": 2
+          },
           "resultText": "Nobody cheers your name, but the club runs smoothly because of you."
         },
         {
           "label": "Skip it and hang out elsewhere",
-          "statEffects": { "happiness": 1, "karma": -1 },
+          "statEffects": {
+            "happiness": 1,
+            "karma": -1
+          },
           "resultText": "You miss the night. The group notices — and so does your club advisor."
         }
       ]
@@ -181,21 +265,33 @@
       "maxAge": 22,
       "text": "Exam week hits like a wall. Everyone is tired, caffeinated, and one bad night away from melting down.",
       "weight": 6,
-      "tags": ["education"],
+      "tags": [
+        "education"
+      ],
       "choices": [
         {
           "label": "Build a study schedule and stick to it",
-          "statEffects": { "smarts": 4, "happiness": -1 },
+          "statEffects": {
+            "smarts": 4,
+            "happiness": -1
+          },
           "resultText": "Boring works. You walk into the hall knowing the material."
         },
         {
           "label": "Cram with friends overnight",
-          "statEffects": { "smarts": 2, "happiness": 2, "health": -2 },
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 2,
+            "health": -2
+          },
           "resultText": "You learn some things and forget others. Bonding helps the stress, not the sleep."
         },
         {
           "label": "Give up and wing it",
-          "statEffects": { "happiness": 1, "smarts": -2 },
+          "statEffects": {
+            "happiness": 1,
+            "smarts": -2
+          },
           "resultText": "Freedom feels good until the first question. Then it doesn't."
         }
       ]
@@ -206,21 +302,32 @@
       "maxAge": 17,
       "text": "A transfer student sits alone at lunch looking lost. A few people stare; nobody moves.",
       "weight": 4,
-      "tags": ["education", "positive"],
+      "tags": [
+        "education",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Invite them to sit with you",
-          "statEffects": { "happiness": 3, "karma": 3 },
+          "statEffects": {
+            "happiness": 3,
+            "karma": 3
+          },
           "resultText": "They smile like they haven't in weeks. School gets a little bigger for both of you."
         },
         {
           "label": "Point them toward a teacher",
-          "statEffects": { "karma": 1 },
+          "statEffects": {
+            "karma": 1
+          },
           "resultText": "Helpful, distant. You did something — just not the hard part."
         },
         {
           "label": "Pretend you didn't notice",
-          "statEffects": { "happiness": -1, "karma": -1 },
+          "statEffects": {
+            "happiness": -1,
+            "karma": -1
+          },
           "resultText": "You eat in peace. The quiet still feels wrong."
         }
       ]
@@ -231,22 +338,331 @@
       "maxAge": 25,
       "text": "A professor's office hours are open. Your assignment is confusing and the lecture notes don't fill the gap.",
       "weight": 5,
-      "tags": ["education", "positive"],
+      "tags": [
+        "education",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Go and ask focused questions",
-          "statEffects": { "smarts": 4, "happiness": 1 },
+          "statEffects": {
+            "smarts": 4,
+            "happiness": 1
+          },
           "resultText": "They clarify the hard part in ten minutes. You leave feeling like a real student."
         },
         {
           "label": "Email a vague cry for help",
-          "statEffects": { "smarts": 1 },
+          "statEffects": {
+            "smarts": 1
+          },
           "resultText": "You get a polite reply pointing back to the syllabus. Progress: minimal."
         },
         {
           "label": "Skip it and copy from a friend",
-          "statEffects": { "smarts": -1, "karma": -2, "happiness": 1 },
+          "statEffects": {
+            "smarts": -1,
+            "karma": -2,
+            "happiness": 1
+          },
           "resultText": "You submit something. Understanding it is a problem for future-you."
+        }
+      ]
+    },
+    {
+      "id": "school_life_primary_exam_cram",
+      "minAge": 9,
+      "maxAge": 13,
+      "text": "The morning {transportMode} to school is packed with anxious classmates chanting memory formulas for the upcoming {primaryExam}.",
+      "weight": 5,
+      "tags": [
+        "education",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Quiz your seatmate and share summary mnemonic charts",
+          "statEffects": {
+            "smarts": 2,
+            "karma": 3,
+            "happiness": 2
+          },
+          "resultText": "Studying together calms everyone's nerves. Your seatmate aced the revision quiz thanks to your charts."
+        },
+        {
+          "label": "Reassure a visibly crying classmate and offer them your water bottle",
+          "statEffects": {
+            "karma": 4,
+            "happiness": 3
+          },
+          "resultText": "They wipe their tears with a grateful sniffle. Kind gestures on tough exam mornings are never forgotten."
+        },
+        {
+          "label": "Put in earplugs and review your own notes in isolation",
+          "statEffects": {
+            "smarts": 2
+          },
+          "resultText": "You blocked out the noise and committed key science formulas to memory with surgical focus."
+        }
+      ]
+    },
+    {
+      "id": "school_life_money_app_treat_share",
+      "minAge": 13,
+      "maxAge": 18,
+      "text": "After acing a tough pop quiz, an older relative transfers celebratory pocket money via {moneyApp}. Friends at the school gate suggest visiting the corner snack shop.",
+      "weight": 5,
+      "tags": [
+        "education"
+      ],
+      "choices": [
+        {
+          "label": "Treat your close friend group to warm pastries and sodas",
+          "statEffects": {
+            "money": -1500,
+            "happiness": 4,
+            "karma": 2
+          },
+          "resultText": "Laughter echoes around the snack bench as friends praise your generosity and celebrate your quiz score."
+        },
+        {
+          "label": "Save the cash to buy recommended {secondaryExam} study guides",
+          "statEffects": {
+            "smarts": 3,
+            "happiness": 1
+          },
+          "resultText": "You bought annotated revision handbooks. Your preparation for the {secondaryExam} takes a major leap forward."
+        },
+        {
+          "label": "Donate the allowance to the school library computer fund",
+          "statEffects": {
+            "money": -1000,
+            "karma": 5,
+            "happiness": 3
+          },
+          "resultText": "The head librarian pins your name to the donors' board with a warm, approving smile."
+        }
+      ]
+    },
+    {
+      "id": "school_life_commute_greeting_kindness",
+      "minAge": 8,
+      "maxAge": 16,
+      "text": "Every morning at the {transportMode} stop, a gentle elderly vendor greets students with a warm \"{greeting}!\", making sure children cross the busy junction safely.",
+      "weight": 4,
+      "tags": [
+        "education",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Greet them respectfully with a bright \"{greeting}!\" and buy fruit",
+          "statEffects": {
+            "money": -200,
+            "karma": 3,
+            "happiness": 3
+          },
+          "resultText": "The vendor beams and slips an extra sweet orange into your school bag. Your morning starts on a golden note."
+        },
+        {
+          "label": "Help them sweep clean their fruit stall before the bell rings",
+          "statEffects": {
+            "karma": 4,
+            "happiness": 2
+          },
+          "resultText": "Their wrinkled eyes crinkle with warmth. Fellow students take notice of your courteous manners."
+        },
+        {
+          "label": "Nod politely and hurry onward to beat the morning roll call",
+          "statEffects": {
+            "happiness": 1
+          },
+          "resultText": "You waved respectfully and slipped through the school gates right before the gates slammed shut."
+        }
+      ]
+    },
+    {
+      "id": "school_life_rainy_commute_rescue",
+      "minAge": 10,
+      "maxAge": 17,
+      "text": "A sudden tropical downpour turns the road outside school into a rushing stream, stalling the morning {transportMode}.",
+      "weight": 4,
+      "tags": [
+        "education"
+      ],
+      "choices": [
+        {
+          "label": "Form a human chain with older students to help younger pupils cross safely",
+          "statEffects": {
+            "karma": 5,
+            "happiness": 4,
+            "health": -1
+          },
+          "resultText": "Soaked to the knees, you safely guided every single younger child across the muddy torrent."
+        },
+        {
+          "label": "Share your umbrella with a stranded classmate holding paper textbooks",
+          "statEffects": {
+            "karma": 3,
+            "happiness": 3
+          },
+          "resultText": "You saved their homework notebooks from destruction. They become a steadfast lunchroom companion."
+        },
+        {
+          "label": "Wait sheltered under the store awning until the cloudburst passes",
+          "statEffects": {
+            "health": 1
+          },
+          "resultText": "You arrived dry and warm, even if twenty minutes late to morning homeroom."
+        }
+      ]
+    },
+    {
+      "id": "school_life_secondary_exam_mock_triumph",
+      "minAge": 14,
+      "maxAge": 18,
+      "text": "Results for the nationwide mock {secondaryExam} are posted on the hall board. Your name appears in the top regional tier.",
+      "weight": 5,
+      "tags": [
+        "education",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Organize an evening study circle to tutor struggling peers",
+          "statEffects": {
+            "smarts": 3,
+            "karma": 5,
+            "happiness": 4
+          },
+          "resultText": "Classmates flock to your study circle. Teaching the material cements your own mastery for the real exam."
+        },
+        {
+          "label": "Celebrate with family over a special dinner",
+          "statEffects": {
+            "happiness": 5
+          },
+          "familyRelationshipEffect": 6,
+          "resultText": "Your guardians celebrate your stellar marks, cooking your favorite feast and praising your dedication."
+        },
+        {
+          "label": "Stay modest and quietly double down on weak subjects",
+          "statEffects": {
+            "smarts": 3
+          },
+          "resultText": "You avoided jealousy and worked silently in the library, sharpening your academic edge."
+        }
+      ]
+    },
+    {
+      "id": "school_life_science_lab_mishap",
+      "minAge": 12,
+      "maxAge": 18,
+      "text": "During an ambitious chemistry experiment, a test tube boils over, filling the laboratory with dense lavender smoke.",
+      "weight": 4,
+      "tags": [
+        "education"
+      ],
+      "choices": [
+        {
+          "label": "Quickly activate the emergency ventilation fan and switch off gas burners",
+          "statEffects": {
+            "smarts": 3,
+            "karma": 4,
+            "happiness": 2
+          },
+          "resultText": "Your quick thinking clears the air before the fire alarms trip. The science teacher commends your safety instincts."
+        },
+        {
+          "label": "Calmly guide coughing lab partners toward the open courtyard",
+          "statEffects": {
+            "karma": 3,
+            "happiness": 2
+          },
+          "resultText": "You ensured everyone exited safely. The fresh air revives your classmates immediately."
+        },
+        {
+          "label": "Laugh off the colorful purple mess with your lab partner",
+          "statEffects": {
+            "happiness": 3,
+            "smarts": -1
+          },
+          "resultText": "The spectacle was hilarious, although cleaning the purple soot off lab goggles took the rest of the period."
+        }
+      ]
+    },
+    {
+      "id": "school_life_interschool_debate_rivalry",
+      "minAge": 13,
+      "maxAge": 18,
+      "text": "You represent your school at the inter-district debate tournament. The opposing captain is a fiery speaker with a fierce reputation.",
+      "weight": 4,
+      "tags": [
+        "education"
+      ],
+      "choices": [
+        {
+          "label": "Deliver a razor-sharp evidence-based counter-argument",
+          "statEffects": {
+            "smarts": 4,
+            "looks": 2,
+            "happiness": 5
+          },
+          "resultText": "The judges lean forward, captivated by your logical precision. Your school takes home the regional trophy!"
+        },
+        {
+          "label": "Appeal to the audience's emotional empathy with a stirring story",
+          "statEffects": {
+            "looks": 3,
+            "karma": 3,
+            "happiness": 4
+          },
+          "resultText": "The auditorium erupts into applause. Even the rival captain shakes your hand with sincere respect."
+        },
+        {
+          "label": "Stick strictly to prepared team speaking notes",
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 2
+          },
+          "resultText": "You delivered a competent, steady performance that secured your school a solid runner-up finish."
+        }
+      ]
+    },
+    {
+      "id": "school_life_last_day_yearbook_signing",
+      "minAge": 15,
+      "maxAge": 18,
+      "text": "On the final afternoon before {secondaryExam} study leave, classmates gather on the school lawn passing yearbooks and sharing bittersweet farewells.",
+      "weight": 5,
+      "tags": [
+        "education",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Write heartfelt personalized notes to teachers and friends",
+          "statEffects": {
+            "karma": 4,
+            "happiness": 5
+          },
+          "resultText": "Your kind words bring smiles and tears. Yearbooks capture a bond that distance will never erase."
+        },
+        {
+          "label": "Organize a group commemorative photo beside the school crest",
+          "statEffects": {
+            "looks": 2,
+            "happiness": 4
+          },
+          "resultText": "Dozens of smiling faces crowd into the frame. The snapshot becomes a cherished memento for years to come."
+        },
+        {
+          "label": "Exchange contact details and promise to meet after {secondaryExam} results",
+          "statEffects": {
+            "smarts": 1,
+            "happiness": 3
+          },
+          "resultText": "You created a group chat to share revision tips, keeping mutual spirits high for exam season."
         }
       ]
     }

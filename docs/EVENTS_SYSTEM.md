@@ -27,31 +27,31 @@ flowchart TD
 
 ---
 
-## 2. Event Pack Inventory (19 JSON Files)
+## 2. Event Pack Inventory (19 JSON Files, 551 Total Events)
 
 All narrative event packs reside in `app/src/main/assets/data/events/`:
 
-| File | Scope / Theme | Typical Age Range | Primary Gates & Tags |
-|---|---|:---:|---|
-| `starter_events.json` | Newborn, infant, and toddler moments | 0–5 | Baby milestones, parenting interactions |
-| `education_events.json` | School life, exam preparations, homework dilemmas | 6–22 | `education`, `study_effort` |
-| `school_life_events.json` | Classmate secrets, crushes, bullies, clubs, rivalries | 6–18 | `education`, classmates roster interactions |
-| `career_events.json` | Workplace dilemmas, promotions, office politics | 18–70 | `career`, `requires_job`, `work_effort` |
-| `wave4_workplace_events.json` | Advanced corporate politics, PIPs, boss interactions | 18–65 | `requires_job`, corporate tracks |
-| `wave4_side_hustle_events.json`| Freelancing, streaming, craft businesses | 14–60 | Side hustle management |
-| `wave4_hobbies_events.json` | Creative pursuits, sports, gaming, outdoor activities | 8–80 | Leisure & hobbies |
-| `relationship_events.json` | Family dynamics, dating dilemmas, marriage choices | 13–80 | `relationship`, `requires_spouse`, `requires_child` |
-| `wave4_love_sex_events.json` | Intimate romance, relationship tests, proposals | 16–70 | `requires_spouse`, `requires_partner` |
-| `wave4_children_events.json` | Parenting dilemmas, child milestones, family drama | 18–80 | `requires_child` |
-| `finance_events.json` | Money windfalls, scams, asset purchases, market dips | 18–85 | `finance`, wealth thresholds |
-| `crime_events.json` | Street crime encounters, temptation, illegal offers | 14–65 | `crime`, law enforcement encounters |
-| `wave4_crime_events.json` | Underworld syndicates, heist planning, prison life | 16–70 | `crime`, `incarcerated` |
-| `midlife_events.json` | Midlife crises, career shifts, health warnings | 35–65 | Mature adulthood dilemmas |
-| `general_events.json` | Broad cross-cutting life moments (largest pool) | 6–90 | Universal human experiences |
-| `holiday_events.json` | Country holiday celebrations and family traditions | 4–90 | `holiday`, holiday cooldowns |
-| `wave3_events.json` | Specialized medical, legal, and lifestyle dilemmas | 18–80 | Wave 3 system integrations |
-| `narrative_arcs_events.json` | Cohesive multi-year narrative story arcs and country-authentic life stage milestones | 7–95 | `one_time`, `requires_event_<id>`, `education`, `requires_job`, `holiday` |
-| `wildcard_twists_events.json` | Bizarre inheritances, mistaken identities, viral mishaps, surreal encounters, and fate forks | 8–95 | `one_time`, `requires_event_<id>`, `requires_flag_<flag>`, `education`, `holiday` |
+| File | Scope / Theme | Event Count | Typical Age Range | Primary Gates & Tags |
+|---|---|:---:|:---:|---|
+| `starter_events.json` | Newborn, infant, and toddler moments | 28 | 0–5 | Baby milestones, parenting interactions |
+| `education_events.json` | School life, exam preparations, homework dilemmas | 35 | 6–22 | `education`, `study_effort` |
+| `school_life_events.json` | Classmate secrets, crushes, bullies, clubs, exam crams, yearbook farewells | 18 | 6–18 | `education`, classmates roster interactions |
+| `career_events.json` | Workplace dilemmas, promotions, office politics | 39 | 18–70 | `career`, `requires_job`, `work_effort` |
+| `wave4_workplace_events.json` | Advanced corporate politics, PIPs, boss interactions | 8 | 18–65 | `requires_job`, corporate tracks |
+| `wave4_side_hustle_events.json`| Freelancing, streaming, craft businesses | 7 | 14–60 | Side hustle management |
+| `wave4_hobbies_events.json` | Creative pursuits, sports, gaming, outdoor activities | 7 | 8–80 | Leisure & hobbies |
+| `relationship_events.json` | Family dynamics, dating dilemmas, marriage choices | 41 | 13–80 | `relationship`, `requires_spouse`, `requires_child` |
+| `wave4_love_sex_events.json` | Intimate romance, relationship tests, proposals | 7 | 16–70 | `requires_spouse`, `requires_partner` |
+| `wave4_children_events.json` | Parenting dilemmas, child milestones, family drama | 8 | 18–80 | `requires_child` |
+| `finance_events.json` | Money windfalls, cooperative SACCO/Chama dividends, route syndicates, family emergency remittances, sovereign bonds | 45 | 18–85 | `finance`, wealth thresholds |
+| `crime_events.json` | Street crime encounters, pickpocket standoffs, neighborhood watch, counterfeit app alerts, anonymous drops | 17 | 14–65 | `crime`, law enforcement encounters |
+| `wave4_crime_events.json` | Underworld syndicates, heist planning, prison life | 7 | 16–70 | `crime`, `incarcerated` |
+| `midlife_events.json` | Midlife crises, career shifts, health warnings | 25 | 35–65 | Mature adulthood dilemmas |
+| `general_events.json` | Broad cross-cutting life moments (largest pool) | 146 | 6–90 | Universal human experiences |
+| `holiday_events.json` | Country holiday celebrations, homecomings, midnight vigils, charity drives | 19 | 4–90 | `holiday`, holiday cooldowns |
+| `wave3_events.json` | Specialized medical, legal, and lifestyle dilemmas | 15 | 18–80 | Wave 3 system integrations |
+| `narrative_arcs_events.json` | Cohesive multi-year narrative story arcs and country-authentic life stage milestones | 46 | 5–95 | `one_time`, `requires_event_<id>`, `requires_flag_<flag>`, `education`, `requires_job`, `holiday` |
+| `wildcard_twists_events.json` | Bizarre inheritances, safe deposit boxes, viral street food, shortwave distress, urban beekeeping, fate forks | 33 | 8–95 | `one_time`, `requires_event_<id>`, `requires_flag_<flag>`, `education`, `holiday` |
 
 ---
 
@@ -181,4 +181,34 @@ Authors should avoid hardcoding nation-specific terms in universal events. Inste
 4. **Appropriate Gating:** Add tags like `education` or `requires_job` to prevent nonsensical contexts (e.g. an unemployed infant getting a workplace event).
 5. **Universal Placeholders:** Use `{transportMode}`, `{secondaryExam}`, `{moneyApp}`, `{primaryExam}`, `{greeting}`, `{holidayName}` instead of hardcoded terms.
 6. **Valid JSON Syntax:** No trailing commas or malformed quotes (Kotlinx Serialization requires strict JSON).
-7. **Verification Test:** Run `./gradlew :app:testDebugUnitTest --tests "com.maisha.game.domain.GlobalContentCoverageTest"` to verify that all 19 event packs parse cleanly and resolve placeholders for all 15 countries.
+7. **Verification Test:** Run `./gradlew :app:testDebugUnitTest --tests "com.maisha.game.data.GlobalContentCoverageTest"` to verify that all 19 event packs parse cleanly and resolve placeholders for all 15 countries.
+
+---
+
+## 7. Multi-Year Storyline Arcs & Callbacks
+
+The narrative engine features cohesive 2- and 3-step storyline arcs and consequence-flag callbacks that tie early life choices into late-life payoffs:
+
+1. **School Bully to Logistics Fleet Partner (`arc_bully_reunion_1..3`):**
+   - Triggered by `requires_flag_stoodUpToBully` in early adulthood.
+   - Meeting your former elementary school rival at a {transportMode} terminal, reconciling over tea, co-founding a regional logistics company via {moneyApp}, and ultimately securing a municipal public transit franchise.
+2. **Rotating Cooperative Chama Savings Circle (`arc_family_chama_1..3`):**
+   - Joining a multi-generational family rotating credit group via {moneyApp}.
+   - Navigating personal liquidity vs. family emergency tuition support when your rotation arrives.
+   - Celebrating a 10-year cooperative dividend and acquiring commercial land near transit hubs.
+3. **Corporate Mentorship & Succession Legacy (`arc_mentor_legacy_1..3`):**
+   - Guided by a retiring department veteran through executive politics.
+   - Stepping up to lead the business unit upon the mentor's departure, and eventually paying it forward to a new junior associate decades later.
+4. **Diaspora Bridge & Cross-Border Endowment (`arc_expat_bridge_1..3`):**
+   - Living abroad, sending mobile remittances via {moneyApp} to fund community solar and library construction back home.
+   - Visiting home for community celebrations and establishing a matched bilateral scholarship endowment.
+5. **Reformed Transit Courier Anti-Fraud Advisory (`arc_reformed_courier_1..3`):**
+   - Handed an unmarked drive on the {transportMode}, aiding federal transit detectives in taking down a counterfeiting ring.
+   - Transitioning into an expert cyber-fraud advisory role protecting daily mobile commerce merchants.
+6. **Civic Solar Microgrid & Energy Democracy (`arc_civic_green_energy_1..3`):**
+   - Crowdfunding a rooftop neighborhood solar array on {moneyApp} during grid blackouts.
+   - Expanding to power local streetlights and clinics, and advising national renewable energy commissions.
+7. **Wildcard Mystery Safes, Street Food & Curiosities (`wildcard_twists_events.json`):**
+   - Dormant bank safe deposit boxes containing vintage gold sovereigns and historic surveys (`twist_mystery_safe_deposit_1..2`).
+   - Viral street food recipes recorded during {holidayName} scaling into boutique kiosk franchises (`twist_viral_holiday_street_food_1..2`).
+   - Unchecked lottery tickets found in {transportMode} seat cushions, amateur shortwave distress relays, and rooftop urban beekeeping.

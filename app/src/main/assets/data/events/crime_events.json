@@ -479,6 +479,156 @@
           "resultText": "Staff listen. The wing gets colder toward you for a week."
         }
       ]
+    },
+    {
+      "id": "crime_counterfeit_money_app_scam",
+      "minAge": 16,
+      "maxAge": 65,
+      "text": "While selling a used gadget, a prospective buyer shows a counterfeit confirmation screen on their phone claiming money was sent through {moneyApp}.",
+      "weight": 5,
+      "tags": [
+        "crime"
+      ],
+      "choices": [
+        {
+          "label": "Check your own {moneyApp} balance and call them out on the spot",
+          "statEffects": {
+            "smarts": 3,
+            "happiness": 3,
+            "karma": 3
+          },
+          "resultText": "You refused to release the device until your account reflected the transfer. Caught red-handed, the fraudster sprinted away."
+        },
+        {
+          "label": "Insist on waiting for the official SMS notification before releasing the device",
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 2
+          },
+          "resultText": "Your patient firmness protected your belongings. The buyer made up a lame excuse and vanished."
+        },
+        {
+          "label": "Raise an alarm and report the scammer to market security",
+          "statEffects": {
+            "karma": 5,
+            "happiness": 2
+          },
+          "resultText": "Market guards apprehended the suspect, recovering several stolen phones belonging to other merchants."
+        }
+      ]
+    },
+    {
+      "id": "crime_commute_pickpocket_standoff",
+      "minAge": 15,
+      "maxAge": 65,
+      "text": "On a heavily crowded {transportMode}, you feel a hand slip into your jacket pocket attempting to lift your phone.",
+      "weight": 5,
+      "tags": [
+        "crime"
+      ],
+      "choices": [
+        {
+          "label": "Grab the thief's wrist firmly and demand they let go",
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 3,
+            "looks": 1
+          },
+          "resultText": "You clamped your hand down with fierce resolve. Shocked, the pickpocket dropped your phone and sheepishly backed away."
+        },
+        {
+          "label": "Loudly alert fellow passengers to corner the culprit",
+          "statEffects": {
+            "karma": 4,
+            "happiness": 3
+          },
+          "resultText": "Commuters surrounded the thief and held them until the next transit security checkpoint."
+        },
+        {
+          "label": "Step backward into the aisle and secure your belongings safely",
+          "statEffects": {
+            "smarts": 1,
+            "happiness": 1
+          },
+          "resultText": "You slipped out of reach and clutched your zippered pockets tightly for the remainder of the commute."
+        }
+      ]
+    },
+    {
+      "id": "crime_neighborhood_watch_patrol",
+      "minAge": 18,
+      "maxAge": 70,
+      "text": "Following a spate of nighttime break-ins, the neighborhood association organizes evening foot patrols along residential lanes.",
+      "weight": 4,
+      "tags": [
+        "crime",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Volunteer for weekend patrol shifts with neighbours",
+          "statEffects": {
+            "karma": 6,
+            "health": 1,
+            "happiness": 4
+          },
+          "resultText": "Walking the lanes with heavy flashlights and whistles deters prowlers, restoring safety and solidarity to the street."
+        },
+        {
+          "label": "Contribute towards community street lighting and security cameras via {moneyApp}",
+          "statEffects": {
+            "money": -1500,
+            "karma": 4,
+            "happiness": 3
+          },
+          "resultText": "Bright solar floodlights illuminate dark alleys, making the entire neighborhood hostile to burglars."
+        },
+        {
+          "label": "Keep your porch lights on and doors deadbolted",
+          "statEffects": {
+            "happiness": 1
+          },
+          "resultText": "You upgraded your home security quietly, maintaining vigilance behind locked gates."
+        }
+      ]
+    },
+    {
+      "id": "crime_transit_anonymous_whistleblower_drop",
+      "minAge": 21,
+      "maxAge": 65,
+      "text": "A confidential contact slips you an encrypted memory card containing municipal kickback evidence, requesting you deliver it to investigative journalists at the central {transportMode} terminal.",
+      "weight": 4,
+      "tags": [
+        "one_time",
+        "crime"
+      ],
+      "choices": [
+        {
+          "label": "Discreetly deliver the card to the journalist's lockbox",
+          "statEffects": {
+            "karma": 8,
+            "smarts": 3,
+            "happiness": 5
+          },
+          "resultText": "The investigative exposé hits front pages the next morning. Corrupt contracts are frozen and civic leaders praise the anonymous drop."
+        },
+        {
+          "label": "Hand the memory card over to independent anti-corruption authorities",
+          "statEffects": {
+            "karma": 6,
+            "smarts": 2,
+            "happiness": 4
+          },
+          "resultText": "State investigators launch official audits, citing the evidence as critical to prosecuting corrupt officials."
+        },
+        {
+          "label": "Refuse to get entangled in dangerous political feuds",
+          "statEffects": {
+            "happiness": 1
+          },
+          "resultText": "You left the card untouched at the station coffee counter, protecting your personal safety and family."
+        }
+      ]
     }
   ]
 }

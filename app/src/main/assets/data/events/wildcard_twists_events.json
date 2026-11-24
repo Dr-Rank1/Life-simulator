@@ -6,21 +6,32 @@
       "maxAge": 12,
       "text": "During recess, older kids dare you to knock three times on the old boiler room door behind the {transportMode} stop and summon the legendary Headmaster's Ghost.",
       "weight": 3,
-      "tags": ["education"],
+      "tags": [
+        "education"
+      ],
       "choices": [
         {
           "label": "Knock three times boldly",
-          "statEffects": { "smarts": 1, "happiness": 3 },
+          "statEffects": {
+            "smarts": 1,
+            "happiness": 3
+          },
           "resultText": "You knocked firmly. A grumpy groundskeeper threw an empty bucket at you, proving ghosts wear overalls."
         },
         {
           "label": "Charge a fee in sweets to do the dare",
-          "statEffects": { "smarts": 2, "happiness": 2 },
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 2
+          },
           "resultText": "You collected half a dozen sugar candies from gullible classmates before nonchalantly tapping the door."
         },
         {
           "label": "Warn them about electrical hazards instead",
-          "statEffects": { "smarts": 2, "happiness": 1 },
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 1
+          },
           "resultText": "You explained the boiler room was merely condemned for rusted pipes. Boring, but responsible."
         }
       ]
@@ -31,16 +42,23 @@
       "maxAge": 14,
       "text": "A superstitious classmate corners you before the {primaryExam}, offering a battered ballpoint pen allegedly blessed by an eccentric hermit that 'never writes a wrong answer'.",
       "weight": 3,
-      "tags": ["education"],
+      "tags": [
+        "education"
+      ],
       "choices": [
         {
           "label": "Trade your favorite snack for the pen",
-          "statEffects": { "smarts": 1, "happiness": 2 },
+          "statEffects": {
+            "smarts": 1,
+            "happiness": 2
+          },
           "resultText": "The pen leaked black ink all over your palm, but the placebo confidence helped you breeze through the {primaryExam}."
         },
         {
           "label": "Mock the superstition and study your notes",
-          "statEffects": { "smarts": 3 },
+          "statEffects": {
+            "smarts": 3
+          },
           "resultText": "You relied on genuine revision instead of sorcery and finished the {primaryExam} with clean fingers."
         },
         {
@@ -56,21 +74,31 @@
       "maxAge": 16,
       "text": "A transfer student with your exact first and last name arrives at school, triggering an administrative disaster with report cards and lunch accounts.",
       "weight": 3,
-      "tags": ["education"],
+      "tags": [
+        "education"
+      ],
       "choices": [
         {
           "label": "Team up with your namesake for harmless chaos",
-          "statEffects": { "happiness": 4, "smarts": 1 },
+          "statEffects": {
+            "happiness": 4,
+            "smarts": 1
+          },
           "resultText": "You answered roll call for each other and confused the entire faculty for an entire term."
         },
         {
           "label": "Politely request the principal fix the paperwork",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "resultText": "The administration added middle initials to the school register, restoring bureaucratic order."
         },
         {
           "label": "Compete fiercely to be the top namesake",
-          "statEffects": { "smarts": 3, "happiness": -1 },
+          "statEffects": {
+            "smarts": 3,
+            "happiness": -1
+          },
           "resultText": "You spent weeks trying to outperform your doppelganger on every single pop quiz."
         }
       ]
@@ -81,22 +109,34 @@
       "maxAge": 25,
       "text": "Someone filmed you dozing off awkwardly on a packed morning {transportMode} with a half-eaten snack in your mouth. By nightfall, your face is a viral meme.",
       "weight": 4,
-      "tags": ["one_time"],
+      "tags": [
+        "one_time"
+      ],
       "choices": [
         {
           "label": "Lean into the fame and launch official meme merchandise",
-          "statEffects": { "money": 3500, "happiness": 3, "looks": 1 },
+          "statEffects": {
+            "money": 3500,
+            "happiness": 3,
+            "looks": 1
+          },
           "setsConsequenceFlag": "meme_celebrity",
           "resultText": "You monetized the viral clip, collecting royalties directly into your {moneyApp} account."
         },
         {
           "label": "Lie low and wear dark sunglasses on public transit",
-          "statEffects": { "happiness": -2, "smarts": 1 },
+          "statEffects": {
+            "happiness": -2,
+            "smarts": 1
+          },
           "resultText": "You hid behind dark shades on the {transportMode} for three weeks until internet attention moved on."
         },
         {
           "label": "Post an unhinged parody video mimicking yourself",
-          "statEffects": { "happiness": 4, "looks": 2 },
+          "statEffects": {
+            "happiness": 4,
+            "looks": 2
+          },
           "setsConsequenceFlag": "meme_celebrity",
           "resultText": "The self-mocking video gained another million views, turning you into a local campus icon."
         }
@@ -108,21 +148,35 @@
       "maxAge": 27,
       "text": "A trendy beverage startup notices your viral meme fame and wants to feature your sleeping face on billboard ads across the city.",
       "weight": 6,
-      "tags": ["one_time", "requires_event_twist_commute_viral_meme_1", "requires_flag_meme_celebrity"],
+      "tags": [
+        "one_time",
+        "requires_event_twist_commute_viral_meme_1",
+        "requires_flag_meme_celebrity"
+      ],
       "choices": [
         {
           "label": "Sign the commercial endorsement deal",
-          "statEffects": { "money": 12000, "happiness": 4, "looks": 2 },
+          "statEffects": {
+            "money": 12000,
+            "happiness": 4,
+            "looks": 2
+          },
           "resultText": "Your face was plastered on billboards overlooking the highway, and an endorsement check landed in {moneyApp}."
         },
         {
           "label": "Demand creative control and direct the commercial",
-          "statEffects": { "money": 8000, "smarts": 3, "happiness": 3 },
+          "statEffects": {
+            "money": 8000,
+            "smarts": 3,
+            "happiness": 3
+          },
           "resultText": "You turned the ad into a hilarious avant-garde short film that won a regional marketing award."
         },
         {
           "label": "Decline to preserve your privacy",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "resultText": "You turned down the corporate money to enjoy a peaceful, unphotographed commute."
         }
       ]
@@ -133,22 +187,32 @@
       "maxAge": 45,
       "text": "A probate lawyer contacts you with a wax-sealed letter: an eccentric grand-uncle you never met has bequeathed you an ocean shipping container full of vintage ceramic figurines.",
       "weight": 3,
-      "tags": ["one_time"],
+      "tags": [
+        "one_time"
+      ],
       "choices": [
         {
           "label": "Pay the shipping depot clearance fee via {moneyApp}",
-          "statEffects": { "money": -1500, "smarts": 2 },
+          "statEffects": {
+            "money": -1500,
+            "smarts": 2
+          },
           "setsConsequenceFlag": "owns_container_figurines",
           "resultText": "You cleared the container. Thousands of miniature porcelain gnomes now fill your rented storage unit."
         },
         {
           "label": "Sell the unopened container as a blind auction mystery lot",
-          "statEffects": { "money": 4000, "happiness": 2 },
+          "statEffects": {
+            "money": 4000,
+            "happiness": 2
+          },
           "resultText": "A curious bargain hunter bought the unopened container for cash. Quick turnaround, zero headaches."
         },
         {
           "label": "Disclaim the bizarre inheritance immediately",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "resultText": "You declined to get entangled in deceased relatives' eccentric hoards."
         }
       ]
@@ -159,21 +223,35 @@
       "maxAge": 50,
       "text": "An antique appraiser inspecting your inherited ceramic container gasps: three of the dust-covered figurines are museum-grade 18th-century royal porcelain.",
       "weight": 7,
-      "tags": ["one_time", "requires_event_twist_bizarre_inheritance_1", "requires_flag_owns_container_figurines"],
+      "tags": [
+        "one_time",
+        "requires_event_twist_bizarre_inheritance_1",
+        "requires_flag_owns_container_figurines"
+      ],
       "choices": [
         {
           "label": "Consign the rare antiques to an international auction house",
-          "statEffects": { "money": 45000, "happiness": 5, "smarts": 2 },
+          "statEffects": {
+            "money": 45000,
+            "happiness": 5,
+            "smarts": 2
+          },
           "resultText": "Bidding was fierce! The auctioneer hammered down the lot for a life-altering windfall."
         },
         {
           "label": "Donate the treasures to the national heritage museum",
-          "statEffects": { "happiness": 6, "smarts": 3 },
+          "statEffects": {
+            "happiness": 6,
+            "smarts": 3
+          },
           "resultText": "The museum unveiled a gallery plaque bearing your family name in gratitude for your cultural philanthropy."
         },
         {
           "label": "Keep them on your living room mantelpiece as quirky decor",
-          "statEffects": { "looks": 2, "happiness": 3 },
+          "statEffects": {
+            "looks": 2,
+            "happiness": 3
+          },
           "resultText": "You placed the priceless relics next to your television, treating museum antiquities like bookends."
         }
       ]
@@ -184,21 +262,31 @@
       "maxAge": 65,
       "text": "You step into a premier financial branch to check your {moneyApp} balance. The branch manager bows deeply, whispering '{greeting}', mistaking you for an elusive timber baron.",
       "weight": 3,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Politely clarify your real identity",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "resultText": "The manager blushed furiously, apologized profusely, and offered you complimentary espresso."
         },
         {
           "label": "Play along to enjoy the executive VIP lounge snacks",
-          "statEffects": { "happiness": 3, "smarts": 1 },
+          "statEffects": {
+            "happiness": 3,
+            "smarts": 1
+          },
           "resultText": "You feigned quiet aristocratic exhaustion while eating imported pastries and sparkling water."
         },
         {
           "label": "Nod mysteriously and leave before security notices",
-          "statEffects": { "smarts": 2, "happiness": 2 },
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 2
+          },
           "resultText": "You gave a dignified wave, stepped into the street, and laughed all the way to your bus stop."
         }
       ]
@@ -209,21 +297,32 @@
       "maxAge": 50,
       "text": "While waiting for the {transportMode}, a runaway capuchin monkey wearing a tiny velvet waistcoat leaps onto your shoulder and clutches your coat.",
       "weight": 3,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Check its collar for contact info and call the owner",
-          "statEffects": { "money": 2000, "happiness": 3 },
+          "statEffects": {
+            "money": 2000,
+            "happiness": 3
+          },
           "resultText": "A frantic diplomat arrived in a luxury sedan, thanking you with a handsome cash reward."
         },
         {
           "label": "Share half your sandwich and take a selfie",
-          "statEffects": { "happiness": 5, "looks": 1 },
+          "statEffects": {
+            "happiness": 5,
+            "looks": 1
+          },
           "resultText": "The photo gained thousands of likes before municipal animal services arrived to gently coax the creature down."
         },
         {
           "label": "Scream in shock and bolt away",
-          "statEffects": { "health": 1, "happiness": -2 },
+          "statEffects": {
+            "health": 1,
+            "happiness": -2
+          },
           "resultText": "You ran down the avenue in panic, giving fellow commuters an impromptu comedy routine."
         }
       ]
@@ -234,21 +333,32 @@
       "maxAge": 60,
       "text": "At a contemporary gallery opening, you accidentally set your spilled cup and crushed sandwich on an empty white pedestal. Art critics gather in awe.",
       "weight": 3,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Nod sagely and explain it represents modern suburban decay",
-          "statEffects": { "smarts": 3, "money": 6000, "happiness": 4 },
+          "statEffects": {
+            "smarts": 3,
+            "money": 6000,
+            "happiness": 4
+          },
           "resultText": "An eccentric collector bought the 'installation' on the spot for serious money. You are officially an artist."
         },
         {
           "label": "Apologize and quickly wipe the pedestal clean",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "resultText": "The critics sighed in disappointment, claiming you just destroyed a post-industrial masterpiece."
         },
         {
           "label": "Slip away silently into the crowd before someone scolds you",
-          "statEffects": { "smarts": 1, "happiness": 2 },
+          "statEffects": {
+            "smarts": 1,
+            "happiness": 2
+          },
           "resultText": "You watched from the free wine bar as attendees snapped photos of your discarded garbage."
         }
       ]
@@ -259,21 +369,31 @@
       "maxAge": 70,
       "text": "A loud crash shakes your pantry. Your eccentric neighbor emerges through a hole in your basement wall covered in dust, greeting you with a bewildered '{greeting}'.",
       "weight": 3,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Help them patch the wall over tea and biscuits",
-          "statEffects": { "happiness": 3 },
+          "statEffects": {
+            "happiness": 3
+          },
           "resultText": "Your neighbor explained they were excavating a root cellar and miscalculated the boundary line."
         },
         {
           "label": "Demand immediate repair compensation via {moneyApp}",
-          "statEffects": { "money": 3000, "happiness": 1 },
+          "statEffects": {
+            "money": 3000,
+            "happiness": 1
+          },
           "resultText": "They transferred funds instantly from their phone to cover professional mason repairs."
         },
         {
           "label": "Ask if the secret tunnel leads anywhere interesting",
-          "statEffects": { "smarts": 2, "happiness": 3 },
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 3
+          },
           "resultText": "It only led to their laundry room, but the sheer absurdity made you lifelong friends."
         }
       ]
@@ -284,22 +404,32 @@
       "maxAge": 55,
       "text": "A courier drops a silver envelope on your doorstep. Inside is a brass token and a cryptic invite to a midnight meeting of the 'Order of the Gilded Compass'.",
       "weight": 3,
-      "tags": ["one_time"],
+      "tags": [
+        "one_time"
+      ],
       "choices": [
         {
           "label": "Attend the midnight gathering out of curiosity",
-          "statEffects": { "smarts": 2, "happiness": 3 },
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 3
+          },
           "setsConsequenceFlag": "order_initiate",
           "resultText": "You arrived at an old hall where hooded figures were eating artisan pizza and debating philosophy."
         },
         {
           "label": "Toss the envelope straight into the recycling bin",
-          "statEffects": { "smarts": 1 },
+          "statEffects": {
+            "smarts": 1
+          },
           "resultText": "You have too many real-world bills to deal with strange secret club drama."
         },
         {
           "label": "Try to sell the antique brass token online",
-          "statEffects": { "money": 1500, "happiness": 1 },
+          "statEffects": {
+            "money": 1500,
+            "happiness": 1
+          },
           "resultText": "An eccentric collector bought the curious token within an hour of posting."
         }
       ]
@@ -310,22 +440,35 @@
       "maxAge": 60,
       "text": "The senior council of the Gilded Compass evaluates your standing and offers you an honorary patronage chair, opening exclusive old-money networking circles.",
       "weight": 6,
-      "tags": ["one_time", "requires_event_twist_secret_society_invitation_1", "requires_flag_order_initiate"],
+      "tags": [
+        "one_time",
+        "requires_event_twist_secret_society_invitation_1",
+        "requires_flag_order_initiate"
+      ],
       "choices": [
         {
           "label": "Accept the patronage seat and expand your network",
-          "statEffects": { "money": 15000, "smarts": 3, "happiness": 4 },
+          "statEffects": {
+            "money": 15000,
+            "smarts": 3,
+            "happiness": 4
+          },
           "performanceEffect": 10,
           "resultText": "The guild's influential alumni helped you secure lucrative commercial introductions."
         },
         {
           "label": "Suggest turning the society into a charity foundation",
-          "statEffects": { "happiness": 5, "smarts": 2 },
+          "statEffects": {
+            "happiness": 5,
+            "smarts": 2
+          },
           "resultText": "Under your guidance, the quirky society began funding local youth community centers."
         },
         {
           "label": "Resign gracefully to avoid secret society drama",
-          "statEffects": { "happiness": 2 },
+          "statEffects": {
+            "happiness": 2
+          },
           "clearsConsequenceFlag": "order_initiate",
           "resultText": "You bowed out with a polite handshake, preferring a normal unencumbered life."
         }
@@ -337,21 +480,33 @@
       "maxAge": 50,
       "text": "You shared a photo of a bizarre late-night fusion sandwich you cooked. Suddenly, twenty food courier alerts chime on your phone with prepaid orders sent through {moneyApp}.",
       "weight": 3,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Raid your pantry and actually assemble the orders",
-          "statEffects": { "money": 4500, "health": -1, "happiness": 4 },
+          "statEffects": {
+            "money": 4500,
+            "health": -1,
+            "happiness": 4
+          },
           "resultText": "You spent two frantic hours flipping sandwiches and earned a handsome accidental profit."
         },
         {
           "label": "Issue immediate refunds with an apology note",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "resultText": "You canceled the accidental listings and enjoyed your midnight sandwich in peace."
         },
         {
           "label": "Call a friend with a restaurant to fulfill the orders",
-          "statEffects": { "money": 2000, "smarts": 2, "happiness": 3 },
+          "statEffects": {
+            "money": 2000,
+            "smarts": 2,
+            "happiness": 3
+          },
           "resultText": "Your friend's kitchen handled the rush and sent you a finder's commission."
         }
       ]
@@ -362,21 +517,32 @@
       "maxAge": 60,
       "text": "A futuristic delivery drone spins out of control and crash-lands in your garden, dropping a heavy weatherproof case marked 'Confidential Hardware Prototype #404'.",
       "weight": 3,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Contact the tech company's hotline and return the unit",
-          "statEffects": { "money": 5000, "smarts": 2 },
+          "statEffects": {
+            "money": 5000,
+            "smarts": 2
+          },
           "resultText": "The company's vice president personally wired you a reward and praised your integrity."
         },
         {
           "label": "Crack open the case and test the prototype VR headset",
-          "statEffects": { "smarts": 4, "happiness": 3, "health": -1 },
+          "statEffects": {
+            "smarts": 4,
+            "happiness": 3,
+            "health": -1
+          },
           "resultText": "The holographic graphics blew your mind before the remote self-destruct firmware wiped the drive."
         },
         {
           "label": "Auction the damaged carbon-fiber drone parts for scrap",
-          "statEffects": { "money": 2500 },
+          "statEffects": {
+            "money": 2500
+          },
           "resultText": "You sold the rare brushless motors and titanium frame to a robotics hobbyist."
         }
       ]
@@ -387,21 +553,32 @@
       "maxAge": 35,
       "text": "Between the yellowed pages of a secondhand textbook you bought to study for the {secondaryExam}, you discover an unpublished spy thriller manuscript.",
       "weight": 3,
-      "tags": ["education"],
+      "tags": [
+        "education"
+      ],
       "choices": [
         {
           "label": "Transcribe the novel and submit it to a literary agency",
-          "statEffects": { "money": 8000, "smarts": 3, "happiness": 4 },
+          "statEffects": {
+            "money": 8000,
+            "smarts": 3,
+            "happiness": 4
+          },
           "resultText": "A publishing house snapped up the manuscript, paying you an advance as discoverer and editor."
         },
         {
           "label": "Track down the original author from marginal notes",
-          "statEffects": { "smarts": 2, "happiness": 4 },
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 4
+          },
           "resultText": "The retired author was moved to tears by the return of their lost manuscript and mentored your writing."
         },
         {
           "label": "Use the blank backs of the pages for {secondaryExam} scratch math",
-          "statEffects": { "smarts": 2 },
+          "statEffects": {
+            "smarts": 2
+          },
           "resultText": "You solved complex equations on the back of intense action scenes. Pragmatic to the core."
         }
       ]
@@ -412,21 +589,30 @@
       "maxAge": 70,
       "text": "You get into a polite squabble over a downtown parking spot with a driver whose sedan sports foreign diplomatic plates and a sovereign flag.",
       "weight": 3,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Yield the spot gracefully with a courteous '{greeting}'",
-          "statEffects": { "happiness": 2 },
+          "statEffects": {
+            "happiness": 2
+          },
           "resultText": "The diplomat was so impressed by your manners that they handed you an invite to an embassy reception."
         },
         {
           "label": "Stand your ground and point to the parking meter rules",
-          "statEffects": { "happiness": 1, "smarts": 2 },
+          "statEffects": {
+            "happiness": 1,
+            "smarts": 2
+          },
           "resultText": "The diplomat huffed about the Geneva convention but drove away to look elsewhere."
         },
         {
           "label": "Offer to guide them to an open VIP garage nearby",
-          "statEffects": { "money": 1000 },
+          "statEffects": {
+            "money": 1000
+          },
           "resultText": "They tipped you generously for the local parking tip and thanked you warmly."
         }
       ]
@@ -437,21 +623,31 @@
       "maxAge": 95,
       "text": "While reading the local morning gazette over coffee, you discover a full-page obituary praising your life, accomplishments, and untimely 'passing'.",
       "weight": 3,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Call the editor to demand a retraction and free newspapers",
-          "statEffects": { "happiness": 3, "smarts": 2 },
+          "statEffects": {
+            "happiness": 3,
+            "smarts": 2
+          },
           "resultText": "The mortified editor sent a glowing apology correction and a lifetime subscription."
         },
         {
           "label": "Show up at your friends' morning coffee club like a ghost",
-          "statEffects": { "happiness": 6, "health": 1 },
+          "statEffects": {
+            "happiness": 6,
+            "health": 1
+          },
           "resultText": "The screams followed by hysterical laughter made it the most memorable morning of the decade."
         },
         {
           "label": "Read all the heartfelt compliments and bask in the praise",
-          "statEffects": { "happiness": 5 },
+          "statEffects": {
+            "happiness": 5
+          },
           "resultText": "Few people get to read their own eulogies while sipping hot tea. It was surprisingly uplifting."
         }
       ]
@@ -462,21 +658,31 @@
       "maxAge": 85,
       "text": "The municipality unearths a municipal time capsule buried decades ago during a memorable {holidayName}. Your childhood letter is chosen to be read aloud.",
       "weight": 3,
-      "tags": ["holiday"],
+      "tags": [
+        "holiday"
+      ],
       "choices": [
         {
           "label": "Embrace your goofy childhood predictions proudly",
-          "statEffects": { "happiness": 5, "looks": 1 },
+          "statEffects": {
+            "happiness": 5,
+            "looks": 1
+          },
           "resultText": "The crowd roared with laughter at your prediction that everyone would commute via personal rocket boots."
         },
         {
           "label": "Hide in the back of the crowd pretending it's someone else",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "resultText": "You watched discreetly as neighbors chuckled at your ambitious youthful doodles."
         },
         {
           "label": "Donate a modern artifact to the next 50-year capsule",
-          "statEffects": { "smarts": 2, "happiness": 3 },
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 3
+          },
           "resultText": "You sealed a modern memory into the new capsule, continuing the generational tradition."
         }
       ]
@@ -487,21 +693,31 @@
       "maxAge": 90,
       "text": "A candid smartphone clip of you singing soulfully while waiting for a {transportMode} goes viral, catching the ear of a famous indie recording producer.",
       "weight": 3,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Record a guest track at their professional studio",
-          "statEffects": { "money": 10000, "happiness": 8, "looks": 2 },
+          "statEffects": {
+            "money": 10000,
+            "happiness": 8,
+            "looks": 2
+          },
           "resultText": "The single hit regional charts! You proved talent has no expiration date."
         },
         {
           "label": "Perform a one-night-only guest appearance at a community theater",
-          "statEffects": { "happiness": 6 },
+          "statEffects": {
+            "happiness": 6
+          },
           "resultText": "The venue gave you a standing ovation, and proceeds went to local music education."
         },
         {
           "label": "Politely decline and sing in the shower only",
-          "statEffects": { "happiness": 2 },
+          "statEffects": {
+            "happiness": 2
+          },
           "resultText": "You chose peaceful domestic serenity over late-life tour bus chaos."
         }
       ]
@@ -512,21 +728,33 @@
       "maxAge": 80,
       "text": "An odd, dusty landscape painting you bought at a street stall for pocket change catches the eye of an art history professor visiting your home.",
       "weight": 3,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Have it professionally restored and authenticated",
-          "statEffects": { "money": 35000, "smarts": 2, "happiness": 5 },
+          "statEffects": {
+            "money": 35000,
+            "smarts": 2,
+            "happiness": 5
+          },
           "resultText": "It was a lost canvas by an acclaimed 19th-century master! You sold it to an art foundation."
         },
         {
           "label": "Gift the painting to a national university gallery",
-          "statEffects": { "happiness": 6, "smarts": 3 },
+          "statEffects": {
+            "happiness": 6,
+            "smarts": 3
+          },
           "resultText": "The university named a student scholarship in your honor to celebrate the discovery."
         },
         {
           "label": "Keep it in your hallway because you genuinely like the colors",
-          "statEffects": { "happiness": 4, "looks": 1 },
+          "statEffects": {
+            "happiness": 4,
+            "looks": 1
+          },
           "resultText": "Guests now stare at your hallway art in silent reverence whenever they visit."
         }
       ]
@@ -537,24 +765,33 @@
       "maxAge": 75,
       "text": "Two rival branches of your extended family both book major dinners for {holidayName} and demand you attend theirs or cause a generational feud.",
       "weight": 3,
-      "tags": ["holiday"],
+      "tags": [
+        "holiday"
+      ],
       "choices": [
         {
           "label": "Sprint between both houses to attend both meals",
-          "statEffects": { "health": -2, "happiness": 4 },
+          "statEffects": {
+            "health": -2,
+            "happiness": 4
+          },
           "familyRelationshipEffect": 4,
           "siblingRelationshipEffect": 4,
           "resultText": "You ate two enormous festive dinners in three hours. Exhausting, but diplomatic peace was preserved."
         },
         {
           "label": "Host a neutral joint potluck at your place",
-          "statEffects": { "happiness": 5 },
+          "statEffects": {
+            "happiness": 5
+          },
           "familyRelationshipEffect": 6,
           "resultText": "Burying the hatchet over good food and holiday cheer brought the entire family back together."
         },
         {
           "label": "Feign an urgent {transportMode} breakdown and stay home",
-          "statEffects": { "happiness": 3 },
+          "statEffects": {
+            "happiness": 3
+          },
           "resultText": "You watched movies and ate leftovers in glorious solitude, avoiding all holiday drama."
         }
       ]
@@ -565,21 +802,32 @@
       "maxAge": 85,
       "text": "An eccentric philanthropist walking down your street offers to transfer funds via {moneyApp} to anyone who can beat him in a best-of-three game of rock-paper-scissors.",
       "weight": 2,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Play with strategic game-theory psychology",
-          "statEffects": { "money": 5000, "smarts": 2, "happiness": 5 },
+          "statEffects": {
+            "money": 5000,
+            "smarts": 2,
+            "happiness": 5
+          },
           "resultText": "You anticipated his scissors with rock on the deciding round! The transfer arrived instantly."
         },
         {
           "label": "Play randomly with pure gut instinct",
-          "statEffects": { "money": 2500, "happiness": 4 },
+          "statEffects": {
+            "money": 2500,
+            "happiness": 4
+          },
           "resultText": "You tied twice and squeaked out a win with paper. The billionaire cheered and paid up."
         },
         {
           "label": "Decline and advise the crowd to watch out for cameras",
-          "statEffects": { "smarts": 1 },
+          "statEffects": {
+            "smarts": 1
+          },
           "resultText": "You walked past calmly, deciding not to participate in billionaire street spectacles."
         }
       ]
@@ -590,21 +838,33 @@
       "maxAge": 75,
       "text": "While replacing water pipes beneath your floorboards, you discover a heavy iron safe from 1952 embedded in the foundation stone.",
       "weight": 3,
-      "tags": ["general"],
+      "tags": [
+        "general"
+      ],
       "choices": [
         {
           "label": "Hire a master locksmith to crack the dials",
-          "statEffects": { "money": 8000, "smarts": 2, "happiness": 4 },
+          "statEffects": {
+            "money": 8000,
+            "smarts": 2,
+            "happiness": 4
+          },
           "resultText": "Inside were uncirculated vintage banknotes and pristine mint silver coins!"
         },
         {
           "label": "Carefully drill it open yourself with power tools",
-          "statEffects": { "money": 4000, "smarts": 3, "health": -1 },
+          "statEffects": {
+            "money": 4000,
+            "smarts": 3,
+            "health": -1
+          },
           "resultText": "After hours of sparks and grease, you popped the latch and found antique pocket watches."
         },
         {
           "label": "Leave it sealed as a mysterious house quirk for future generations",
-          "statEffects": { "happiness": 2 },
+          "statEffects": {
+            "happiness": 2
+          },
           "resultText": "You tiled over the inspection hatch, leaving the mystery intact for future homeowners."
         }
       ]
@@ -615,22 +875,332 @@
       "maxAge": 80,
       "text": "A genealogical research institute sends you certified documents indicating you are 14th in line to the throne of a tiny, sovereign mountain principality.",
       "weight": 2,
-      "tags": ["one_time"],
+      "tags": [
+        "one_time"
+      ],
       "choices": [
         {
           "label": "Fly out on vacation to inspect your supposed ancestral territory",
-          "statEffects": { "happiness": 6, "looks": 2, "money": -3000 },
+          "statEffects": {
+            "happiness": 6,
+            "looks": 2,
+            "money": -3000
+          },
           "resultText": "The village council greeted you with warm alpine pastries and made you an honorary castle patron."
         },
         {
           "label": "Frame the royal parchment and hang it behind your desk",
-          "statEffects": { "looks": 1, "happiness": 3 },
+          "statEffects": {
+            "looks": 1,
+            "happiness": 3
+          },
           "resultText": "It makes for an extraordinary conversation starter during dinner parties."
         },
         {
           "label": "Politely decline all royal titles to stay a humble citizen",
-          "statEffects": { "happiness": 2 },
+          "statEffects": {
+            "happiness": 2
+          },
           "resultText": "You have no desire to navigate royal protocol or micro-nation border disputes."
+        }
+      ]
+    },
+    {
+      "id": "twist_mystery_safe_deposit_1",
+      "minAge": 24,
+      "maxAge": 55,
+      "text": "A certified letter arrives from a historic downtown bank vault. A safe deposit box rented in your family surname decades ago has been flagged for escheatment after automated {moneyApp} rental payments ceased.",
+      "weight": 5,
+      "tags": [
+        "one_time",
+        "general"
+      ],
+      "choices": [
+        {
+          "label": "Pay the outstanding back-rent via {moneyApp} and claim access",
+          "statEffects": {
+            "money": -2000,
+            "happiness": 2
+          },
+          "setsConsequenceFlag": "holds_deposit_key",
+          "resultText": "You cleared the back-fees and were issued a heavy brass master key in a velvet envelope."
+        },
+        {
+          "label": "Surrender the box to municipal probate without inspecting it",
+          "statEffects": {
+            "happiness": 1
+          },
+          "resultText": "You signed a waiver forfeiting the box, preferring not to dig into old family mysteries."
+        }
+      ]
+    },
+    {
+      "id": "twist_mystery_safe_deposit_2",
+      "minAge": 25,
+      "maxAge": 60,
+      "text": "Inside the heavy steel deposit box, you uncover vintage bearer bonds, historical land survey maps, and a collection of mint-condition gold sovereign coins.",
+      "weight": 8,
+      "tags": [
+        "one_time",
+        "requires_event_twist_mystery_safe_deposit_1",
+        "requires_flag_holds_deposit_key"
+      ],
+      "choices": [
+        {
+          "label": "Liquidate the gold coins at the central exchange",
+          "statEffects": {
+            "money": 35000,
+            "happiness": 7
+          },
+          "resultText": "The exchange wires a massive cash windfall directly into your accounts. Fortune favored your curiosity."
+        },
+        {
+          "label": "Donate the historical maps to the national archives",
+          "statEffects": {
+            "money": 15000,
+            "karma": 8,
+            "happiness": 8
+          },
+          "resultText": "Archivists celebrate the rare maps, awarding you a research honorarium and permanent patron medal."
+        },
+        {
+          "label": "Store the collection securely as a multi-generational family heirloom",
+          "statEffects": {
+            "happiness": 5
+          },
+          "familyRelationshipEffect": 6,
+          "resultText": "You locked the heirloom in your home safe, preserving ancestral treasures for future descendants."
+        }
+      ]
+    },
+    {
+      "id": "twist_viral_holiday_street_food_1",
+      "minAge": 18,
+      "maxAge": 45,
+      "text": "During {holidayName} celebrations, you set up an informal street grill near the {transportMode} stop. A visiting travel vlogger records your signature dish and uploads it online.",
+      "weight": 6,
+      "tags": [
+        "one_time",
+        "holiday",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Lean into the attention: share your recipe story and handle orders via {moneyApp}",
+          "statEffects": {
+            "money": 5000,
+            "happiness": 6,
+            "looks": 2
+          },
+          "setsConsequenceFlag": "viral_street_chef",
+          "resultText": "Orders pour in faster than you can cook. The video crosses half a million views by evening."
+        },
+        {
+          "label": "Treat the customers warmly but stay modest and off-camera",
+          "statEffects": {
+            "money": 2000,
+            "karma": 4,
+            "happiness": 4
+          },
+          "resultText": "Customers rave about your authentic flavors, thanking you for keeping holiday traditions alive."
+        },
+        {
+          "label": "Pack up early when the crowd gets too overwhelming",
+          "statEffects": {
+            "money": 1000,
+            "happiness": 1
+          },
+          "resultText": "You sold out of supplies in two hours and went home to enjoy the holiday with family."
+        }
+      ]
+    },
+    {
+      "id": "twist_viral_holiday_street_food_2",
+      "minAge": 19,
+      "maxAge": 48,
+      "text": "With millions of views on your holiday food video, a hospitality group offers to fund a boutique food kiosk chain bearing your family name.",
+      "weight": 8,
+      "tags": [
+        "one_time",
+        "requires_event_twist_viral_holiday_street_food_1",
+        "requires_flag_viral_street_chef"
+      ],
+      "choices": [
+        {
+          "label": "Sign the licensing partnership and launch three branded kiosks",
+          "statEffects": {
+            "money": 28000,
+            "smarts": 3,
+            "happiness": 7
+          },
+          "resultText": "Your branded kiosks open at major transit hubs, serving thousands of hungry commuters daily."
+        },
+        {
+          "label": "Keep full ownership and run a single authentic flagship cart",
+          "statEffects": {
+            "money": 12000,
+            "karma": 4,
+            "happiness": 6
+          },
+          "resultText": "You maintain total quality control. Food critics name your street cart the best authentic bite in the city."
+        },
+        {
+          "label": "Sell the secret spice blend recipe outright to a food brand",
+          "statEffects": {
+            "money": 22000,
+            "happiness": 4
+          },
+          "resultText": "The spice company sends a lump sum payout. Your family blend lines supermarket shelves nationwide."
+        }
+      ]
+    },
+    {
+      "id": "twist_lost_lottery_commute",
+      "minAge": 18,
+      "maxAge": 70,
+      "text": "Tucked into the seat seam of your morning {transportMode}, you spot an unchecked national lottery ticket from last weekend's draw.",
+      "weight": 5,
+      "tags": [
+        "general"
+      ],
+      "choices": [
+        {
+          "label": "Check the numbers at a convenience store terminal",
+          "statEffects": {
+            "money": 8000,
+            "happiness": 5
+          },
+          "resultText": "The scanner chimes! It matches four numbers, paying out a delightful mid-tier cash windfall."
+        },
+        {
+          "label": "Hand the ticket to the {transportMode} driver's lost and found",
+          "statEffects": {
+            "karma": 6,
+            "happiness": 3
+          },
+          "resultText": "The driver nods in surprise at your honesty. Doing the right thing leaves your conscience clear."
+        },
+        {
+          "label": "Toss it into the ticket bin without thinking",
+          "statEffects": {
+            "happiness": 1
+          },
+          "resultText": "You tossed it away, not letting phantom hopes distract you from your day."
+        }
+      ]
+    },
+    {
+      "id": "twist_antique_shortwave_sos",
+      "minAge": 20,
+      "maxAge": 65,
+      "text": "Tinkering with an old radio receiver, you pick up a static-laced maritime distress call from a fishing boat caught in stormy weather off the coast.",
+      "weight": 4,
+      "tags": [
+        "general",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Relay the GPS coordinates immediately to coast guard search and rescue",
+          "statEffects": {
+            "karma": 10,
+            "smarts": 3,
+            "happiness": 8
+          },
+          "resultText": "The rescue chopper arrives just in time. The crew of four is saved, and port authorities hail your vigilance."
+        },
+        {
+          "label": "Record the frequency audio and alert amateur radio networks",
+          "statEffects": {
+            "karma": 6,
+            "smarts": 2,
+            "happiness": 5
+          },
+          "resultText": "Fellow radio enthusiasts triangulate the signal, assisting emergency dispatch in coordinating a tow."
+        },
+        {
+          "label": "Assume emergency services are already on it and tune away",
+          "statEffects": {
+            "happiness": -1
+          },
+          "resultText": "You switched frequencies, though you checked news broadcasts anxiously for the rest of the night."
+        }
+      ]
+    },
+    {
+      "id": "twist_rooftop_urban_beekeeping",
+      "minAge": 22,
+      "maxAge": 65,
+      "text": "You install two cedar beehives on your rooftop terrace. Within months, the hives thrive, and neighborhood neighbors eagerly buy fresh raw honey via {moneyApp}.",
+      "weight": 5,
+      "tags": [
+        "general",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Bottle and sell premium neighborhood honey jars",
+          "statEffects": {
+            "money": 6000,
+            "karma": 3,
+            "happiness": 5
+          },
+          "resultText": "Your honey jars sell out in hours. The rooftop garden flourishes with visiting pollinators."
+        },
+        {
+          "label": "Gift honey jars to your building neighbors and family",
+          "statEffects": {
+            "karma": 6,
+            "happiness": 6
+          },
+          "familyRelationshipEffect": 4,
+          "resultText": "Neighbors are thrilled with the pure amber honey, bringing you homemade bread in friendly return."
+        },
+        {
+          "label": "Teach a weekend urban ecology workshop for local youth",
+          "statEffects": {
+            "smarts": 3,
+            "karma": 5,
+            "happiness": 5
+          },
+          "resultText": "Local kids marvel at the queen bee through observation glass, learning about conservation firsthand."
+        }
+      ]
+    },
+    {
+      "id": "twist_accidental_film_extra",
+      "minAge": 16,
+      "maxAge": 55,
+      "text": "While stepping off the {transportMode}, a film crew director grabs your shoulder and thrusts you into a scene opposite famous actors, shouting \"Action!\"",
+      "weight": 5,
+      "tags": [
+        "general",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Deliver your impromptu lines with theatrical confidence",
+          "statEffects": {
+            "money": 3000,
+            "looks": 3,
+            "happiness": 6
+          },
+          "resultText": "The director screams with delight: \"Cut! Print that!\" Your unscripted reaction stays in the final movie cut."
+        },
+        {
+          "label": "Play the background passerby naturally and collect your day pay via {moneyApp}",
+          "statEffects": {
+            "money": 2000,
+            "happiness": 3
+          },
+          "resultText": "You walked through the shot smoothly, enjoyed complimentary catering snacks, and collected talent pay."
+        },
+        {
+          "label": "Duck out of frame apologetically to catch your connection",
+          "statEffects": {
+            "happiness": 1
+          },
+          "resultText": "You apologized and rushed on your way. You missed the movie set, but you made your appointment on time."
         }
       ]
     }

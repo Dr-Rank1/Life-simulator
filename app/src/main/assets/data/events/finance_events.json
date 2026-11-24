@@ -6,18 +6,25 @@
       "maxAge": 55,
       "text": "Your car won't start on a rainy morning. The mechanic says the alternator needs replacing.",
       "weight": 6,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Pay for the full repair",
-          "statEffects": { "money": -25000 },
+          "statEffects": {
+            "money": -25000
+          },
           "conditionEffect": 15,
           "targetAssetType": "CAR",
           "resultText": "The car runs smoothly again. Expensive but necessary."
         },
         {
           "label": "Patch it up cheaply",
-          "statEffects": { "money": -8000, "happiness": -3 },
+          "statEffects": {
+            "money": -8000,
+            "happiness": -3
+          },
           "conditionEffect": -12,
           "targetAssetType": "CAR",
           "resultText": "It limps along for now. You worry about the next breakdown."
@@ -30,18 +37,25 @@
       "maxAge": 60,
       "text": "Heavy rains expose a leak in your roof. Water drips into the sitting room.",
       "weight": 5,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Hire a proper roofer",
-          "statEffects": { "money": -40000, "happiness": 2 },
+          "statEffects": {
+            "money": -40000,
+            "happiness": 2
+          },
           "conditionEffect": 20,
           "targetAssetType": "HOUSE",
           "resultText": "The roof is sealed. You sleep dry tonight."
         },
         {
           "label": "Place buckets and wait",
-          "statEffects": { "happiness": -5 },
+          "statEffects": {
+            "happiness": -5
+          },
           "conditionEffect": -15,
           "targetAssetType": "HOUSE",
           "resultText": "Mould starts forming. The problem grows worse."
@@ -54,16 +68,25 @@
       "maxAge": 60,
       "text": "A distant relative leaves you a modest inheritance. The lawyer calls with good news.",
       "weight": 2,
-      "tags": ["finance", "one_time"],
+      "tags": [
+        "finance",
+        "one_time"
+      ],
       "choices": [
         {
           "label": "Accept gratefully",
-          "statEffects": { "money": 150000, "happiness": 10 },
+          "statEffects": {
+            "money": 150000,
+            "happiness": 10
+          },
           "resultText": "The funds clear. You whisper a prayer of thanks."
         },
         {
           "label": "Donate part to charity",
-          "statEffects": { "money": 100000, "happiness": 12 },
+          "statEffects": {
+            "money": 100000,
+            "happiness": 12
+          },
           "resultText": "You kept some and gave back. It feels right."
         }
       ]
@@ -74,16 +97,24 @@
       "maxAge": 50,
       "text": "You return from work to find your gate open and some belongings missing.",
       "weight": 2,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Report to police",
-          "statEffects": { "money": -15000, "happiness": -4 },
+          "statEffects": {
+            "money": -15000,
+            "happiness": -4
+          },
           "resultText": "Paperwork and patience. Little is recovered."
         },
         {
           "label": "Accept the loss and move on",
-          "statEffects": { "money": -30000, "happiness": -6 },
+          "statEffects": {
+            "money": -30000,
+            "happiness": -6
+          },
           "resultText": "You replace what you can and double-check the locks."
         }
       ]
@@ -94,21 +125,31 @@
       "maxAge": 50,
       "text": "A friend swears they have a hot tip on a local savings group — pay in easily with {moneyApp}. They want you in.",
       "weight": 4,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Invest a solid amount",
-          "statEffects": { "money": 45000, "happiness": 5 },
+          "statEffects": {
+            "money": 45000,
+            "happiness": 5
+          },
           "resultText": "The group paid out modestly. A pleasant surprise."
         },
         {
           "label": "Invest cautiously",
-          "statEffects": { "money": 5000, "happiness": 1 },
+          "statEffects": {
+            "money": 5000,
+            "happiness": 1
+          },
           "resultText": "Small gain, small risk. Not bad."
         },
         {
           "label": "Decline politely",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "resultText": "You heard later it went sideways. Bullet dodged."
         }
       ]
@@ -119,23 +160,32 @@
       "maxAge": 55,
       "text": "A family member calls asking to borrow money for school fees. They want it sent through {moneyApp} and sound desperate.",
       "weight": 5,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Lend them generously",
-          "statEffects": { "money": -20000, "happiness": 3 },
+          "statEffects": {
+            "money": -20000,
+            "happiness": 3
+          },
           "familyRelationshipEffect": 12,
           "resultText": "They thank you profusely. Family comes first."
         },
         {
           "label": "Offer half the amount",
-          "statEffects": { "money": -10000 },
+          "statEffects": {
+            "money": -10000
+          },
           "familyRelationshipEffect": 5,
           "resultText": "They accept, a little disappointed but grateful."
         },
         {
           "label": "Refuse — you need the money",
-          "statEffects": { "happiness": -2 },
+          "statEffects": {
+            "happiness": -2
+          },
           "familyRelationshipEffect": -10,
           "resultText": "An awkward silence on the phone. They understand, maybe."
         }
@@ -148,18 +198,24 @@
       "restrictedToCountry": "KE",
       "text": "Your boda's chain snaps on a dusty road. A fundi nearby offers a quick fix.",
       "weight": 4,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Pay for a full service",
-          "statEffects": { "money": -5000 },
+          "statEffects": {
+            "money": -5000
+          },
           "conditionEffect": 18,
           "targetAssetType": "MOTORBIKE",
           "resultText": "The bike purrs again. Worth every shilling."
         },
         {
           "label": "Just fix the chain",
-          "statEffects": { "money": -1500 },
+          "statEffects": {
+            "money": -1500
+          },
           "conditionEffect": -8,
           "targetAssetType": "MOTORBIKE",
           "resultText": "It works for now. Other parts look worn."
@@ -172,18 +228,24 @@
       "maxAge": 45,
       "text": "Your scooter's chain snaps on a quiet road. A mechanic nearby offers a quick fix.",
       "weight": 4,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Pay for a full service",
-          "statEffects": { "money": -5000 },
+          "statEffects": {
+            "money": -5000
+          },
           "conditionEffect": 18,
           "targetAssetType": "MOTORBIKE",
           "resultText": "The scooter purrs again. Worth every coin."
         },
         {
           "label": "Just fix the chain",
-          "statEffects": { "money": -1500 },
+          "statEffects": {
+            "money": -1500
+          },
           "conditionEffect": -8,
           "targetAssetType": "MOTORBIKE",
           "resultText": "It works for now. Other parts look worn."
@@ -196,17 +258,23 @@
       "maxAge": 60,
       "text": "Property prices in your area climb steadily. Neighbours talk about selling at a tidy profit.",
       "weight": 4,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Ride the wave and hold",
-          "statEffects": { "happiness": 4 },
+          "statEffects": {
+            "happiness": 4
+          },
           "economicShift": "boom",
           "resultText": "Your home's paper value rises. You feel a little richer on paper."
         },
         {
           "label": "Stay cautious",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "resultText": "You keep a level head while others celebrate."
         }
       ]
@@ -217,17 +285,24 @@
       "maxAge": 65,
       "text": "Headlines warn of a slowdown. Shops quiet down and landlords whisper about lower rents.",
       "weight": 4,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Tighten spending",
-          "statEffects": { "happiness": -2 },
+          "statEffects": {
+            "happiness": -2
+          },
           "economicShift": "bust",
           "resultText": "You cut extras and wait for calmer days."
         },
         {
           "label": "Carry on as usual",
-          "statEffects": { "happiness": -4, "money": -5000 },
+          "statEffects": {
+            "happiness": -4,
+            "money": -5000
+          },
           "economicShift": "random",
           "resultText": "The downturn still nipped at your wallet."
         }
@@ -239,16 +314,25 @@
       "maxAge": 70,
       "text": "A letter arrives about taxes on a small inheritance you received years ago. The amount due is higher than expected.",
       "weight": 3,
-      "tags": ["finance", "one_time"],
+      "tags": [
+        "finance",
+        "one_time"
+      ],
       "choices": [
         {
           "label": "Pay in full promptly",
-          "statEffects": { "money": -35000, "happiness": -3 },
+          "statEffects": {
+            "money": -35000,
+            "happiness": -3
+          },
           "resultText": "The matter closes cleanly. Your books are square again."
         },
         {
           "label": "Negotiate a payment plan",
-          "statEffects": { "money": -20000, "happiness": -1 },
+          "statEffects": {
+            "money": -20000,
+            "happiness": -1
+          },
           "resultText": "You spread the cost over months. Manageable, if annoying."
         }
       ]
@@ -259,17 +343,24 @@
       "maxAge": 55,
       "text": "Investors flood your neighbourhood with offers well above asking price. Your street feels like a gold rush.",
       "weight": 3,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Decline every offer",
-          "statEffects": { "happiness": 2 },
+          "statEffects": {
+            "happiness": 2
+          },
           "economicShift": "boom",
           "resultText": "You chose roots over profit — but your asset values still rose."
         },
         {
           "label": "Sell a secondary plot if you had one",
-          "statEffects": { "money": 80000, "happiness": 5 },
+          "statEffects": {
+            "money": 80000,
+            "happiness": 5
+          },
           "conditionEffect": -10,
           "targetAssetType": "HOUSE",
           "resultText": "You cashed in on the frenzy and banked a windfall."
@@ -282,18 +373,25 @@
       "maxAge": 65,
       "text": "A burst pipe floods your home overnight. Water soaks the floors and the walls smell of mildew.",
       "weight": 5,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Pay for emergency repairs",
-          "statEffects": { "money": -55000, "happiness": -2 },
+          "statEffects": {
+            "money": -55000,
+            "happiness": -2
+          },
           "conditionEffect": 25,
           "targetAssetType": "HOUSE",
           "resultText": "Plumbers work through the night. The damage is contained before it spreads."
         },
         {
           "label": "Ignore it and hope it dries out",
-          "statEffects": { "happiness": -18 },
+          "statEffects": {
+            "happiness": -18
+          },
           "forceConditionValue": 0,
           "targetAssetType": "HOUSE",
           "resultText": "Mould spreads. The property is essentially ruined."
@@ -306,18 +404,25 @@
       "maxAge": 60,
       "text": "Your car engine sputters on the highway and white smoke pours from the bonnet. Traffic honks behind you.",
       "weight": 5,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Pay for emergency repairs",
-          "statEffects": { "money": -45000, "happiness": -3 },
+          "statEffects": {
+            "money": -45000,
+            "happiness": -3
+          },
           "conditionEffect": 20,
           "targetAssetType": "CAR",
           "resultText": "The mechanic rebuilds the engine block. Expensive, but you are mobile again."
         },
         {
           "label": "Abandon the car on the roadside",
-          "statEffects": { "happiness": -20 },
+          "statEffects": {
+            "happiness": -20
+          },
           "forceConditionValue": 0,
           "targetAssetType": "CAR",
           "resultText": "The car is towed for scrap. You watch it leave on a flatbed."
@@ -331,18 +436,25 @@
       "restrictedToCountry": "KE",
       "text": "Your boda's engine seizes mid-ride with a loud clunk. You push it to the nearest fundi in the blazing sun.",
       "weight": 5,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Pay for a full engine rebuild",
-          "statEffects": { "money": -18000, "happiness": -2 },
+          "statEffects": {
+            "money": -18000,
+            "happiness": -2
+          },
           "conditionEffect": 22,
           "targetAssetType": "MOTORBIKE",
           "resultText": "The fundi works miracles. The bike roars back to life."
         },
         {
           "label": "Walk away and leave it",
-          "statEffects": { "happiness": -15 },
+          "statEffects": {
+            "happiness": -15
+          },
           "forceConditionValue": 0,
           "targetAssetType": "MOTORBIKE",
           "resultText": "Rust takes over. The bike never runs again."
@@ -355,18 +467,25 @@
       "maxAge": 50,
       "text": "Your motorbike's engine seizes mid-ride with a loud clunk. You push it to the nearest mechanic in the heat.",
       "weight": 5,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Pay for a full engine rebuild",
-          "statEffects": { "money": -18000, "happiness": -2 },
+          "statEffects": {
+            "money": -18000,
+            "happiness": -2
+          },
           "conditionEffect": 22,
           "targetAssetType": "MOTORBIKE",
           "resultText": "The mechanic works miracles. The bike roars back to life."
         },
         {
           "label": "Walk away and leave it",
-          "statEffects": { "happiness": -15 },
+          "statEffects": {
+            "happiness": -15
+          },
           "forceConditionValue": 0,
           "targetAssetType": "MOTORBIKE",
           "resultText": "Rust takes over. The bike never runs again."
@@ -379,17 +498,25 @@
       "maxAge": 80,
       "text": "While clearing out the attic, you find a dusty wooden box wrapped in cloth — inside rests an old pocket watch that still ticks faintly.",
       "weight": 1,
-      "tags": ["finance", "one_time"],
+      "tags": [
+        "finance",
+        "one_time"
+      ],
       "choices": [
         {
           "label": "Keep it in the family",
-          "statEffects": { "happiness": 8 },
+          "statEffects": {
+            "happiness": 8
+          },
           "grantHeirloom": "heirloom_pocket_watch",
           "resultText": "The watch becomes a treasured family heirloom."
         },
         {
           "label": "Sell it to a collector",
-          "statEffects": { "money": 180000, "happiness": 3 },
+          "statEffects": {
+            "money": 180000,
+            "happiness": 3
+          },
           "resultText": "A dealer pays well, but the watch leaves your family forever."
         }
       ]
@@ -400,17 +527,24 @@
       "maxAge": 75,
       "text": "At a chaotic estate auction, a bidding war erupts over a velvet pouch. You accidentally win with a wave of your paddle.",
       "weight": 1,
-      "tags": ["finance"],
+      "tags": [
+        "finance"
+      ],
       "choices": [
         {
           "label": "Pay up and claim the gem",
-          "statEffects": { "money": -120000, "happiness": 6 },
+          "statEffects": {
+            "money": -120000,
+            "happiness": 6
+          },
           "grantHeirloom": "heirloom_rare_gemstone",
           "resultText": "Inside the pouch: a rare gemstone that catches every light."
         },
         {
           "label": "Forfeit the bid",
-          "statEffects": { "happiness": -4 },
+          "statEffects": {
+            "happiness": -4
+          },
           "resultText": "The auctioneer glares, but you walk away poorer in pride only."
         }
       ]
@@ -421,17 +555,26 @@
       "maxAge": 85,
       "text": "A relative passes down a brittle leather folio — pages of an ancient manuscript in a language almost forgotten.",
       "weight": 1,
-      "tags": ["finance", "one_time"],
+      "tags": [
+        "finance",
+        "one_time"
+      ],
       "choices": [
         {
           "label": "Preserve it carefully",
-          "statEffects": { "happiness": 10, "smarts": 2 },
+          "statEffects": {
+            "happiness": 10,
+            "smarts": 2
+          },
           "grantHeirloom": "heirloom_ancient_manuscript",
           "resultText": "Scholars would envy you. The manuscript stays in your care."
         },
         {
           "label": "Donate it to a museum",
-          "statEffects": { "happiness": 6, "money": 40000 },
+          "statEffects": {
+            "happiness": 6,
+            "money": 40000
+          },
           "resultText": "Your name is etched on a small plaque at the entrance."
         }
       ]
@@ -442,18 +585,27 @@
       "maxAge": 70,
       "text": "Your employees walk out over pay and hours. Pickets form outside the office.",
       "weight": 5,
-      "tags": ["finance", "requires_business"],
+      "tags": [
+        "finance",
+        "requires_business"
+      ],
       "choices": [
         {
           "label": "Negotiate a raise package",
-          "statEffects": { "money": -35000, "happiness": -2 },
+          "statEffects": {
+            "money": -35000,
+            "happiness": -2
+          },
           "businessRevenueEffect": 8000,
           "businessValuationEffect": 15000,
           "resultText": "Costly, but operations resume and morale recovers."
         },
         {
           "label": "Hold the line and wait them out",
-          "statEffects": { "happiness": -8, "health": -2 },
+          "statEffects": {
+            "happiness": -8,
+            "health": -2
+          },
           "businessRevenueEffect": -25000,
           "businessValuationEffect": -40000,
           "resultText": "The strike drags on. Customers leave and revenue tanks."
@@ -466,18 +618,26 @@
       "maxAge": 65,
       "text": "A well-funded rival launches in your industry with aggressive pricing.",
       "weight": 5,
-      "tags": ["finance", "requires_business"],
+      "tags": [
+        "finance",
+        "requires_business"
+      ],
       "choices": [
         {
           "label": "Invest in a marketing blitz",
-          "statEffects": { "money": -40000, "happiness": 2 },
+          "statEffects": {
+            "money": -40000,
+            "happiness": 2
+          },
           "businessRevenueEffect": 12000,
           "businessValuationEffect": 20000,
           "resultText": "You held market share. Valuation ticks up."
         },
         {
           "label": "Ignore them and stay the course",
-          "statEffects": { "happiness": -4 },
+          "statEffects": {
+            "happiness": -4
+          },
           "businessRevenueEffect": -18000,
           "businessValuationEffect": -30000,
           "resultText": "They steal clients. Your books look thinner."
@@ -490,18 +650,26 @@
       "maxAge": 60,
       "text": "A venture capital firm offers a partial buyout — cash now, less control later.",
       "weight": 4,
-      "tags": ["finance", "requires_business"],
+      "tags": [
+        "finance",
+        "requires_business"
+      ],
       "choices": [
         {
           "label": "Accept the investment",
-          "statEffects": { "money": 120000, "happiness": 8 },
+          "statEffects": {
+            "money": 120000,
+            "happiness": 8
+          },
           "businessValuationEffect": 80000,
           "businessRevenueEffect": 15000,
           "resultText": "Cash hits your account. The board just got more crowded."
         },
         {
           "label": "Keep full ownership",
-          "statEffects": { "happiness": 2 },
+          "statEffects": {
+            "happiness": 2
+          },
           "businessValuationEffect": 5000,
           "resultText": "You stay independent. Growth stays on your terms."
         }
@@ -513,18 +681,26 @@
       "maxAge": 65,
       "text": "A key supplier fails. Inventory is thin and customers are calling.",
       "weight": 4,
-      "tags": ["finance", "requires_business"],
+      "tags": [
+        "finance",
+        "requires_business"
+      ],
       "choices": [
         {
           "label": "Pay premium for emergency stock",
-          "statEffects": { "money": -28000, "happiness": -1 },
+          "statEffects": {
+            "money": -28000,
+            "happiness": -1
+          },
           "businessRevenueEffect": 5000,
           "businessValuationEffect": 8000,
           "resultText": "Expensive, but shelves stay full."
         },
         {
           "label": "Delay orders and apologize",
-          "statEffects": { "happiness": -6 },
+          "statEffects": {
+            "happiness": -6
+          },
           "businessRevenueEffect": -22000,
           "businessValuationEffect": -35000,
           "resultText": "Refunds pile up. Trust takes a hit."
@@ -537,18 +713,27 @@
       "maxAge": 55,
       "text": "One of your offerings goes viral overnight. Orders flood in faster than you can fulfill.",
       "weight": 4,
-      "tags": ["finance", "requires_business"],
+      "tags": [
+        "finance",
+        "requires_business"
+      ],
       "choices": [
         {
           "label": "Hire fast and scale up",
-          "statEffects": { "money": -20000, "happiness": 10 },
+          "statEffects": {
+            "money": -20000,
+            "happiness": 10
+          },
           "businessRevenueEffect": 40000,
           "businessValuationEffect": 100000,
           "resultText": "Chaos, then growth. Your valuation soars."
         },
         {
           "label": "Cap orders to protect quality",
-          "statEffects": { "happiness": 4, "money": 15000 },
+          "statEffects": {
+            "happiness": 4,
+            "money": 15000
+          },
           "businessRevenueEffect": 10000,
           "businessValuationEffect": 25000,
           "resultText": "Steady gains without burning out the team."
@@ -561,17 +746,27 @@
       "maxAge": 70,
       "text": "Tax authorities open an audit on your company books. Penalties could be steep.",
       "weight": 3,
-      "tags": ["finance", "requires_business"],
+      "tags": [
+        "finance",
+        "requires_business"
+      ],
       "choices": [
         {
           "label": "Hire a specialist accountant",
-          "statEffects": { "money": -45000, "happiness": -3 },
+          "statEffects": {
+            "money": -45000,
+            "happiness": -3
+          },
           "businessValuationEffect": -5000,
           "resultText": "Fees hurt, but you clear the audit cleanly."
         },
         {
           "label": "Handle it yourself",
-          "statEffects": { "money": -15000, "happiness": -10, "health": -2 },
+          "statEffects": {
+            "money": -15000,
+            "happiness": -10,
+            "health": -2
+          },
           "businessRevenueEffect": -10000,
           "businessValuationEffect": -25000,
           "resultText": "Mistakes cost more than the specialist would have."
@@ -584,18 +779,26 @@
       "maxAge": 60,
       "text": "A franchise group wants to license your brand in other cities for an upfront fee.",
       "weight": 3,
-      "tags": ["finance", "requires_business"],
+      "tags": [
+        "finance",
+        "requires_business"
+      ],
       "choices": [
         {
           "label": "License the brand",
-          "statEffects": { "money": 80000, "happiness": 6 },
+          "statEffects": {
+            "money": 80000,
+            "happiness": 6
+          },
           "businessValuationEffect": 50000,
           "businessRevenueEffect": 8000,
           "resultText": "Your name spreads. Royalty checks will follow."
         },
         {
           "label": "Protect exclusivity",
-          "statEffects": { "happiness": 1 },
+          "statEffects": {
+            "happiness": 1
+          },
           "businessValuationEffect": 10000,
           "resultText": "You keep the brand rare — and local."
         }
@@ -607,18 +810,26 @@
       "maxAge": 70,
       "text": "Your tenant moved out overnight. The rental is trashed — holes in walls, ruined floors.",
       "weight": 4,
-      "tags": ["finance", "requires_rental"],
+      "tags": [
+        "finance",
+        "requires_rental"
+      ],
       "choices": [
         {
           "label": "Pay for full repairs",
-          "statEffects": { "money": -18000, "happiness": -2 },
+          "statEffects": {
+            "money": -18000,
+            "happiness": -2
+          },
           "conditionEffect": 15,
           "targetAssetType": "HOUSE",
           "resultText": "Contractors restore the place. You are out of pocket but rentable again."
         },
         {
           "label": "Ignore the damage",
-          "statEffects": { "happiness": -6 },
+          "statEffects": {
+            "happiness": -6
+          },
           "conditionEffect": -35,
           "targetAssetType": "HOUSE",
           "resultText": "The unit sits vacant and decaying. Word spreads among tenants."
@@ -631,18 +842,26 @@
       "maxAge": 70,
       "text": "Your tenant texts at midnight: the AC died in a heatwave. They want it fixed today.",
       "weight": 4,
-      "tags": ["finance", "requires_rental"],
+      "tags": [
+        "finance",
+        "requires_rental"
+      ],
       "choices": [
         {
           "label": "Send a technician immediately",
-          "statEffects": { "money": -8000, "happiness": 1 },
+          "statEffects": {
+            "money": -8000,
+            "happiness": 1
+          },
           "conditionEffect": 5,
           "targetAssetType": "HOUSE",
           "resultText": "The unit cools down. Your tenant sends a thank-you emoji."
         },
         {
           "label": "Tell them to wait",
-          "statEffects": { "happiness": -3 },
+          "statEffects": {
+            "happiness": -3
+          },
           "conditionEffect": -10,
           "targetAssetType": "HOUSE",
           "resultText": "They threaten to leave. Reviews of your property tank."
@@ -655,16 +874,25 @@
       "maxAge": 70,
       "text": "Neighbours report squatters in your rental after the lease ended. They refuse to leave.",
       "weight": 3,
-      "tags": ["finance", "requires_rental"],
+      "tags": [
+        "finance",
+        "requires_rental"
+      ],
       "choices": [
         {
           "label": "Hire a lawyer and evict",
-          "statEffects": { "money": -20000, "happiness": -4 },
+          "statEffects": {
+            "money": -20000,
+            "happiness": -4
+          },
           "resultText": "The process is slow and expensive, but the property is yours again."
         },
         {
           "label": "Confront them yourself",
-          "statEffects": { "happiness": -8, "health": -2 },
+          "statEffects": {
+            "happiness": -8,
+            "health": -2
+          },
           "conditionEffect": -20,
           "targetAssetType": "HOUSE",
           "resultText": "A fight breaks out. Police are called. The unit takes more damage."
@@ -677,16 +905,25 @@
       "maxAge": 70,
       "text": "Rent is two months late. Your tenant promises payment 'next week' — again.",
       "weight": 4,
-      "tags": ["finance", "requires_rental"],
+      "tags": [
+        "finance",
+        "requires_rental"
+      ],
       "choices": [
         {
           "label": "Offer a payment plan",
-          "statEffects": { "money": 5000, "happiness": 1 },
+          "statEffects": {
+            "money": 5000,
+            "happiness": 1
+          },
           "resultText": "You recover part of the arrears and keep a tenant."
         },
         {
           "label": "Start eviction proceedings",
-          "statEffects": { "money": -12000, "happiness": -3 },
+          "statEffects": {
+            "money": -12000,
+            "happiness": -3
+          },
           "resultText": "Legal fees mount. The unit will be empty soon."
         }
       ]
@@ -697,16 +934,24 @@
       "maxAge": 70,
       "text": "Downstairs neighbours file a noise complaint about your tenant's parties.",
       "weight": 3,
-      "tags": ["finance", "requires_rental"],
+      "tags": [
+        "finance",
+        "requires_rental"
+      ],
       "choices": [
         {
           "label": "Mediate and set house rules",
-          "statEffects": { "happiness": 2, "smarts": 1 },
+          "statEffects": {
+            "happiness": 2,
+            "smarts": 1
+          },
           "resultText": "Quiet hours are agreed. Everyone calms down."
         },
         {
           "label": "Ignore it",
-          "statEffects": { "happiness": -2 },
+          "statEffects": {
+            "happiness": -2
+          },
           "conditionEffect": -5,
           "targetAssetType": "HOUSE",
           "resultText": "The building association fines you. Relations sour."
@@ -719,18 +964,27 @@
       "maxAge": 70,
       "text": "A pipe bursts in your rental. Water soaks the ceiling of the unit below.",
       "weight": 3,
-      "tags": ["finance", "requires_rental"],
+      "tags": [
+        "finance",
+        "requires_rental"
+      ],
       "choices": [
         {
           "label": "Emergency plumber and hotel for tenant",
-          "statEffects": { "money": -22000, "happiness": -1 },
+          "statEffects": {
+            "money": -22000,
+            "happiness": -1
+          },
           "conditionEffect": 10,
           "targetAssetType": "HOUSE",
           "resultText": "Costly, but you avoid a lawsuit and keep the lease."
         },
         {
           "label": "Patch it cheaply",
-          "statEffects": { "money": -4000, "happiness": -5 },
+          "statEffects": {
+            "money": -4000,
+            "happiness": -5
+          },
           "conditionEffect": -30,
           "targetAssetType": "HOUSE",
           "resultText": "The patch fails. Your tenant moves out and the damage spreads."
@@ -743,18 +997,26 @@
       "maxAge": 70,
       "text": "A long-term tenant offers to renew early and gifts you homemade food.",
       "weight": 3,
-      "tags": ["finance", "requires_rental"],
+      "tags": [
+        "finance",
+        "requires_rental"
+      ],
       "choices": [
         {
           "label": "Offer a small rent discount",
-          "statEffects": { "money": -3000, "happiness": 5 },
+          "statEffects": {
+            "money": -3000,
+            "happiness": 5
+          },
           "conditionEffect": 5,
           "targetAssetType": "HOUSE",
           "resultText": "Loyalty pays both ways. They stay for years."
         },
         {
           "label": "Keep rent as-is",
-          "statEffects": { "happiness": 3 },
+          "statEffects": {
+            "happiness": 3
+          },
           "resultText": "They renew anyway. You pocket the full rate."
         }
       ]
@@ -765,18 +1027,27 @@
       "maxAge": 65,
       "text": "A contact offers an illegal insider tip that could double your portfolio overnight.",
       "weight": 4,
-      "tags": ["finance", "requires_portfolio", "negative"],
+      "tags": [
+        "finance",
+        "requires_portfolio",
+        "negative"
+      ],
       "choices": [
         {
           "label": "Act on the tip",
-          "statEffects": { "happiness": 4 },
+          "statEffects": {
+            "happiness": 4
+          },
           "portfolioReturnPercent": 100,
           "triggersCrime": "FRAUD",
           "resultText": "Huge gains — if you get away with it."
         },
         {
           "label": "Report it and stay clean",
-          "statEffects": { "karma": 6, "happiness": 2 },
+          "statEffects": {
+            "karma": 6,
+            "happiness": 2
+          },
           "resultText": "You sleep well. The market can wait."
         }
       ]
@@ -787,17 +1058,25 @@
       "maxAge": 70,
       "text": "Markets plunge. Your portfolio flashes red across every screen.",
       "weight": 4,
-      "tags": ["finance", "requires_portfolio", "negative"],
+      "tags": [
+        "finance",
+        "requires_portfolio",
+        "negative"
+      ],
       "choices": [
         {
           "label": "Hold and ride it out",
-          "statEffects": { "happiness": -4 },
+          "statEffects": {
+            "happiness": -4
+          },
           "portfolioReturnPercent": -25,
           "resultText": "You take the hit. Time may heal the chart."
         },
         {
           "label": "Panic sell everything",
-          "statEffects": { "happiness": -6 },
+          "statEffects": {
+            "happiness": -6
+          },
           "portfolioReturnPercent": -40,
           "resultText": "You lock in losses at the bottom."
         }
@@ -809,17 +1088,26 @@
       "maxAge": 60,
       "text": "A tech bubble bursts. Growth stocks you hold are in free fall.",
       "weight": 3,
-      "tags": ["finance", "requires_portfolio", "negative"],
+      "tags": [
+        "finance",
+        "requires_portfolio",
+        "negative"
+      ],
       "choices": [
         {
           "label": "Rebalance into safer holdings",
-          "statEffects": { "happiness": -2, "smarts": 1 },
+          "statEffects": {
+            "happiness": -2,
+            "smarts": 1
+          },
           "portfolioReturnPercent": -15,
           "resultText": "A controlled retreat. Damage is limited."
         },
         {
           "label": "Double down on the dip",
-          "statEffects": { "happiness": -5 },
+          "statEffects": {
+            "happiness": -5
+          },
           "portfolioReturnPercent": -35,
           "resultText": "The dip kept dipping. Painful lesson."
         }
@@ -831,17 +1119,26 @@
       "maxAge": 70,
       "text": "A surprise bull run lifts the entire market. Your portfolio is soaring.",
       "weight": 3,
-      "tags": ["finance", "requires_portfolio", "positive"],
+      "tags": [
+        "finance",
+        "requires_portfolio",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Let it ride",
-          "statEffects": { "happiness": 6 },
+          "statEffects": {
+            "happiness": 6
+          },
           "portfolioReturnPercent": 30,
           "resultText": "Gains compound. You feel invincible — for now."
         },
         {
           "label": "Take some profits",
-          "statEffects": { "happiness": 4, "smarts": 1 },
+          "statEffects": {
+            "happiness": 4,
+            "smarts": 1
+          },
           "portfolioReturnPercent": 15,
           "resultText": "You bank a win without getting greedy."
         }
@@ -853,17 +1150,26 @@
       "maxAge": 70,
       "text": "A company in your portfolio announces a special dividend.",
       "weight": 3,
-      "tags": ["finance", "requires_portfolio", "positive"],
+      "tags": [
+        "finance",
+        "requires_portfolio",
+        "positive"
+      ],
       "choices": [
         {
           "label": "Reinvest the dividend",
-          "statEffects": { "happiness": 3 },
+          "statEffects": {
+            "happiness": 3
+          },
           "portfolioReturnPercent": 12,
           "resultText": "Compounding does the quiet work."
         },
         {
           "label": "Celebrate with a night out",
-          "statEffects": { "money": 3000, "happiness": 5 },
+          "statEffects": {
+            "money": 3000,
+            "happiness": 5
+          },
           "portfolioReturnPercent": 5,
           "resultText": "A little cash out, a little still growing."
         }
@@ -875,19 +1181,261 @@
       "maxAge": 55,
       "text": "An online group invites you into a coordinated pump-and-dump. Easy money — illegal money.",
       "weight": 3,
-      "tags": ["finance", "requires_portfolio", "negative"],
+      "tags": [
+        "finance",
+        "requires_portfolio",
+        "negative"
+      ],
       "choices": [
         {
           "label": "Join the scheme",
-          "statEffects": { "happiness": 2, "karma": -8 },
+          "statEffects": {
+            "happiness": 2,
+            "karma": -8
+          },
           "portfolioReturnPercent": 80,
           "triggersCrime": "FRAUD",
           "resultText": "Charts spike. Regulators may be watching."
         },
         {
           "label": "Block the group and walk away",
-          "statEffects": { "karma": 5, "happiness": 1 },
+          "statEffects": {
+            "karma": 5,
+            "happiness": 1
+          },
           "resultText": "You keep your license and your integrity."
+        }
+      ]
+    },
+    {
+      "id": "finance_sacco_annual_dividend",
+      "minAge": 22,
+      "maxAge": 75,
+      "text": "Your cooperative savings society closes a stellar fiscal year, depositing an annual dividend return directly into your {moneyApp} account.",
+      "weight": 5,
+      "tags": [
+        "finance",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Reinvest the dividend to purchase additional cooperative shares",
+          "statEffects": {
+            "money": -2000,
+            "smarts": 2,
+            "happiness": 4
+          },
+          "resultText": "You compounded your equity. Cooperative voting rights and future dividend streams increase."
+        },
+        {
+          "label": "Deposit the cash into a high-yield emergency reserve",
+          "statEffects": {
+            "money": 8000,
+            "happiness": 3
+          },
+          "resultText": "Your liquid safety cushion grows, giving you peace of mind against life's unpredictable turns."
+        },
+        {
+          "label": "Celebrate by treating family to a memorable meal",
+          "statEffects": {
+            "money": 4000,
+            "happiness": 5,
+            "karma": 2
+          },
+          "familyRelationshipEffect": 5,
+          "resultText": "Family members toast your financial acumen over a delightful feast."
+        }
+      ]
+    },
+    {
+      "id": "finance_commute_route_syndicate",
+      "minAge": 25,
+      "maxAge": 65,
+      "text": "A respected logistics operator invites reliable community investors to buy into a fleet syndicate servicing a popular regional {transportMode} route.",
+      "weight": 4,
+      "tags": [
+        "finance"
+      ],
+      "choices": [
+        {
+          "label": "Invest capital for a guaranteed monthly yield",
+          "statEffects": {
+            "money": -10000,
+            "smarts": 2,
+            "happiness": 4
+          },
+          "resultText": "You purchased route revenue rights. Daily commuter fares begin generating passive income deposited directly via {moneyApp}."
+        },
+        {
+          "label": "Review the vehicle maintenance ledgers thoroughly first",
+          "statEffects": {
+            "smarts": 3,
+            "happiness": 2
+          },
+          "resultText": "Your financial diligence uncovers overdue tire replacements. You negotiate a much better entry valuation."
+        },
+        {
+          "label": "Decline and stick to conservative bank deposits",
+          "statEffects": {
+            "happiness": 1
+          },
+          "resultText": "You passed on the transport syndicate, preferring zero-risk fixed deposits over wheels on tarmac."
+        }
+      ]
+    },
+    {
+      "id": "finance_emergency_family_remittance",
+      "minAge": 20,
+      "maxAge": 70,
+      "text": "A relative living across the country calls urgently: a sudden medical bill requires immediate assistance transferred through {moneyApp}.",
+      "weight": 5,
+      "tags": [
+        "finance",
+        "relationship"
+      ],
+      "choices": [
+        {
+          "label": "Transfer the requested emergency sum immediately via {moneyApp}",
+          "statEffects": {
+            "money": -5000,
+            "karma": 8,
+            "happiness": 4
+          },
+          "familyRelationshipEffect": 10,
+          "resultText": "The hospital treatment begins without delay. Your prompt kindness preserves a loved one's health."
+        },
+        {
+          "label": "Offer half the amount and help coordinate other family pledges",
+          "statEffects": {
+            "money": -2500,
+            "karma": 5,
+            "happiness": 3
+          },
+          "familyRelationshipEffect": 5,
+          "resultText": "You mobilized uncles and cousins on a group call, closing the financial gap as a united family."
+        },
+        {
+          "label": "Explain that your current savings are tied up in fixed deposits",
+          "statEffects": {
+            "happiness": -2
+          },
+          "familyRelationshipEffect": -6,
+          "resultText": "They managed through other channels, but a lingering chill settles over your relationship for months."
+        }
+      ]
+    },
+    {
+      "id": "finance_cryptocurrency_speculation_warning",
+      "minAge": 18,
+      "maxAge": 55,
+      "text": "Co-workers boast about making astronomical paper returns overnight on an unregulated digital coin, urging you to cash out your savings before the rally ends.",
+      "weight": 4,
+      "tags": [
+        "finance"
+      ],
+      "choices": [
+        {
+          "label": "Refuse to gamble and stay disciplined with index funds and savings",
+          "statEffects": {
+            "smarts": 3,
+            "karma": 2,
+            "happiness": 3
+          },
+          "resultText": "Within two weeks, the coin crashes 90%. Your colleagues mourn their losses while your savings remain intact."
+        },
+        {
+          "label": "Invest a tiny risk-controlled sum for curiosity",
+          "statEffects": {
+            "money": -1000,
+            "smarts": 1,
+            "happiness": 1
+          },
+          "resultText": "You treated it like a lottery ticket. The coin eventually dwindles, but you learned a cheap lesson in market bubbles."
+        },
+        {
+          "label": "Research the underlying whitepaper and identify red flags",
+          "statEffects": {
+            "smarts": 4,
+            "karma": 3
+          },
+          "resultText": "You identified severe protocol vulnerabilities and warned your friends, saving several from financial ruin."
+        }
+      ]
+    },
+    {
+      "id": "finance_freehold_title_deed_clearance",
+      "minAge": 28,
+      "maxAge": 80,
+      "text": "After years of incremental savings, the municipal land registry invites you to pay the final surveyor and stamp duty fee to secure clean freehold title deeds.",
+      "weight": 4,
+      "tags": [
+        "finance",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Pay the final clearance fee via {moneyApp} and register the title",
+          "statEffects": {
+            "money": -4000,
+            "smarts": 2,
+            "happiness": 8
+          },
+          "resultText": "The official registry stamp clunks down. You hold unencumbered freehold title deeds to your land."
+        },
+        {
+          "label": "Hire an independent land auditor to verify boundary markers",
+          "statEffects": {
+            "money": -5500,
+            "smarts": 4,
+            "happiness": 6
+          },
+          "resultText": "The surveyor verified every boundary beacon perfectly, protecting your investment from future zoning disputes."
+        },
+        {
+          "label": "Delay the paperwork to keep cash liquid",
+          "statEffects": {
+            "happiness": -1
+          },
+          "resultText": "You postponed the title transfer. The land remains in administrative limbo while registry fees creep upward."
+        }
+      ]
+    },
+    {
+      "id": "finance_sovereign_treasury_bill_ladder",
+      "minAge": 24,
+      "maxAge": 80,
+      "text": "The central bank announces a new tranche of retail government bonds offering competitive, guaranteed annualized coupon returns.",
+      "weight": 4,
+      "tags": [
+        "finance",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Lock in a one-year treasury note to beat inflation",
+          "statEffects": {
+            "money": 6000,
+            "smarts": 2,
+            "happiness": 4
+          },
+          "resultText": "Guaranteed interest coupons arrive reliably, providing steady passive income shielded from market volatility."
+        },
+        {
+          "label": "Build a staggered four-quarter treasury ladder",
+          "statEffects": {
+            "money": 8000,
+            "smarts": 4,
+            "happiness": 5
+          },
+          "resultText": "Your rolling bond ladder generates predictable quarterly liquidity, maximizing yield while preserving cash access."
+        },
+        {
+          "label": "Keep cash in a liquid daily interest wallet",
+          "statEffects": {
+            "money": 2000,
+            "happiness": 2
+          },
+          "resultText": "You kept total flexibility, ready to seize sudden opportunities that demand immediate settlement."
         }
       ]
     }

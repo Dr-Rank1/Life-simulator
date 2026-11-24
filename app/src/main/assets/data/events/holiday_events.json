@@ -470,6 +470,242 @@
           "resultText": "You look generous online. The people still packing boxes do not comment."
         }
       ]
+    },
+    {
+      "id": "holiday_transit_homecoming",
+      "minAge": 14,
+      "maxAge": 85,
+      "text": "Every terminal is brimming with travelers boarding the {transportMode} to reunite with extended family for {holidayName}.",
+      "weight": 3,
+      "tags": [
+        "holiday",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Assist an elderly traveler with heavy luggage onto the {transportMode}",
+          "statEffects": {
+            "karma": 5,
+            "happiness": 4
+          },
+          "resultText": "They shower you with traditional holiday blessings. Traveling with good deeds makes the journey fly by."
+        },
+        {
+          "label": "Enjoy festive songs echoing through the transit cabin with fellow passengers",
+          "statEffects": {
+            "happiness": 4
+          },
+          "resultText": "Strangers share roasted snacks and sing along to holiday radio hits as landscapes roll by."
+        },
+        {
+          "label": "Secure a window seat and reflect quietly on the passing year",
+          "statEffects": {
+            "happiness": 2,
+            "smarts": 1
+          },
+          "resultText": "Watching rolling hills and holiday decorations outside soothes your mind and clarifies your goals."
+        }
+      ]
+    },
+    {
+      "id": "holiday_greeting_neighborhood_potluck",
+      "minAge": 10,
+      "maxAge": 90,
+      "text": "Neighbors call out \"{greeting}!\" from open verandas as cooking aromas fill the lane in honor of {holidayName}. {holidayDescription}",
+      "weight": 3,
+      "tags": [
+        "holiday",
+        "relationship",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Bring a homemade specialty dish to the communal street table",
+          "statEffects": {
+            "money": -1500,
+            "happiness": 6,
+            "karma": 4
+          },
+          "resultText": "Neighbors lick their fingers and demand the recipe! Community camaraderie warms the entire block."
+        },
+        {
+          "label": "Help string colorful festival lights across the courtyard trees",
+          "statEffects": {
+            "happiness": 4,
+            "karma": 3
+          },
+          "resultText": "As twilight falls, the lanterns twinkle brightly, drawing gasps of wonder from neighborhood children."
+        },
+        {
+          "label": "Sit with the elders to listen to traditional folklore tales",
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 4,
+            "karma": 3
+          },
+          "resultText": "Their voices recount ancient triumphs and historical resilience, grounding you in your heritage."
+        }
+      ]
+    },
+    {
+      "id": "holiday_money_app_family_blessings",
+      "minAge": 18,
+      "maxAge": 85,
+      "text": "Following traditional {holidayName} prayers, family members send digital festival gift tokens and blessings to younger relatives via {moneyApp}.",
+      "weight": 3,
+      "tags": [
+        "holiday",
+        "family",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Send generous gift tokens to younger cousins and nieces via {moneyApp}",
+          "statEffects": {
+            "money": -3000,
+            "karma": 6,
+            "happiness": 6
+          },
+          "familyRelationshipEffect": 8,
+          "resultText": "Excited notifications chime across young relatives' phones. Their giggles and thankful voice notes brighten your day."
+        },
+        {
+          "label": "Match contributions with words of personal mentorship and encouragement",
+          "statEffects": {
+            "money": -1000,
+            "karma": 4,
+            "happiness": 4
+          },
+          "familyRelationshipEffect": 5,
+          "resultText": "Younger family members appreciate both the modest festival cash and your thoughtful guidance."
+        },
+        {
+          "label": "Save your budget while offering warm in-person blessings and hugs",
+          "statEffects": {
+            "happiness": 2
+          },
+          "familyRelationshipEffect": 2,
+          "resultText": "Presence matters more than cash. You spend quality hours baking treats and chatting with relatives."
+        }
+      ]
+    },
+    {
+      "id": "holiday_civic_lantern_parade",
+      "minAge": 8,
+      "maxAge": 90,
+      "text": "Town squares come alive under starry skies for {holidayName}. Marching bands, illuminated floats, and joyful singing fill the streets.",
+      "weight": 3,
+      "tags": [
+        "holiday",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Carry a ceremonial lantern in the community procession",
+          "statEffects": {
+            "looks": 2,
+            "happiness": 6,
+            "karma": 3
+          },
+          "resultText": "You marched amidst drums and cheers, holding your glowing lantern high alongside community leaders."
+        },
+        {
+          "label": "Volunteer as a route safety steward helping families find parking",
+          "statEffects": {
+            "karma": 5,
+            "happiness": 4
+          },
+          "resultText": "Your helpful directions kept crowds moving smoothly and ensured lost children were promptly reunited."
+        },
+        {
+          "label": "Cheer enthusiastically from the sidewalk with family and friends",
+          "statEffects": {
+            "happiness": 4
+          },
+          "resultText": "You clapped as dancers in traditional regalia spun by, soaking in the civic holiday energy."
+        }
+      ]
+    },
+    {
+      "id": "holiday_charity_food_basket_drive",
+      "minAge": 16,
+      "maxAge": 85,
+      "text": "In the spirit of {holidayName}, community volunteers pack wholesome food hampers for neighborhood elders and low-income families.",
+      "weight": 3,
+      "tags": [
+        "holiday",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Spend your morning packing and distributing care parcels",
+          "statEffects": {
+            "karma": 8,
+            "happiness": 7
+          },
+          "resultText": "Elders wiped away tears as you delivered fresh provisions. Service to others is the true essence of {holidayName}."
+        },
+        {
+          "label": "Donate generously to fund the supplies via {moneyApp}",
+          "statEffects": {
+            "money": -2500,
+            "karma": 6,
+            "happiness": 5
+          },
+          "resultText": "Your donation purchased sacks of rice, flour, and cooking oil for twenty vulnerable households."
+        },
+        {
+          "label": "Coordinate delivery logistics and drivers across town",
+          "statEffects": {
+            "smarts": 3,
+            "karma": 5,
+            "happiness": 5
+          },
+          "resultText": "Your spreadsheet and route maps ensured every single hamper reached its intended doorstep without delay."
+        }
+      ]
+    },
+    {
+      "id": "holiday_midnight_remembrance_vigil",
+      "minAge": 18,
+      "maxAge": 90,
+      "text": "As the clocks strike midnight to welcome {holidayName}, elders gather the household to offer thanks, remember ancestors, and share hopes for the coming year.",
+      "weight": 3,
+      "tags": [
+        "holiday",
+        "relationship",
+        "positive"
+      ],
+      "choices": [
+        {
+          "label": "Lead the family in words of gratitude and reflection",
+          "statEffects": {
+            "karma": 6,
+            "happiness": 6
+          },
+          "familyRelationshipEffect": 8,
+          "resultText": "Your heartfelt speech brings tears of pride to elders' eyes. Family bonds deepen under candlelight."
+        },
+        {
+          "label": "Listen attentively to ancestral tales by candlelight",
+          "statEffects": {
+            "smarts": 2,
+            "happiness": 4,
+            "karma": 3
+          },
+          "familyRelationshipEffect": 4,
+          "resultText": "You committed family history to memory, honoring the struggles that paved the way for your generation."
+        },
+        {
+          "label": "Prepare warm spiced tea and snacks for everyone present",
+          "statEffects": {
+            "happiness": 4,
+            "karma": 3
+          },
+          "familyRelationshipEffect": 4,
+          "resultText": "Steaming cups of tea warm hands and hearts as quiet conversation extends into the early hours."
+        }
+      ]
     }
   ]
 }
