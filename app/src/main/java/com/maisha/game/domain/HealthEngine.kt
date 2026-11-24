@@ -1,6 +1,8 @@
 // app/src/main/java/com/maisha/game/domain/HealthEngine.kt (modified — yearsUntreated increment)
 package com.maisha.game.domain
 
+import com.maisha.game.data.EconomyScaler
+import com.maisha.game.data.model.CareTier
 import com.maisha.game.data.model.Character
 import com.maisha.game.data.model.HealthCondition
 import com.maisha.game.data.model.Job
@@ -123,6 +125,26 @@ class HealthEngine @Inject constructor() {
     ).random()
 
     /**
+     * Estimates recovery probability percentage (1-99%) for a given condition and care tier.
+     */
+    fun calculateRecoveryOdds(
+        character: Character,
+        condition: HealthCondition,
+        careTier: CareTier
+    ): Int {
+        val chance = treatmentSuccessChance(
+            condition.name,
+            condition.severity,
+            careTier,
+            character.lifestyle.hasHealthInsurance,
+            character.stats.smarts,
+            character.stats.health,
+            character.age
+        )
+        return (chance * 100).roundToInt().coerceIn(1, 99)
+    }
+
+    /**
      * Pays for treatment of [conditionId]; deducts cost first, then rolls success by severity and care tier.
      *
      * @return [DoctorResult.Failed] if condition missing, already treated, or insufficient funds.
@@ -130,7 +152,7 @@ class HealthEngine @Inject constructor() {
     fun visitDoctor(
         character: Character,
         conditionId: String,
-        usePrivateCare: Boolean
+        careTier: CareTier = CareTier.PUBLIC_CLINIC
     ): DoctorResult {
         val index = character.activeConditions.indexOfFirst { it.id == conditionId }
         if (index == -1) return DoctorResult.Failed(character)
@@ -138,17 +160,19 @@ class HealthEngine @Inject constructor() {
         val condition = character.activeConditions[index]
         if (condition.treated) return DoctorResult.Failed(character)
 
-        val cost = treatmentCost(character, condition.severity, usePrivateCare)
+        val cost = treatmentCost(character, condition.severity, careTier)
         if (character.stats.money < cost) {
             return DoctorResult.Failed(character)
         }
 
         val successChance = treatmentSuccessChance(
+            condition.name,
             condition.severity,
-            usePrivateCare,
+            careTier,
             character.lifestyle.hasHealthInsurance,
             character.stats.smarts,
-            character.stats.health
+            character.stats.health,
+            character.age
         )
         val afterPayment = character.copy(
             stats = character.stats.copy(money = character.stats.money - cost)
@@ -159,48 +183,109 @@ class HealthEngine @Inject constructor() {
             val updatedConditions = afterPayment.activeConditions.toMutableList().apply {
                 this[index] = treatedCondition
             }
-            val facility = if (usePrivateCare) {
-                CountryCatalog.flavorFor(character.countryCode).privateHospitalName
-            } else {
-                "public clinic"
+            val facility = when (careTier) {
+                CareTier.PRIVATE_HOSPITAL -> CountryCatalog.flavorFor(character.countryCode).privateHospitalName
+                CareTier.PUBLIC_CLINIC -> "public clinic"
+                CareTier.ALTERNATIVE_MEDICINE -> "holistic wellness center"
+                CareTier.MENTAL_WELLNESS -> "mental wellness clinic"
             }
             val recoveryMessage = if (condition.isChronic) {
                 "Your ${condition.name} is now managed with ongoing care at $facility."
             } else {
                 "Recovered from ${condition.name} after treatment at $facility."
             }
-            DoctorResult.Treated(
-                afterPayment.copy(
-                    activeConditions = updatedConditions,
-                    eventLog = EventLogCap.prepend(
-                        afterPayment.eventLog,
-                        recoveryMessage
-                    )
+            var treatedChar = afterPayment.copy(
+                activeConditions = updatedConditions,
+                eventLog = EventLogCap.prepend(
+                    afterPayment.eventLog,
+                    recoveryMessage
                 )
             )
+            when (careTier) {
+                CareTier.ALTERNATIVE_MEDICINE -> {
+                    treatedChar = treatedChar.copy(
+                        stats = treatedChar.stats.copy(
+                            happiness = clampStat(treatedChar.stats.happiness + 5),
+                            karma = clampStat(treatedChar.stats.karma + 4)
+                        )
+                    )
+                }
+                CareTier.MENTAL_WELLNESS -> {
+                    treatedChar = treatedChar.copy(
+                        stats = treatedChar.stats.copy(
+                            happiness = clampStat(treatedChar.stats.happiness + 12)
+                        )
+                    )
+                }
+                CareTier.PUBLIC_CLINIC, CareTier.PRIVATE_HOSPITAL -> {}
+            }
+            DoctorResult.Treated(treatedChar)
         } else {
-            DoctorResult.Failed(
-                afterPayment.copy(
-                    eventLog = EventLogCap.prepend(
-                        afterPayment.eventLog,
-                        "Treatment for ${condition.name} at the " +
-                            (if (usePrivateCare) "hospital" else "clinic") +
-                            " did not fully work."
-                    )
+            val failFacility = when (careTier) {
+                CareTier.PRIVATE_HOSPITAL -> "hospital"
+                CareTier.PUBLIC_CLINIC -> "clinic"
+                CareTier.ALTERNATIVE_MEDICINE -> "holistic practice"
+                CareTier.MENTAL_WELLNESS -> "therapy session"
+            }
+            var failChar = afterPayment.copy(
+                eventLog = EventLogCap.prepend(
+                    afterPayment.eventLog,
+                    "Treatment for ${condition.name} at the $failFacility did not fully work."
                 )
             )
+            when (careTier) {
+                CareTier.ALTERNATIVE_MEDICINE -> {
+                    failChar = failChar.copy(
+                        stats = failChar.stats.copy(
+                            happiness = clampStat(failChar.stats.happiness + 3),
+                            karma = clampStat(failChar.stats.karma + 2)
+                        )
+                    )
+                }
+                CareTier.MENTAL_WELLNESS -> {
+                    failChar = failChar.copy(
+                        stats = failChar.stats.copy(
+                            happiness = clampStat(failChar.stats.happiness + 6)
+                        )
+                    )
+                }
+                CareTier.PUBLIC_CLINIC, CareTier.PRIVATE_HOSPITAL -> {}
+            }
+            DoctorResult.Failed(failChar)
         }
     }
+
+    /**
+     * Backward-compatible overload accepting a boolean for private care.
+     */
+    fun visitDoctor(
+        character: Character,
+        conditionId: String,
+        usePrivateCare: Boolean
+    ): DoctorResult = visitDoctor(
+        character,
+        conditionId,
+        if (usePrivateCare) CareTier.PRIVATE_HOSPITAL else CareTier.PUBLIC_CLINIC
+    )
 
     /** Convenience wrapper: treats the first untreated condition, if any. */
     fun visitFirstUntreatedCondition(
         character: Character,
-        usePrivateCare: Boolean
+        careTier: CareTier = CareTier.PUBLIC_CLINIC
     ): DoctorResult {
         val condition = character.activeConditions.firstOrNull { !it.treated }
             ?: return DoctorResult.Failed(character)
-        return visitDoctor(character, condition.id, usePrivateCare)
+        return visitDoctor(character, condition.id, careTier)
     }
+
+    /** Backward-compatible wrapper for first untreated condition with boolean private care. */
+    fun visitFirstUntreatedCondition(
+        character: Character,
+        usePrivateCare: Boolean
+    ): DoctorResult = visitFirstUntreatedCondition(
+        character,
+        if (usePrivateCare) CareTier.PRIVATE_HOSPITAL else CareTier.PUBLIC_CLINIC
+    )
 
     /**
      * Yearly health loop: illness roll, untreated drain, lifestyle billing/benefits, chronic stress.
@@ -501,20 +586,54 @@ class HealthEngine @Inject constructor() {
     private fun treatmentCost(
         character: Character,
         severity: Int,
-        privateCare: Boolean
+        careTier: CareTier
     ): Int {
-        val base = when (severity) {
-            1 -> if (privateCare) 8_000 else 2_000
-            2 -> if (privateCare) 20_000 else 6_000
-            else -> if (privateCare) 45_000 else 12_000
+        if (character.age < 3) return 0 // Free pediatric healthcare during infancy
+        val base = when (careTier) {
+            CareTier.PUBLIC_CLINIC -> when (severity) {
+                1 -> 2_000
+                2 -> 6_000
+                else -> 12_000
+            }
+            CareTier.PRIVATE_HOSPITAL -> when (severity) {
+                1 -> 8_000
+                2 -> 20_000
+                else -> 45_000
+            }
+            CareTier.ALTERNATIVE_MEDICINE -> when (severity) {
+                1 -> 1_000
+                2 -> 3_000
+                else -> 6_000
+            }
+            CareTier.MENTAL_WELLNESS -> when (severity) {
+                1 -> 4_000
+                2 -> 10_000
+                else -> 18_000
+            }
         }
-        val scaled = com.maisha.game.data.EconomyScaler.scaleAmount(base, character.countryCode)
-        return if (character.lifestyle.hasHealthInsurance) {
+        val scaled = EconomyScaler.scaleAmount(base, character.countryCode)
+        return if (character.lifestyle.hasHealthInsurance && careTier != CareTier.ALTERNATIVE_MEDICINE) {
             (scaled * INSURANCE_COPAY_FRACTION).roundToInt().coerceAtLeast(1)
         } else {
             scaled
         }
     }
+
+    private fun treatmentCost(
+        character: Character,
+        severity: Int,
+        privateCare: Boolean
+    ): Int = treatmentCost(
+        character,
+        severity,
+        if (privateCare) CareTier.PRIVATE_HOSPITAL else CareTier.PUBLIC_CLINIC
+    )
+
+    fun estimateTreatmentCost(
+        character: Character,
+        severity: Int,
+        careTier: CareTier
+    ): Int = treatmentCost(character, severity, careTier)
 
     fun estimateTreatmentCost(
         character: Character,
@@ -523,22 +642,73 @@ class HealthEngine @Inject constructor() {
     ): Int = treatmentCost(character, severity, privateCare)
 
     private fun treatmentSuccessChance(
+        conditionName: String,
+        severity: Int,
+        careTier: CareTier,
+        insured: Boolean,
+        smarts: Int,
+        health: Int,
+        age: Int
+    ): Float {
+        if (age < 3) return 0.95f // Infancy protection: pediatric care has high cure rate
+        val isMental = conditionName.equals(PTSD_CONDITION_NAME, ignoreCase = true) ||
+            conditionName.contains("stress", ignoreCase = true) ||
+            conditionName.contains("depression", ignoreCase = true) ||
+            conditionName.contains("burnout", ignoreCase = true)
+
+        val base = when (careTier) {
+            CareTier.PUBLIC_CLINIC -> when (severity) {
+                1 -> 0.62f
+                2 -> 0.48f
+                else -> 0.35f
+            }
+            CareTier.PRIVATE_HOSPITAL -> when (severity) {
+                1 -> 0.94f
+                2 -> 0.88f
+                else -> 0.80f
+            }
+            CareTier.ALTERNATIVE_MEDICINE -> when (severity) {
+                1 -> 0.52f
+                2 -> 0.38f
+                else -> 0.25f
+            }
+            CareTier.MENTAL_WELLNESS -> {
+                if (isMental) {
+                    when (severity) {
+                        1 -> 0.88f
+                        2 -> 0.80f
+                        else -> 0.72f
+                    }
+                } else {
+                    when (severity) {
+                        1 -> 0.55f
+                        2 -> 0.42f
+                        else -> 0.30f
+                    }
+                }
+            }
+        }
+        val insuranceBoost = if (insured && careTier != CareTier.ALTERNATIVE_MEDICINE) 0.06f else 0f
+        val smartsBoost = (smarts / 100f) * 0.05f
+        val resilienceBoost = (health / 100f) * 0.04f
+        return (base + insuranceBoost + smartsBoost + resilienceBoost).coerceIn(0.10f, 0.98f)
+    }
+
+    private fun treatmentSuccessChance(
         severity: Int,
         privateCare: Boolean,
         insured: Boolean,
         smarts: Int,
         health: Int
-    ): Float {
-        val base = when (severity) {
-            1 -> if (privateCare) 0.93f else 0.60f
-            2 -> if (privateCare) 0.86f else 0.45f
-            else -> if (privateCare) 0.78f else 0.32f
-        }
-        val insuranceBoost = if (insured) 0.08f else 0f
-        val smartsBoost = (smarts / 100f) * 0.06f
-        val resilienceBoost = (health / 100f) * 0.04f
-        return (base + insuranceBoost + smartsBoost + resilienceBoost).coerceAtMost(0.98f)
-    }
+    ): Float = treatmentSuccessChance(
+        "",
+        severity,
+        if (privateCare) CareTier.PRIVATE_HOSPITAL else CareTier.PUBLIC_CLINIC,
+        insured,
+        smarts,
+        health,
+        18
+    )
 
     private fun illnessName(severity: Int): String {
         val minor = listOf("Common cold", "Mild flu", "Stomach bug", POOR_EYESIGHT_CONDITION)

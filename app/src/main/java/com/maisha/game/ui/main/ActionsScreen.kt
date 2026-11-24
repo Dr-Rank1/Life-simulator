@@ -102,9 +102,13 @@ import com.maisha.game.ui.components.ActionCard
 import com.maisha.game.ui.components.ActionCardAccent
 import com.maisha.game.ui.components.ActivityGridCard
 import com.maisha.game.ui.components.ActivityRiskLevel
+import com.maisha.game.data.model.CareTier
 import com.maisha.game.ui.components.CategoryFilterChipRow
 import com.maisha.game.ui.components.CrimeHeistBoard
+import com.maisha.game.ui.components.HealthWellnessHub
+import com.maisha.game.ui.components.LeisureLifestyleBoard
 import com.maisha.game.ui.components.PrisonYardBoard
+import com.maisha.game.ui.components.RelocationBoard
 import com.maisha.game.ui.components.ConditionBadge
 import com.maisha.game.ui.components.ConfirmActionDialog
 import com.maisha.game.ui.components.ConfirmSeverity
@@ -218,6 +222,7 @@ fun ActionsScreen(
     onDropEndorsement: () -> Unit = {},
     onOpenDoubleLife: () -> Unit = {},
     onCommuteTransit: () -> Unit = {},
+    onRelocateToCountry: (String) -> Unit = {},
     onActionMessageDismissed: () -> Unit,
     onDismissLeisureTip: () -> Unit = {},
     modifier: Modifier = Modifier
@@ -687,109 +692,14 @@ fun ActionsScreen(
                     title = stringResource(R.string.act_cat_mind_body_title),
                     onDismiss = { activeActionSheet = ActionSheet.NONE }
                 ) {
-                    val adultLeisure = leisureActivities.filter {
-                        it !in listOf(
-                            LeisureActivity.PLAY_WITH_TOYS,
-                            LeisureActivity.THROW_TANTRUM,
-                            LeisureActivity.ASK_ALLOWANCE,
-                            LeisureActivity.CHILDHOOD_HOBBY,
-                            LeisureActivity.SNEAK_OUT,
-                            LeisureActivity.MALL_HANGOUT,
-                            LeisureActivity.GAMING_MARATHON
-                        )
-                    }
-                    adultLeisure.forEach { activity ->
-                        val cost = leisureEngine.cost(activity, character.countryCode)
-                        val isChores = activity == LeisureActivity.CHORES
-                        val canAfford = isChores || character.stats.money >= cost
-                        val meta = if (isChores) {
-                            stringResource(
-                                R.string.format_leisure_meta,
-                                stringResource(R.string.meta_earn_cash),
-                                leisureEffectLabel(activity)
-                            )
-                        } else {
-                            stringResource(
-                                R.string.format_leisure_meta,
-                                formatMoney(cost, character.countryCode),
-                                leisureEffectLabel(activity)
-                            )
-                        }
-                        ActionCard(
-                            icon = AppIcons.Happiness,
-                            title = leisureTitle(activity),
-                            description = leisureDescription(activity),
-                            metaLabel = meta,
-                            enabled = canAfford,
-                            accent = ActionCardAccent.CARE,
-                            questHint = questHintIf(yearQuests, ActionFamily.LEISURE, questHintLabel),
-                            onClick = {
-                                if (canAfford) {
-                                    activeActionSheet = ActionSheet.NONE
-                                    pendingAction.request(PendingAction.Leisure(activity))
-                                }
-                            }
-                        )
-                    }
-                    ActionCard(
-                        icon = AppIcons.Travel,
-                        title = stringResource(
-                            R.string.btn_transit_commute,
-                            CountryCatalog.flavorFor(character.countryCode).commonTransportMode
-                        ),
-                        description = stringResource(R.string.btn_transit_commute_desc),
-                        metaLabel = CountryCatalog.flavorFor(character.countryCode).commonTransportMode,
-                        enabled = true,
-                        accent = ActionCardAccent.CARE,
-                        onClick = {
+                    LeisureLifestyleBoard(
+                        character = character,
+                        onPerformLeisure = { activity ->
                             activeActionSheet = ActionSheet.NONE
-                            onCommuteTransit()
-                        }
+                            onPerformLeisure(activity)
+                        },
+                        onDismiss = { activeActionSheet = ActionSheet.NONE }
                     )
-                    if (showLifestyleActions) {
-                        LifestyleActionCard(
-                            character = character,
-                            option = LifestyleOption.GYM,
-                            activeTitleRes = R.string.lifestyle_gym_active,
-                            inactiveTitleRes = R.string.lifestyle_gym_title,
-                            descriptionRes = R.string.lifestyle_gym_desc,
-                            yearlyCost = lifestyleYearlyCost(LifestyleOption.GYM, character.countryCode),
-                            icon = AppIcons.Health,
-                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
-                            onToggle = { enable ->
-                                activeActionSheet = ActionSheet.NONE
-                                pendingAction.request(PendingAction.Lifestyle(LifestyleOption.GYM, enable))
-                            }
-                        )
-                        LifestyleActionCard(
-                            character = character,
-                            option = LifestyleOption.DIET,
-                            activeTitleRes = R.string.lifestyle_diet_active,
-                            inactiveTitleRes = R.string.lifestyle_diet_title,
-                            descriptionRes = R.string.lifestyle_diet_desc,
-                            yearlyCost = lifestyleYearlyCost(LifestyleOption.DIET, character.countryCode),
-                            icon = AppIcons.Looks,
-                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
-                            onToggle = { enable ->
-                                activeActionSheet = ActionSheet.NONE
-                                pendingAction.request(PendingAction.Lifestyle(LifestyleOption.DIET, enable))
-                            }
-                        )
-                        LifestyleActionCard(
-                            character = character,
-                            option = LifestyleOption.THERAPIST,
-                            activeTitleRes = R.string.lifestyle_therapist_active,
-                            inactiveTitleRes = R.string.lifestyle_therapist_title,
-                            descriptionRes = R.string.lifestyle_therapist_desc,
-                            yearlyCost = lifestyleYearlyCost(LifestyleOption.THERAPIST, character.countryCode),
-                            icon = AppIcons.Happiness,
-                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
-                            onToggle = { enable ->
-                                activeActionSheet = ActionSheet.NONE
-                                pendingAction.request(PendingAction.Lifestyle(LifestyleOption.THERAPIST, enable))
-                            }
-                        )
-                    }
                 }
             }
             ActionSheet.DOCTOR_HEALTH -> {
@@ -797,61 +707,18 @@ fun ActionsScreen(
                     title = stringResource(R.string.act_cat_doctor_health_title),
                     onDismiss = { activeActionSheet = ActionSheet.NONE }
                 ) {
-                    if (untreated.isNotEmpty()) {
-                        untreated.forEach { condition ->
-                            val isExpanded = expandedConditionId == condition.id
-                            val treatmentHint = questHintIf(yearQuests, ActionFamily.TREATMENT, questHintLabel)
-                            ConditionBadge(
-                                condition = condition,
-                                onClick = {
-                                    expandedConditionId = if (isExpanded) null else condition.id
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            if (isExpanded) {
-                                ActionCard(
-                                    icon = AppIcons.HealthClinic,
-                                    title = stringResource(R.string.care_public_clinic),
-                                    description = successHint(CareType.PUBLIC_CLINIC),
-                                    metaLabel = treatmentCostLabel(character, condition.severity, CareType.PUBLIC_CLINIC),
-                                    accent = ActionCardAccent.CARE,
-                                    questHint = treatmentHint,
-                                    onClick = {
-                                        activeActionSheet = ActionSheet.NONE
-                                        pendingAction.request(PendingAction.Treatment(condition, CareType.PUBLIC_CLINIC))
-                                    }
-                                )
-                                ActionCard(
-                                    icon = AppIcons.HealthHospital,
-                                    title = CountryCatalog.flavorFor(character.countryCode).privateHospitalName,
-                                    description = successHint(CareType.PRIVATE_HOSPITAL),
-                                    metaLabel = treatmentCostLabel(character, condition.severity, CareType.PRIVATE_HOSPITAL),
-                                    accent = ActionCardAccent.CARE,
-                                    questHint = treatmentHint,
-                                    onClick = {
-                                        activeActionSheet = ActionSheet.NONE
-                                        pendingAction.request(PendingAction.Treatment(condition, CareType.PRIVATE_HOSPITAL))
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    if (showLifestyleActions) {
-                        LifestyleActionCard(
-                            character = character,
-                            option = LifestyleOption.HEALTH_INSURANCE,
-                            activeTitleRes = R.string.lifestyle_insurance_active,
-                            inactiveTitleRes = R.string.lifestyle_insurance_title,
-                            descriptionRes = R.string.lifestyle_insurance_desc,
-                            yearlyCost = lifestyleYearlyCost(LifestyleOption.HEALTH_INSURANCE, character.countryCode),
-                            icon = AppIcons.Health,
-                            questHint = questHintIf(yearQuests, ActionFamily.LIFESTYLE_WELLNESS, questHintLabel),
-                            onToggle = { enable ->
-                                activeActionSheet = ActionSheet.NONE
-                                pendingAction.request(PendingAction.Lifestyle(LifestyleOption.HEALTH_INSURANCE, enable))
-                            }
-                        )
-                    }
+                    HealthWellnessHub(
+                        character = character,
+                        onVisitDoctor = { conditionId, tier ->
+                            activeActionSheet = ActionSheet.NONE
+                            onVisitDoctor(conditionId, tier)
+                        },
+                        onSetLifestyleOption = { option, enable ->
+                            activeActionSheet = ActionSheet.NONE
+                            onSetLifestyleOption(option, enable)
+                        },
+                        onDismiss = { activeActionSheet = ActionSheet.NONE }
+                    )
                 }
             }
             ActionSheet.SKILLS_MASTERY -> {
@@ -1102,65 +969,26 @@ fun ActionsScreen(
                     title = stringResource(R.string.act_cat_relocate_title),
                     onDismiss = { activeActionSheet = ActionSheet.NONE }
                 ) {
-                    if (showDrivingTest) {
-                        val canAfford = character.stats.money >= drivingTestFee
-                        ActionCard(
-                            icon = AppIcons.Career,
-                            title = stringResource(R.string.btn_take_driving_test),
-                            description = stringResource(R.string.driving_test_desc, formatMoney(drivingTestFee, character.countryCode)),
-                            metaLabel = formatMoney(drivingTestFee, character.countryCode),
-                            enabled = canAfford,
-                            onClick = {
-                                if (canAfford) {
-                                    activeActionSheet = ActionSheet.NONE
-                                    pendingAction.request(PendingAction.TakeDrivingTest)
-                                }
-                            }
-                        )
-                    }
-                    if (showImmigrationOffice) {
-                        Text(
-                            text = stringResource(
-                                R.string.immigration_status_summary,
-                                character.currentVisa?.name?.lowercase() ?: stringResource(R.string.immigration_no_visa),
-                                character.visaYearsRemaining
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (canRenewVisa) {
-                            val canAfford = character.stats.money >= visaRenewalFee
-                            ActionCard(
-                                icon = AppIcons.Career,
-                                title = stringResource(R.string.btn_renew_visa),
-                                description = stringResource(R.string.immigration_renew_visa_desc, formatMoney(visaRenewalFee, character.countryCode)),
-                                metaLabel = formatMoney(visaRenewalFee, character.countryCode),
-                                enabled = canAfford,
-                                onClick = {
-                                    if (canAfford) {
-                                        activeActionSheet = ActionSheet.NONE
-                                        pendingAction.request(PendingAction.RenewVisa)
-                                    }
-                                }
-                            )
-                        }
-                        if (canApplyCitizenship) {
-                            val canAfford = character.stats.money >= citizenshipFee
-                            ActionCard(
-                                icon = AppIcons.Family,
-                                title = stringResource(R.string.btn_apply_citizenship),
-                                description = stringResource(R.string.immigration_citizenship_desc, formatMoney(citizenshipFee, character.countryCode)),
-                                metaLabel = formatMoney(citizenshipFee, character.countryCode),
-                                enabled = canAfford,
-                                onClick = {
-                                    if (canAfford) {
-                                        activeActionSheet = ActionSheet.NONE
-                                        pendingAction.request(PendingAction.ApplyCitizenship)
-                                    }
-                                }
-                            )
-                        }
-                    }
+                    RelocationBoard(
+                        character = character,
+                        onRenewVisa = {
+                            activeActionSheet = ActionSheet.NONE
+                            onRenewVisa()
+                        },
+                        onApplyForCitizenship = {
+                            activeActionSheet = ActionSheet.NONE
+                            onApplyForCitizenship()
+                        },
+                        onTakeDrivingTest = {
+                            activeActionSheet = ActionSheet.NONE
+                            onTakeDrivingTest()
+                        },
+                        onRelocate = { targetCountryCode ->
+                            activeActionSheet = ActionSheet.NONE
+                            onRelocateToCountry(targetCountryCode)
+                        },
+                        onDismiss = { activeActionSheet = ActionSheet.NONE }
+                    )
                 }
             }
             ActionSheet.PHILANTHROPY_GOALS -> {
@@ -1347,6 +1175,8 @@ fun ActionsScreen(
                     CareType.PUBLIC_CLINIC -> stringResource(R.string.care_public_clinic)
                     CareType.PRIVATE_HOSPITAL ->
                         CountryCatalog.flavorFor(character.countryCode).privateHospitalName
+                    CareType.ALTERNATIVE_MEDICINE -> stringResource(R.string.care_alternative_medicine)
+                    CareType.MENTAL_WELLNESS -> stringResource(R.string.care_mental_wellness)
                 }
                 ConfirmActionDialog(
                     title = stringResource(R.string.dialog_seek_treatment_title),
@@ -2039,6 +1869,8 @@ private fun treatmentCostLabel(
 private fun successHint(careType: CareType): String = when (careType) {
     CareType.PUBLIC_CLINIC -> stringResource(R.string.hint_public_clinic_success)
     CareType.PRIVATE_HOSPITAL -> stringResource(R.string.hint_private_hospital_success)
+    CareType.ALTERNATIVE_MEDICINE -> stringResource(R.string.hint_alternative_medicine_success)
+    CareType.MENTAL_WELLNESS -> stringResource(R.string.hint_mental_wellness_success)
 }
 
 @Composable

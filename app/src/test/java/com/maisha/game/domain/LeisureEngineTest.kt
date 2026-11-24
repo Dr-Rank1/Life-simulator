@@ -183,6 +183,48 @@ class LeisureEngineTest {
         assertEquals("The Dance Class by Edgar Degas", success.flavor)
         assertTrue(success.character.eventLog.any { it.contains("Dance Class") })
     }
+
+    @Test
+    fun luxuryActivities_requireCorrespondingAssets() {
+        val adultWithoutAssets = TestFixtures.character(
+            age = 35,
+            stats = Stats(money = 10_000_000, happiness = 50, health = 80),
+            assets = emptyList()
+        )
+        assertFalse(engine.isEligible(adultWithoutAssets, LeisureActivity.YACHT_DAY))
+        assertFalse(engine.isEligible(adultWithoutAssets, LeisureActivity.PRIVATE_JET_TRIP))
+
+        val yachtAsset = com.maisha.game.data.model.Asset(
+            id = "boat_1",
+            name = "Sunseeker Yacht",
+            type = com.maisha.game.data.model.AssetType.BOAT,
+            purchasePrice = 5_000_000,
+            currentValue = 5_000_000,
+            monthlyUpkeep = 10_000,
+            condition = 100
+        )
+        val jetAsset = com.maisha.game.data.model.Asset(
+            id = "jet_1",
+            name = "Gulfstream Jet",
+            type = com.maisha.game.data.model.AssetType.PRIVATE_JET,
+            purchasePrice = 25_000_000,
+            currentValue = 25_000_000,
+            monthlyUpkeep = 50_000,
+            condition = 100
+        )
+
+        val adultWithYacht = adultWithoutAssets.copy(assets = listOf(yachtAsset))
+        assertTrue(engine.isEligible(adultWithYacht, LeisureActivity.YACHT_DAY))
+        assertFalse(engine.isEligible(adultWithYacht, LeisureActivity.PRIVATE_JET_TRIP))
+
+        val result = engine.perform(adultWithYacht, LeisureActivity.YACHT_DAY)
+        assertTrue(result is LeisureResult.Success)
+        val after = (result as LeisureResult.Success).character
+        assertTrue("Yacht day should give a massive happiness boost", after.stats.happiness > 50)
+
+        val adultWithJet = adultWithoutAssets.copy(assets = listOf(jetAsset))
+        assertTrue(engine.isEligible(adultWithJet, LeisureActivity.PRIVATE_JET_TRIP))
+    }
 }
 
 class CrimeStatusMapperTest {

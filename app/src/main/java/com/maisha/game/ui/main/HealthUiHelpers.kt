@@ -28,10 +28,12 @@ object HealthUiHelpers {
     }
 
     fun treatmentCost(character: Character, severity: Int, careType: CareType): Int =
-        healthEngine.estimateTreatmentCost(character, severity, careType.usePrivateCare())
+        healthEngine.estimateTreatmentCost(character, severity, careType)
 
     fun successHint(careType: CareType, res: Resources): String = when (careType) {
         CareType.PUBLIC_CLINIC -> res.getString(R.string.hint_public_clinic_success)
         CareType.PRIVATE_HOSPITAL -> res.getString(R.string.hint_private_hospital_success)
+        CareType.ALTERNATIVE_MEDICINE -> res.getString(R.string.hint_alternative_medicine_success)
+        CareType.MENTAL_WELLNESS -> res.getString(R.string.hint_mental_wellness_success)
     }
 }

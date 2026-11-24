@@ -3,18 +3,17 @@ package com.maisha.game.ui.main
 
 import android.content.res.Resources
 import com.maisha.game.R
+import com.maisha.game.data.CountryCatalog
+import com.maisha.game.data.model.CareTier
 
-enum class CareType {
-    PUBLIC_CLINIC,
-    PRIVATE_HOSPITAL;
+typealias CareType = CareTier
 
-    fun usePrivateCare(): Boolean = this == PRIVATE_HOSPITAL
-
-    fun displayName(res: Resources, countryCode: String = "XX"): String = when (this) {
-        PUBLIC_CLINIC -> res.getString(R.string.care_public_clinic)
-        PRIVATE_HOSPITAL -> {
-            val name = com.maisha.game.data.CountryCatalog.flavorFor(countryCode).privateHospitalName
-            res.getString(R.string.care_private_hospital, name)
-        }
+fun CareTier.displayName(res: Resources, countryCode: String = "XX"): String = when (this) {
+    CareTier.PUBLIC_CLINIC -> res.getString(R.string.care_public_clinic)
+    CareTier.PRIVATE_HOSPITAL -> {
+        val name = CountryCatalog.flavorFor(countryCode).privateHospitalName
+        res.getString(R.string.care_private_hospital, name)
     }
+    CareTier.ALTERNATIVE_MEDICINE -> res.getString(R.string.care_alternative_medicine)
+    CareTier.MENTAL_WELLNESS -> res.getString(R.string.care_mental_wellness)
 }

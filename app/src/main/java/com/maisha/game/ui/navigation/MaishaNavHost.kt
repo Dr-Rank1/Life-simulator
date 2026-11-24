@@ -386,6 +386,7 @@ fun MaishaNavHost(
                 onRenewVisa = viewModel::onRenewVisa,
                 onApplyForCitizenship = viewModel::onApplyForCitizenship,
                 onTakeDrivingTest = viewModel::onTakeDrivingTest,
+                onRelocateToCountry = viewModel::onRelocateToCountry,
                 onVolunteer = viewModel::onVolunteer,
                 onDonateToCharity = viewModel::onDonateToCharity,
                 donationTiers = viewModel.donationTiers(),

@@ -251,6 +251,7 @@ Completely offline Canvas drawing engine (1,180+ lines):
 | `feature` | Game-Feel Character Creation, Commemorative Monument Dossier & Rich Heir Succession: `StartingStatArchetype` presets, instant shuffle, country preview cards, arched monument tombstone with silk-sash banner & carved metrics, and `HeirCandidatePreview` dossier cards with inheritance shares |
 | `feature` | Entrepreneurship Stages, Politics Campaigns & Creator Economy Progression Boards: `BusinessEngine` 5-stage lifecycle, valuation milestones & founder agency (`BusinessProgressionCard`), `PoliticsEngine` campaign-to-governance boards (`PoliticalCampaignBoard`), and `SocialMediaEngine` 5-tier fame ribbon, creator burnout & brand deals (`FameSocialMediaBoard`) |
 | `feature` | Underworld Crime Board, Courtroom Verdicts & Prison Yard Life: `CrimeEngine` prison gangs, cellblock respect & escape calculations, `CrimeHeistBoard` 3-tier heists & heat meter, `ArrestTrialDialog` high-stakes court proceedings, and `PrisonYardBoard` cellblock routines, parole petitions & breakouts |
+| `feature` | Health & Wellness Hub, Leisure Lifestyle Board & Global Emigration: `HealthEngine` 4-tier care & infancy zero-cost protection (`HealthWellnessHub`), `LeisureEngine` 4-category boards & luxury yacht/jet trips (`LeisureLifestyleBoard`), `RelocationEngine` residence dossiers, dual citizenship naturalization & 15-country emigration with PPP conversions (`RelocationBoard`) |
 
 ---
 

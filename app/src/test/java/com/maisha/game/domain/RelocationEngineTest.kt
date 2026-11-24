@@ -194,5 +194,39 @@ class RelocationEngineTest {
         )
     }
 
+    @Test
+    fun `canRelocate checks age and incarceration constraints`() {
+        val child = baseCharacter().copy(age = 15)
+        assertFalse(engine.canRelocate(child))
+
+        val prisoner = baseCharacter().copy(
+            age = 24,
+            criminalRecord = com.maisha.game.data.model.CriminalRecord(currentlyIncarcerated = true)
+        )
+        assertFalse(engine.canRelocate(prisoner))
+
+        val freeAdult = baseCharacter().copy(age = 24)
+        assertTrue(engine.canRelocate(freeAdult))
+    }
+
+    @Test
+    fun `relocate with chargeFee deducts flight logistics fee`() {
+        val character = baseCharacter().copy(
+            age = 26,
+            stats = Stats(money = 500_000, happiness = 80, health = 80, smarts = 70, looks = 60),
+            countryCode = "KE"
+        )
+        val fee = engine.relocationFee(character)
+        assertTrue("Relocation flight fee should be greater than zero", fee > 0)
+        assertTrue("Character should afford relocation", engine.canAffordRelocation(character))
+
+        val target = CountryCatalog.getCountry("US")
+        val moved = engine.relocate(character, target, chargeFee = true)
+
+        assertEquals("US", moved.countryCode)
+        assertEquals(600, moved.finance.creditScore)
+        assertTrue(moved.eventLog.first().contains("flight and relocation logistics"))
+    }
+
     private fun baseCharacter() = TestFixtures.character(age = 22, countryCode = "KE")
 }

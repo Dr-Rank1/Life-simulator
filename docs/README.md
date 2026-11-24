@@ -34,7 +34,7 @@ Built specifically for modern Android with **Jetpack Compose and Material 3**, M
   - [10. Dynamic Chapter Titles & Evocative Epitaphs](#10-dynamic-chapter-titles--evocative-epitaphs)
   - [11. 15-Country Personal Finance, Economy & Dynasty Vault](#11-15-country-personal-finance-economy--dynasty-vault)
   - [12. Underworld Crime Board, Courtroom Trials & Prison Life](#12-underworld-crime-board-courtroom-trials--prison-life)
-  - [13. Health, Wellness & Medical Care](#13-health-wellness--medical-care)
+  - [13. Health, Wellness, Leisure & Global Relocation](#13-health-wellness-leisure--global-relocation)
   - [14. Mortality, Tombstone Ribbons & Heir Succession](#14-mortality-tombstone-ribbons--heir-succession)
 - [True Global Flavor (15 Countries)](#true-global-flavor-15-countries)
 - [Architecture & Tech Stack](#architecture--tech-stack)
@@ -224,10 +224,31 @@ flowchart TD
   - *Parole Board Petitions:* Transparent eligibility requirements (served >= 33% of sentence, 0 negative infractions) and parole board favor odds meter.
   - *High-Tension Prison Breakouts:* Plan perimeter wire escapes with odds calculated from Smarts, Cellblock Respect, and Crew alliances, balanced against severe capture penalties (+4 years added to sentence).
 
-### 13. Health, Wellness & Medical Care
-- **Dynamic Medical System:** Characters can contract common ailments (flu, food poisoning), acute emergencies, or chronic conditions (hypertension, asthma, depression).
-- **Healthcare Tiers:** Choose Public Community Clinics, Private Specialists, or Alternative Medicine Healers.
-- **Wellness & Habits:** Diet regimes (Mediterranean, Keto, Vegan), plastic surgery procedures, mental health therapy, and gym memberships.
+### 13. Health, Wellness, Leisure & Global Relocation
+- **Health & Wellness Hub (`HealthWellnessHub.kt`):**
+  - *Vitality & Physiological Dashboard:* Live physical health meter, mental equilibrium meter, insurance coverage indicator, and itemized active conditions with severity pills (Mild, Moderate, Severe, Chronic Managed, and Years Untreated).
+  - *4-Tier Treatment Comparisons:*
+    - *Public Clinic (`CareTier.PUBLIC_CLINIC`):* Subsidized, affordable government healthcare with standard recovery odds.
+    - *Private Hospital (`CareTier.PRIVATE_HOSPITAL`):* Premier clinical care branded with the country\'s top hospital name (`{privateHospital}`), yielding 80-94% recovery odds and covered by health insurance copays.
+    - *Alternative Medicine (`CareTier.ALTERNATIVE_MEDICINE`):* Herbal, acupuncture, and holistic wellness practices providing +5 Happiness and +4 Karma whether cured or failed.
+    - *Mental Wellness & Therapy (`CareTier.MENTAL_WELLNESS`):* Dedicated psychiatric and psychological counseling delivering 72-88% cure rates for stress/PTSD/burnout conditions and +12 Happiness boost.
+  - *Rock-Solid Infancy Protection:* Age 0-2 infants and toddlers strictly receive 100% free pediatric care (0 cost), guaranteed 95% cure rates, zero debt stress, and zero chronic illness onset under age 3.
+  - *Preventative Wellness Subscriptions:* One-tap enrollment for Gym Membership, Premium Nutrition & Diet, Personal Therapy, and Health Insurance with annual fees scaled by economy factor.
+- **Leisure & Lifestyle Hub (`LeisureLifestyleBoard.kt`):**
+  - *Categorized Experience Boards:*
+    - *Vacations & Travel:* Weekend Retreats (+12 Mood, +5 Health), Nature Hikes (+8 Mood, +4 Health), City Theater & Shows (+9 Mood), Night Out (+10 Mood, -3 Health), Caregiver Park Outings, and Playgrounds.
+    - *Hobbies & Culture:* High Museum Visits (collect fine art prints), Library Book Reading, Senior Memoir Writing, Youth Passions, Study Buddy Sessions, Gaming Marathons, and Mall Hangouts.
+    - *Mind & Wellness:* Mindful Meditation (free tension relief, +4 Mood, +2 Health), Spa Days (+7 Mood, +6 Health), Annual Checkups (+6 Health), Reunion Dinners (+10 Mood), and Senior Community Clubs.
+    - *Luxury Lifestyle:* Yacht Cruise Days (+15 Mood, +3 Health, requires owning Boat/Yacht asset), and Private Jet Getaways (+18 Mood, +2 Health, requires owning Private Jet asset).
+  - *Tactile Payoff Badges:* Direct indicators for immediate mood, health, smarts, karma, and asset prerequisite status.
+- **Relocation & Border Hopping Hub (`RelocationBoard.kt`):**
+  - *Residence & Visa Dossier:* Live tracking of current country residence, citizenship status, visa type, and years remaining, with one-tap actions for Visa Renewal and 5-Year Dual Citizenship Naturalization.
+  - *Licensing & Transit:* Driving license road tests with country-scaled fees and authentic daily commute options.
+  - *Global Emigration Board:* Interactive destination browser across all 14 foreign countries featuring:
+    - National currency code, symbol, and economy factor.
+    - Authentic flavor tokens: Daily Commute (`{transportMode}`), Top Private Hospital (`{privateHospital}`), and Local Money App (`{popularMoneyAppOrBank}`).
+    - Purchasing Power Parity (PPP) Cash Conversion preview showing exactly how current wealth translates into the destination currency.
+    - Flight and international moving logistics fees deducted cleanly upon departure, resetting local credit scores to 600 and opening a new chapter abroad.
 
 ### 14. Mortality, Tombstone Ribbons & Heir Succession
 - **Mortality Calculation:** Annual death probabilities scale realistically based on health deterioration, old age (80+), lifestyle hazards, or fatal accidents.

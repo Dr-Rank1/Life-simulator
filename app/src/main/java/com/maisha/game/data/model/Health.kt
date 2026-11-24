@@ -15,3 +15,16 @@ data class HealthCondition(
     /** Chronic conditions stay after treatment (managed, not cured). */
     val isChronic: Boolean = false
 )
+
+/**
+ * Available tiers of medical and wellness care.
+ */
+@Serializable
+enum class CareTier {
+    PUBLIC_CLINIC,
+    PRIVATE_HOSPITAL,
+    ALTERNATIVE_MEDICINE,
+    MENTAL_WELLNESS;
+
+    fun usePrivateCare(): Boolean = this == PRIVATE_HOSPITAL
+}

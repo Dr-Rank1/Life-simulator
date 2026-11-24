@@ -848,6 +848,17 @@ class GameEngine @Inject constructor(
     fun applyForCitizenship(character: Character): CitizenshipApplicationResult =
         relocationEngine.applyForCitizenship(character)
 
+    fun relocateToCountry(character: Character, countryCode: String): Character {
+        val destination = com.maisha.game.data.CountryCatalog.getCountry(countryCode)
+        return relocationEngine.relocate(character, destination, chargeFee = true)
+    }
+
+    fun canRelocate(character: Character): Boolean = relocationEngine.canRelocate(character)
+
+    fun relocationFee(character: Character): Int = relocationEngine.relocationFee(character)
+
+    fun canAffordRelocation(character: Character): Boolean = relocationEngine.canAffordRelocation(character)
+
     fun launchCampaign(
         character: Character,
         office: com.maisha.game.data.model.PoliticalOffice,
@@ -1369,6 +1380,13 @@ class GameEngine @Inject constructor(
         conditionId: String,
         usePrivateCare: Boolean
     ): DoctorResult = healthEngine.visitDoctor(character, conditionId, usePrivateCare)
+
+    /** Delegates to [HealthEngine.visitDoctor] with [CareTier]. */
+    fun visitDoctor(
+        character: Character,
+        conditionId: String,
+        careTier: com.maisha.game.data.model.CareTier
+    ): DoctorResult = healthEngine.visitDoctor(character, conditionId, careTier)
 
     /** Toggles a recurring lifestyle subscription on or off. */
     fun setLifestyleOption(

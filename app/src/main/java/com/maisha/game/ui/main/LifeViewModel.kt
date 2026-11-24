@@ -3890,7 +3890,7 @@ class LifeViewModel @Inject constructor(
         if (!character.alive) return
 
         viewModelScope.launch {
-            when (val result = gameEngine.visitDoctor(character, conditionId, careType.usePrivateCare())) {
+            when (val result = gameEngine.visitDoctor(character, conditionId, careType)) {
                 is DoctorResult.Treated -> {
                     persist(result.character)
                     _uiState.update {
@@ -4722,6 +4722,32 @@ class LifeViewModel @Inject constructor(
                         it.copy(actionMessage = context.getString(R.string.msg_citizenship_ineligible))
                     }
                 }
+            }
+        }
+    }
+
+    fun onRelocateToCountry(targetCountryCode: String) {
+        val character = _uiState.value.character ?: return
+        if (!character.alive) return
+        if (!gameEngine.canRelocate(character)) {
+            _uiState.update { it.copy(actionMessage = context.getString(R.string.msg_relocation_ineligible)) }
+            return
+        }
+        if (!gameEngine.canAffordRelocation(character)) {
+            _uiState.update { it.copy(actionMessage = context.getString(R.string.msg_relocation_cannot_afford)) }
+            return
+        }
+
+        viewModelScope.launch {
+            val destination = com.maisha.game.data.CountryCatalog.getCountry(targetCountryCode)
+            val updated = gameEngine.relocateToCountry(character, targetCountryCode)
+            persist(updated)
+            _uiState.update {
+                it.copy(
+                    character = updated,
+                    actionMessage = context.getString(R.string.msg_relocation_success, destination.displayName),
+                    netWorth = financeEngine.calculateNetWorth(updated)
+                )
             }
         }
     }

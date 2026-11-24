@@ -263,9 +263,31 @@ com.maisha.game.domain/
     - *Ad Monetization:* Turn on platform creator funds for passive annual ad dividends.
     - *Drama & Cancel Culture PR:* Handle controversies through public accountability or pushing back against cancel mobs.
 
-#### 11. `LeisureEngine` & `RelocationEngine`
-- **Leisure:** Hobbies, gym workouts, meditation, vacations, yacht days, private jet trips.
-- **Relocation:** Applying for tourist visas, work permits, permanent residency, or naturalized citizenship across 15 countries.
+#### 11. `HealthEngine`, `LeisureEngine` & `RelocationEngine`
+- **Health & Wellness Hub (`HealthWellnessHub`):**
+  - *Vitality & Physiological Dashboard:* Displays live physical health meter, mental equilibrium, active insurance coverage, and active conditions with severity pills (Mild, Moderate, Severe, Chronic Managed, and Years Untreated).
+  - *4-Tier Treatment Comparisons:*
+    - *Public Clinic (`CareTier.PUBLIC_CLINIC`):* Subsidized, affordable government healthcare with standard recovery odds.
+    - *Private Hospital (`CareTier.PRIVATE_HOSPITAL`):* Premier clinical care branded with the country\'s top hospital name (`{privateHospital}`), yielding 80-94% recovery odds and covered by health insurance copays.
+    - *Alternative Medicine (`CareTier.ALTERNATIVE_MEDICINE`):* Herbal, acupuncture, and holistic wellness practices providing +5 Happiness and +4 Karma whether cured or failed.
+    - *Mental Wellness & Therapy (`CareTier.MENTAL_WELLNESS`):* Dedicated psychiatric and psychological counseling delivering 72-88% cure rates for stress/PTSD/burnout conditions and +12 Happiness boost.
+  - *Rock-Solid Infancy Protection:* Age 0-2 infants and toddlers strictly receive 100% free pediatric care (0 cost), guaranteed 95% cure rates, zero debt stress, and zero chronic illness onset under age 3.
+  - *Preventative Wellness Subscriptions:* One-tap enrollment for Gym Membership, Premium Nutrition & Diet, Personal Therapy, and Health Insurance with annual fees scaled by economy factor.
+- **Leisure & Lifestyle Hub (`LeisureLifestyleBoard`):**
+  - *Categorized Experience Boards:*
+    - *Vacations & Travel:* Weekend Retreats (+12 Mood, +5 Health), Nature Hikes (+8 Mood, +4 Health), City Theater & Shows (+9 Mood), Night Out (+10 Mood, -3 Health), Caregiver Park Outings, and Playgrounds.
+    - *Hobbies & Culture:* High Museum Visits (collect fine art prints), Library Book Reading, Senior Memoir Writing, Youth Passions, Study Buddy Sessions, Gaming Marathons, and Mall Hangouts.
+    - *Mind & Wellness:* Mindful Meditation (free tension relief, +4 Mood, +2 Health), Spa Days (+7 Mood, +6 Health), Annual Checkups (+6 Health), Reunion Dinners (+10 Mood), and Senior Community Clubs.
+    - *Luxury Lifestyle:* Yacht Cruise Days (+15 Mood, +3 Health, requires owning Boat/Yacht asset), and Private Jet Getaways (+18 Mood, +2 Health, requires owning Private Jet asset).
+  - *Tactile Payoff Badges:* Direct indicators for immediate mood, health, smarts, karma, and asset prerequisite status.
+- **Relocation & Border Hopping Hub (`RelocationBoard`):**
+  - *Residence & Visa Dossier:* Live tracking of current country residence, citizenship status, visa type, and years remaining, with one-tap actions for Visa Renewal and 5-Year Dual Citizenship Naturalization.
+  - *Licensing & Transit:* Driving license road tests with country-scaled fees and authentic daily commute options.
+  - *Global Emigration Board:* Interactive destination browser across all 14 foreign countries featuring:
+    - National currency code, symbol, and economy factor.
+    - Authentic flavor tokens: Daily Commute (`{transportMode}`), Top Private Hospital (`{privateHospital}`), and Local Money App (`{popularMoneyAppOrBank}`).
+    - Purchasing Power Parity (PPP) Cash Conversion preview showing exactly how current wealth translates into the destination currency.
+    - Flight and international moving logistics fees deducted cleanly upon departure, resetting local credit scores to 600 and opening a new chapter abroad.
 
 #### 12. `LifeArchetypeEngine`
 - **Role:** Resolves silk-sash memorial ribbons, dynamic life chapter titles, evocative narrative epitaphs, and multi-generational legacy stamps upon player death and throughout life progression.

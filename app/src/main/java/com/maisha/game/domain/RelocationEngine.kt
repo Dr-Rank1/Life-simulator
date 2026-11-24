@@ -116,7 +116,8 @@ class RelocationEngine @Inject constructor() {
     fun relocate(
         character: Character,
         newCountry: Country,
-        visaType: VisaType? = null
+        visaType: VisaType? = null,
+        chargeFee: Boolean = false
     ): Character {
         val formerJob = character.career.currentJob
         val updatedCareer = if (formerJob != null) {
@@ -139,7 +140,10 @@ class RelocationEngine @Inject constructor() {
 
         val happinessDip = Random.nextInt(RELOCATION_HAPPINESS_DIP_MIN, RELOCATION_HAPPINESS_DIP_MAX + 1)
         val originCountry = CountryCatalog.getCountry(character.countryCode)
-        val convertedMoney = EconomyScaler.convertCurrency(character.stats.money, character.countryCode, newCountry.code)
+        val fee = if (chargeFee) relocationFee(character) else 0
+        val startingMoney = (character.stats.money - fee).coerceAtLeast(0)
+
+        val convertedMoney = EconomyScaler.convertCurrency(startingMoney, character.countryCode, newCountry.code)
         val convertedSavings = EconomyScaler.convertCurrency(character.savingsBalance, character.countryCode, newCountry.code)
         val convertedTrust = EconomyScaler.convertCurrency(character.finance.juniorTrustBalance, character.countryCode, newCountry.code)
         val liquidatedInstrument = EconomyScaler.convertCurrency(character.finance.countryInstrumentBalance, character.countryCode, newCountry.code)
@@ -155,7 +159,8 @@ class RelocationEngine @Inject constructor() {
             mobileOverdraftUsed = 0
         )
 
-        val moveLog = "Relocated from ${originCountry.displayName} to ${newCountry.displayName}. Converted funds to ${newCountry.currencyCode} (${newCountry.currencySymbol}${totalLiquidMoney}) and established a fresh credit profile."
+        val feeNote = if (fee > 0) " Paid flight and relocation logistics (${originCountry.currencySymbol}${fee})." else ""
+        val moveLog = "Relocated from ${originCountry.displayName} to ${newCountry.displayName}.$feeNote Converted funds to ${newCountry.currencyCode} (${newCountry.currencySymbol}${totalLiquidMoney}) and established a fresh credit profile."
 
         return character.copy(
             countryCode = newCountry.code,
@@ -175,6 +180,18 @@ class RelocationEngine @Inject constructor() {
             eventLog = listOf(moveLog) + character.eventLog
         )
     }
+
+    fun relocationFee(character: Character): Int =
+        EconomyScaler.scaleAmount(RELOCATION_FLIGHT_FEE_KENYA, character.countryCode)
+
+    fun canAffordRelocation(character: Character): Boolean =
+        character.stats.money >= relocationFee(character)
+
+    fun canRelocate(character: Character): Boolean =
+        character.alive &&
+            character.age >= MIN_RELOCATION_AGE &&
+            !character.criminalRecord.currentlyIncarcerated &&
+            !character.criminalRecord.awaitingTrial
 
     /** Years of continuous residence required before dual citizenship can be requested. */
     fun canApplyForCitizenship(character: Character): Boolean =
@@ -321,6 +338,7 @@ class RelocationEngine @Inject constructor() {
         const val NATURALIZATION_YEARS = 5
         const val VISA_RENEWAL_FEE_KENYA = 50_000
         const val CITIZENSHIP_FEE_KENYA = 200_000
+        const val RELOCATION_FLIGHT_FEE_KENYA = 150_000
 
         private const val MIN_RELOCATION_AGE = 18
         private const val MAX_RELOCATION_AGE = 55

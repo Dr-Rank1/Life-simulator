@@ -3159,4 +3159,62 @@
     <string name="parole_status_ineligible">Ineligible (Need %1$d More Years Served &amp; Zero Infractions)</string>
     <string name="escape_warning_notice">Perimeter wire electrified, armed guard towers on high alert. If caught: +4 years added to sentence.</string>
     <string name="escape_odds_meter">Breakout Probability: %1$d%%</string>
+
+    <!-- Health & Wellness Hub -->
+    <string name="care_alternative_medicine">Alternative Medicine</string>
+    <string name="care_mental_wellness">Mental Wellness &amp; Therapy</string>
+    <string name="hint_alternative_medicine_success">Affordable holistic herbs, +Karma and Mood</string>
+    <string name="hint_mental_wellness_success">High recovery for stress/burnout, +Mood</string>
+    <string name="care_tier_public_desc">Subsidized government care. Affordable with standard recovery rates.</string>
+    <string name="care_tier_private_desc">Premier clinical care with cutting-edge diagnostics and high recovery odds.</string>
+    <string name="care_tier_alternative_desc">Herbal, acupuncture, and natural wellness practices that lift spiritual vitality.</string>
+    <string name="care_tier_therapy_desc">Psychiatric counseling and stress decompression for mental equilibrium.</string>
+    <string name="label_vitality">Vitality</string>
+    <string name="label_health_status">Health Status</string>
+    <string name="label_recovery_odds">Recovery Odds: %1$d%%</string>
+    <string name="label_years_untreated">%1$d yr untreated</string>
+    <string name="label_years_untreated_plural">%1$d yrs untreated</string>
+    <string name="label_chronic_condition">Chronic (Managed)</string>
+    <string name="label_infant_care_free">Free Pediatric Care (Infancy Protected)</string>
+    <string name="label_wellness_subscriptions">Wellness &amp; Preventative Care</string>
+    <string name="label_active_conditions">Active Conditions</string>
+    <string name="label_no_conditions">Clean bill of health. No active illnesses.</string>
+    <string name="label_severity_mild">Mild</string>
+    <string name="label_severity_moderate">Moderate</string>
+    <string name="label_severity_severe">Severe</string>
+
+    <!-- Leisure & Lifestyle Board -->
+    <string name="tab_leisure_vacations">Vacations &amp; Travel</string>
+    <string name="tab_leisure_hobbies">Hobbies &amp; Culture</string>
+    <string name="tab_leisure_wellness">Mind &amp; Wellness</string>
+    <string name="tab_leisure_luxury">Luxury Lifestyle</string>
+    <string name="label_leisure_hub_title">Leisure &amp; Lifestyle Hub</string>
+    <string name="label_leisure_hub_desc">Rest, explore, indulge, and balance your mind, body, and happiness.</string>
+    <string name="badge_requires_asset">Requires %1$s</string>
+    <string name="badge_asset_boat">Boat / Yacht</string>
+    <string name="badge_asset_jet">Private Jet</string>
+    <string name="label_immediate_payoffs">Immediate Payoffs</string>
+    <string name="label_activity_free">Free Activity</string>
+
+    <!-- Relocation & Border Hopping Hub -->
+    <string name="tab_relocation_status">Dossier &amp; Visas</string>
+    <string name="tab_relocation_destinations">Global Emigration</string>
+    <string name="label_relocation_hub_title">International Relocation &amp; Visas</string>
+    <string name="label_relocation_hub_desc">Explore foreign chapters, naturalize abroad, and manage your visas.</string>
+    <string name="label_destination_highlights">Destination Highlights</string>
+    <string name="label_commute_mode">Daily Commute: %1$s</string>
+    <string name="label_local_hospital">Top Hospital: %1$s</string>
+    <string name="label_money_app">Banking &amp; Money: %1$s</string>
+    <string name="label_ppp_conversion">Cash Conversion (PPP)</string>
+    <string name="label_conversion_preview">%1$s -> %2$s</string>
+    <string name="label_flight_moving_fee">Flight &amp; Moving Fee: %1$s</string>
+    <string name="label_passport_status">Status: %1$s</string>
+    <string name="label_holds_passport">Passport Holder (Full Rights)</string>
+    <string name="label_tourist_entry">Tourist Visa Entry (1 Year)</string>
+    <string name="btn_emigrate">Emigrate to %1$s</string>
+    <string name="dialog_relocate_title">Emigrate to %1$s?</string>
+    <string name="dialog_relocate_desc">Moving abroad will convert your liquid cash to %1$s, establish a fresh credit score of 600, reset your job, and begin a new chapter in %2$s. Logistics fee: %3$s.</string>
+    <string name="msg_relocation_success">Relocated successfully to %1$s.</string>
+    <string name="msg_relocation_cannot_afford">You cannot afford the flight and relocation logistics fees.</string>
+    <string name="msg_relocation_ineligible">You cannot relocate at this time.</string>
 </resources>
