@@ -97,19 +97,26 @@ import com.maisha.game.domain.YearQuestKind
 import com.maisha.game.domain.YearQuestProgress
 import com.maisha.game.ui.celebration.CelebrationOverlay
 import com.maisha.game.ui.components.AchievementUnlockedDialog
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
 import com.maisha.game.domain.CrimePushLuckSession
 import com.maisha.game.domain.ExamFocusChallenge
 import com.maisha.game.domain.ExamFocusTactic
 import com.maisha.game.domain.NegotiationChallenge
 import com.maisha.game.domain.NegotiationTactics
 import com.maisha.game.domain.PushLuckAction
+import com.maisha.game.ui.components.CharacterDossierSheet
 import com.maisha.game.ui.components.CrimePushLuckSheet
 import com.maisha.game.ui.components.DoubleLifeSheet
+import com.maisha.game.ui.components.EdgeGlowOverlay
 import com.maisha.game.ui.components.ExamFocusDialog
 import com.maisha.game.ui.components.LifeArchetypeStrings
 import com.maisha.game.ui.components.NegotiationDialog
 import com.maisha.game.ui.components.RoutineDilemmaDialog
 import com.maisha.game.ui.components.SecretConfrontationDialog
+import com.maisha.game.ui.components.StageBackdropCanvas
+import com.maisha.game.ui.components.StatGaugeCluster
+import com.maisha.game.ui.components.resolveStageBackdrop
 import com.maisha.game.ui.components.AgeUpButton
 import com.maisha.game.ui.components.AppLoadingIndicator
 import com.maisha.game.ui.components.CountryFlag
@@ -143,6 +150,7 @@ import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.Hairline
+import androidx.compose.material.icons.rounded.EmojiEvents
 import com.maisha.game.ui.theme.HairlineSoft
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
@@ -490,6 +498,15 @@ fun LifeScreen(
     }
 
     var showQuestsSheet by rememberSaveable { mutableStateOf(false) }
+    var showDossierSheet by rememberSaveable { mutableStateOf(false) }
+
+    if (showDossierSheet) {
+        CharacterDossierSheet(
+            character = character,
+            netWorth = uiState.netWorth,
+            onDismiss = { showDossierSheet = false }
+        )
+    }
 
     if (showQuestsSheet) {
         YearQuestsSheet(
@@ -569,6 +586,9 @@ fun LifeScreen(
     }
 
     val eventActive = uiState.currentEvent != null
+    val isCriticalHealth = character.stats.health < 25 || incarcerated
+    val isPositiveWindfall = uiState.currentCelebration != null || uiState.currentAchievementDialog != null
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -590,7 +610,7 @@ fun LifeScreen(
                     netWorth = uiState.netWorth,
                     questCount = uiState.yearQuests.size,
                     questCompleted = uiState.yearQuestProgress.count { it.completed },
-                    onViewCharacterStats = onViewCharacterStats,
+                    onViewCharacterStats = { showDossierSheet = true },
                     onOpenSettings = onOpenSettings,
                     onOpenQuests = { showQuestsSheet = true }
                 )
@@ -841,6 +861,11 @@ fun LifeScreen(
                 tabContent()
             }
         }
+
+        EdgeGlowOverlay(
+            isPositiveWindfall = isPositiveWindfall,
+            isCriticalWarning = isCriticalHealth
+        )
     }
 }
 }
@@ -1499,6 +1524,26 @@ private fun GlobalHudHeader(
     onOpenSettings: () -> Unit,
     onOpenQuests: () -> Unit
 ) {
+    val stageBackdrop = remember(
+        character.criminalRecord.currentlyIncarcerated,
+        character.stats.health,
+        character.age,
+        character.education.stage
+    ) {
+        resolveStageBackdrop(character)
+    }
+
+    val animatedMoney by animateIntAsState(
+        targetValue = character.stats.money,
+        animationSpec = tween(durationMillis = 500),
+        label = "hudMoney"
+    )
+    val animatedNetWorth by animateIntAsState(
+        targetValue = netWorth,
+        animationSpec = tween(durationMillis = 500),
+        label = "hudNetWorth"
+    )
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -1508,157 +1553,184 @@ private fun GlobalHudHeader(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, BorderCardSlate)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Box(
+        Box(modifier = Modifier.fillMaxWidth()) {
+            StageBackdropCanvas(
+                stageType = stageBackdrop,
                 modifier = Modifier
-                    .size(46.dp)
-                    .clip(CircleShape)
-                    .background(CreamMuted)
-                    .border(1.5.dp, LifeGreenSoft, CircleShape)
-                    .clickable(onClick = onViewCharacterStats),
-                contentAlignment = Alignment.Center
-            ) {
-                PersonAvatar(
-                    avatarConfig = character.avatarConfig,
-                    size = 42,
-                    age = character.age,
-                    expression = expression,
-                    forPlayerCharacter = true,
-                    hideFromAccessibility = true,
-                    seed = "${character.gender.name}-${character.name}"
-                )
-            }
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(16.dp))
+            )
 
             Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.Center
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Text(
-                        modifier = Modifier.weight(1f, fill = false),
-                        text = character.name,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = InkPrimary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    CountryFlag(countryCode = character.countryCode, size = 14.dp)
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(CreamMuted)
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .size(46.dp)
+                            .clip(CircleShape)
+                            .background(PaperWhite)
+                            .border(1.5.dp, TealPrimary.copy(alpha = 0.5f), CircleShape)
+                            .clickable(onClick = onViewCharacterStats),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = stringResource(R.string.format_age, character.age),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = InkPrimary,
-                            fontSize = 11.sp
+                        PersonAvatar(
+                            avatarConfig = character.avatarConfig,
+                            size = 42,
+                            age = character.age,
+                            expression = expression,
+                            forPlayerCharacter = true,
+                            hideFromAccessibility = true,
+                            seed = "${character.gender.name}-${character.name}"
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                modifier = Modifier.weight(1f, fill = false),
+                                text = character.name,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = InkPrimary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            CountryFlag(countryCode = character.countryCode, size = 14.dp)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(PaperWhite.copy(alpha = 0.85f))
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.format_age, character.age),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = InkPrimary,
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
+
+                        val chapterKey = remember(
+                            character.age,
+                            character.career.currentJob,
+                            character.education.stage,
+                            character.criminalRecord.notoriety,
+                            character.education.childhoodAptitude,
+                            character.education.schoolClique,
+                            netWorth
+                        ) {
+                            LifeArchetypeEngine.resolveChapterKey(character, netWorth)
+                        }
+
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        Surface(
+                            shape = RoundedCornerShape(4.dp),
+                            color = PaperWhite.copy(alpha = 0.90f),
+                            border = androidx.compose.foundation.BorderStroke(0.5.dp, TealPrimary.copy(alpha = 0.35f))
+                        ) {
+                            Text(
+                                text = stringResource(LifeArchetypeStrings.chapterStringRes(chapterKey)),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = TealPrimary,
+                                fontSize = 10.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = formatMoney(animatedMoney, character.countryCode),
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = StatMoney
+                            )
+                            Text(
+                                text = "•",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = InkTertiary
+                            )
+                            Text(
+                                modifier = Modifier.weight(1f, fill = false),
+                                text = stringResource(R.string.label_net_worth) + ": " + formatMoney(animatedNetWorth, character.countryCode),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = InkSecondary,
+                                fontSize = 11.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+
+                    if (questCount > 0) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(PaperWhite.copy(alpha = 0.9f))
+                                .border(1.dp, GoldAccent.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                                .clickable(onClick = onOpenQuests)
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = AppIcons.Achievements,
+                                    contentDescription = null,
+                                    tint = GoldAccent,
+                                    modifier = Modifier.size(13.dp)
+                                )
+                                Text(
+                                    text = "$questCompleted/$questCount",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = InkPrimary,
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
+                    }
+
+                    IconButton(onClick = onOpenSettings, modifier = Modifier.size(34.dp)) {
+                        Icon(
+                            imageVector = Icons.Filled.Menu,
+                            contentDescription = stringResource(R.string.content_desc_settings),
+                            tint = InkSecondary,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
 
-                val chapterKey = remember(
-                    character.age,
-                    character.career.currentJob,
-                    character.education.stage,
-                    character.criminalRecord.notoriety,
-                    character.education.childhoodAptitude,
-                    character.education.schoolClique,
-                    netWorth
-                ) {
-                    LifeArchetypeEngine.resolveChapterKey(character, netWorth)
-                }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    color = TealPrimary.copy(alpha = 0.12f)
-                ) {
-                    Text(
-                        text = stringResource(LifeArchetypeStrings.chapterStringRes(chapterKey)),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TealPrimary,
-                        fontSize = 10.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Text(
-                        text = formatMoney(character.stats.money, character.countryCode),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = StatMoney
-                    )
-                    Text(
-                        text = "•",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = InkTertiary
-                    )
-                    Text(
-                        modifier = Modifier.weight(1f, fill = false),
-                        text = stringResource(R.string.label_net_worth) + ": " + formatMoney(netWorth, character.countryCode),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = InkSecondary,
-                        fontSize = 11.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-
-            if (questCount > 0) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(GoldAccent.copy(alpha = 0.14f))
-                        .clickable(onClick = onOpenQuests)
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(text = "🎯", fontSize = 12.sp)
-                        Text(
-                            text = "$questCompleted/$questCount",
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = InkPrimary,
-                            fontSize = 11.sp
-                        )
-                    }
-                }
-            }
-
-            IconButton(onClick = onOpenSettings, modifier = Modifier.size(34.dp)) {
-                Icon(
-                    imageVector = Icons.Filled.Menu,
-                    contentDescription = stringResource(R.string.content_desc_settings),
-                    tint = InkSecondary,
-                    modifier = Modifier.size(20.dp)
+                // Compact Ring Arc Gauge Cluster right on the HUD
+                StatGaugeCluster(
+                    stats = character.stats,
+                    onGaugeClick = onViewCharacterStats
                 )
             }
         }
@@ -1747,7 +1819,12 @@ private fun YearQuestsSheet(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Text(text = "🏆", fontSize = 16.sp)
+                                Icon(
+                                    imageVector = Icons.Rounded.EmojiEvents,
+                                    contentDescription = null,
+                                    tint = GoldAccent,
+                                    modifier = Modifier.size(18.dp)
+                                )
                                 Text(
                                     text = stringResource(R.string.section_weekly_challenge),
                                     style = MaterialTheme.typography.labelMedium,
@@ -1789,7 +1866,7 @@ private fun YearQuestsSheet(
                     color = InkPrimary
                 )
                 Text(
-                    text = "🎯 ${progress.count { it.completed }}/${quests.size}",
+                    text = "${progress.count { it.completed }}/${quests.size}",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = GoldAccent

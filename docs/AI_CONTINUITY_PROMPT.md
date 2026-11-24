@@ -2,7 +2,7 @@
 
 > **Purpose:** Read this document at the start of any new session so the assistant or developer understands **what Maisha is**, **what has already been built**, **what just shipped**, **what is still missing**, and **how to work in this repo without undoing progress**.
 >
-> **Last updated:** 2026-11-24 (15-Country Authentic Financial Instruments, Remittances, Google Play Billing v7, Social Ecosystem & Memory, Routine Micro-Dilemmas, Chapter Titles, BitLife/Another Life Dashboards)  
+> **Last updated:** 2026-11-24 (BitLife/Another Life Arcade UI Overhaul: StageBackdropCanvas, Rolling HUD Counters, StatGaugeCluster, ActivityGridCard 2-Column Arcade Grid, Expressive Relationship Cards with 1-Tap Quick Actions, Rank Progression Steppers, CharacterDossierSheet)  
 > **Repository:** `https://github.com/Dr-Rank1/Life-simulator` (`origin/main`)  
 > **Package:** `com.maisha.game`
 
@@ -224,6 +224,7 @@ Completely offline Canvas drawing engine (1,180+ lines):
 | `feature` | Compose UI/UX Ergonomics & Adaptive Navigation Pass: Adaptive `BoxWithConstraints` (bottom bar for <600dp compact phones vs `LeftNavRail` for >=600dp wide layouts), memoized `ProceduralAvatarPortrait`, bounded `EventDialogStyled` & `HeirSelectionScreen`, flexible font-scaling on `DrillDownRow` & `AgeUpButton`, and insets polish |
 | `hardening` | Persistence, Engine Edge-Cases, AdMob/Play Games & Release Configuration Audit: Kotlinx Serialization null/default coercion (`coerceInputValues = true`), net worth mortgage liability deduction, extreme lifecycle age-gates (0, 13, 14, 16, 18, 60, 100+), zero/multi-heir and estate insolvency guards, Play Games v2 init, and 507 unit tests |
 | `feature` | 15-Country Financial Instruments, Relocation FX & Play Billing Store: Localized instruments & SACCO/overdraft, relocation PPP conversions & remittances, Play Billing v7 Dynasty Vault store (`DynastyVaultStoreSheet`, `CountryFinanceSheet`, `RemittanceSheet`), and 586 unit tests |
+| `feature` | Mobile Life-Sim Visual & Tactile Arcade UI Overhaul: Procedural `StageBackdropCanvas` scene backdrop, rolling HUD counter transitions, 4-ring arc gauges (`StatGaugeCluster`), edge-glow windfall/critical alert overlays, 2-column arcade activity grid (`ActivityGridCard`), expressive Relationship Cards (`PersonCard`) with temperament pills, 5-segment bond meters & instant 1-tap quick actions, visual rank progression steppers, opportunity stamps (`JobOpportunityCard`), home equity gauges, and modal `CharacterDossierSheet` |
 
 ---
 

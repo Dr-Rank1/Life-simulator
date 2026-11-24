@@ -250,6 +250,7 @@ Event texts use dynamic tokens like `{transportMode}`, `{secondaryExam}`, `{mone
 ┌────────────────────────────────────────────────────────┐
 │                  Jetpack Compose UI                    │
 │   LifeScreen | ActionsScreen | CareerScreen | Family   │
+│   StageBackdropCanvas | ActivityGridCard | PersonCard  │
 │   LeftNavRail | InsetCardContainer | 3D AgeUpButton    │
 └───────────────────────────┬────────────────────────────┘
                             │ StateFlow

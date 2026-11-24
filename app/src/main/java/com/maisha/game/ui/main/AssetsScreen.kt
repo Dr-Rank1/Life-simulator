@@ -114,6 +114,7 @@ import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaRadius
@@ -1910,6 +1911,52 @@ private fun OwnedAssetCard(
                 }
             }
 
+            if (asset.mortgageBalance > 0 && asset.currentValue > 0) {
+                val equityFraction = (equity.toFloat() / asset.currentValue).coerceIn(0f, 1f)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 6.dp),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Home Equity",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = InkSecondary,
+                            fontSize = 10.sp
+                        )
+                        Text(
+                            text = "${(equityFraction * 100).toInt()}% Owned",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = SuccessGreen,
+                            fontSize = 10.sp
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(Color(0xFFCBD5E1))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(fraction = equityFraction)
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(SuccessGreen)
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
             if (!isHeirloom) {
@@ -2016,11 +2063,22 @@ private fun OwnedAssetCard(
                         shape = MaishaRadius.buttonShape,
                         colors = ButtonDefaults.buttonColors(containerColor = GoldAccent)
                     ) {
-                        Text(
-                            text = stringResource(R.string.btn_yacht_day),
-                            color = Color(0xFF1A1200),
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = AppIcons.Travel,
+                                contentDescription = null,
+                                tint = Color(0xFF1A1200),
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.btn_yacht_day),
+                                color = Color(0xFF1A1200),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -2032,11 +2090,22 @@ private fun OwnedAssetCard(
                         shape = MaishaRadius.buttonShape,
                         colors = ButtonDefaults.buttonColors(containerColor = TealPrimary)
                     ) {
-                        Text(
-                            text = stringResource(R.string.btn_private_jet_trip),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = AppIcons.Travel,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.btn_private_jet_trip),
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                 }

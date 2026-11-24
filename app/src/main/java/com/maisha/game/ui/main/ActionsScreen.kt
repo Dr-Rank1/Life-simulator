@@ -100,6 +100,8 @@ import com.maisha.game.domain.SocialMediaEngine
 import com.maisha.game.domain.YearQuest
 import com.maisha.game.ui.components.ActionCard
 import com.maisha.game.ui.components.ActionCardAccent
+import com.maisha.game.ui.components.ActivityGridCard
+import com.maisha.game.ui.components.ActivityRiskLevel
 import com.maisha.game.ui.components.CategoryFilterChipRow
 import com.maisha.game.ui.components.ConditionBadge
 import com.maisha.game.ui.components.ConfirmActionDialog
@@ -399,120 +401,115 @@ fun ActionsScreen(
                     .padding(horizontal = MaishaSpacing.md)
             )
         } else {
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 156.dp),
                 modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(top = 4.dp, bottom = 24.dp)
+                contentPadding = PaddingValues(start = 10.dp, top = 4.dp, end = 10.dp, bottom = 28.dp)
             ) {
                 if (showPrisonActions || incarcerated) {
                     if (crimeStatus.kind != CrimeStatusKind.CLEAR) {
-                        item {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
                             CrimeStatusCard(
                                 statusKind = crimeStatus.kind,
                                 yearsRemaining = crimeStatus.yearsRemaining
                             )
                         }
                     }
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        SectionHeaderTitle(title = stringResource(R.string.act_cat_prison_title))
+                    }
                     item {
-                        InsetCardContainer(title = stringResource(R.string.act_cat_prison_title)) {
-                            DrillDownRow(
-                                title = stringResource(R.string.act_cat_prison_title),
-                                subtitle = stringResource(R.string.act_cat_prison_desc),
-                                icon = Icons.Rounded.Lock,
-                                iconTint = CoralNegative,
-                                trailingBadge = "Inmate",
-                                insideContainer = true,
-                                onClick = { activeActionSheet = ActionSheet.PRISON }
-                            )
-                        }
+                        ActivityGridCard(
+                            title = stringResource(R.string.act_cat_prison_title),
+                            subtitle = stringResource(R.string.act_cat_prison_desc),
+                            icon = Icons.Rounded.Lock,
+                            iconTint = CoralNegative,
+                            energyCost = 2,
+                            riskLevel = ActivityRiskLevel.UNDERWORLD,
+                            trailingBadge = "Inmate",
+                            onClick = { activeActionSheet = ActionSheet.PRISON }
+                        )
                     }
                 } else {
                     if (character.age < 16) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            SectionHeaderTitle(title = stringResource(R.string.act_cat_childhood_title))
+                        }
                         item {
                             val childhoodSubtitle = if (character.age <= 2) {
-                                "Infancy: Early development, toys & bonding"
+                                "Infancy: Early development & bonding"
                             } else {
                                 stringResource(R.string.act_cat_childhood_desc)
                             }
-                            InsetCardContainer(title = stringResource(R.string.act_cat_childhood_title)) {
-                                DrillDownRow(
-                                    title = stringResource(R.string.act_cat_childhood_title),
-                                    subtitle = childhoodSubtitle,
-                                    icon = Icons.Rounded.ChildCare,
-                                    iconTint = LifeGreen,
-                                    insideContainer = true,
-                                    onClick = { activeActionSheet = ActionSheet.CHILDHOOD }
-                                )
-                            }
+                            ActivityGridCard(
+                                title = stringResource(R.string.act_cat_childhood_title),
+                                subtitle = childhoodSubtitle,
+                                icon = Icons.Rounded.ChildCare,
+                                iconTint = LifeGreen,
+                                energyCost = 1,
+                                riskLevel = ActivityRiskLevel.SAFE,
+                                onClick = { activeActionSheet = ActionSheet.CHILDHOOD }
+                            )
                         }
                     }
 
+                    item(span = { GridItemSpan(maxLineSpan) }) {
+                        SectionHeaderTitle(title = stringResource(R.string.act_cat_mind_body_title))
+                    }
                     item {
-                        InsetCardContainer(title = "Health & Wellness") {
-                            DrillDownRow(
-                                title = stringResource(R.string.act_cat_mind_body_title),
-                                subtitle = stringResource(R.string.act_cat_mind_body_desc),
-                                icon = Icons.Rounded.Spa,
-                                iconTint = LifeGreen,
-                                insideContainer = true,
-                                onClick = { activeActionSheet = ActionSheet.MIND_BODY }
-                            )
-
-                            InsetDivider()
-
-                            DrillDownRow(
-                                title = stringResource(R.string.act_cat_doctor_health_title),
-                                subtitle = if (untreated.isNotEmpty()) "${untreated.size} untreated conditions" else stringResource(R.string.act_cat_doctor_health_desc),
-                                icon = Icons.Rounded.MedicalServices,
-                                iconTint = if (untreated.isNotEmpty()) CoralNegative else TealPrimary,
-                                trailingBadge = if (untreated.isNotEmpty()) "! ${untreated.size}" else null,
-                                insideContainer = true,
-                                onClick = { activeActionSheet = ActionSheet.DOCTOR_HEALTH }
-                            )
-                        }
+                        ActivityGridCard(
+                            title = stringResource(R.string.act_cat_mind_body_title),
+                            subtitle = stringResource(R.string.act_cat_mind_body_desc),
+                            icon = Icons.Rounded.Spa,
+                            iconTint = LifeGreen,
+                            energyCost = 1,
+                            riskLevel = ActivityRiskLevel.SAFE,
+                            onClick = { activeActionSheet = ActionSheet.MIND_BODY }
+                        )
+                    }
+                    item {
+                        ActivityGridCard(
+                            title = stringResource(R.string.act_cat_doctor_health_title),
+                            subtitle = if (untreated.isNotEmpty()) "${untreated.size} untreated conditions" else stringResource(R.string.act_cat_doctor_health_desc),
+                            icon = Icons.Rounded.MedicalServices,
+                            iconTint = if (untreated.isNotEmpty()) CoralNegative else TealPrimary,
+                            energyCost = 1,
+                            riskLevel = if (untreated.isNotEmpty()) ActivityRiskLevel.MODERATE else ActivityRiskLevel.SAFE,
+                            trailingBadge = if (untreated.isNotEmpty()) "! ${untreated.size}" else null,
+                            onClick = { activeActionSheet = ActionSheet.DOCTOR_HEALTH }
+                        )
                     }
 
                     val hasHustles = showSkillActions || showJobsAndHustles || showSocialMediaActions || (character.alive && character.age >= CareerEngine.MIN_TALENT_TRAINING_AGE)
                     if (hasHustles) {
-                        item {
-                            InsetCardContainer(title = "Career & Side Hustles") {
-                                var hasFirst = false
-                                if (showJobsAndHustles || showSocialMediaActions || (character.alive && character.age >= CareerEngine.MIN_TALENT_TRAINING_AGE)) {
-                                    DrillDownRow(
-                                        title = stringResource(R.string.section_jobs_side_hustles),
-                                        subtitle = if (character.socialMedia.hasAccount) "${character.socialMedia.followers} Followers" else "Social media, gigs & part-time jobs",
-                                        icon = Icons.Rounded.Work,
-                                        iconTint = LifeGreen,
-                                        insideContainer = true,
-                                        onClick = { activeActionSheet = ActionSheet.SIDE_HUSTLES }
-                                    )
-                                    hasFirst = true
-                                }
-                                if (showSkillActions) {
-                                    if (hasFirst) InsetDivider()
-                                    DrillDownRow(
-                                        title = stringResource(R.string.act_cat_side_hustles_title),
-                                        subtitle = "Practice, masterclasses & exhibitions",
-                                        icon = Icons.Rounded.School,
-                                        iconTint = GoldAccent,
-                                        insideContainer = true,
-                                        onClick = { activeActionSheet = ActionSheet.SKILLS_MASTERY }
-                                    )
-                                }
-                            }
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            SectionHeaderTitle(title = stringResource(R.string.act_cat_side_hustles_title))
                         }
-                    } else if (character.age < 14) {
-                        item {
-                            InsetCardContainer(title = "Career & Side Hustles") {
-                                DrillDownRow(
+                        if (showJobsAndHustles || showSocialMediaActions || (character.alive && character.age >= CareerEngine.MIN_TALENT_TRAINING_AGE)) {
+                            item {
+                                ActivityGridCard(
                                     title = stringResource(R.string.section_jobs_side_hustles),
-                                    subtitle = "Part-time jobs, gigs & social media",
+                                    subtitle = if (character.socialMedia.hasAccount) "${character.socialMedia.followers} Followers" else "Gigs & part-time jobs",
                                     icon = Icons.Rounded.Work,
                                     iconTint = LifeGreen,
-                                    isAgeLocked = true,
-                                    lockBadgeText = stringResource(R.string.badge_age_locked, 14),
-                                    insideContainer = true,
-                                    onClick = {}
+                                    energyCost = 2,
+                                    riskLevel = ActivityRiskLevel.LOW,
+                                    onClick = { activeActionSheet = ActionSheet.SIDE_HUSTLES }
+                                )
+                            }
+                        }
+                        if (showSkillActions) {
+                            item {
+                                ActivityGridCard(
+                                    title = stringResource(R.string.act_cat_side_hustles_title),
+                                    subtitle = "Practice & masterclasses",
+                                    icon = Icons.Rounded.School,
+                                    iconTint = GoldAccent,
+                                    energyCost = 1,
+                                    riskLevel = ActivityRiskLevel.SAFE,
+                                    onClick = { activeActionSheet = ActionSheet.SKILLS_MASTERY }
                                 )
                             }
                         }
@@ -520,101 +517,95 @@ fun ActionsScreen(
 
                     val hasLifestyle = showAdoptPetActions || showAdoptChild || showDrivingTest || showImmigrationOffice || showPhilanthropy || showBucketList
                     if (hasLifestyle) {
-                        item {
-                            InsetCardContainer(title = "Lifestyle & Travel") {
-                                var dividerNeeded = false
-                                if (showAdoptPetActions || showAdoptChild) {
-                                    DrillDownRow(
-                                        title = stringResource(R.string.act_cat_adoption_title),
-                                        subtitle = stringResource(R.string.act_cat_adoption_desc),
-                                        icon = Icons.Rounded.Pets,
-                                        iconTint = TealPrimary,
-                                        insideContainer = true,
-                                        onClick = { activeActionSheet = ActionSheet.LOVE_FAMILY }
-                                    )
-                                    dividerNeeded = true
-                                }
-                                if (showDrivingTest || showImmigrationOffice) {
-                                    if (dividerNeeded) InsetDivider()
-                                    DrillDownRow(
-                                        title = stringResource(R.string.act_cat_relocate_title),
-                                        subtitle = stringResource(R.string.act_cat_relocate_desc),
-                                        icon = Icons.Rounded.Flight,
-                                        iconTint = TealPrimary,
-                                        insideContainer = true,
-                                        onClick = { activeActionSheet = ActionSheet.LICENSES_RELOCATION }
-                                    )
-                                    dividerNeeded = true
-                                }
-                                if (showPhilanthropy || showBucketList) {
-                                    if (dividerNeeded) InsetDivider()
-                                    DrillDownRow(
-                                        title = stringResource(R.string.act_cat_philanthropy_title),
-                                        subtitle = stringResource(R.string.act_cat_philanthropy_desc),
-                                        icon = Icons.Rounded.EmojiEvents,
-                                        iconTint = GoldAccent,
-                                        insideContainer = true,
-                                        onClick = { activeActionSheet = ActionSheet.PHILANTHROPY_GOALS }
-                                    )
-                                }
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            SectionHeaderTitle(title = stringResource(R.string.act_cat_lifestyle_title))
+                        }
+                        if (showAdoptPetActions || showAdoptChild) {
+                            item {
+                                ActivityGridCard(
+                                    title = stringResource(R.string.act_cat_adoption_title),
+                                    subtitle = stringResource(R.string.act_cat_adoption_desc),
+                                    icon = Icons.Rounded.Pets,
+                                    iconTint = TealPrimary,
+                                    energyCost = 1,
+                                    riskLevel = ActivityRiskLevel.SAFE,
+                                    onClick = { activeActionSheet = ActionSheet.LOVE_FAMILY }
+                                )
                             }
+                        }
+                        if (showDrivingTest || showImmigrationOffice) {
+                            item {
+                                ActivityGridCard(
+                                    title = stringResource(R.string.act_cat_relocate_title),
+                                    subtitle = stringResource(R.string.act_cat_relocate_desc),
+                                    icon = Icons.Rounded.Flight,
+                                    iconTint = TealPrimary,
+                                    energyCost = 1,
+                                    riskLevel = ActivityRiskLevel.LOW,
+                                    onClick = { activeActionSheet = ActionSheet.LICENSES_RELOCATION }
+                                )
+                            }
+                        }
+                        if (showPhilanthropy || showBucketList) {
+                            item {
+                                ActivityGridCard(
+                                    title = stringResource(R.string.act_cat_philanthropy_title),
+                                    subtitle = stringResource(R.string.act_cat_philanthropy_desc),
+                                    icon = Icons.Rounded.EmojiEvents,
+                                    iconTint = GoldAccent,
+                                    energyCost = 1,
+                                    riskLevel = ActivityRiskLevel.SAFE,
+                                    onClick = { activeActionSheet = ActionSheet.PHILANTHROPY_GOALS }
+                                )
+                            }
+                        }
+                        item {
+                            ActivityGridCard(
+                                title = stringResource(R.string.routine_category_commute),
+                                subtitle = stringResource(R.string.btn_transit_commute_desc),
+                                icon = Icons.Rounded.Flight,
+                                iconTint = TealPrimary,
+                                energyCost = 1,
+                                riskLevel = ActivityRiskLevel.LOW,
+                                onClick = onCommuteTransit
+                            )
                         }
                     }
 
                     if (showCrimeActions || showExpungement || showDoubleLife) {
-                        item {
-                            InsetCardContainer(title = "Crime & Legal") {
-                                var crimeDividerNeeded = false
-                                if (showCrimeActions || showExpungement) {
-                                    DrillDownRow(
-                                        title = stringResource(R.string.act_cat_crime_title),
-                                        subtitle = stringResource(R.string.act_cat_crime_desc),
-                                        icon = Icons.Rounded.Gavel,
-                                        iconTint = CoralNegative,
-                                        riskPill = stringResource(R.string.badge_risk_high),
-                                        insideContainer = true,
-                                        onClick = { activeActionSheet = ActionSheet.CRIME }
-                                    )
-                                    crimeDividerNeeded = true
-                                }
-                                if (showDoubleLife) {
-                                    if (crimeDividerNeeded) InsetDivider()
-                                    val activeSecret = character.doubleLife.activeSecret
-                                    val doubleLifeSubtitle = if (activeSecret != null) {
-                                        stringResource(
-                                            R.string.desc_double_life_active,
-                                            activeSecret.codename,
-                                            activeSecret.exposureRisk,
-                                            activeSecret.alibiStrength
-                                        )
-                                    } else {
-                                        stringResource(R.string.desc_double_life_none)
-                                    }
-                                    DrillDownRow(
-                                        title = stringResource(R.string.title_double_life),
-                                        subtitle = doubleLifeSubtitle,
-                                        icon = Icons.Rounded.Lock,
-                                        iconTint = if (activeSecret != null && activeSecret.exposureRisk >= 60) CoralNegative else TealPrimary,
-                                        riskPill = if (activeSecret != null) "${activeSecret.exposureRisk}% Risk" else null,
-                                        insideContainer = true,
-                                        onClick = onOpenDoubleLife
-                                    )
-                                }
-                            }
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            SectionHeaderTitle(title = stringResource(R.string.act_cat_crime_title))
                         }
-                    } else if (character.age < 16) {
-                        item {
-                            InsetCardContainer(title = "Crime & Legal") {
-                                DrillDownRow(
+                        if (showCrimeActions || showExpungement) {
+                            item {
+                                ActivityGridCard(
                                     title = stringResource(R.string.act_cat_crime_title),
-                                    subtitle = stringResource(R.string.act_cat_crime_desc),
+                                    subtitle = if (character.criminalRecord.hasRecord) "Heat: ${character.criminalRecord.heatLevel}%" else stringResource(R.string.act_cat_crime_desc),
                                     icon = Icons.Rounded.Gavel,
                                     iconTint = CoralNegative,
-                                    isAgeLocked = true,
-                                    lockBadgeText = stringResource(R.string.badge_age_locked, 16),
-                                    riskPill = stringResource(R.string.badge_risk_high),
-                                    insideContainer = true,
-                                    onClick = {}
+                                    energyCost = 2,
+                                    riskLevel = ActivityRiskLevel.HIGH,
+                                    trailingBadge = if (character.criminalRecord.heatLevel > 40) "Heat!" else null,
+                                    onClick = { activeActionSheet = ActionSheet.CRIME }
+                                )
+                            }
+                        }
+                        if (showDoubleLife) {
+                            item {
+                                val activeSecret = character.doubleLife.activeSecret
+                                val doubleLifeSubtitle = if (activeSecret != null) {
+                                    "${activeSecret.codename} (${activeSecret.exposureRisk}% Risk)"
+                                } else {
+                                    stringResource(R.string.desc_double_life_none)
+                                }
+                                ActivityGridCard(
+                                    title = stringResource(R.string.title_double_life),
+                                    subtitle = doubleLifeSubtitle,
+                                    icon = Icons.Rounded.Lock,
+                                    iconTint = if (activeSecret != null && activeSecret.exposureRisk >= 60) CoralNegative else TealPrimary,
+                                    energyCost = 2,
+                                    riskLevel = ActivityRiskLevel.UNDERWORLD,
+                                    onClick = onOpenDoubleLife
                                 )
                             }
                         }
@@ -2328,5 +2319,27 @@ private fun PoliceHeatMeterCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SectionHeaderTitle(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp, bottom = 4.dp, start = 4.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title.uppercase(),
+            style = MaterialTheme.typography.labelMedium.copy(
+                letterSpacing = 1.2.sp,
+                fontWeight = FontWeight.ExtraBold
+            ),
+            color = InkTertiary
+        )
     }
 }

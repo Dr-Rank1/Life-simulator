@@ -390,7 +390,12 @@ fun FamilyScreen(
                             InsetCardContainer(title = stringResource(R.string.section_partner)) {
                                 partner.forEachIndexed { idx, member ->
                                     if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(member, character.countryCode, insideContainer = true) {
+                                    FamilyPersonCard(
+                                        member = member,
+                                        playerCountryCode = character.countryCode,
+                                        insideContainer = true,
+                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
+                                    ) {
                                         onMemberClick(member)
                                     }
                                 }
@@ -402,7 +407,12 @@ fun FamilyScreen(
                             InsetCardContainer(title = stringResource(R.string.section_parents)) {
                                 parents.forEachIndexed { idx, member ->
                                     if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(member, character.countryCode, insideContainer = true) {
+                                    FamilyPersonCard(
+                                        member = member,
+                                        playerCountryCode = character.countryCode,
+                                        insideContainer = true,
+                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
+                                    ) {
                                         onMemberClick(member)
                                     }
                                 }
@@ -414,7 +424,12 @@ fun FamilyScreen(
                             InsetCardContainer(title = stringResource(R.string.section_siblings)) {
                                 siblings.forEachIndexed { idx, member ->
                                     if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(member, character.countryCode, insideContainer = true) {
+                                    FamilyPersonCard(
+                                        member = member,
+                                        playerCountryCode = character.countryCode,
+                                        insideContainer = true,
+                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
+                                    ) {
                                         onMemberClick(member)
                                     }
                                 }
@@ -426,7 +441,12 @@ fun FamilyScreen(
                             InsetCardContainer(title = stringResource(R.string.section_children)) {
                                 children.forEachIndexed { idx, member ->
                                     if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(member, character.countryCode, insideContainer = true) {
+                                    FamilyPersonCard(
+                                        member = member,
+                                        playerCountryCode = character.countryCode,
+                                        insideContainer = true,
+                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
+                                    ) {
                                         onMemberClick(member)
                                     }
                                 }
@@ -438,7 +458,12 @@ fun FamilyScreen(
                             InsetCardContainer(title = stringResource(R.string.section_friends_rivals)) {
                                 socialCircle.forEachIndexed { idx, member ->
                                     if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(member, character.countryCode, insideContainer = true) {
+                                    FamilyPersonCard(
+                                        member = member,
+                                        playerCountryCode = character.countryCode,
+                                        insideContainer = true,
+                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
+                                    ) {
                                         onMemberClick(member)
                                     }
                                 }
@@ -450,7 +475,12 @@ fun FamilyScreen(
                             InsetCardContainer(title = stringResource(R.string.section_other)) {
                                 others.forEachIndexed { idx, member ->
                                     if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(member, character.countryCode, insideContainer = true) {
+                                    FamilyPersonCard(
+                                        member = member,
+                                        playerCountryCode = character.countryCode,
+                                        insideContainer = true,
+                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
+                                    ) {
                                         onMemberClick(member)
                                     }
                                 }
@@ -672,14 +702,16 @@ private fun FamilyPersonCard(
     member: Person,
     playerCountryCode: String,
     insideContainer: Boolean = false,
+    onQuickAction: ((InteractionType) -> Unit)? = null,
     onClick: () -> Unit
 ) {
-    key(member.id, member.relation, member.isMarried) {
+    key(member.id, member.relation, member.isMarried, member.relationshipLevel, member.interactedTypesThisYear) {
         PersonCard(
             person = member,
             relationLabel = relationLabel(member),
             playerCountryCode = playerCountryCode,
             insideContainer = insideContainer,
+            onQuickAction = onQuickAction,
             onClick = onClick
         )
     }

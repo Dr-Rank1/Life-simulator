@@ -3,12 +3,16 @@ package com.maisha.game.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -32,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -49,11 +54,18 @@ import com.maisha.game.data.model.RelationType
 import com.maisha.game.data.model.RelationshipTier
 import com.maisha.game.data.model.SocialBondType
 import com.maisha.game.data.model.relationshipTierFor
+import com.maisha.game.domain.InteractionType
 import com.maisha.game.ui.avatar.AvatarImage
 import com.maisha.game.ui.avatar.ExpressionResolver
+import com.maisha.game.ui.theme.AppIcons
+import com.maisha.game.ui.theme.BorderCardSlate
 import com.maisha.game.ui.theme.CoralNegative
+import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.Hairline
+import com.maisha.game.ui.theme.InkPrimary
+import com.maisha.game.ui.theme.InkSecondary
+import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
@@ -68,7 +80,8 @@ fun PersonCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     playerCountryCode: String? = null,
-    insideContainer: Boolean = false
+    insideContainer: Boolean = false,
+    onQuickAction: ((InteractionType) -> Unit)? = null
 ) {
     val expression = remember(person.id, person.relationshipLevel) {
         ExpressionResolver.resolvePersonExpression(person)
@@ -91,177 +104,264 @@ fun PersonCard(
         else -> BorderStroke(1.dp, Hairline)
     }
 
-    val rowContent = @Composable {
-        Row(
+    val (temperamentLabel, temperamentColor) = when {
+        person.crazy >= 70 -> stringResource(R.string.temperament_volatile) to CoralNegative
+        person.crazy <= 35 -> stringResource(R.string.temperament_calm) to LifeGreen
+        else -> stringResource(R.string.temperament_balanced) to InkTertiary
+    }
+
+    val cardContent = @Composable {
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = if (insideContainer) 10.dp else MaishaSpacing.md),
-            horizontalArrangement = Arrangement.spacedBy(MaishaSpacing.md),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(vertical = if (insideContainer) 10.dp else MaishaSpacing.md)
         ) {
-            PersonAvatar(
-                avatarConfig = person.avatarConfig,
-                size = 44,
-                age = person.age,
-                expression = expression,
-                hideFromAccessibility = true,
-                seed = person.id
-            )
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(MaishaSpacing.xs)
+                // 50dp Framed Avatar
+                Box(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .clip(CircleShape)
+                        .background(CreamMuted)
+                        .border(1.dp, BorderCardSlate.copy(alpha = 0.5f), CircleShape),
+                    contentAlignment = Alignment.Center
                 ) {
-                    if (person.secondaryCountryCode != null) {
-                        HeritageCountryFlags(
-                            primaryCountryCode = person.countryCode,
-                            secondaryCountryCode = person.secondaryCountryCode,
-                            size = 16.dp
+                    PersonAvatar(
+                        avatarConfig = person.avatarConfig,
+                        size = 48,
+                        age = person.age,
+                        expression = expression,
+                        hideFromAccessibility = true,
+                        seed = person.id
+                    )
+                }
+
+                // Middle Info
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(MaishaSpacing.xs)
+                    ) {
+                        if (person.secondaryCountryCode != null) {
+                            HeritageCountryFlags(
+                                primaryCountryCode = person.countryCode,
+                                secondaryCountryCode = person.secondaryCountryCode,
+                                size = 16.dp
+                            )
+                        } else if (playerCountryCode != null && person.countryCode != playerCountryCode) {
+                            CountryFlag(countryCode = person.countryCode, size = 16.dp)
+                        }
+                        Text(
+                            text = person.name,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
                         )
-                    } else if (playerCountryCode != null && person.countryCode != playerCountryCode) {
-                        CountryFlag(countryCode = person.countryCode, size = 16.dp)
+                        when (person.relation) {
+                            RelationType.BEST_FRIEND -> Icon(
+                                imageVector = Icons.Filled.Star,
+                                contentDescription = null,
+                                tint = GoldAccent,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            RelationType.ENEMY -> Icon(
+                                imageVector = Icons.Filled.Warning,
+                                contentDescription = null,
+                                tint = CoralNegative,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            else -> Unit
+                        }
+                        if (person.socialBond != SocialBondType.NONE) {
+                            val (badgeText, badgeColor) = when (person.socialBond) {
+                                SocialBondType.RECURRING_RIVAL -> stringResource(R.string.badge_rival).uppercase() to GoldAccent
+                                SocialBondType.BENEFACTOR_MENTOR -> stringResource(R.string.badge_benefactor).uppercase() to TealPrimary
+                                SocialBondType.FAMILY_FEUD -> stringResource(R.string.badge_feud).uppercase() to CoralNegative
+                                SocialBondType.FAMILY_ALLY -> stringResource(R.string.badge_ally).uppercase() to LifeGreen
+                                SocialBondType.NONE -> "" to Color.Transparent
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(3.dp),
+                                color = badgeColor
+                            ) {
+                                Text(
+                                    text = badgeText,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PaperWhite,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                    fontSize = 8.sp
+                                )
+                            }
+                        }
+                    }
+
+                    // Subtitle: Role, Age, Occupation
+                    val subtitle = buildString {
+                        append("$relationLabel, $ageLabel")
+                        if (person.occupation != "Unemployed" && person.occupation.isNotBlank()) {
+                            append(" · ${person.occupation}")
+                        }
                     }
                     Text(
-                        text = person.name,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
+                        fontSize = 11.sp
                     )
-                    when (person.relation) {
-                        RelationType.BEST_FRIEND -> Icon(
-                            imageVector = Icons.Filled.Star,
-                            contentDescription = null,
-                            tint = GoldAccent,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        RelationType.ENEMY -> Icon(
-                            imageVector = Icons.Filled.Warning,
-                            contentDescription = null,
-                            tint = CoralNegative,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        else -> Unit
-                    }
-                    if (person.socialBond != SocialBondType.NONE) {
-                        val (badgeText, badgeColor) = when (person.socialBond) {
-                            SocialBondType.RECURRING_RIVAL -> stringResource(R.string.badge_rival).uppercase() to GoldAccent
-                            SocialBondType.BENEFACTOR_MENTOR -> stringResource(R.string.badge_benefactor).uppercase() to TealPrimary
-                            SocialBondType.FAMILY_FEUD -> stringResource(R.string.badge_feud).uppercase() to CoralNegative
-                            SocialBondType.FAMILY_ALLY -> stringResource(R.string.badge_ally).uppercase() to LifeGreen
-                            SocialBondType.NONE -> "" to Color.Transparent
-                        }
+
+                    // Badges: Temperament + Attention/Milestone
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         Surface(
                             shape = RoundedCornerShape(3.dp),
-                            color = badgeColor
+                            color = temperamentColor.copy(alpha = 0.12f),
+                            border = BorderStroke(0.5.dp, temperamentColor.copy(alpha = 0.35f))
                         ) {
                             Text(
-                                text = badgeText,
+                                text = temperamentLabel.uppercase(),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = PaperWhite,
+                                color = temperamentColor,
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
-                                fontSize = 9.sp
+                                fontSize = 8.sp
                             )
+                        }
+
+                        if (person.relationshipLevel < 40) {
+                            Surface(
+                                shape = RoundedCornerShape(3.dp),
+                                color = CoralNegative.copy(alpha = 0.15f),
+                                border = BorderStroke(0.5.dp, CoralNegative.copy(alpha = 0.4f))
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.badge_needs_attention).uppercase(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = CoralNegative,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                    fontSize = 8.sp
+                                )
+                            }
+                        } else if (person.milestones.isNotEmpty()) {
+                            Surface(
+                                shape = RoundedCornerShape(3.dp),
+                                color = GoldAccent.copy(alpha = 0.15f),
+                                border = BorderStroke(0.5.dp, GoldAccent.copy(alpha = 0.4f))
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.badge_recent_milestone).uppercase(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = GoldAccent,
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                    fontSize = 8.sp
+                                )
+                            }
                         }
                     }
                 }
+
+                // Right Column: Bond Meter & Chevron
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text(
-                        text = "$relationLabel, $ageLabel",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (person.relationshipLevel < 40) {
-                        Surface(
-                            shape = RoundedCornerShape(3.dp),
-                            color = CoralNegative.copy(alpha = 0.15f),
-                            border = BorderStroke(0.5.dp, CoralNegative.copy(alpha = 0.4f))
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "${person.relationshipLevel}%",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = when {
+                                person.relationshipLevel >= 70 -> TealPrimary
+                                person.relationshipLevel <= 30 -> CoralNegative
+                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            fontSize = 11.sp
+                        )
+                        // 5-Segment Arcade Bond Meter
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = stringResource(R.string.badge_needs_attention).uppercase(),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = CoralNegative,
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
-                                fontSize = 8.sp
-                            )
-                        }
-                    } else if (person.milestones.isNotEmpty()) {
-                        Surface(
-                            shape = RoundedCornerShape(3.dp),
-                            color = GoldAccent.copy(alpha = 0.15f),
-                            border = BorderStroke(0.5.dp, GoldAccent.copy(alpha = 0.4f))
-                        ) {
-                            Text(
-                                text = stringResource(R.string.badge_recent_milestone).uppercase(),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = GoldAccent,
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
-                                fontSize = 8.sp
-                            )
+                            val segmentColors = listOf(CoralNegative, GoldAccent, GoldAccent, TealPrimary, LifeGreen)
+                            val segmentThresholds = listOf(15, 35, 55, 75, 90)
+                            segmentThresholds.forEachIndexed { idx, threshold ->
+                                val filled = person.relationshipLevel >= threshold
+                                Box(
+                                    modifier = Modifier
+                                        .width(7.dp)
+                                        .height(6.dp)
+                                        .clip(RoundedCornerShape(1.5.dp))
+                                        .background(if (filled) segmentColors[idx] else Hairline.copy(alpha = 0.6f))
+                                )
+                            }
                         }
                     }
+
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.spacedBy(3.dp)
+            // Quick 1-tap Actions Row
+            if (onQuickAction != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "${person.relationshipLevel}%",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = when {
-                            person.relationshipLevel >= 70 -> TealPrimary
-                            person.relationshipLevel <= 30 -> CoralNegative
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        }
+                    val spendTimeUsed = person.interactedTypesThisYear.contains(InteractionType.SPEND_TIME.name)
+                    val complimentUsed = person.interactedTypesThisYear.contains(InteractionType.COMPLIMENT.name)
+                    val adviceUsed = person.interactedTypesThisYear.contains(InteractionType.ASK_FOR_ADVICE.name)
+
+                    QuickActionButton(
+                        icon = AppIcons.SpendTime,
+                        label = stringResource(R.string.tile_spend_time),
+                        isUsed = spendTimeUsed,
+                        onClick = { onQuickAction(InteractionType.SPEND_TIME) },
+                        modifier = Modifier.weight(1f)
                     )
-                    Box(
-                        modifier = Modifier
-                            .width(48.dp)
-                            .height(5.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(Hairline)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(fraction = (person.relationshipLevel / 100f).coerceIn(0f, 1f))
-                                .fillMaxHeight()
-                                .clip(RoundedCornerShape(3.dp))
-                                .background(
-                                    when {
-                                        person.relationshipLevel >= 70 -> TealPrimary
-                                        person.relationshipLevel <= 30 -> CoralNegative
-                                        else -> GoldAccent
-                                    }
-                                )
-                        )
-                    }
+                    QuickActionButton(
+                        icon = AppIcons.Compliment,
+                        label = stringResource(R.string.tile_compliment),
+                        isUsed = complimentUsed,
+                        onClick = { onQuickAction(InteractionType.COMPLIMENT) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    QuickActionButton(
+                        icon = AppIcons.Advice,
+                        label = stringResource(R.string.tile_ask_advice),
+                        isUsed = adviceUsed,
+                        onClick = { onQuickAction(InteractionType.ASK_FOR_ADVICE) },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier.size(18.dp)
-                )
             }
         }
     }
@@ -276,7 +376,7 @@ fun PersonCard(
                 }
                 .clickable(onClick = onClick)
         ) {
-            rowContent()
+            cardContent()
         }
     } else {
         Card(
@@ -298,7 +398,50 @@ fun PersonCard(
             border = socialBorder,
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
-            rowContent()
+            cardContent()
+        }
+    }
+}
+
+@Composable
+private fun QuickActionButton(
+    icon: ImageVector,
+    label: String,
+    isUsed: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        enabled = !isUsed,
+        shape = RoundedCornerShape(8.dp),
+        color = if (isUsed) Hairline.copy(alpha = 0.3f) else PaperWhite,
+        border = BorderStroke(0.8.dp, if (isUsed) Hairline.copy(alpha = 0.4f) else BorderCardSlate.copy(alpha = 0.5f)),
+        modifier = modifier.height(28.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 4.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (isUsed) InkSecondary.copy(alpha = 0.4f) else TealPrimary,
+                modifier = Modifier.size(12.dp)
+            )
+            Spacer(modifier = Modifier.width(3.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = if (isUsed) InkSecondary.copy(alpha = 0.4f) else InkPrimary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }

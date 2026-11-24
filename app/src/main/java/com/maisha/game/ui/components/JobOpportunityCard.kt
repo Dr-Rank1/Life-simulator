@@ -136,17 +136,46 @@ fun JobOpportunityCard(
                     )
                 }
 
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = if (job.isMilitary) Color(0xFF556B2F).copy(alpha = 0.15f) else GoldAccent.copy(alpha = 0.15f)
+                val (stampText, stampColor) = when {
+                    !isEligible -> stringResource(R.string.stamp_probation) to CoralNegative
+                    job.level >= 4 -> stringResource(R.string.stamp_competitive) to GoldAccent
+                    character.stats.smarts >= 75 -> stringResource(R.string.stamp_fast_track) to TealPrimary
+                    else -> stringResource(R.string.stamp_hiring_now) to SuccessGreen
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
-                    Text(
-                        text = if (job.isMilitary) "Military" else "Tier ${job.level}",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = if (job.isMilitary) Color(0xFF556B2F) else GoldAccent,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = stampColor.copy(alpha = 0.14f),
+                        border = BorderStroke(1.dp, stampColor.copy(alpha = 0.5f))
+                    ) {
+                        Text(
+                            text = stampText,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = stampColor,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                            fontSize = 8.sp,
+                            letterSpacing = 0.4.sp
+                        )
+                    }
+
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = if (job.isMilitary) Color(0xFF556B2F).copy(alpha = 0.15f) else CreamMuted
+                    ) {
+                        Text(
+                            text = if (job.isMilitary) "Military" else "Tier ${job.level}",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = if (job.isMilitary) Color(0xFF556B2F) else InkSecondary,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                            fontSize = 8.sp
+                        )
+                    }
                 }
             }
 
