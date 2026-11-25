@@ -774,6 +774,8 @@
     <string name="stat_performance">Performance</string>
     <string name="stat_workplace_stress">Workplace stress</string>
     <string name="stat_boss_relationship">Boss relationship</string>
+    <string name="stat_energy">Energy</string>
+    <string name="stat_stress">Stress</string>
     <string name="section_corporate_dashboard">Corporate Career Dashboard</string>
     <string name="section_office_meters">Performance &amp; stress</string>
     <string name="section_workplace_relationships">Boss &amp; colleagues</string>

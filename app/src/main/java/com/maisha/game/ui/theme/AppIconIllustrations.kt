@@ -28,6 +28,8 @@ object AppIconIllustrations {
             StatType.FOLLOWERS -> "img_stat_looks"
             StatType.SKILL -> "img_stat_smarts"
             StatType.KARMA -> "img_stat_karma"
+            StatType.ENERGY -> "img_nav_actions"
+            StatType.STRESS -> "img_stat_condition"
         }
     )
 

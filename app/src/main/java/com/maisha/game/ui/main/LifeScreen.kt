@@ -648,6 +648,15 @@ fun LifeScreen(
     val isCriticalHealth = character.stats.health < 25 || incarcerated
     val isPositiveWindfall = uiState.currentCelebration != null || uiState.currentAchievementDialog != null
 
+    val isStudentOrHustling = character.career.activePartTimeJob != null ||
+        character.career.energyLevel < 100 ||
+        character.education.stage == SchoolStage.UNIVERSITY
+
+    val activeEnergy = if (isStudentOrHustling) character.career.energyLevel else null
+    val activeStress = if (activeEnergy == null && character.career.currentJob != null) {
+        kotlin.math.round(character.career.stress).toInt()
+    } else null
+
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -685,7 +694,11 @@ fun LifeScreen(
                             happiness = character.stats.happiness,
                             health = character.stats.health,
                             smarts = character.stats.smarts,
-                            looks = character.stats.looks
+                            looks = character.stats.looks,
+                            energy = activeEnergy,
+                            stress = activeStress,
+                            pendingDeltas = uiState.pendingStatDeltas,
+                            onDeltaFinished = onStatDeltaFinished
                         )
                         ActionDockWithCenterAge(
                             selectedTab = selectedTab,
@@ -974,7 +987,11 @@ fun LifeScreen(
                             happiness = character.stats.happiness,
                             health = character.stats.health,
                             smarts = character.stats.smarts,
-                            looks = character.stats.looks
+                            looks = character.stats.looks,
+                            energy = activeEnergy,
+                            stress = activeStress,
+                            pendingDeltas = uiState.pendingStatDeltas,
+                            onDeltaFinished = onStatDeltaFinished
                         )
                     }
                 }
@@ -1295,6 +1312,8 @@ private fun LifeTabContent(
                         StatType.FOLLOWERS -> stringResource(R.string.stat_followers)
                         StatType.SKILL -> stringResource(R.string.stat_skill)
                         StatType.KARMA -> stringResource(R.string.stat_karma)
+                        StatType.ENERGY -> stringResource(R.string.stat_energy)
+                        StatType.STRESS -> stringResource(R.string.stat_stress)
                         else -> ""
                     }
                 },

@@ -871,6 +871,8 @@ object AppIcons {
         StatType.FOLLOWERS -> Looks
         StatType.SKILL -> Smarts
         StatType.KARMA -> Longevity
+        StatType.ENERGY -> NavActions
+        StatType.STRESS -> UnderworldHeat
     }
 
     fun forAchievementCategory(category: AchievementCategory): ImageVector = when (category) {
