@@ -69,6 +69,10 @@ fun LeftNavRail(
     selectedTab: MainTab,
     onTabSelected: (MainTab) -> Unit,
     disabledTabs: Set<MainTab> = emptySet(),
+    onAgeUp: (() -> Unit)? = null,
+    ageUpEnabled: Boolean = true,
+    isAgingUp: Boolean = false,
+    currentAge: Int = 0,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -159,6 +163,17 @@ fun LeftNavRail(
                     )
                 }
             }
+        }
+
+        if (onAgeUp != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            CenterAgeUpTrigger(
+                onClick = onAgeUp,
+                enabled = ageUpEnabled,
+                isLoading = isAgingUp,
+                currentAge = currentAge,
+                modifier = Modifier.padding(horizontal = 4.dp)
+            )
         }
     }
 }

@@ -72,8 +72,33 @@
     <string name="nav_family">Relationships</string>
     <string name="nav_people">People</string>
     <string name="nav_career">Career</string>
+    <string name="nav_occupation">Occupation</string>
+    <string name="nav_relationships">Relationships</string>
     <string name="nav_assets">Assets</string>
     <string name="nav_actions">Actions</string>
+    <string name="nav_activities">Activities</string>
+    <string name="btn_age_center">+ Age</string>
+
+    <!-- Compact Top HUD & Financial Breakdown -->
+    <string name="hud_financial_breakdown_title">Financial Overview</string>
+    <string name="hud_cash_on_hand">Cash on Hand</string>
+    <string name="hud_net_worth">Total Net Worth</string>
+    <string name="hud_assets_val">Properties &amp; Assets</string>
+    <string name="hud_business_val">Business Valuation</string>
+    <string name="hud_savings_val">Bank Savings</string>
+    <string name="hud_portfolio_val">Investment Portfolio</string>
+    <string name="hud_mortgage_val">Mortgages &amp; Debt</string>
+    <string name="hud_student_loan_val">Student Loans</string>
+    <string name="hud_annual_salary">Annual Salary / Pension</string>
+    <string name="hud_annual_expenses">Estimated Living Costs</string>
+    <string name="hud_net_cashflow">Net Cash Flow</string>
+    <string name="hud_status_unemployed">Unemployed</string>
+    <string name="hud_status_incarcerated">Incarcerated</string>
+    <string name="hud_status_infant">Infant</string>
+    <string name="hud_status_toddler">Toddler</string>
+    <string name="hud_status_student">Student</string>
+    <string name="hud_btn_close">Close</string>
+    <string name="hud_feed_return">Story Feed</string>
 
     <!-- Common buttons -->
     <string name="btn_confirm">Confirm</string>

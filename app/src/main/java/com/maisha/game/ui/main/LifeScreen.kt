@@ -137,6 +137,27 @@ import com.maisha.game.ui.components.FloatingStatChangeLayer
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import com.maisha.game.ui.components.LeftNavRail
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.TextStyle
+import com.maisha.game.ui.components.ActionDockWithCenterAge
+import com.maisha.game.ui.theme.AccentPink
+import com.maisha.game.ui.theme.AmberWarning
+import com.maisha.game.ui.theme.CrimsonDanger
+import com.maisha.game.ui.theme.EmeraldCash
+import com.maisha.game.ui.theme.EmeraldCashSoft
+import com.maisha.game.ui.theme.HairlineBorder
+import com.maisha.game.ui.theme.ObsidianBg
+import com.maisha.game.ui.theme.OffWhitePrimary
+import com.maisha.game.ui.theme.RoyalIndigo
+import com.maisha.game.ui.theme.SlateNavyCard
+import com.maisha.game.ui.theme.SlateNavyElevated
+import com.maisha.game.ui.theme.SlateNavyMuted
+import com.maisha.game.ui.theme.StatKarma
+import com.maisha.game.ui.theme.SteelSecondary
+import com.maisha.game.ui.theme.SteelTertiary
+import com.maisha.game.ui.theme.TabularFigures
 import com.maisha.game.ui.theme.BorderCardSlate
 import com.maisha.game.ui.theme.CanvasBg
 import com.maisha.game.ui.theme.DeepSlate
@@ -527,12 +548,21 @@ fun LifeScreen(
 
     var showQuestsSheet by rememberSaveable { mutableStateOf(false) }
     var showDossierSheet by rememberSaveable { mutableStateOf(false) }
+    var showFinancialBreakdown by rememberSaveable { mutableStateOf(false) }
 
     if (showDossierSheet) {
         CharacterDossierSheet(
             character = character,
             netWorth = uiState.netWorth,
             onDismiss = { showDossierSheet = false }
+        )
+    }
+
+    if (showFinancialBreakdown) {
+        FinancialBreakdownSheet(
+            character = character,
+            netWorth = uiState.netWorth,
+            onDismiss = { showFinancialBreakdown = false }
         )
     }
 
@@ -633,24 +663,45 @@ fun LifeScreen(
             containerColor = prisonBackground,
             snackbarHost = {},
             topBar = {
-                GlobalHudHeader(
+                CompactTopHud(
                     character = character,
                     expression = uiState.headerExpression,
-                    netWorth = uiState.netWorth,
                     questCount = uiState.yearQuests.size,
                     questCompleted = uiState.yearQuestProgress.count { it.completed },
                     onViewCharacterStats = { showDossierSheet = true },
                     onOpenSettings = onOpenSettings,
-                    onOpenQuests = { showQuestsSheet = true }
+                    onOpenQuests = { showQuestsSheet = true },
+                    onExpandFinances = { showFinancialBreakdown = true }
                 )
             },
             bottomBar = {
                 if (!isWideLayout && !eventActive) {
-                    MaishaBottomNav(
-                        selectedTab = selectedTab,
-                        onTabSelected = { selectedTabOrdinal = it.ordinal },
-                        disabledTabs = disabledTabs
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(CanvasBg)
+                    ) {
+                        DockedStatStrip(
+                            happiness = character.stats.happiness,
+                            health = character.stats.health,
+                            smarts = character.stats.smarts,
+                            looks = character.stats.looks
+                        )
+                        ActionDockWithCenterAge(
+                            selectedTab = selectedTab,
+                            onTabSelected = { selectedTabOrdinal = it.ordinal },
+                            onAgeUp = {
+                                selectedTabOrdinal = MainTab.LIFE.ordinal
+                                onAgeUp()
+                            },
+                            ageUpEnabled = character.alive &&
+                                !uiState.isAgingUp &&
+                                !character.criminalRecord.awaitingTrial,
+                            isAgingUp = uiState.isAgingUp,
+                            currentAge = character.age,
+                            disabledTabs = disabledTabs
+                        )
+                    }
                 }
             }
         ) { innerPadding ->
@@ -894,15 +945,37 @@ fun LifeScreen(
                     LeftNavRail(
                         selectedTab = selectedTab,
                         onTabSelected = { selectedTabOrdinal = it.ordinal },
-                        disabledTabs = disabledTabs
+                        disabledTabs = disabledTabs,
+                        onAgeUp = {
+                            selectedTabOrdinal = MainTab.LIFE.ordinal
+                            onAgeUp()
+                        },
+                        ageUpEnabled = character.alive &&
+                            !uiState.isAgingUp &&
+                            uiState.currentEvent == null &&
+                            !character.criminalRecord.awaitingTrial,
+                        isAgingUp = uiState.isAgingUp,
+                        currentAge = character.age
                     )
 
-                    Box(
+                    Column(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
                     ) {
-                        tabContent()
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                        ) {
+                            tabContent()
+                        }
+                        DockedStatStrip(
+                            happiness = character.stats.happiness,
+                            health = character.stats.health,
+                            smarts = character.stats.smarts,
+                            looks = character.stats.looks
+                        )
                     }
                 }
             } else {
@@ -1116,12 +1189,11 @@ private fun LifeTabContent(
             }
         }
 
-        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 state = listState,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 12.dp),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 24.dp, start = 12.dp, end = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 item { Spacer(modifier = Modifier.height(4.dp)) }
@@ -1169,8 +1241,22 @@ private fun LifeTabContent(
                         )
                     }
                 } else {
-                    items(yearBlocks) { block ->
-                        YearTimelineCard(yearBlock = block)
+                    yearBlocks.forEach { block ->
+                        val hasMilestone = block.entries.any {
+                            it.category == EventLogCategory.MILESTONE || it.tone == EventLogTone.MILESTONE
+                        }
+                        item(key = "header_${block.age}") {
+                            YearMilestoneHeader(
+                                age = block.age,
+                                hasMilestone = hasMilestone
+                            )
+                        }
+                        itemsIndexed(
+                            items = block.entries,
+                            key = { idx, entry -> "entry_${block.age}_${idx}_${entry.text.hashCode()}" }
+                        ) { _, entry ->
+                            StoryEventCard(entry = entry)
+                        }
                     }
                     if (!journalExpanded && hiddenJournalCount > 0) {
                         item {
@@ -1217,215 +1303,216 @@ private fun LifeTabContent(
                     .padding(top = MaishaSpacing.sm, end = MaishaSpacing.sm)
             )
         }
-
-        // Docked bottom control deck with stat strip and 3D tactile Age Up button
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(CanvasBg)
-                .padding(horizontal = 10.dp, vertical = 6.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            DockedStatStrip(
-                happiness = character.stats.happiness,
-                health = character.stats.health,
-                smarts = character.stats.smarts,
-                looks = character.stats.looks
-            )
-            AgeUpButton(
-                onClick = onAgeUp,
-                enabled = character.alive &&
-                    !uiState.isAgingUp &&
-                    uiState.currentEvent == null &&
-                    !character.criminalRecord.awaitingTrial,
-                isLoading = uiState.isAgingUp
-            )
-        }
     }
 }
 
 private const val JOURNAL_VISIBLE_CAP = 30
 
-@Composable
-private fun YearTimelineCard(
-    yearBlock: YearBlock,
-    modifier: Modifier = Modifier
+private enum class StoryCategory(
+    val label: String,
+    val icon: ImageVector,
+    val accentColor: Color
 ) {
-    val hasMilestone = remember(yearBlock) {
-        yearBlock.entries.any { it.category == EventLogCategory.MILESTONE || it.tone == EventLogTone.MILESTONE }
-    }
+    CAREER("CAREER", AppIcons.Career, RoyalIndigo),
+    RELATIONSHIP("RELATIONSHIP", AppIcons.NavFamily, AccentPink),
+    EDUCATION("EDUCATION", AppIcons.Education, StatKarma),
+    HEALTH("HEALTH", AppIcons.Health, CrimsonDanger),
+    WEALTH("WEALTH", AppIcons.NavAssets, EmeraldCash),
+    RANDOM("RANDOM", AppIcons.NavLife, AmberWarning)
+}
 
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = PaperWhite),
-        border = BorderStroke(
-            width = if (hasMilestone) 1.5.dp else 1.dp,
-            color = if (hasMilestone) GoldAccent.copy(alpha = 0.5f) else BorderCardSlate
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (hasMilestone) 3.dp else 2.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (hasMilestone) GoldAccent else DeepSlate)
-                        .padding(horizontal = 8.dp, vertical = 3.dp)
-                ) {
-                    Text(
-                        text = "AGE ${yearBlock.age}",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 11.sp,
-                        letterSpacing = 0.5.sp
-                    )
-                }
+private fun resolveStoryCategory(entry: YearLogItem): StoryCategory {
+    val lower = entry.text.lowercase()
+    return when {
+        lower.contains("bought") || lower.contains("sold") || lower.contains("invest") ||
+            lower.contains("profit") || lower.contains("dividend") || lower.contains("lottery") ||
+            lower.contains("crypto") || lower.contains("wealth") || lower.contains("portfolio") ||
+            lower.contains("savings") || lower.contains("salary increases") -> StoryCategory.WEALTH
 
-                if (hasMilestone) {
-                    Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = GoldAccent.copy(alpha = 0.15f)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.timeline_tag_milestone),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = GoldAccent,
-                            fontSize = 10.sp,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                }
+        lower.contains("school") || lower.contains("university") || lower.contains("exam") ||
+            lower.contains("graduat") || lower.contains("study") || lower.contains("degree") ||
+            lower.contains("clique") || lower.contains("aptitude") || lower.contains("detention") -> StoryCategory.EDUCATION
 
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    thickness = 1.dp,
-                    color = if (hasMilestone) GoldAccent.copy(alpha = 0.3f) else Hairline
-                )
-            }
+        entry.category == EventLogCategory.CAREER_SCHOOL || lower.contains("hired") ||
+            lower.contains("promot") || lower.contains("fired") || lower.contains("job") ||
+            lower.contains("career") || lower.contains("interview") || lower.contains("work") ||
+            lower.contains("business") -> StoryCategory.CAREER
 
-            yearBlock.entries.forEach { entry ->
-                val isMilestone = entry.category == EventLogCategory.MILESTONE || entry.tone == EventLogTone.MILESTONE
-                val isDrama = entry.category == EventLogCategory.CRIME_DRAMA
+        entry.category == EventLogCategory.FAMILY_ROMANCE || lower.contains("marri") ||
+            lower.contains("dating") || lower.contains("broke up") || lower.contains("divorce") ||
+            lower.contains("child") || lower.contains("baby") || lower.contains("spouse") ||
+            lower.contains("parent") || lower.contains("friend") || lower.contains("family") -> StoryCategory.RELATIONSHIP
 
-                if (isMilestone) {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(10.dp),
-                        color = GoldAccent.copy(alpha = 0.10f),
-                        border = BorderStroke(1.dp, GoldAccent.copy(alpha = 0.40f))
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 10.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = AppIcons.Achievements,
-                                contentDescription = null,
-                                tint = GoldAccent,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = entry.text,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = InkPrimary,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.sp,
-                                lineHeight = 18.sp,
-                                modifier = Modifier.weight(1f)
-                            )
-                            if (!entry.deltaBadge.isNullOrBlank()) {
-                                TimelineDeltaBadge(entry.deltaBadge)
-                            }
-                        }
-                    }
-                } else {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Top,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        val (iconVector, iconColor) = when (entry.category) {
-                            EventLogCategory.CRIME_DRAMA -> AppIcons.Mischief to CoralNegative
-                            EventLogCategory.CAREER_SCHOOL -> AppIcons.Career to TealPrimary
-                            EventLogCategory.FAMILY_ROMANCE -> AppIcons.Family to StatHappiness
-                            EventLogCategory.HEALTH_WELLNESS -> AppIcons.Health to StatHealth
-                            else -> null to when (entry.tone) {
-                                EventLogTone.POSITIVE -> Color(0xFF10B981)
-                                EventLogTone.NEGATIVE -> CoralNegative
-                                else -> Color(0xFF64748B)
-                            }
-                        }
+        entry.category == EventLogCategory.HEALTH_WELLNESS || lower.contains("doctor") ||
+            lower.contains("hospital") || lower.contains("clinic") || lower.contains("sick") ||
+            lower.contains("ill") || lower.contains("diet") || lower.contains("gym") ||
+            lower.contains("wellness") || lower.contains("exhaustion") || lower.contains("health") -> StoryCategory.HEALTH
 
-                        if (iconVector != null) {
-                            Icon(
-                                imageVector = iconVector,
-                                contentDescription = null,
-                                tint = iconColor,
-                                modifier = Modifier
-                                    .size(14.dp)
-                                    .padding(top = 2.dp)
-                            )
-                        } else {
-                            Text(
-                                text = "•",
-                                color = iconColor,
-                                fontWeight = FontWeight.Black,
-                                fontSize = 15.sp,
-                                lineHeight = 16.sp,
-                                modifier = Modifier.padding(top = 1.dp)
-                            )
-                        }
-
-                        Text(
-                            text = entry.text,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (isDrama) CoralNegative else InkPrimary,
-                            fontWeight = if (isDrama) FontWeight.Medium else FontWeight.Normal,
-                            fontSize = 13.sp,
-                            lineHeight = 18.sp,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        if (!entry.deltaBadge.isNullOrBlank()) {
-                            TimelineDeltaBadge(entry.deltaBadge)
-                        }
-                    }
-                }
-            }
-        }
+        else -> StoryCategory.RANDOM
     }
 }
 
 @Composable
-private fun TimelineDeltaBadge(deltaBadge: String) {
-    val isPositive = !deltaBadge.startsWith("-")
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(if (isPositive) Color(0xFFDCFCE7) else Color(0xFFFEE2E2))
-            .padding(horizontal = 6.dp, vertical = 2.dp)
+private fun YearMilestoneHeader(
+    age: Int,
+    hasMilestone: Boolean = false,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = deltaBadge,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = if (isPositive) Color(0xFF15803D) else Color(0xFFB91C1C),
-            fontSize = 10.sp
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            thickness = 1.dp,
+            color = if (hasMilestone) AmberWarning.copy(alpha = 0.35f) else HairlineBorder
         )
+
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = if (hasMilestone) AmberWarning.copy(alpha = 0.12f) else SlateNavyMuted,
+            border = BorderStroke(
+                1.dp,
+                if (hasMilestone) AmberWarning.copy(alpha = 0.45f) else HairlineBorder
+            )
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                if (hasMilestone) {
+                    Icon(
+                        imageVector = AppIcons.Achievements,
+                        contentDescription = null,
+                        tint = AmberWarning,
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
+                Text(
+                    text = "Age $age",
+                    style = TabularFigures,
+                    fontSize = 11.sp,
+                    color = if (hasMilestone) AmberWarning else SteelSecondary
+                )
+            }
+        }
+
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            thickness = 1.dp,
+            color = if (hasMilestone) AmberWarning.copy(alpha = 0.35f) else HairlineBorder
+        )
+    }
+}
+
+@Composable
+private fun StoryEventCard(
+    entry: YearLogItem,
+    modifier: Modifier = Modifier
+) {
+    val category = remember(entry.text, entry.category) {
+        resolveStoryCategory(entry)
+    }
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = SlateNavyCard),
+        border = BorderStroke(1.dp, HairlineBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+        ) {
+            // 3dp left semantic accent bar
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .fillMaxHeight()
+                    .background(category.accentColor)
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Crisp vector icon badge
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(category.accentColor.copy(alpha = 0.14f))
+                        .border(1.dp, category.accentColor.copy(alpha = 0.3f), RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = category.icon,
+                        contentDescription = category.label,
+                        tint = category.accentColor,
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = category.label,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = category.accentColor.copy(alpha = 0.85f),
+                            letterSpacing = 0.5.sp
+                        )
+
+                        if (!entry.deltaBadge.isNullOrBlank()) {
+                            val isNegative = entry.deltaBadge.startsWith("-")
+                            val deltaBg = if (isNegative) CrimsonDanger.copy(alpha = 0.16f) else EmeraldCash.copy(alpha = 0.16f)
+                            val deltaTextColor = if (isNegative) CrimsonDanger else EmeraldCash
+                            val deltaBorder = if (isNegative) CrimsonDanger.copy(alpha = 0.35f) else EmeraldCash.copy(alpha = 0.35f)
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(deltaBg)
+                                    .border(0.5.dp, deltaBorder, RoundedCornerShape(4.dp))
+                                    .padding(horizontal = 5.dp, vertical = 1.dp)
+                            ) {
+                                Text(
+                                    text = entry.deltaBadge,
+                                    style = TabularFigures,
+                                    fontSize = 10.sp,
+                                    color = deltaTextColor
+                                )
+                            }
+                        }
+                    }
+
+                    Text(
+                        text = entry.text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = OffWhitePrimary,
+                        fontSize = 13.5.sp,
+                        lineHeight = 18.sp
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -1662,258 +1749,455 @@ private fun ContextualThisYearStrip(
 }
 
 @Composable
-private fun GlobalHudHeader(
+private fun CompactTopHud(
     character: Character,
     expression: Expression,
-    netWorth: Int,
     questCount: Int,
     questCompleted: Int,
     onViewCharacterStats: () -> Unit,
     onOpenSettings: () -> Unit,
-    onOpenQuests: () -> Unit
+    onOpenQuests: () -> Unit,
+    onExpandFinances: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val stageBackdrop = remember(
-        character.criminalRecord.currentlyIncarcerated,
-        character.stats.health,
-        character.age,
-        character.education.stage
-    ) {
-        resolveStageBackdrop(character)
-    }
-
     val animatedMoney by animateIntAsState(
         targetValue = character.stats.money,
-        animationSpec = tween(durationMillis = 500),
+        animationSpec = tween(durationMillis = 400),
         label = "hudMoney"
     )
-    val animatedNetWorth by animateIntAsState(
-        targetValue = netWorth,
-        animationSpec = tween(durationMillis = 500),
-        label = "hudNetWorth"
-    )
 
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = PaperWhite),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, BorderCardSlate)
+    val occupationText = remember(
+        character.criminalRecord.currentlyIncarcerated,
+        character.age,
+        character.education.stage,
+        character.career.currentJob
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            StageBackdropCanvas(
-                stageType = stageBackdrop,
-                modifier = Modifier
-                    .matchParentSize()
-                    .clip(RoundedCornerShape(16.dp))
-            )
+        when {
+            character.criminalRecord.currentlyIncarcerated -> "Incarcerated"
+            character.age <= 2 -> if (character.age == 0) "Infant" else "Toddler"
+            character.education.stage == SchoolStage.PRIMARY -> "Primary"
+            character.education.stage == SchoolStage.SECONDARY -> "High School"
+            character.education.stage == SchoolStage.UNIVERSITY -> "University"
+            character.career.currentJob != null -> character.career.currentJob!!.title
+            else -> "Unemployed"
+        }
+    }
 
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = SlateNavyCard,
+        border = BorderStroke(1.dp, HairlineBorder),
+        tonalElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 7.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Character Avatar (tap to dossier)
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(SlateNavyMuted)
+                    .border(1.dp, HairlineBorder, CircleShape)
+                    .clickable(onClick = onViewCharacterStats),
+                contentAlignment = Alignment.Center
+            ) {
+                PersonAvatar(
+                    avatarConfig = character.avatarConfig,
+                    size = 32,
+                    age = character.age,
+                    expression = expression,
+                    forPlayerCharacter = true,
+                    hideFromAccessibility = true,
+                    seed = "${character.gender.name}-${character.name}"
+                )
+            }
+
+            // Character Name + Flag + Age Pill & Occupation Badge
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .weight(1f)
+                    .clickable(onClick = onViewCharacterStats),
+                verticalArrangement = Arrangement.Center
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(46.dp)
-                            .clip(CircleShape)
-                            .background(PaperWhite)
-                            .border(1.5.dp, TealPrimary.copy(alpha = 0.5f), CircleShape)
-                            .clickable(onClick = onViewCharacterStats),
-                        contentAlignment = Alignment.Center
+                    Text(
+                        text = character.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = OffWhitePrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    CountryFlag(countryCode = character.countryCode, size = 12.dp)
+                }
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // Age Pill (tnum)
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = SlateNavyMuted,
+                        border = BorderStroke(0.5.dp, HairlineBorder)
                     ) {
-                        PersonAvatar(
-                            avatarConfig = character.avatarConfig,
-                            size = 42,
-                            age = character.age,
-                            expression = expression,
-                            forPlayerCharacter = true,
-                            hideFromAccessibility = true,
-                            seed = "${character.gender.name}-${character.name}"
+                        Text(
+                            text = stringResource(R.string.format_age, character.age),
+                            style = TabularFigures,
+                            fontSize = 10.sp,
+                            color = SteelSecondary,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
                         )
                     }
 
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.Center
+                    // Occupation / School Badge
+                    Surface(
+                        shape = RoundedCornerShape(4.dp),
+                        color = if (character.criminalRecord.currentlyIncarcerated) CrimsonDanger.copy(alpha = 0.12f)
+                        else SlateNavyMuted,
+                        border = BorderStroke(
+                            0.5.dp,
+                            if (character.criminalRecord.currentlyIncarcerated) CrimsonDanger.copy(alpha = 0.35f)
+                            else HairlineBorder
+                        )
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                modifier = Modifier.weight(1f, fill = false),
-                                text = character.name,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = InkPrimary,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            CountryFlag(countryCode = character.countryCode, size = 14.dp)
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(PaperWhite.copy(alpha = 0.85f))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.format_age, character.age),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = InkPrimary,
-                                    fontSize = 11.sp
-                                )
-                            }
-                        }
-
-                        val chapterKey = remember(
-                            character.age,
-                            character.career.currentJob,
-                            character.education.stage,
-                            character.criminalRecord.notoriety,
-                            character.education.childhoodAptitude,
-                            character.education.schoolClique,
-                            netWorth
-                        ) {
-                            LifeArchetypeEngine.resolveChapterKey(character, netWorth)
-                        }
-
-                        Spacer(modifier = Modifier.height(2.dp))
-
-                        Surface(
-                            shape = RoundedCornerShape(4.dp),
-                            color = PaperWhite.copy(alpha = 0.90f),
-                            border = androidx.compose.foundation.BorderStroke(0.5.dp, TealPrimary.copy(alpha = 0.35f))
-                        ) {
-                            Text(
-                                text = stringResource(LifeArchetypeStrings.chapterStringRes(chapterKey)),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = TealPrimary,
-                                fontSize = 10.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(2.dp))
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Text(
-                                text = formatMoney(animatedMoney, character.countryCode),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = StatMoney
-                            )
-                            Text(
-                                text = "•",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = InkTertiary
-                            )
-                            Text(
-                                modifier = Modifier.weight(1f, fill = false),
-                                text = stringResource(R.string.label_net_worth) + ": " + formatMoney(animatedNetWorth, character.countryCode),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = InkSecondary,
-                                fontSize = 11.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-
-                    if (questCount > 0) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(PaperWhite.copy(alpha = 0.9f))
-                                .border(1.dp, GoldAccent.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
-                                .clickable(onClick = onOpenQuests)
-                                .padding(horizontal = 8.dp, vertical = 6.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Icon(
-                                    imageVector = AppIcons.Achievements,
-                                    contentDescription = null,
-                                    tint = GoldAccent,
-                                    modifier = Modifier.size(13.dp)
-                                )
-                                Text(
-                                    text = "$questCompleted/$questCount",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = InkPrimary,
-                                    fontSize = 11.sp
-                                )
-                            }
-                        }
-                    }
-
-                    IconButton(onClick = onOpenSettings, modifier = Modifier.size(34.dp)) {
-                        Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = stringResource(R.string.content_desc_settings),
-                            tint = InkSecondary,
-                            modifier = Modifier.size(20.dp)
+                        Text(
+                            text = occupationText,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (character.criminalRecord.currentlyIncarcerated) CrimsonDanger else SteelSecondary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
                         )
                     }
                 }
+            }
 
-                // Compact Ring Arc Gauge Cluster right on the HUD
-                StatGaugeCluster(
-                    stats = character.stats,
-                    onGaugeClick = onViewCharacterStats
+            // Formatted Cash Counter (tnum) with tap-to-expand financial breakdown
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = SlateNavyMuted,
+                border = BorderStroke(1.dp, EmeraldCash.copy(alpha = 0.35f)),
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable(onClick = onExpandFinances)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = formatMoney(animatedMoney, character.countryCode),
+                        style = TabularFigures,
+                        fontSize = 12.sp,
+                        color = EmeraldCash
+                    )
+                    Icon(
+                        imageVector = Icons.Filled.ChevronRight,
+                        contentDescription = stringResource(R.string.hud_financial_breakdown_title),
+                        tint = EmeraldCash.copy(alpha = 0.7f),
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
+            }
+
+            // Quest counter badge (if active quests)
+            if (questCount > 0) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = SlateNavyMuted,
+                    border = BorderStroke(1.dp, AmberWarning.copy(alpha = 0.35f)),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(onClick = onOpenQuests)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        Icon(
+                            imageVector = AppIcons.Achievements,
+                            contentDescription = null,
+                            tint = AmberWarning,
+                            modifier = Modifier.size(11.dp)
+                        )
+                        Text(
+                            text = "$questCompleted/$questCount",
+                            style = TabularFigures,
+                            fontSize = 10.sp,
+                            color = AmberWarning
+                        )
+                    }
+                }
+            }
+
+            // Settings Icon
+            IconButton(
+                onClick = onOpenSettings,
+                modifier = Modifier.size(30.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = stringResource(R.string.content_desc_settings),
+                    tint = SteelSecondary,
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun YearLogHeader(age: Int) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 12.dp, bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(LifeGreen.copy(alpha = 0.12f))
-                .padding(horizontal = 8.dp, vertical = 3.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.format_age, age).uppercase(),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = LifeGreen,
-                fontSize = 11.sp,
-                letterSpacing = 0.8.sp
-            )
+private fun FinancialBreakdownSheet(
+    character: Character,
+    netWorth: Int,
+    onDismiss: () -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val propertyVehiclesVal = remember(character.assets) {
+        character.assets.sumOf { it.currentValue }
+    }
+    val businessVal = remember(character.businesses) {
+        character.businesses.sumOf { it.valuation }
+    }
+    val mortgagesVal = remember(character.assets) {
+        character.assets.sumOf { it.mortgageBalance }
+    }
+    val studentLoanVal = character.education.studentLoanBalance
+    val annualSalary = character.career.currentJob?.baseSalary ?: 0
+    val cashFlow = character.finance.lastCashFlow
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = SlateNavyCard,
+        tonalElevation = 8.dp,
+        dragHandle = {
+            Surface(
+                modifier = Modifier.padding(vertical = 10.dp),
+                color = SlateNavyMuted,
+                shape = RoundedCornerShape(2.dp)
+            ) {
+                Box(modifier = Modifier.size(width = 36.dp, height = 4.dp))
+            }
         }
-        Box(
+    ) {
+        Column(
             modifier = Modifier
-                .weight(1f)
-                .height(1.dp)
-                .background(Hairline)
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 28.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(EmeraldCashSoft),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = AppIcons.NavAssets,
+                            contentDescription = null,
+                            tint = EmeraldCash,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.hud_financial_breakdown_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = OffWhitePrimary
+                    )
+                }
+                IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.hud_btn_close),
+                        tint = SteelSecondary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+
+            // Top Summary Cards: Cash on Hand & Net Worth
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    color = SlateNavyMuted,
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, EmeraldCash.copy(alpha = 0.35f))
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Text(
+                            text = stringResource(R.string.hud_cash_on_hand),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SteelSecondary,
+                            fontSize = 10.sp
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = formatMoney(character.stats.money, character.countryCode),
+                            style = TabularFigures,
+                            fontSize = 15.sp,
+                            color = EmeraldCash
+                        )
+                    }
+                }
+
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    color = SlateNavyMuted,
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, HairlineBorder)
+                ) {
+                    Column(modifier = Modifier.padding(10.dp)) {
+                        Text(
+                            text = stringResource(R.string.hud_net_worth),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = SteelSecondary,
+                            fontSize = 10.sp
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = formatMoney(netWorth, character.countryCode),
+                            style = TabularFigures,
+                            fontSize = 15.sp,
+                            color = OffWhitePrimary
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider(color = HairlineBorder, thickness = 1.dp)
+
+            // Assets Section
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                FinancialBreakdownRow(
+                    label = stringResource(R.string.hud_assets_val),
+                    value = formatMoney(propertyVehiclesVal, character.countryCode)
+                )
+                if (businessVal > 0) {
+                    FinancialBreakdownRow(
+                        label = stringResource(R.string.hud_business_val),
+                        value = formatMoney(businessVal, character.countryCode)
+                    )
+                }
+                if (character.savingsBalance > 0) {
+                    FinancialBreakdownRow(
+                        label = stringResource(R.string.hud_savings_val),
+                        value = formatMoney(character.savingsBalance, character.countryCode)
+                    )
+                }
+                if (character.investmentPortfolioValue > 0) {
+                    FinancialBreakdownRow(
+                        label = stringResource(R.string.hud_portfolio_val),
+                        value = formatMoney(character.investmentPortfolioValue, character.countryCode)
+                    )
+                }
+            }
+
+            // Liabilities Section (if any)
+            if (mortgagesVal > 0 || studentLoanVal > 0) {
+                HorizontalDivider(color = HairlineBorder, thickness = 1.dp)
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (mortgagesVal > 0) {
+                        FinancialBreakdownRow(
+                            label = stringResource(R.string.hud_mortgage_val),
+                            value = "-" + formatMoney(mortgagesVal, character.countryCode),
+                            valueColor = CrimsonDanger
+                        )
+                    }
+                    if (studentLoanVal > 0) {
+                        FinancialBreakdownRow(
+                            label = stringResource(R.string.hud_student_loan_val),
+                            value = "-" + formatMoney(studentLoanVal, character.countryCode),
+                            valueColor = CrimsonDanger
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider(color = HairlineBorder, thickness = 1.dp)
+
+            // Annual Cashflow Section
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                FinancialBreakdownRow(
+                    label = stringResource(R.string.hud_annual_salary),
+                    value = formatMoney(annualSalary, character.countryCode),
+                    valueColor = if (annualSalary > 0) EmeraldCash else SteelSecondary
+                )
+                if (cashFlow.totalDeductions > 0) {
+                    FinancialBreakdownRow(
+                        label = stringResource(R.string.hud_annual_expenses),
+                        value = "-" + formatMoney(cashFlow.totalDeductions, character.countryCode),
+                        valueColor = CrimsonDanger
+                    )
+                }
+                if (cashFlow.netCashFlow != 0) {
+                    val isPositive = cashFlow.netCashFlow > 0
+                    FinancialBreakdownRow(
+                        label = stringResource(R.string.hud_net_cashflow),
+                        value = (if (isPositive) "+" else "") + formatMoney(cashFlow.netCashFlow, character.countryCode),
+                        valueColor = if (isPositive) EmeraldCash else CrimsonDanger
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FinancialBreakdownRow(
+    label: String,
+    value: String,
+    valueColor: Color = OffWhitePrimary
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = SteelSecondary
+        )
+        Text(
+            text = value,
+            style = TabularFigures,
+            fontSize = 13.sp,
+            color = valueColor
         )
     }
 }
