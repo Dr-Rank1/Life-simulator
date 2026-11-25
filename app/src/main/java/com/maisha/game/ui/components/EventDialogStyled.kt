@@ -143,11 +143,11 @@ fun EventDialogStyled(
     var visible by remember(event.id) { mutableStateOf(false) }
     var selectionLocked by remember(event.id) { mutableStateOf(false) }
     val view = LocalView.current
-    val feedbackManager = LocalFeedbackManager.current
+    val feedbackManager = runCatching { LocalFeedbackManager.current }.getOrNull()
 
     LaunchedEffect(event.id) {
         visible = true
-        feedbackManager.triggerHaptic(view, HapticType.LIGHT_TAP)
+        feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
     }
 
     val flavor = remember(character.countryCode) { CountryCatalog.flavorFor(character.countryCode) }
@@ -174,7 +174,7 @@ fun EventDialogStyled(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(InkPrimary.copy(alpha = 0.45f))
+                .background(com.maisha.game.ui.theme.ObsidianBg.copy(alpha = 0.75f))
                 .padding(horizontal = 16.dp, vertical = 20.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -193,12 +193,12 @@ fun EventDialogStyled(
                         .fillMaxWidth()
                         .widthIn(max = 480.dp)
                         .heightIn(max = 640.dp),
-                    shape = RoundedCornerShape(24.dp),
+                    shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = PaperWhite
+                        containerColor = com.maisha.game.ui.theme.SlateNavyCard
                     ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, Hairline)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, com.maisha.game.ui.theme.HairlineBorder)
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         EventDialogHeroHeader(
@@ -267,14 +267,10 @@ private fun EventDialogHeroHeader(
     eventQueueIndex: Int,
     eventQueueTotal: Int
 ) {
-    val headerBrush = Brush.verticalGradient(
-        colors = listOf(CreamBg, PaperWhite)
-    )
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(headerBrush)
+            .background(com.maisha.game.ui.theme.SlateNavyCard)
             .padding(horizontal = 20.dp, vertical = 18.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
@@ -291,29 +287,31 @@ private fun EventDialogHeroHeader(
                     Box(
                         modifier = Modifier
                             .size(40.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(category.accent.copy(alpha = 0.18f))
-                            .border(1.dp, category.accent.copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(category.accent.copy(alpha = 0.16f))
+                            .border(1.dp, category.accent.copy(alpha = 0.35f), RoundedCornerShape(10.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         MaishaIcon(
                             icon = category.icon,
-                            size = 22.dp,
+                            size = 20.dp,
                             tint = category.accent
                         )
                     }
                     Column {
                         Text(
-                            text = if (holiday != null) holiday.name else stringResource(category.titleRes),
-                            style = MaterialTheme.typography.labelMedium,
+                            text = if (holiday != null) holiday.name.uppercase() else stringResource(category.titleRes).uppercase(),
+                            style = MaterialTheme.typography.labelSmall,
                             color = category.accent,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.8.sp,
+                            fontSize = 11.sp
                         )
                         Text(
                             text = stringResource(R.string.event_dialog_subtitle),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = InkPrimary
+                            color = com.maisha.game.ui.theme.OffWhitePrimary
                         )
                     }
                 }
@@ -323,10 +321,10 @@ private fun EventDialogHeroHeader(
                 ) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
+                            .clip(RoundedCornerShape(14.dp))
                             .background(category.accent.copy(alpha = 0.12f))
-                            .border(1.dp, category.accent.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
-                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                            .border(1.dp, category.accent.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
+                            .padding(horizontal = 8.dp, vertical = 5.dp)
                     ) {
                         Text(
                             text = countryCode.uppercase(),
@@ -337,16 +335,18 @@ private fun EventDialogHeroHeader(
                     }
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(PaperWhite)
-                            .border(1.dp, Hairline, RoundedCornerShape(20.dp))
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(com.maisha.game.ui.theme.SlateNavyMuted)
+                            .border(1.dp, com.maisha.game.ui.theme.HairlineBorder, RoundedCornerShape(14.dp))
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.event_age_badge, playerAge),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = InkPrimary,
-                            fontWeight = FontWeight.Bold
+                            style = com.maisha.game.ui.theme.TabularFigures.copy(
+                                fontSize = 12.sp,
+                                color = com.maisha.game.ui.theme.OffWhitePrimary,
+                                fontWeight = FontWeight.Bold
+                            )
                         )
                     }
                 }
@@ -366,12 +366,15 @@ private fun EventDialogHeroHeader(
                             eventQueueTotal
                         ),
                         style = MaterialTheme.typography.labelSmall,
-                        color = InkSecondary
+                        color = com.maisha.game.ui.theme.SteelSecondary
                     )
                     Text(
                         text = "${((eventQueueIndex.toFloat() / eventQueueTotal) * 100).toInt()}%",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = InkPrimary
+                        style = com.maisha.game.ui.theme.TabularFigures.copy(
+                            fontSize = 11.sp,
+                            color = com.maisha.game.ui.theme.OffWhitePrimary,
+                            fontWeight = FontWeight.Bold
+                        )
                     )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
@@ -381,8 +384,8 @@ private fun EventDialogHeroHeader(
                         .fillMaxWidth()
                         .height(4.dp)
                         .clip(RoundedCornerShape(2.dp)),
-                    color = LifeGreen,
-                    trackColor = CreamMuted
+                    color = com.maisha.game.ui.theme.EmeraldCash,
+                    trackColor = com.maisha.game.ui.theme.SlateNavyMuted
                 )
             }
         }
@@ -465,14 +468,14 @@ private fun EventNarrativePanel(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(CreamMuted)
-            .border(1.dp, Hairline, RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(14.dp))
+            .background(com.maisha.game.ui.theme.SlateNavyElevated)
+            .border(1.dp, com.maisha.game.ui.theme.HairlineBorder, RoundedCornerShape(14.dp))
     ) {
         Box(
             modifier = Modifier
-                .width(4.dp)
-                .heightIn(min = 80.dp)
+                .width(3.dp)
+                .heightIn(min = 72.dp)
                 .background(accentBarColor)
         )
         Column(
@@ -481,20 +484,13 @@ private fun EventNarrativePanel(
                 .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
             Text(
-                text = "\u201C",
-                style = MaterialTheme.typography.headlineSmall,
-                color = accentBarColor.copy(alpha = 0.45f),
-                fontSize = 28.sp,
-                lineHeight = 20.sp
-            )
-            Text(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    lineHeight = 26.sp,
+                    lineHeight = 24.sp,
                     fontWeight = FontWeight.Normal
                 ),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontStyle = FontStyle.Normal
+                color = com.maisha.game.ui.theme.OffWhitePrimary,
+                fontSize = 15.sp
             )
         }
     }
@@ -516,7 +512,7 @@ private fun EventChoiceCard(
     onClick: () -> Unit
 ) {
     val context = LocalContext.current
-    val feedbackManager = LocalFeedbackManager.current
+    val feedbackManager = runCatching { LocalFeedbackManager.current }.getOrNull()
     val view = LocalView.current
 
     var visible by remember(eventId, index) { mutableStateOf(false) }
@@ -548,8 +544,8 @@ private fun EventChoiceCard(
     val backgroundColor by animateColorAsState(
         targetValue = when {
             flashing -> accent.copy(alpha = 0.22f)
-            pressed -> accent.copy(alpha = 0.10f)
-            else -> MaterialTheme.colorScheme.surface
+            pressed -> accent.copy(alpha = 0.12f)
+            else -> com.maisha.game.ui.theme.SlateNavyElevated
         },
         animationSpec = tween(90),
         label = "eventChoiceBg"
@@ -558,7 +554,7 @@ private fun EventChoiceCard(
         targetValue = when {
             flashing -> accent
             pressed -> accent.copy(alpha = 0.55f)
-            else -> OutlineInk
+            else -> com.maisha.game.ui.theme.HairlineBorder
         },
         animationSpec = tween(90),
         label = "eventChoiceBorder"
@@ -579,9 +575,9 @@ private fun EventChoiceCard(
         modifier = Modifier
             .fillMaxWidth()
             .scale(scale)
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
-            .border(1.dp, borderColor, RoundedCornerShape(14.dp))
+            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
             .semantics { role = Role.Button }
 
             .pointerInput(enabled, eventId, index) {
@@ -602,8 +598,8 @@ private fun EventChoiceCard(
                                 happinessDelta <= -5 || healthDelta <= -5 || "crime" in choice.label.lowercase() -> SoundEffect.EVENT_NEGATIVE to HapticType.WARNING
                                 else -> SoundEffect.BUTTON_TAP to HapticType.LIGHT_TAP
                             }
-                            feedbackManager.playSound(context, sound)
-                            feedbackManager.triggerHaptic(view, haptic)
+                            feedbackManager?.playSound(context, sound)
+                            feedbackManager?.triggerHaptic(view, haptic)
                             onSelectStart()
                             pendingClick = true
                         }
@@ -612,34 +608,37 @@ private fun EventChoiceCard(
                     }
                 }
             }
-            .padding(horizontal = 14.dp, vertical = 14.dp),
+            .padding(horizontal = 14.dp, vertical = 13.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(
             modifier = Modifier
                 .size(28.dp)
-                .clip(CircleShape)
-                .background(accent.copy(alpha = 0.12f))
-                .border(1.dp, accent.copy(alpha = 0.35f), CircleShape),
+                .clip(RoundedCornerShape(8.dp))
+                .background(accent.copy(alpha = 0.16f))
+                .border(1.dp, accent.copy(alpha = 0.35f), RoundedCornerShape(8.dp)),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = index.toString(),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold,
-                color = accent
+                style = com.maisha.game.ui.theme.TabularFigures.copy(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = accent
+                )
             )
         }
         Spacer(modifier = Modifier.width(12.dp))
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
                 text = resolvedLabel,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
+                color = com.maisha.game.ui.theme.OffWhitePrimary,
+                fontSize = 14.sp
             )
             if (hints.isNotEmpty()) {
                 FlowRow(
@@ -659,23 +658,26 @@ private fun EventChoiceCard(
 private fun ChoiceStatChip(hint: ChoiceStatHint) {
     val chipColor = hint.type.color()
     val isPositive = hint.delta > 0
-    val bg = if (isPositive) chipColor.copy(alpha = 0.14f) else CoralNegative.copy(alpha = 0.12f)
-    val fg = if (isPositive) chipColor else CoralNegative
+    val bg = if (isPositive) com.maisha.game.ui.theme.EmeraldCash.copy(alpha = 0.14f) else com.maisha.game.ui.theme.CrimsonDanger.copy(alpha = 0.14f)
+    val fg = if (isPositive) com.maisha.game.ui.theme.EmeraldCash else com.maisha.game.ui.theme.CrimsonDanger
 
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(6.dp))
             .background(bg)
-            .padding(horizontal = 7.dp, vertical = 3.dp),
+            .border(0.5.dp, fg.copy(alpha = 0.35f), RoundedCornerShape(6.dp))
+            .padding(horizontal = 6.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        MaishaStatIcon(type = hint.type, size = 14.dp)
+        MaishaStatIcon(type = hint.type, size = 12.dp)
         Text(
             text = hint.label,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = fg
+            style = com.maisha.game.ui.theme.TabularFigures.copy(
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+                color = fg
+            )
         )
     }
 }

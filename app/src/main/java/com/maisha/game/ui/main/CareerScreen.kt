@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -2961,22 +2963,35 @@ private fun SchoolPersonCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = PaperWhite),
-        border = BorderStroke(1.dp, BorderCardSlate)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = com.maisha.game.ui.theme.SlateNavyCard),
+        border = BorderStroke(1.dp, com.maisha.game.ui.theme.HairlineBorder)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                AvatarImage(
-                    config = person.avatarConfig,
-                    size = 44.dp,
-                    age = person.age,
-                    seed = person.id
-                )
+                val initials = person.name.trim().split("\\s+".toRegex()).filter { it.isNotBlank() }
+                    .let { if (it.isEmpty()) "?" else if (it.size == 1) it[0].take(2).uppercase() else "${it[0].first()}${it[1].first()}".uppercase() }
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(roleTextColor.copy(alpha = 0.16f))
+                        .border(1.dp, roleTextColor.copy(alpha = 0.35f), RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = initials,
+                        style = com.maisha.game.ui.theme.TabularFigures.copy(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = roleTextColor
+                        )
+                    )
+                }
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -2984,35 +2999,40 @@ private fun SchoolPersonCard(
                     ) {
                         Text(
                             text = person.name,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
+                            color = com.maisha.game.ui.theme.OffWhitePrimary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f, fill = false)
                         )
                         Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = roleBg
+                            shape = RoundedCornerShape(4.dp),
+                            color = roleTextColor.copy(alpha = 0.16f),
+                            border = BorderStroke(0.5.dp, roleTextColor.copy(alpha = 0.35f))
                         ) {
                             Text(
-                                text = stringResource(roleLabelRes),
+                                text = stringResource(roleLabelRes).uppercase(),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = roleTextColor,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                                fontSize = 9.sp
                             )
                         }
                         if (person.clique != SchoolClique.UNAFFILIATED) {
                             Surface(
-                                shape = RoundedCornerShape(6.dp),
-                                color = CreamMuted
+                                shape = RoundedCornerShape(4.dp),
+                                color = com.maisha.game.ui.theme.SlateNavyMuted,
+                                border = BorderStroke(0.5.dp, com.maisha.game.ui.theme.HairlineBorder)
                             ) {
                                 Text(
                                     text = person.clique.name.lowercase().replaceFirstChar { it.uppercase() },
                                     style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Medium,
-                                    color = InkSecondary,
-                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                    fontWeight = FontWeight.Bold,
+                                    color = com.maisha.game.ui.theme.SteelSecondary,
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp),
+                                    fontSize = 9.sp
                                 )
                             }
                         }
@@ -3027,23 +3047,49 @@ private fun SchoolPersonCard(
                                 append(person.traits.first())
                             }
                         }.ifEmpty { stringResource(R.string.school_role_classmate) },
-                        style = MaterialTheme.typography.labelSmall,
-                        color = InkTertiary,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = com.maisha.game.ui.theme.SteelSecondary,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 11.sp
                     )
                 }
 
-                Text(
-                    text = "${person.relationshipLevel}%",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = when {
-                        person.relationshipLevel >= 70 -> SuccessGreen
-                        person.relationshipLevel >= 40 -> TealPrimary
-                        else -> CoralNegative
+                val bond = person.relationshipLevel.coerceIn(0, 100)
+                val bondColor = when {
+                    bond > 60 -> com.maisha.game.ui.theme.EmeraldCash
+                    bond >= 30 -> com.maisha.game.ui.theme.AmberWarning
+                    else -> com.maisha.game.ui.theme.CrimsonDanger
+                }
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(3.dp),
+                    modifier = Modifier.width(52.dp)
+                ) {
+                    Text(
+                        text = "$bond%",
+                        style = com.maisha.game.ui.theme.TabularFigures.copy(
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = bondColor
+                        )
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(com.maisha.game.ui.theme.SlateNavyMuted)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .fillMaxWidth(bond / 100f)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(bondColor)
+                        )
                     }
-                )
+                }
             }
 
             Spacer(modifier = Modifier.height(8.dp))

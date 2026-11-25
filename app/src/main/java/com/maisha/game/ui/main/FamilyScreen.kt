@@ -3,6 +3,7 @@ package com.maisha.game.ui.main
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -388,119 +389,99 @@ fun FamilyScreen(
                         )
                     }
                     if (partner.isNotEmpty()) {
-                        item(key = "section_partner") {
-                            InsetCardContainer(title = stringResource(R.string.section_partner)) {
-                                partner.forEachIndexed { idx, member ->
-                                    if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(
-                                        member = member,
-                                        playerCountryCode = character.countryCode,
-                                        insideContainer = true,
-                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
-                                    ) {
-                                        onMemberClick(member)
-                                    }
-                                }
+                        item(key = "section_partner_header") {
+                            FamilySectionHeader(title = stringResource(R.string.section_partner), count = partner.size)
+                        }
+                        items(partner, key = { "partner_${it.id}" }) { member ->
+                            FamilyPersonCard(
+                                member = member,
+                                playerCountryCode = character.countryCode,
+                                onQuickAction = { type -> onInteraction(member.id, type, null) }
+                            ) {
+                                onMemberClick(member)
                             }
                         }
                     }
                     if (parents.isNotEmpty()) {
-                        item(key = "section_parents") {
-                            InsetCardContainer(title = stringResource(R.string.section_parents)) {
-                                parents.forEachIndexed { idx, member ->
-                                    if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(
-                                        member = member,
-                                        playerCountryCode = character.countryCode,
-                                        insideContainer = true,
-                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
-                                    ) {
-                                        onMemberClick(member)
-                                    }
-                                }
+                        item(key = "section_parents_header") {
+                            FamilySectionHeader(title = stringResource(R.string.section_parents), count = parents.size)
+                        }
+                        items(parents, key = { "parent_${it.id}" }) { member ->
+                            FamilyPersonCard(
+                                member = member,
+                                playerCountryCode = character.countryCode,
+                                onQuickAction = { type -> onInteraction(member.id, type, null) }
+                            ) {
+                                onMemberClick(member)
                             }
                         }
                     }
                     if (siblings.isNotEmpty()) {
-                        item(key = "section_siblings") {
-                            InsetCardContainer(title = stringResource(R.string.section_siblings)) {
-                                siblings.forEachIndexed { idx, member ->
-                                    if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(
-                                        member = member,
-                                        playerCountryCode = character.countryCode,
-                                        insideContainer = true,
-                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
-                                    ) {
-                                        onMemberClick(member)
-                                    }
-                                }
+                        item(key = "section_siblings_header") {
+                            FamilySectionHeader(title = stringResource(R.string.section_siblings), count = siblings.size)
+                        }
+                        items(siblings, key = { "sibling_${it.id}" }) { member ->
+                            FamilyPersonCard(
+                                member = member,
+                                playerCountryCode = character.countryCode,
+                                onQuickAction = { type -> onInteraction(member.id, type, null) }
+                            ) {
+                                onMemberClick(member)
                             }
                         }
                     }
                     if (children.isNotEmpty()) {
-                        item(key = "section_children") {
-                            InsetCardContainer(title = stringResource(R.string.section_children)) {
-                                children.forEachIndexed { idx, member ->
-                                    if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(
-                                        member = member,
-                                        playerCountryCode = character.countryCode,
-                                        insideContainer = true,
-                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
-                                    ) {
-                                        onMemberClick(member)
-                                    }
-                                }
+                        item(key = "section_children_header") {
+                            FamilySectionHeader(title = stringResource(R.string.section_children), count = children.size)
+                        }
+                        items(children, key = { "child_${it.id}" }) { member ->
+                            FamilyPersonCard(
+                                member = member,
+                                playerCountryCode = character.countryCode,
+                                onQuickAction = { type -> onInteraction(member.id, type, null) }
+                            ) {
+                                onMemberClick(member)
                             }
                         }
                     }
                     if (socialCircle.isNotEmpty()) {
-                        item(key = "section_friends") {
-                            InsetCardContainer(title = stringResource(R.string.section_friends_rivals)) {
-                                socialCircle.forEachIndexed { idx, member ->
-                                    if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(
-                                        member = member,
-                                        playerCountryCode = character.countryCode,
-                                        insideContainer = true,
-                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
-                                    ) {
-                                        onMemberClick(member)
-                                    }
-                                }
+                        item(key = "section_friends_header") {
+                            FamilySectionHeader(title = stringResource(R.string.section_friends_rivals), count = socialCircle.size)
+                        }
+                        items(socialCircle, key = { "friend_${it.id}" }) { member ->
+                            FamilyPersonCard(
+                                member = member,
+                                playerCountryCode = character.countryCode,
+                                onQuickAction = { type -> onInteraction(member.id, type, null) }
+                            ) {
+                                onMemberClick(member)
                             }
                         }
                     }
                     if (others.isNotEmpty()) {
-                        item(key = "section_other") {
-                            InsetCardContainer(title = stringResource(R.string.section_other)) {
-                                others.forEachIndexed { idx, member ->
-                                    if (idx > 0) InsetDivider(insetStart = false)
-                                    FamilyPersonCard(
-                                        member = member,
-                                        playerCountryCode = character.countryCode,
-                                        insideContainer = true,
-                                        onQuickAction = { type -> onInteraction(member.id, type, null) }
-                                    ) {
-                                        onMemberClick(member)
-                                    }
-                                }
+                        item(key = "section_other_header") {
+                            FamilySectionHeader(title = stringResource(R.string.section_other), count = others.size)
+                        }
+                        items(others, key = { "other_${it.id}" }) { member ->
+                            FamilyPersonCard(
+                                member = member,
+                                playerCountryCode = character.countryCode,
+                                onQuickAction = { type -> onInteraction(member.id, type, null) }
+                            ) {
+                                onMemberClick(member)
                             }
                         }
                     }
                     if (character.pets.isNotEmpty()) {
-                        item(key = "section_pets") {
-                            InsetCardContainer(title = stringResource(R.string.section_pets)) {
-                                character.pets.forEachIndexed { idx, pet ->
-                                    if (idx > 0) InsetDivider(insetStart = false)
-                                    PetCard(
-                                        pet = pet,
-                                        speciesLabel = petSpeciesLabel(pet.species),
-                                        onClick = { onPetClick(pet) }
-                                    )
-                                }
-                            }
+                        item(key = "section_pets_header") {
+                            FamilySectionHeader(title = stringResource(R.string.section_pets), count = character.pets.size)
+                        }
+                        items(character.pets, key = { "pet_${it.id}" }) { pet ->
+                            PetCard(
+                                pet = pet,
+                                speciesLabel = petSpeciesLabel(pet.species),
+                                onClick = { onPetClick(pet) }
+                            )
                         }
                     }
                     item(key = "fab_spacer") {
@@ -729,14 +710,41 @@ private fun petSpeciesLabel(species: PetSpecies): String = when (species) {
 }
 
 @Composable
-private fun FamilySectionHeader(title: String) {
-    Text(
-        text = title.uppercase(),
-        style = MaterialTheme.typography.labelMedium,
-        fontWeight = FontWeight.Bold,
-        color = InkTertiary,
-        modifier = Modifier.padding(vertical = 4.dp)
-    )
+private fun FamilySectionHeader(title: String, count: Int? = null) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 4.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title.uppercase(),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = com.maisha.game.ui.theme.SteelSecondary,
+            letterSpacing = 1.sp,
+            fontSize = 12.sp
+        )
+        if (count != null) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(com.maisha.game.ui.theme.SlateNavyMuted)
+                    .border(0.5.dp, com.maisha.game.ui.theme.HairlineBorder, RoundedCornerShape(6.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = count.toString(),
+                    style = com.maisha.game.ui.theme.TabularFigures.copy(
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = com.maisha.game.ui.theme.SteelSecondary
+                    )
+                )
+            }
+        }
+    }
 }
 
 @Composable

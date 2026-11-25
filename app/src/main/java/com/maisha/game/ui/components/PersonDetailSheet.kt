@@ -28,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AttachMoney
 import androidx.compose.material.icons.rounded.CardGiftcard
 import androidx.compose.material.icons.rounded.Celebration
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.ChildCare
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
@@ -388,18 +389,23 @@ fun PersonDetailSheet(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
+                    val relColor = relationColor(member.relation)
+                    val initials = getPersonInitials(member.name)
                     Box(
                         modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                            .background(PaperWhite)
-                            .border(2.dp, TealPrimary.copy(alpha = 0.4f), CircleShape)
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(relColor.copy(alpha = 0.16f))
+                            .border(1.5.dp, relColor.copy(alpha = 0.45f), RoundedCornerShape(14.dp)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        ProceduralAvatarPortrait(
-                            config = member.avatarConfig,
-                            age = member.age,
-                            expression = liveExpression,
-                            modifier = Modifier.fillMaxSize()
+                        Text(
+                            text = initials,
+                            style = com.maisha.game.ui.theme.TabularFigures.copy(
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = relColor
+                            )
                         )
                     }
 
@@ -1296,10 +1302,10 @@ private fun InteractionTile(
     Surface(
         onClick = onClick,
         enabled = enabled && !isUsedThisYear,
-        shape = RoundedCornerShape(14.dp),
-        color = if (isUsedThisYear) SurfaceMuted.copy(alpha = 0.5f) else PaperWhite,
-        border = BorderStroke(1.dp, if (isUsedThisYear) Hairline.copy(alpha = 0.4f) else Hairline),
-        shadowElevation = if (isUsedThisYear || !enabled) 0.dp else 1.dp,
+        shape = RoundedCornerShape(12.dp),
+        color = if (isUsedThisYear) com.maisha.game.ui.theme.SlateNavyMuted else com.maisha.game.ui.theme.SlateNavyCard,
+        border = BorderStroke(1.dp, com.maisha.game.ui.theme.HairlineBorder),
+        shadowElevation = if (isUsedThisYear || !enabled) 0.dp else 2.dp,
         modifier = modifier
             .fillMaxWidth()
             .height(68.dp)
@@ -1307,24 +1313,30 @@ private fun InteractionTile(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 10.dp, vertical = 6.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(38.dp)
+                    .size(40.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .background(
-                        if (isUsedThisYear) InkTertiary.copy(alpha = 0.12f)
-                        else iconTint.copy(alpha = 0.14f)
+                        if (isUsedThisYear) com.maisha.game.ui.theme.SteelTertiary.copy(alpha = 0.12f)
+                        else iconTint.copy(alpha = 0.16f)
+                    )
+                    .border(
+                        1.dp,
+                        if (isUsedThisYear) com.maisha.game.ui.theme.SteelTertiary.copy(alpha = 0.25f)
+                        else iconTint.copy(alpha = 0.32f),
+                        RoundedCornerShape(10.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = if (isUsedThisYear) InkTertiary else iconTint,
+                    tint = if (isUsedThisYear) com.maisha.game.ui.theme.SteelTertiary else iconTint,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -1335,37 +1347,41 @@ private fun InteractionTile(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (isUsedThisYear) InkSecondary else InkPrimary,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isUsedThisYear) com.maisha.game.ui.theme.SteelTertiary else com.maisha.game.ui.theme.OffWhitePrimary,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    fontSize = 14.sp
                 )
                 if (isUsedThisYear) {
                     Text(
                         text = stringResource(R.string.tile_used_badge),
                         style = MaterialTheme.typography.labelSmall,
-                        color = InkTertiary,
-                        fontWeight = FontWeight.Medium
+                        color = com.maisha.game.ui.theme.SteelTertiary,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 11.sp
                     )
                 } else if (!costLabel.isNullOrBlank()) {
                     Text(
                         text = costLabel,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (enabled) TealPrimary else CoralNegative,
-                        fontWeight = FontWeight.Medium,
+                        style = com.maisha.game.ui.theme.TabularFigures.copy(
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = if (enabled) com.maisha.game.ui.theme.EmeraldCash else com.maisha.game.ui.theme.CrimsonDanger
+                        ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                } else {
-                    Text(
-                        text = stringResource(R.string.tile_cost_free),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = LifeGreen,
-                        fontWeight = FontWeight.Medium
-                    )
                 }
             }
+
+            Icon(
+                imageVector = Icons.Rounded.ChevronRight,
+                contentDescription = null,
+                tint = if (isUsedThisYear) com.maisha.game.ui.theme.SteelTertiary.copy(alpha = 0.4f) else com.maisha.game.ui.theme.SteelSecondary,
+                modifier = Modifier.size(18.dp)
+            )
         }
     }
 }

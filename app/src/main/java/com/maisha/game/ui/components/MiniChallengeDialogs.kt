@@ -103,9 +103,9 @@ fun ExamFocusDialog(
                 .fillMaxWidth()
                 .padding(vertical = 12.dp),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = PaperWhite),
-            border = BorderStroke(1.5.dp, BorderCardSlate),
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            colors = CardDefaults.cardColors(containerColor = com.maisha.game.ui.theme.SlateNavyCard),
+            border = BorderStroke(1.dp, com.maisha.game.ui.theme.HairlineBorder),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -125,7 +125,7 @@ fun ExamFocusDialog(
                             text = challenge.examTitle,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = InkPrimary
+                            color = com.maisha.game.ui.theme.OffWhitePrimary
                         )
                         Text(
                             text = stringResource(R.string.dialog_exam_focus_title),
@@ -167,7 +167,7 @@ fun ExamFocusDialog(
                             .height(6.dp)
                             .clip(RoundedCornerShape(3.dp)),
                         color = if (timerProgress.value > 0.3f) TealPrimary else CoralNegative,
-                        trackColor = HairlineSoft
+                        trackColor = com.maisha.game.ui.theme.SlateNavyMuted
                     )
                 }
 
@@ -252,24 +252,24 @@ private fun FocusTacticCard(
             .clip(RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        color = PaperWhite,
+        color = com.maisha.game.ui.theme.SlateNavyElevated,
         border = BorderStroke(1.dp, accentColor.copy(alpha = 0.45f)),
-        shadowElevation = 1.dp
+        shadowElevation = 2.dp
     ) {
-        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = accentColor,
-                fontSize = 13.sp
+                fontSize = 14.sp
             )
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = InkSecondary,
-                fontSize = 11.sp,
-                lineHeight = 15.sp
+                color = com.maisha.game.ui.theme.SteelSecondary,
+                fontSize = 12.sp,
+                lineHeight = 16.sp
             )
         }
     }
@@ -484,9 +484,9 @@ fun NegotiationDialog(
                 .fillMaxWidth()
                 .padding(vertical = 12.dp),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = PaperWhite),
-            border = BorderStroke(1.5.dp, BorderCardSlate),
-            elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+            colors = CardDefaults.cardColors(containerColor = com.maisha.game.ui.theme.SlateNavyCard),
+            border = BorderStroke(1.dp, com.maisha.game.ui.theme.HairlineBorder),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -506,7 +506,7 @@ fun NegotiationDialog(
                             text = stringResource(R.string.dialog_negotiation_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = InkPrimary
+                            color = com.maisha.game.ui.theme.OffWhitePrimary
                         )
                         Text(
                             text = challenge.subjectLabel,
@@ -524,8 +524,8 @@ fun NegotiationDialog(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                    border = BorderStroke(0.5.dp, Hairline)
+                    color = com.maisha.game.ui.theme.SlateNavyElevated,
+                    border = BorderStroke(1.dp, com.maisha.game.ui.theme.HairlineBorder)
                 ) {
                     Row(
                         modifier = Modifier
