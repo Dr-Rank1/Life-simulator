@@ -48,6 +48,7 @@
     <string name="btn_sell">बेचें</string>
     <string name="btn_overwrite">ओवरराइट</string>
     <string name="btn_new_life">नया जीवन</string>
+    <string name="btn_life_log">लाइफ लॉग</string>
     <string name="btn_start_life">जीवन शुरू करें</string>
     <string name="btn_random_name">यादृच्छिक नाम</string>
     <string name="btn_aging">उम्र बढ़ रही है…</string>

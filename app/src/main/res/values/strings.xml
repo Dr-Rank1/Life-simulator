@@ -109,6 +109,7 @@
     <string name="btn_overwrite">Overwrite</string>
     <string name="btn_start_new_life">Start New Life</string>
     <string name="btn_new_life">New Life</string>
+    <string name="btn_life_log">Life Log</string>
     <string name="btn_view_summary">View Summary</string>
     <string name="btn_start_life">Start Life</string>
     <string name="btn_starting">Starting…</string>

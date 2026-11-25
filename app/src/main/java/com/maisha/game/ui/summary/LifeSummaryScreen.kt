@@ -5,6 +5,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,11 +19,16 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -43,6 +49,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -61,36 +70,40 @@ import com.maisha.game.data.IllustrationCatalog
 import com.maisha.game.data.model.AchievementCategory
 import com.maisha.game.data.model.AvatarConfig
 import com.maisha.game.data.model.Character
-import com.maisha.game.data.model.Expression
 import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.IllustrationRef
 import com.maisha.game.data.model.Stats
 import com.maisha.game.data.model.ageStageFor
-import com.maisha.game.ui.avatar.ProceduralAvatarPortrait
+import com.maisha.game.domain.LifeRibbon
 import com.maisha.game.ui.components.AdaptiveBannerAd
-import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.components.AppLoadingIndicator
 import com.maisha.game.ui.components.CountryFlag
 import com.maisha.game.ui.components.DismissibleTipCard
 import com.maisha.game.ui.components.IllustrationImage
-import com.maisha.game.ui.components.PersonAvatar
 import com.maisha.game.ui.components.StatBar
 import com.maisha.game.ui.components.StatType
+import com.maisha.game.ui.components.getPersonInitials
 import com.maisha.game.ui.legacy.AncestryTimelinePreview
 import com.maisha.game.ui.share.ShareAchievementBadge
 import com.maisha.game.ui.share.ShareCardComposable
 import com.maisha.game.ui.share.ShareCardData
 import com.maisha.game.ui.share.ShareCardDimensions
-import com.maisha.game.ui.theme.CoralNegative
-import com.maisha.game.ui.theme.CreamBg
+import com.maisha.game.ui.theme.AmberWarning
+import com.maisha.game.ui.theme.AppIcons
+import com.maisha.game.ui.theme.CrimsonDanger
+import com.maisha.game.ui.theme.EmeraldCash
 import com.maisha.game.ui.theme.GoldAccent
-import com.maisha.game.ui.theme.InkPrimary
-import com.maisha.game.ui.theme.InkSecondary
-import com.maisha.game.ui.theme.LifeGreen
+import com.maisha.game.ui.theme.HairlineBorder
 import com.maisha.game.ui.theme.MaishaTheme
-import com.maisha.game.ui.theme.OutlineInk
-import com.maisha.game.ui.theme.PaperWhite
-import com.maisha.game.ui.theme.TealPrimary
+import com.maisha.game.ui.theme.ObsidianBg
+import com.maisha.game.ui.theme.OffWhitePrimary
+import com.maisha.game.ui.theme.RoyalIndigo
+import com.maisha.game.ui.theme.SlateNavyCard
+import com.maisha.game.ui.theme.SlateNavyElevated
+import com.maisha.game.ui.theme.SlateNavyMuted
+import com.maisha.game.ui.theme.SteelSecondary
+import com.maisha.game.ui.theme.SteelTertiary
+import com.maisha.game.ui.theme.TabularFigures
 import com.maisha.game.util.ComposableToImage
 import com.maisha.game.util.ShareIntentHelper
 import com.maisha.game.util.formatMoney
@@ -102,6 +115,12 @@ import kotlinx.coroutines.withContext
 private const val CASCADE_STAGGER_MS = 90
 private const val CASCADE_DURATION_MS = 420
 
+/**
+ * Redesigned Tombstone & Legacy Summary Screen inspired by BitLife's iconic ribbon/legacy card.
+ * Features a dignified dark commemorative card with silk-sash ribbon, monogram avatar medallion,
+ * cause-of-death plaque, final net worth, career peak, and 4 highlight milestone chips,
+ * with New Life and Life Log buttons anchored cleanly at the bottom.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LifeSummaryScreen(
@@ -123,7 +142,9 @@ fun LifeSummaryScreen(
 ) {
     if (uiState.isLoading) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(ObsidianBg),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -135,7 +156,9 @@ fun LifeSummaryScreen(
     val character = uiState.character ?: return
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
     val shareCardData = uiState.shareCardData
+
     var cascadeVisible by remember { mutableStateOf(false) }
     LaunchedEffect(character.name) {
         cascadeVisible = false
@@ -181,285 +204,362 @@ fun LifeSummaryScreen(
         )
     }
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(CreamBg)
+            .background(ObsidianBg)
+            .statusBarsPadding()
     ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp)
-        ) {
-            Spacer(modifier = Modifier.height(8.dp))
+        Column(modifier = Modifier.fillMaxSize()) {
+            // -- Scrollable Story & Legacy Content Area ----------------------
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // -- 0. Dignified Dark Commemorative Monument Card -----------
+                CascadeCard(visible = cascadeVisible, index = 0) {
+                    MemorialHeader(
+                        character = character,
+                        deathCauseLabel = uiState.deathCauseLabel,
+                        deathFlavorText = uiState.deathFlavorText,
+                        lifeArchetypeLabel = uiState.lifeArchetypeLabel,
+                        ribbon = uiState.ribbon,
+                        legacyStamp = uiState.legacyStamp,
+                        epitaph = uiState.epitaphText,
+                        netWorth = uiState.netWorth,
+                        careerRecap = uiState.careerRecap,
+                        childrenCount = uiState.childrenCount
+                    )
+                }
 
-            CascadeCard(visible = cascadeVisible, index = 0) {
-                MemorialHeader(
-                    character = character,
-                    deathCauseLabel = uiState.deathCauseLabel,
-                    deathFlavorText = uiState.deathFlavorText,
-                    lifeArchetypeLabel = uiState.lifeArchetypeLabel,
-                    ribbon = uiState.ribbon,
-                    legacyStamp = uiState.legacyStamp,
-                    epitaph = uiState.epitaphText,
-                    netWorth = uiState.netWorth,
-                    careerRecap = uiState.careerRecap,
-                    childrenCount = uiState.childrenCount
-                )
-            }
-
-            if (uiState.eligibleHeirs.isNotEmpty()) {
-                CascadeCard(visible = cascadeVisible, index = 1) {
-                    Button(
-                        onClick = onContinueLegacy,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(54.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = GoldAccent,
-                            contentColor = InkPrimary
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                // -- 1. Eligible Heirs Banner --------------------------------
+                if (uiState.eligibleHeirs.isNotEmpty()) {
+                    CascadeCard(visible = cascadeVisible, index = 1) {
+                        Button(
+                            onClick = onContinueLegacy,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = GoldAccent,
+                                contentColor = ObsidianBg
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
                         ) {
-                            Icon(
-                                imageVector = AppIcons.HeirCrown,
-                                contentDescription = null,
-                                tint = InkPrimary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.btn_continue_as_heir_count, uiState.eligibleHeirs.size),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = AppIcons.HeirCrown,
+                                    contentDescription = null,
+                                    tint = ObsidianBg,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text(
+                                    text = stringResource(
+                                        R.string.btn_continue_as_heir_count,
+                                        uiState.eligibleHeirs.size
+                                    ),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
-            }
 
-            if (uiState.showAchievementsCarryOverTip) {
-                CascadeCard(visible = cascadeVisible, index = 1) {
-                    DismissibleTipCard(
-                        text = stringResource(R.string.tip_first_death_achievements),
-                        onDismiss = onDismissAchievementsTip
-                    )
-                }
-            }
-
-            CascadeCard(visible = cascadeVisible, index = 2) {
-                SummarySectionCard(title = stringResource(R.string.section_final_stats)) {
-                    FinalStatsGrid(
-                        stats = character.stats,
-                        netWorth = uiState.netWorth,
-                        countryCode = character.countryCode
-                    )
-                }
-            }
-
-            CascadeCard(visible = cascadeVisible, index = 3) {
-                SummarySectionCard(title = stringResource(R.string.section_wealth_career)) {
-                    WealthCareerSection(
-                        educationRecap = uiState.educationRecap,
-                        careerRecap = uiState.careerRecap,
-                        careerIllustration = uiState.shareCardData?.careerJobId?.let {
-                            IllustrationCatalog.getIllustrationForJob(it)
-                        },
-                        spouseRecap = uiState.spouseRecap,
-                        closestBondRecap = uiState.closestBondRecap,
-                        childrenCount = uiState.childrenCount,
-                        netWorth = uiState.netWorth,
-                        money = character.stats.money,
-                        countryCode = character.countryCode
-                    )
-                }
-            }
-
-            val badges = shareCardData?.achievementBadges.orEmpty()
-            if (badges.isNotEmpty()) {
-                CascadeCard(visible = cascadeVisible, index = 4) {
-                    SummarySectionCard(title = stringResource(R.string.section_achievements_unlocked)) {
-                        AchievementsShowcase(badges = badges)
+                // -- 2. Achievements Tip -------------------------------------
+                if (uiState.showAchievementsCarryOverTip) {
+                    CascadeCard(visible = cascadeVisible, index = 1) {
+                        DismissibleTipCard(
+                            text = stringResource(R.string.tip_first_death_achievements),
+                            onDismiss = onDismissAchievementsTip
+                        )
                     }
                 }
+
+                // -- 3. Final Character Stats Grid ---------------------------
+                CascadeCard(visible = cascadeVisible, index = 2) {
+                    SummarySectionCard(title = stringResource(R.string.section_final_stats)) {
+                        FinalStatsGrid(
+                            stats = character.stats,
+                            netWorth = uiState.netWorth,
+                            countryCode = character.countryCode
+                        )
+                    }
+                }
+
+                // -- 4. Wealth & Career Recap --------------------------------
+                CascadeCard(visible = cascadeVisible, index = 3) {
+                    SummarySectionCard(title = stringResource(R.string.section_wealth_career)) {
+                        WealthCareerSection(
+                            educationRecap = uiState.educationRecap,
+                            careerRecap = uiState.careerRecap,
+                            careerIllustration = uiState.shareCardData?.careerJobId?.let {
+                                IllustrationCatalog.getIllustrationForJob(it)
+                            },
+                            spouseRecap = uiState.spouseRecap,
+                            closestBondRecap = uiState.closestBondRecap,
+                            childrenCount = uiState.childrenCount,
+                            netWorth = uiState.netWorth,
+                            money = character.stats.money,
+                            countryCode = character.countryCode
+                        )
+                    }
+                }
+
+                // -- 5. Unlocked Achievements Showcase -----------------------
+                val badges = shareCardData?.achievementBadges.orEmpty()
+                if (badges.isNotEmpty()) {
+                    CascadeCard(visible = cascadeVisible, index = 4) {
+                        SummarySectionCard(title = stringResource(R.string.section_achievements_unlocked)) {
+                            AchievementsShowcase(badges = badges)
+                        }
+                    }
+                }
+
+                // -- 6. Life Highlights / Event Log --------------------------
+                if (uiState.eventHighlights.isNotEmpty()) {
+                    CascadeCard(visible = cascadeVisible, index = 5) {
+                        SummarySectionCard(title = stringResource(R.string.section_life_highlights)) {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                uiState.eventHighlights.forEachIndexed { index, entry ->
+                                    SummaryEventLogCard(
+                                        entry = entry,
+                                        ageTag = character.age - index
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // -- 7. Ancestry Timeline Preview ----------------------------
+                if (character.ancestryHistory.isNotEmpty() || character.generationNumber > 1) {
+                    CascadeCard(visible = cascadeVisible, index = 6) {
+                        AncestryTimelinePreview(character = character)
+                    }
+                }
+
+                // -- 8. Share Action & Second Wind ---------------------------
+                if (shareCardData != null) {
+                    OutlinedButton(
+                        onClick = onShareMyLife,
+                        enabled = !uiState.isShareCapturing,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = SlateNavyElevated,
+                            contentColor = OffWhitePrimary
+                        ),
+                        border = BorderStroke(1.dp, HairlineBorder)
+                    ) {
+                        if (uiState.isShareCapturing) {
+                            AppLoadingIndicator(size = 20.dp)
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(
+                                    imageVector = AppIcons.Share,
+                                    contentDescription = null,
+                                    tint = RoyalIndigo,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.btn_share_my_life),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+                }
+
+                uiState.shareErrorMessage?.let { error ->
+                    Text(
+                        text = error,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = CrimsonDanger,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    TextButton(
+                        onClick = onDismissShareError,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text(stringResource(R.string.btn_cancel), color = SteelSecondary)
+                    }
+                }
+
+                if (uiState.showSecondWindButton) {
+                    OutlinedButton(
+                        onClick = onWatchSecondWind,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = SlateNavyElevated,
+                            contentColor = EmeraldCash
+                        ),
+                        border = BorderStroke(1.dp, EmeraldCash.copy(alpha = 0.4f))
+                    ) {
+                        Text(
+                            text = stringResource(R.string.btn_watch_second_wind),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = EmeraldCash,
+                            maxLines = 2,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                uiState.secondWindMessage?.let { message ->
+                    Text(
+                        text = message,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = RoyalIndigo,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            if (uiState.eventHighlights.isNotEmpty()) {
-                CascadeCard(visible = cascadeVisible, index = 5) {
-                    SummarySectionCard(title = stringResource(R.string.section_life_highlights)) {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            uiState.eventHighlights.forEachIndexed { index, entry ->
-                                SummaryEventLogCard(
-                                    entry = entry,
-                                    ageTag = character.age - index
+            // -- Sponsored Banner Ad -----------------------------------------
+            if (AdUnitConfig.areAdsGloballyEnabled) {
+                Text(
+                    text = stringResource(R.string.label_sponsored),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = SteelTertiary,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 2.dp),
+                    textAlign = TextAlign.Center
+                )
+                AdaptiveBannerAd(
+                    adUnitId = AdUnitConfig.BANNER,
+                    modifier = Modifier.padding(bottom = 6.dp)
+                )
+            }
+
+            // -- Docked Bottom Action Bar (Anchored Cleanly) -----------------
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = SlateNavyCard,
+                border = BorderStroke(1.dp, HairlineBorder),
+                shadowElevation = 8.dp
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        // Life Log Button: Smoothly scrolls down to Highlights / Log
+                        OutlinedButton(
+                            onClick = {
+                                scope.launch {
+                                    scrollState.animateScrollTo(scrollState.maxValue)
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = SlateNavyElevated,
+                                contentColor = OffWhitePrimary
+                            ),
+                            border = BorderStroke(1.dp, HairlineBorder)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = AppIcons.Activity,
+                                    contentDescription = null,
+                                    tint = RoyalIndigo,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.btn_life_log),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = OffWhitePrimary
+                                )
+                            }
+                        }
+
+                        // New Life Button (Primary CTA)
+                        Button(
+                            onClick = onStartNewLife,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(50.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = RoyalIndigo,
+                                contentColor = Color.White
+                            ),
+                            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Person,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.btn_new_life),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
                     }
                 }
             }
-
-            if (character.ancestryHistory.isNotEmpty() || character.generationNumber > 1) {
-                CascadeCard(visible = cascadeVisible, index = 6) {
-                    AncestryTimelinePreview(character = character)
-                }
-            }
-
-            if (uiState.showHeirSelection && uiState.eligibleHeirs.isNotEmpty()) {
-                HeirSelectionDialog(
-                    heirs = uiState.eligibleHeirs,
-                    slotNumber = uiState.slotId + 1,
-                    selectedHeir = uiState.selectedHeir,
-                    showConfirmation = uiState.showLegacyConfirmation,
-                    heirPreviews = uiState.heirPreviews,
-                    onHeirSelected = onHeirSelected,
-                    onConfirmContinue = onConfirmLegacyContinuation,
-                    onDismissConfirmation = onDismissLegacyConfirmation,
-                    onDismiss = onDismissHeirSelection,
-                    deceasedName = character.name,
-                    legacyStamp = uiState.legacyStamp,
-                    epitaphText = uiState.epitaphText
-                )
-            }
-
-            if (uiState.eligibleHeirs.isNotEmpty()) {
-                CascadeCard(visible = cascadeVisible, index = 7) {
-                    Button(
-                        onClick = onContinueLegacy,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = TealPrimary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.btn_continue_legacy),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-
-            if (shareCardData != null) {
-                OutlinedButton(
-                    onClick = onShareMyLife,
-                    enabled = !uiState.isShareCapturing,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .padding(top = 10.dp),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    if (uiState.isShareCapturing) {
-                        AppLoadingIndicator(size = 22.dp)
-                    } else {
-                        Text(
-                            text = stringResource(R.string.btn_share_my_life),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-            }
-
-            uiState.shareErrorMessage?.let { error ->
-                Text(
-                    text = error,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = CoralNegative,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 6.dp)
-                )
-                TextButton(
-                    onClick = onDismissShareError,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text(stringResource(R.string.btn_cancel))
-                }
-            }
-
-            Button(
-                onClick = onStartNewLife,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-                    .padding(top = 10.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GoldAccent,
-                    contentColor = InkPrimary
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.btn_start_new_life),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            if (uiState.showSecondWindButton) {
-                OutlinedButton(
-                    onClick = onWatchSecondWind,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .padding(top = 8.dp),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.btn_watch_second_wind),
-                        style = MaterialTheme.typography.labelLarge,
-                        maxLines = 2,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            }
-
-            uiState.secondWindMessage?.let { message ->
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = TealPrimary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
         }
+    }
 
-        if (AdUnitConfig.areAdsGloballyEnabled) {
-            Text(
-                text = stringResource(R.string.label_sponsored),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp),
-                textAlign = TextAlign.Center
-            )
-            AdaptiveBannerAd(
-                adUnitId = AdUnitConfig.BANNER,
-                modifier = Modifier.padding(bottom = 10.dp)
-            )
-        }
+    // -- Heir Selection Dialog -----------------------------------------------
+    if (uiState.showHeirSelection && uiState.eligibleHeirs.isNotEmpty()) {
+        HeirSelectionDialog(
+            heirs = uiState.eligibleHeirs,
+            slotNumber = uiState.slotId + 1,
+            selectedHeir = uiState.selectedHeir,
+            showConfirmation = uiState.showLegacyConfirmation,
+            heirPreviews = uiState.heirPreviews,
+            onHeirSelected = onHeirSelected,
+            onConfirmContinue = onConfirmLegacyContinuation,
+            onDismissConfirmation = onDismissLegacyConfirmation,
+            onDismiss = onDismissHeirSelection,
+            deceasedName = character.name,
+            legacyStamp = uiState.legacyStamp,
+            epitaphText = uiState.epitaphText
+        )
     }
 }
 
@@ -477,7 +577,7 @@ private fun CascadeCard(
                 initialOffsetY = { it / 5 }
             )
     ) {
-        Box(modifier = Modifier.padding(bottom = 10.dp)) {
+        Box(modifier = Modifier.padding(bottom = 2.dp)) {
             content()
         }
     }
@@ -497,68 +597,80 @@ private fun SharePreviewDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(InkPrimary.copy(alpha = 0.45f))
+                .background(ObsidianBg.copy(alpha = 0.85f))
                 .padding(16.dp)
         ) {
-            Column(
+            Card(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .fillMaxWidth()
+                    .align(Alignment.Center),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = SlateNavyCard),
+                border = BorderStroke(1.dp, HairlineBorder)
             ) {
-                Text(
-                    text = stringResource(R.string.share_preview_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = GoldAccent
-                )
-                Text(
-                    text = stringResource(R.string.share_preview_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 16.dp)
-                )
-                ShareCardComposable(
-                    data = cardData,
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth(0.78f)
-                        .aspectRatio(9f / 16f)
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = onDismiss,
-                        enabled = !isCapturing,
+                    Text(
+                        text = stringResource(R.string.share_preview_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = GoldAccent
+                    )
+                    Text(
+                        text = stringResource(R.string.share_preview_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SteelSecondary
+                    )
+                    ShareCardComposable(
+                        data = cardData,
                         modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(14.dp)
+                            .fillMaxWidth(0.85f)
+                            .aspectRatio(9f / 16f)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text(stringResource(R.string.btn_cancel))
-                    }
-                    Button(
-                        onClick = onShare,
-                        enabled = !isCapturing,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = GoldAccent,
-                            contentColor = InkPrimary
-                        )
-                    ) {
-                        if (isCapturing) {
-                            AppLoadingIndicator(size = 20.dp)
-                        } else {
-                            Text(
-                                text = stringResource(R.string.btn_share),
-                                fontWeight = FontWeight.Bold
+                        OutlinedButton(
+                            onClick = onDismiss,
+                            enabled = !isCapturing,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                containerColor = SlateNavyElevated,
+                                contentColor = OffWhitePrimary
+                            ),
+                            border = BorderStroke(1.dp, HairlineBorder)
+                        ) {
+                            Text(stringResource(R.string.btn_cancel))
+                        }
+                        Button(
+                            onClick = onShare,
+                            enabled = !isCapturing,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = RoyalIndigo,
+                                contentColor = Color.White
                             )
+                        ) {
+                            if (isCapturing) {
+                                AppLoadingIndicator(size = 20.dp)
+                            } else {
+                                Text(
+                                    text = stringResource(R.string.btn_share),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
@@ -567,13 +679,18 @@ private fun SharePreviewDialog(
     }
 }
 
+/**
+ * Dignified dark commemorative card inspired by BitLife's ribbon dossier.
+ * Features a high-contrast silk sash life ribbon banner, face-free monogram medallion,
+ * cause-of-death plaque, and 4 highlight milestone chips.
+ */
 @Composable
 private fun MemorialHeader(
     character: Character,
     deathCauseLabel: String,
     deathFlavorText: String,
     lifeArchetypeLabel: String = "",
-    ribbon: com.maisha.game.domain.LifeRibbon = com.maisha.game.domain.LifeRibbon.MEDIOCRE,
+    ribbon: LifeRibbon = LifeRibbon.MEDIOCRE,
     legacyStamp: String = "",
     epitaph: String = "",
     netWorth: Int = 0,
@@ -583,43 +700,43 @@ private fun MemorialHeader(
     val deathYear = character.birthYear + character.age
     val stage = ageStageFor(character.age)
     val ribbonTitleRes = when (ribbon) {
-        com.maisha.game.domain.LifeRibbon.LOADED -> R.string.ribbon_loaded
-        com.maisha.game.domain.LifeRibbon.ACADEMIC -> R.string.ribbon_academic
-        com.maisha.game.domain.LifeRibbon.CUNNING -> R.string.ribbon_cunning
-        com.maisha.game.domain.LifeRibbon.FAMILY_ANCHOR -> R.string.ribbon_family
-        com.maisha.game.domain.LifeRibbon.FAME_ICON -> R.string.ribbon_fame
-        com.maisha.game.domain.LifeRibbon.SAINT -> R.string.ribbon_saint
-        com.maisha.game.domain.LifeRibbon.SCANDALOUS -> R.string.ribbon_scandalous
-        com.maisha.game.domain.LifeRibbon.WORKAHOLIC -> R.string.ribbon_workaholic
-        com.maisha.game.domain.LifeRibbon.MEDIOCRE -> R.string.ribbon_mediocre
+        LifeRibbon.LOADED -> R.string.ribbon_loaded
+        LifeRibbon.ACADEMIC -> R.string.ribbon_academic
+        LifeRibbon.CUNNING -> R.string.ribbon_cunning
+        LifeRibbon.FAMILY_ANCHOR -> R.string.ribbon_family
+        LifeRibbon.FAME_ICON -> R.string.ribbon_fame
+        LifeRibbon.SAINT -> R.string.ribbon_saint
+        LifeRibbon.SCANDALOUS -> R.string.ribbon_scandalous
+        LifeRibbon.WORKAHOLIC -> R.string.ribbon_workaholic
+        LifeRibbon.MEDIOCRE -> R.string.ribbon_mediocre
     }
     val ribbonDescRes = when (ribbon) {
-        com.maisha.game.domain.LifeRibbon.LOADED -> R.string.ribbon_loaded_desc
-        com.maisha.game.domain.LifeRibbon.ACADEMIC -> R.string.ribbon_academic_desc
-        com.maisha.game.domain.LifeRibbon.CUNNING -> R.string.ribbon_cunning_desc
-        com.maisha.game.domain.LifeRibbon.FAMILY_ANCHOR -> R.string.ribbon_family_desc
-        com.maisha.game.domain.LifeRibbon.FAME_ICON -> R.string.ribbon_fame_desc
-        com.maisha.game.domain.LifeRibbon.SAINT -> R.string.ribbon_saint_desc
-        com.maisha.game.domain.LifeRibbon.SCANDALOUS -> R.string.ribbon_scandalous_desc
-        com.maisha.game.domain.LifeRibbon.WORKAHOLIC -> R.string.ribbon_workaholic_desc
-        com.maisha.game.domain.LifeRibbon.MEDIOCRE -> R.string.ribbon_mediocre_desc
+        LifeRibbon.LOADED -> R.string.ribbon_loaded_desc
+        LifeRibbon.ACADEMIC -> R.string.ribbon_academic_desc
+        LifeRibbon.CUNNING -> R.string.ribbon_cunning_desc
+        LifeRibbon.FAMILY_ANCHOR -> R.string.ribbon_family_desc
+        LifeRibbon.FAME_ICON -> R.string.ribbon_fame_desc
+        LifeRibbon.SAINT -> R.string.ribbon_saint_desc
+        LifeRibbon.SCANDALOUS -> R.string.ribbon_scandalous_desc
+        LifeRibbon.WORKAHOLIC -> R.string.ribbon_workaholic_desc
+        LifeRibbon.MEDIOCRE -> R.string.ribbon_mediocre_desc
     }
-    val col1 = androidx.compose.ui.graphics.Color(ribbon.primaryColorHex)
-    val col2 = androidx.compose.ui.graphics.Color(ribbon.secondaryColorHex)
+    val col1 = Color(ribbon.primaryColorHex)
+    val col2 = Color(ribbon.secondaryColorHex)
 
-    // Arched Monument Gravestone Dossier
+    // Dignified Dark Commemorative Monument Card
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 16.dp, bottomEnd = 16.dp),
-        colors = CardDefaults.cardColors(containerColor = PaperWhite),
-        border = androidx.compose.foundation.BorderStroke(2.dp, OutlineInk),
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp, bottomStart = 16.dp, bottomEnd = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = SlateNavyCard),
+        border = BorderStroke(1.dp, HairlineBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         // High-contrast Silk Sash Life Ribbon Banner at Monument Crest
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(androidx.compose.ui.graphics.Brush.horizontalGradient(listOf(col1, col2)))
+                .background(Brush.horizontalGradient(listOf(col1, col2)))
                 .padding(vertical = 12.dp, horizontal = 16.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -630,14 +747,14 @@ private fun MemorialHeader(
                 Icon(
                     imageVector = AppIcons.Tombstone,
                     contentDescription = null,
-                    tint = androidx.compose.ui.graphics.Color.White,
+                    tint = Color.White,
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = stringResource(ribbonTitleRes),
+                    text = stringResource(ribbonTitleRes).uppercase(),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.ExtraBold,
-                    color = androidx.compose.ui.graphics.Color.White,
+                    color = Color.White,
                     letterSpacing = 2.sp
                 )
             }
@@ -646,23 +763,25 @@ private fun MemorialHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 20.dp),
+                .padding(horizontal = 16.dp, vertical = 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Ornamental Gilded Medallion Holding Procedural Avatar
+            // Face-Free Geometric Monogram Avatar Medallion
             Box(
                 modifier = Modifier
-                    .size(96.dp)
-                    .clip(androidx.compose.foundation.shape.CircleShape)
-                    .background(androidx.compose.ui.graphics.Color.White)
-                    .border(3.dp, GoldAccent, androidx.compose.foundation.shape.CircleShape),
+                    .size(68.dp)
+                    .clip(CircleShape)
+                    .background(SlateNavyElevated)
+                    .border(2.dp, GoldAccent, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                ProceduralAvatarPortrait(
-                    config = character.avatarConfig,
-                    age = character.age,
-                    expression = Expression.NEUTRAL,
-                    modifier = Modifier.fillMaxSize()
+                Text(
+                    text = getPersonInitials(character.name),
+                    style = TabularFigures.copy(
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = GoldAccent
+                    )
                 )
             }
 
@@ -688,31 +807,31 @@ private fun MemorialHeader(
 
             Spacer(modifier = Modifier.height(6.dp))
 
+            // Full Name & Birthplace Country Flag
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                CountryFlag(countryCode = character.countryCode, size = 24.dp)
+                CountryFlag(countryCode = character.countryCode, size = 22.dp)
                 Text(
                     text = character.name,
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = InkPrimary,
+                    color = OffWhitePrimary,
                     textAlign = TextAlign.Center,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }
 
+            // Lifespan & Age in Tabular Monospace
             Text(
-                text = stringResource(
-                    R.string.format_life_span,
-                    character.birthYear,
-                    deathYear,
-                    stringResource(R.string.format_age, character.age)
+                text = "${character.birthYear} – $deathYear · ${stringResource(R.string.format_age, character.age)}",
+                style = TabularFigures.copy(
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = SteelSecondary
                 ),
-                style = MaterialTheme.typography.bodySmall,
-                color = InkSecondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -720,7 +839,7 @@ private fun MemorialHeader(
             Text(
                 text = stage.name.lowercase().replaceFirstChar { it.titlecase() },
                 style = MaterialTheme.typography.labelMedium,
-                color = TealPrimary,
+                color = RoyalIndigo,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(top = 2.dp)
             )
@@ -729,11 +848,11 @@ private fun MemorialHeader(
 
             // Cause of Death Commemorative Plaque
             Card(
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = CoralNegative.copy(alpha = 0.14f)
+                    containerColor = CrimsonDanger.copy(alpha = 0.12f)
                 ),
-                border = androidx.compose.foundation.BorderStroke(1.dp, CoralNegative.copy(alpha = 0.4f))
+                border = BorderStroke(1.dp, CrimsonDanger.copy(alpha = 0.35f))
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
@@ -743,14 +862,14 @@ private fun MemorialHeader(
                         text = deathCauseLabel,
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = InkPrimary,
+                        color = OffWhitePrimary,
                         textAlign = TextAlign.Center
                     )
                     if (deathFlavorText.isNotBlank()) {
                         Text(
                             text = deathFlavorText,
                             style = MaterialTheme.typography.bodySmall,
-                            color = InkPrimary.copy(alpha = 0.85f),
+                            color = OffWhitePrimary.copy(alpha = 0.85f),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -758,7 +877,7 @@ private fun MemorialHeader(
                     if (lifeArchetypeLabel.isNotBlank()) {
                         Text(
                             text = lifeArchetypeLabel,
-                            style = MaterialTheme.typography.labelLarge,
+                            style = MaterialTheme.typography.labelMedium,
                             color = GoldAccent,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
@@ -768,15 +887,15 @@ private fun MemorialHeader(
                     if (legacyStamp.isNotBlank()) {
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = GoldAccent.copy(alpha = 0.25f),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, GoldAccent.copy(alpha = 0.6f)),
+                            color = GoldAccent.copy(alpha = 0.22f),
+                            border = BorderStroke(1.dp, GoldAccent.copy(alpha = 0.5f)),
                             modifier = Modifier.padding(top = 8.dp)
                         ) {
                             Text(
                                 text = legacyStamp,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = InkPrimary,
+                                color = OffWhitePrimary,
                                 letterSpacing = 0.8.sp,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
@@ -787,7 +906,7 @@ private fun MemorialHeader(
                             text = "\"$epitaph\"",
                             style = MaterialTheme.typography.bodySmall,
                             fontStyle = FontStyle.Italic,
-                            color = InkPrimary.copy(alpha = 0.9f),
+                            color = OffWhitePrimary.copy(alpha = 0.9f),
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp)
                         )
@@ -797,27 +916,37 @@ private fun MemorialHeader(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // 3-Column Carved Monument Metrics Strip
+            // 4 Highlight Milestone Chips (Net Worth, Pinnacle Career, Family, Legacy Ribbon)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 MonumentMetricChip(
                     icon = AppIcons.Money,
-                    label = stringResource(R.string.monument_lifetime_wealth),
+                    label = stringResource(R.string.label_net_worth),
                     value = formatMoney(netWorth, character.countryCode),
+                    valueColor = EmeraldCash,
                     modifier = Modifier.weight(1f)
                 )
                 MonumentMetricChip(
                     icon = AppIcons.Career,
                     label = stringResource(R.string.label_career),
                     value = careerRecap.split("·").firstOrNull()?.trim() ?: "Independent",
+                    valueColor = OffWhitePrimary,
                     modifier = Modifier.weight(1f)
                 )
                 MonumentMetricChip(
                     icon = AppIcons.Family,
                     label = stringResource(R.string.label_family),
                     value = "$childrenCount Children",
+                    valueColor = OffWhitePrimary,
+                    modifier = Modifier.weight(1f)
+                )
+                MonumentMetricChip(
+                    icon = AppIcons.Tombstone,
+                    label = "Legacy",
+                    value = stringResource(ribbonTitleRes),
+                    valueColor = GoldAccent,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -827,42 +956,47 @@ private fun MemorialHeader(
 
 @Composable
 private fun MonumentMetricChip(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     label: String,
     value: String,
+    valueColor: Color = OffWhitePrimary,
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(10.dp),
-        color = CreamBg,
-        border = androidx.compose.foundation.BorderStroke(1.dp, OutlineInk)
+        color = SlateNavyElevated,
+        border = BorderStroke(1.dp, HairlineBorder)
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = TealPrimary,
-                modifier = Modifier.size(16.dp)
+                tint = valueColor,
+                modifier = Modifier.size(15.dp)
             )
             Text(
                 text = value,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = InkPrimary,
+                style = TabularFigures.copy(
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = valueColor
+                ),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-                color = InkSecondary,
+                color = SteelSecondary,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
             )
         }
     }
@@ -875,23 +1009,21 @@ private fun SummarySectionCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = PaperWhite
-        ),
-        border = androidx.compose.foundation.BorderStroke(1.dp, OutlineInk),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = SlateNavyCard),
+        border = BorderStroke(1.dp, HairlineBorder),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-
         Column(
             modifier = Modifier.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = TealPrimary
+                text = title.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = RoyalIndigo,
+                letterSpacing = 1.sp
             )
             content()
         }
@@ -907,11 +1039,11 @@ private fun FinalStatsGrid(stats: Stats, netWorth: Int, countryCode: String) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         maxItemsInEachRow = 2
     ) {
-        val chipModifier = Modifier.fillMaxWidth(0.47f)
-        StatChip(label = stringResource(R.string.stat_health), value = "${stats.health}", modifier = chipModifier)
-        StatChip(label = stringResource(R.string.stat_happiness), value = "${stats.happiness}", modifier = chipModifier)
-        StatChip(label = stringResource(R.string.stat_smarts), value = "${stats.smarts}", modifier = chipModifier)
-        StatChip(label = stringResource(R.string.stat_looks), value = "${stats.looks}", modifier = chipModifier)
+        val chipModifier = Modifier.fillMaxWidth(0.48f)
+        StatChip(label = stringResource(R.string.stat_health), value = "${stats.health}%", modifier = chipModifier)
+        StatChip(label = stringResource(R.string.stat_happiness), value = "${stats.happiness}%", modifier = chipModifier)
+        StatChip(label = stringResource(R.string.stat_smarts), value = "${stats.smarts}%", modifier = chipModifier)
+        StatChip(label = stringResource(R.string.stat_looks), value = "${stats.looks}%", modifier = chipModifier)
         StatChip(
             label = stringResource(R.string.stat_money),
             value = formatMoney(stats.money, countryCode),
@@ -943,24 +1075,30 @@ private fun StatChip(
     Column(
         modifier = modifier
             .background(
-                color = if (accent) GoldAccent.copy(alpha = 0.12f)
-                else MaterialTheme.colorScheme.surface,
-                shape = RoundedCornerShape(12.dp)
+                color = if (accent) GoldAccent.copy(alpha = 0.14f) else SlateNavyElevated,
+                shape = RoundedCornerShape(10.dp)
             )
-            .padding(horizontal = 12.dp, vertical = 10.dp)
+            .border(
+                1.dp,
+                if (accent) GoldAccent.copy(alpha = 0.4f) else HairlineBorder,
+                RoundedCornerShape(10.dp)
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = SteelSecondary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
         Text(
             text = value,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = if (accent) GoldAccent else MaterialTheme.colorScheme.onSurface,
+            style = TabularFigures.copy(
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (accent) GoldAccent else OffWhitePrimary
+            ),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -1015,20 +1153,21 @@ private fun AchievementsShowcase(badges: List<ShareAchievementBadge>) {
             Row(
                 modifier = Modifier
                     .background(
-                        GoldAccent.copy(alpha = 0.12f),
+                        SlateNavyElevated,
                         RoundedCornerShape(10.dp)
                     )
+                    .border(1.dp, GoldAccent.copy(alpha = 0.35f), RoundedCornerShape(10.dp))
                     .padding(horizontal = 10.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IllustrationImage(
                     ref = IllustrationCatalog.getIllustrationForAchievementCategory(badge.category),
-                    size = 22.dp
+                    size = 20.dp
                 )
                 Text(
                     text = stringResource(badge.titleRes),
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = GoldAccent,
                     maxLines = 2,
@@ -1051,17 +1190,18 @@ private fun RecapRow(
         verticalAlignment = Alignment.Top
     ) {
         if (illustration != null) {
-            IllustrationImage(ref = illustration, size = 32.dp)
+            IllustrationImage(ref = illustration, size = 28.dp)
         }
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = SteelSecondary,
             modifier = Modifier.weight(0.35f)
         )
         Text(
             text = value,
             style = MaterialTheme.typography.bodySmall,
+            color = OffWhitePrimary,
             modifier = Modifier.weight(0.65f),
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
@@ -1074,25 +1214,35 @@ private fun SummaryEventLogCard(entry: String, ageTag: Int) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-        )
+        colors = CardDefaults.cardColors(containerColor = SlateNavyElevated),
+        border = BorderStroke(1.dp, HairlineBorder)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = stringResource(R.string.format_age, ageTag.coerceAtLeast(0)),
-                style = MaterialTheme.typography.labelSmall,
-                color = TealPrimary,
-                fontWeight = FontWeight.SemiBold
-            )
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(RoyalIndigo.copy(alpha = 0.2f))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.format_age, ageTag.coerceAtLeast(0)),
+                    style = TabularFigures.copy(
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = RoyalIndigo
+                    )
+                )
+            }
             Text(
                 text = entry,
                 style = MaterialTheme.typography.bodySmall,
+                color = OffWhitePrimary,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -1100,6 +1250,7 @@ private fun SummaryEventLogCard(entry: String, ageTag: Int) {
 }
 
 @Preview(showBackground = true, widthDp = 360, name = "Life summary 360dp")
+@Preview(showBackground = true, widthDp = 412, name = "Life summary 412dp")
 @Composable
 private fun LifeSummaryScreenPreview() {
     val character = Character(

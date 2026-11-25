@@ -48,9 +48,9 @@ import com.maisha.game.R
 import com.maisha.game.data.model.Expression
 import com.maisha.game.data.model.Person
 import com.maisha.game.domain.HeirCandidatePreview
-import com.maisha.game.ui.avatar.ProceduralAvatarPortrait
 import com.maisha.game.ui.components.ConfirmActionDialog
 import com.maisha.game.ui.components.ConfirmSeverity
+import com.maisha.game.ui.components.getPersonInitials
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.Hairline
@@ -60,6 +60,7 @@ import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.StatHealth
 import com.maisha.game.ui.theme.StatSmarts
+import com.maisha.game.ui.theme.TabularFigures
 import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
 
@@ -273,18 +274,22 @@ private fun HeirDossierCard(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Procedural Portrait
+                // Geometric Monogram Avatar Badge (No faces or emojis)
                 Box(
                     modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .border(1.5.dp, TealPrimary.copy(alpha = 0.4f), CircleShape)
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(GoldAccent.copy(alpha = 0.16f))
+                        .border(1.dp, GoldAccent.copy(alpha = 0.4f), RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
                 ) {
-                    ProceduralAvatarPortrait(
-                        config = heir.avatarConfig,
-                        age = heir.age,
-                        expression = expression,
-                        modifier = Modifier.fillMaxSize()
+                    Text(
+                        text = getPersonInitials(heir.name),
+                        style = TabularFigures.copy(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = GoldAccent
+                        )
                     )
                 }
 
@@ -330,9 +335,11 @@ private fun HeirDossierCard(
                         )
                         Text(
                             text = "${stringResource(R.string.stat_smarts)} ${heir.stats.smarts}%",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = StatSmarts,
-                            fontWeight = FontWeight.SemiBold
+                            style = TabularFigures.copy(
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = StatSmarts
+                            )
                         )
                     }
                 }

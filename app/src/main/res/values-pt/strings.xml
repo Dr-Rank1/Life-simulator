@@ -48,6 +48,7 @@
     <string name="btn_sell">Vender</string>
     <string name="btn_overwrite">Substituir</string>
     <string name="btn_new_life">Nova vida</string>
+    <string name="btn_life_log">Registro de Vida</string>
     <string name="btn_start_life">Começar vida</string>
     <string name="btn_random_name">Nome aleatório</string>
     <string name="btn_aging">Envelhecendo…</string>

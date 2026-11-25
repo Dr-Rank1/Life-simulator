@@ -1,8 +1,9 @@
-// app/src/main/java/com/maisha\game/ui/charactercreation/CharacterCreationScreen.kt
+// app/src/main/java/com/maisha/game/ui/charactercreation/CharacterCreationScreen.kt
 package com.maisha.game.ui.charactercreation
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -27,16 +29,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Shuffle
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -45,7 +45,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -55,7 +54,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -68,13 +66,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maisha.game.R
@@ -83,29 +84,32 @@ import com.maisha.game.data.model.Country
 import com.maisha.game.data.model.Gender
 import com.maisha.game.data.model.Stats
 import com.maisha.game.domain.StartingStatArchetype
-import com.maisha.game.ui.avatar.AvatarImage
+import com.maisha.game.feedback.HapticType
 import com.maisha.game.ui.components.CountryFlag
+import com.maisha.game.ui.feedback.LocalFeedbackManager
+import com.maisha.game.ui.theme.AmberWarning
 import com.maisha.game.ui.theme.AppIcons
-import com.maisha.game.ui.theme.CreamBg
-import com.maisha.game.ui.theme.GoldAccent
-import com.maisha.game.ui.theme.Hairline
-import com.maisha.game.ui.theme.InkPrimary
-import com.maisha.game.ui.theme.InkSecondary
-import com.maisha.game.ui.theme.InkTertiary
-import com.maisha.game.ui.theme.LifeGreen
-import com.maisha.game.ui.theme.LifeGreenSoft
-import com.maisha.game.ui.theme.PaperWhite
-import com.maisha.game.ui.theme.StatHappiness
-import com.maisha.game.ui.theme.StatHealth
-import com.maisha.game.ui.theme.StatLooks
-import com.maisha.game.ui.theme.StatSmarts
-import com.maisha.game.ui.theme.TealPrimary
+import com.maisha.game.ui.theme.CrimsonDanger
+import com.maisha.game.ui.theme.EmeraldCash
+import com.maisha.game.ui.theme.HairlineBorder
+import com.maisha.game.ui.theme.MaishaFontFamily
+import com.maisha.game.ui.theme.MaishaTheme
+import com.maisha.game.ui.theme.ObsidianBg
+import com.maisha.game.ui.theme.OffWhitePrimary
+import com.maisha.game.ui.theme.RoyalIndigo
+import com.maisha.game.ui.theme.SlateNavyCard
+import com.maisha.game.ui.theme.SlateNavyElevated
+import com.maisha.game.ui.theme.SlateNavyMuted
+import com.maisha.game.ui.theme.SteelSecondary
+import com.maisha.game.ui.theme.SteelTertiary
+import com.maisha.game.ui.theme.TabularFigures
 import kotlin.math.roundToInt
 
 /**
- * Mobile life-sim character creation (BitLife + Another Life aesthetic).
- * Pre-filled with randomized defaults, bold hero header, quick shuffle,
- * country preview opportunity card, and 1-tap archetype presets.
+ * Minimalist, face-free dark character creation screen (AltLife & BitLife inspired).
+ * Features an instant randomized preset generator, crisp segmented selectors for
+ * Gender and Starting Country/City, a clean starting attributes preview card,
+ * and a bold full-width Start Life CTA button.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,6 +129,9 @@ fun CharacterCreationScreen(
     onContinueToAvatar: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
+    val view = LocalView.current
+    val feedbackManager = runCatching { LocalFeedbackManager.current }.getOrNull()
+
     val selectedCountry = CountryCatalog.getCountry(uiState.selectedCountryCode)
     val countryFlavor = CountryCatalog.flavorFor(uiState.selectedCountryCode)
 
@@ -134,7 +141,7 @@ fun CharacterCreationScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(CreamBg)
+            .background(ObsidianBg)
             .statusBarsPadding()
             .navigationBarsPadding()
             .imePadding()
@@ -143,10 +150,10 @@ fun CharacterCreationScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // ── Top Header with Arcade Quick-Roll Action ────────────────────
+            // -- Top Header with Arcade Preset Generator Action --------------------
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -157,28 +164,38 @@ fun CharacterCreationScreen(
                         text = stringResource(R.string.title_new_life).uppercase(),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.ExtraBold,
-                        color = InkPrimary,
+                        color = OffWhitePrimary,
                         letterSpacing = 1.sp
                     )
                     if (uiState.secondWindBonusLabel != null) {
                         Text(
                             text = uiState.secondWindBonusLabel,
                             style = MaterialTheme.typography.labelSmall,
-                            color = LifeGreen,
+                            color = EmeraldCash,
                             fontWeight = FontWeight.Bold
+                        )
+                    } else {
+                        Text(
+                            text = "Forge your destiny",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = SteelSecondary
                         )
                     }
                 }
 
-                // Instant Shuffle / Quick Roll Action
+                // Instant Randomized Preset Generator Button
                 Surface(
-                    shape = RoundedCornerShape(14.dp),
-                    color = PaperWhite,
-                    border = BorderStroke(1.dp, Hairline),
+                    shape = RoundedCornerShape(12.dp),
+                    color = SlateNavyElevated,
+                    border = BorderStroke(1.dp, RoyalIndigo.copy(alpha = 0.45f)),
                     shadowElevation = 2.dp,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(14.dp))
-                        .clickable(onClick = onRandomizeLife)
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
+                            onRandomizeLife()
+                        }
+                        .semantics { role = Role.Button }
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -188,189 +205,173 @@ fun CharacterCreationScreen(
                         Icon(
                             imageVector = AppIcons.Dice,
                             contentDescription = stringResource(R.string.btn_quick_roll),
-                            tint = TealPrimary,
+                            tint = RoyalIndigo,
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
                             text = stringResource(R.string.btn_quick_roll),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
-                            color = InkPrimary
+                            color = OffWhitePrimary
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
-            // ── Centered 92dp Baby Avatar with Cycle Halo ───────────────────
-            val avatarCycleHint = stringResource(R.string.cycle_avatar_hint)
-            Box(
-                modifier = Modifier
-                    .size(96.dp)
-                    .clip(CircleShape)
-                    .background(PaperWhite)
-                    .border(2.dp, TealPrimary.copy(alpha = 0.3f), CircleShape)
-                    .clickable(onClick = onCycleAvatar)
-                    .semantics { contentDescription = avatarCycleHint },
-                contentAlignment = Alignment.Center
-            ) {
-                AvatarImage(
-                    config = uiState.avatarConfig,
-                    size = 88.dp,
-                    age = 0
-                )
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .size(28.dp)
-                        .clip(CircleShape)
-                        .background(PaperWhite)
-                        .border(1.dp, Hairline, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Shuffle,
-                        contentDescription = avatarCycleHint,
-                        tint = TealPrimary,
-                        modifier = Modifier.size(15.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // ── Primary Identity Inputs (Name & Gender) ─────────────────────
-            Column(
+            // -- Name Input with Randomize Dice ------------------------------
+            OutlinedTextField(
+                value = uiState.name,
+                onValueChange = onNameChange,
+                label = { Text(stringResource(R.string.label_your_name)) },
+                placeholder = { Text(stringResource(R.string.hint_enter_name)) },
+                singleLine = true,
+                isError = uiState.nameError != null,
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                // Name Input with Dice Shuffle Button
-                OutlinedTextField(
-                    value = uiState.name,
-                    onValueChange = onNameChange,
-                    label = { Text(stringResource(R.string.label_your_name)) },
-                    placeholder = { Text(stringResource(R.string.hint_enter_name)) },
-                    singleLine = true,
-                    isError = uiState.nameError != null,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    leadingIcon = {
+                shape = RoundedCornerShape(12.dp),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Rounded.Person,
+                        contentDescription = null,
+                        tint = SteelSecondary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                },
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
+                            onRandomName()
+                        },
+                        modifier = Modifier.size(44.dp)
+                    ) {
                         Icon(
-                            imageVector = Icons.Rounded.Person,
-                            contentDescription = null,
-                            tint = InkTertiary,
+                            imageVector = AppIcons.Dice,
+                            contentDescription = stringResource(R.string.btn_random_name),
+                            tint = RoyalIndigo,
                             modifier = Modifier.size(20.dp)
                         )
-                    },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = onRandomName,
-                            modifier = Modifier.size(44.dp)
-                        ) {
-                            Icon(
-                                imageVector = AppIcons.Dice,
-                                contentDescription = stringResource(R.string.btn_random_name),
-                                tint = TealPrimary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = InkPrimary,
-                        unfocusedTextColor = InkPrimary,
-                        focusedBorderColor = LifeGreen,
-                        unfocusedBorderColor = Hairline,
-                        focusedContainerColor = PaperWhite,
-                        unfocusedContainerColor = PaperWhite,
-                        cursorColor = LifeGreen
-                    )
-                )
-
-                // Gender Toggle
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(PaperWhite)
-                        .border(1.dp, Hairline, RoundedCornerShape(16.dp))
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    val isMale = uiState.selectedGender == Gender.MALE
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (isMale) LifeGreenSoft else Color.Transparent)
-                            .clickable { onGenderSelected(Gender.MALE) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = AppIcons.Male,
-                                contentDescription = null,
-                                tint = if (isMale) LifeGreen else InkTertiary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.gender_male),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = if (isMale) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isMale) InkPrimary else InkTertiary
-                            )
-                        }
                     }
+                },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = OffWhitePrimary,
+                    unfocusedTextColor = OffWhitePrimary,
+                    focusedBorderColor = RoyalIndigo,
+                    unfocusedBorderColor = HairlineBorder,
+                    focusedContainerColor = SlateNavyCard,
+                    unfocusedContainerColor = SlateNavyCard,
+                    cursorColor = RoyalIndigo,
+                    focusedLabelColor = RoyalIndigo,
+                    unfocusedLabelColor = SteelSecondary,
+                    focusedPlaceholderColor = SteelTertiary,
+                    unfocusedPlaceholderColor = SteelTertiary
+                )
+            )
 
-                    val isFemale = uiState.selectedGender == Gender.FEMALE
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(if (isFemale) LifeGreenSoft else Color.Transparent)
-                            .clickable { onGenderSelected(Gender.FEMALE) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = AppIcons.Female,
-                                contentDescription = null,
-                                tint = if (isFemale) LifeGreen else InkTertiary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.gender_female),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = if (isFemale) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isFemale) InkPrimary else InkTertiary
-                            )
+            // -- Crisp Segmented Gender Selector -----------------------------
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(SlateNavyElevated)
+                    .border(1.dp, HairlineBorder, RoundedCornerShape(12.dp))
+                    .padding(4.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                val isMale = uiState.selectedGender == Gender.MALE
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (isMale) RoyalIndigo.copy(alpha = 0.22f) else Color.Transparent)
+                        .border(
+                            1.dp,
+                            if (isMale) RoyalIndigo.copy(alpha = 0.55f) else Color.Transparent,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clickable {
+                            feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
+                            onGenderSelected(Gender.MALE)
                         }
+                        .semantics { role = Role.Tab },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = AppIcons.Male,
+                            contentDescription = null,
+                            tint = if (isMale) RoyalIndigo else SteelSecondary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.gender_male),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (isMale) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isMale) OffWhitePrimary else SteelSecondary
+                        )
+                    }
+                }
+
+                val isFemale = uiState.selectedGender == Gender.FEMALE
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (isFemale) RoyalIndigo.copy(alpha = 0.22f) else Color.Transparent)
+                        .border(
+                            1.dp,
+                            if (isFemale) RoyalIndigo.copy(alpha = 0.55f) else Color.Transparent,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clickable {
+                            feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
+                            onGenderSelected(Gender.FEMALE)
+                        }
+                        .semantics { role = Role.Tab },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = AppIcons.Female,
+                            contentDescription = null,
+                            tint = if (isFemale) RoyalIndigo else SteelSecondary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.gender_female),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = if (isFemale) FontWeight.Bold else FontWeight.Medium,
+                            color = if (isFemale) OffWhitePrimary else SteelSecondary
+                        )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // ── Crisp Country Opportunity Card ─────────────────────────────
+            // -- Crisp Starting Country/City Drill-Down Card -----------------
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showCountrySheet = true },
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = PaperWhite),
+                    .clickable {
+                        feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
+                        showCountrySheet = true
+                    }
+                    .semantics { role = Role.Button },
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = SlateNavyCard),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                border = BorderStroke(1.dp, Hairline)
+                border = BorderStroke(1.dp, HairlineBorder)
             ) {
                 Column(
                     modifier = Modifier
@@ -394,41 +395,38 @@ fun CharacterCreationScreen(
                                     text = selectedCountry.displayName,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = InkPrimary
+                                    color = OffWhitePrimary
                                 )
                                 Text(
-                                    text = stringResource(R.string.label_birthplace_dossier),
+                                    text = "${selectedCountry.displayName} · ${stringResource(R.string.label_birthplace_dossier)}",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = InkSecondary
+                                    color = SteelSecondary
                                 )
                             }
                         }
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            imageVector = Icons.Rounded.ChevronRight,
                             contentDescription = stringResource(R.string.btn_change_country),
-                            tint = TealPrimary,
-                            modifier = Modifier.size(22.dp)
+                            tint = SteelSecondary,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
 
-                    // 3-Column Country Details Chips
+                    // 3-Column Country Dossier Pills
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Currency Chip
                         CountryDetailPill(
                             icon = AppIcons.Money,
                             label = "${selectedCountry.currencyCode} (${selectedCountry.currencySymbol})",
                             modifier = Modifier.weight(1f)
                         )
-                        // Commute Chip
                         CountryDetailPill(
                             icon = AppIcons.Transport,
                             label = countryFlavor.commonTransportMode.replaceFirstChar { it.uppercase() },
                             modifier = Modifier.weight(1f)
                         )
-                        // Exam Chip
                         CountryDetailPill(
                             icon = AppIcons.Exam,
                             label = countryFlavor.secondaryExamName,
@@ -438,14 +436,12 @@ fun CharacterCreationScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
-
-            // ── Starting Aptitude Archetype Presets ──────────────────────────
+            // -- Clean Starting Attributes Preview Card ----------------------
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = PaperWhite),
-                border = BorderStroke(1.dp, Hairline),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = SlateNavyCard),
+                border = BorderStroke(1.dp, HairlineBorder),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
@@ -461,25 +457,30 @@ fun CharacterCreationScreen(
                     ) {
                         Column {
                             Text(
-                                text = stringResource(R.string.label_starting_aptitude),
-                                style = MaterialTheme.typography.titleSmall,
+                                text = stringResource(R.string.label_starting_aptitude).uppercase(),
+                                style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = InkPrimary
+                                color = OffWhitePrimary,
+                                letterSpacing = 1.sp
                             )
                             Text(
                                 text = stringResource(R.string.label_starting_aptitude_subtitle),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = InkTertiary
+                                color = SteelSecondary,
+                                fontSize = 11.sp
                             )
                         }
                         IconButton(
-                            onClick = { showStatsSheet = true },
+                            onClick = {
+                                feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
+                                showStatsSheet = true
+                            },
                             modifier = Modifier.size(36.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Tune,
                                 contentDescription = stringResource(R.string.btn_fine_tune_stats),
-                                tint = TealPrimary,
+                                tint = RoyalIndigo,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -495,12 +496,14 @@ fun CharacterCreationScreen(
                         StartingStatArchetype.values().forEach { archetype ->
                             val isSelected = uiState.selectedArchetype == archetype
                             val bg by animateColorAsState(
-                                targetValue = if (isSelected) LifeGreenSoft else PaperWhite,
-                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                targetValue = if (isSelected) RoyalIndigo.copy(alpha = 0.22f) else SlateNavyElevated,
+                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                label = "presetBg"
                             )
                             val borderCol by animateColorAsState(
-                                targetValue = if (isSelected) LifeGreen else Hairline,
-                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                targetValue = if (isSelected) RoyalIndigo else HairlineBorder,
+                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                label = "presetBorder"
                             )
                             val labelRes = when (archetype) {
                                 StartingStatArchetype.BALANCED -> R.string.archetype_preset_balanced
@@ -512,18 +515,22 @@ fun CharacterCreationScreen(
 
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
+                                    .clip(RoundedCornerShape(10.dp))
                                     .background(bg)
-                                    .border(1.dp, borderCol, RoundedCornerShape(12.dp))
-                                    .clickable { onArchetypeSelected(archetype) }
-                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                    .border(1.dp, borderCol, RoundedCornerShape(10.dp))
+                                    .clickable {
+                                        feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
+                                        onArchetypeSelected(archetype)
+                                    }
+                                    .padding(horizontal = 12.dp, vertical = 7.dp)
+                                    .semantics { role = Role.Tab },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = stringResource(labelRes),
-                                    style = MaterialTheme.typography.labelMedium,
+                                    style = MaterialTheme.typography.labelSmall,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                                    color = if (isSelected) LifeGreen else InkPrimary
+                                    color = if (isSelected) OffWhitePrimary else SteelSecondary
                                 )
                             }
                         }
@@ -532,23 +539,31 @@ fun CharacterCreationScreen(
                         val isCustom = uiState.selectedArchetype == null
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isCustom) LifeGreenSoft else PaperWhite)
-                                .border(1.dp, if (isCustom) LifeGreen else Hairline, RoundedCornerShape(12.dp))
-                                .clickable { showStatsSheet = true }
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (isCustom) RoyalIndigo.copy(alpha = 0.22f) else SlateNavyElevated)
+                                .border(
+                                    1.dp,
+                                    if (isCustom) RoyalIndigo else HairlineBorder,
+                                    RoundedCornerShape(10.dp)
+                                )
+                                .clickable {
+                                    feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
+                                    showStatsSheet = true
+                                }
+                                .padding(horizontal = 12.dp, vertical = 7.dp)
+                                .semantics { role = Role.Tab },
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = stringResource(R.string.archetype_preset_custom),
-                                style = MaterialTheme.typography.labelMedium,
+                                style = MaterialTheme.typography.labelSmall,
                                 fontWeight = if (isCustom) FontWeight.Bold else FontWeight.SemiBold,
-                                color = if (isCustom) LifeGreen else InkPrimary
+                                color = if (isCustom) OffWhitePrimary else SteelSecondary
                             )
                         }
                     }
 
-                    // Live 4-Stat Meters HUD
+                    // Live 4-Stat Gauges (Threshold color-coded, Tabular monospace)
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -556,50 +571,49 @@ fun CharacterCreationScreen(
                         StatGaugeRow(
                             icon = AppIcons.Health,
                             name = stringResource(R.string.stat_health),
-                            value = uiState.selectedStats.health,
-                            color = StatHealth
+                            value = uiState.selectedStats.health
                         )
                         StatGaugeRow(
                             icon = AppIcons.Happiness,
                             name = stringResource(R.string.stat_happiness),
-                            value = uiState.selectedStats.happiness,
-                            color = StatHappiness
+                            value = uiState.selectedStats.happiness
                         )
                         StatGaugeRow(
                             icon = AppIcons.Smarts,
                             name = stringResource(R.string.stat_smarts),
-                            value = uiState.selectedStats.smarts,
-                            color = StatSmarts
+                            value = uiState.selectedStats.smarts
                         )
                         StatGaugeRow(
                             icon = AppIcons.Looks,
                             name = stringResource(R.string.stat_looks),
-                            value = uiState.selectedStats.looks,
-                            color = StatLooks
+                            value = uiState.selectedStats.looks
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
-            // ── Action Footer ───────────────────────────────────────────────
+            // -- Action Footer: Randomize Secondary + Bold Full-Width Start CTA --
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 // Secondary Randomize Life Button
                 OutlinedButton(
-                    onClick = onRandomizeLife,
+                    onClick = {
+                        feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
+                        onRandomizeLife()
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = PaperWhite,
-                        contentColor = InkPrimary
+                        containerColor = SlateNavyElevated,
+                        contentColor = OffWhitePrimary
                     ),
-                    border = BorderStroke(1.dp, Hairline)
+                    border = BorderStroke(1.dp, HairlineBorder)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -608,14 +622,14 @@ fun CharacterCreationScreen(
                         Icon(
                             imageVector = AppIcons.Dice,
                             contentDescription = null,
-                            tint = TealPrimary,
+                            tint = RoyalIndigo,
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
                             text = stringResource(R.string.btn_randomize_life),
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
-                            color = InkPrimary
+                            color = OffWhitePrimary
                         )
                     }
                 }
@@ -628,14 +642,17 @@ fun CharacterCreationScreen(
                     stringResource(R.string.btn_start_life)
                 }
                 Button(
-                    onClick = onStartLife,
+                    onClick = {
+                        feedbackManager?.triggerHaptic(view, HapticType.SUCCESS)
+                        onStartLife()
+                    },
                     enabled = !uiState.isSaving,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(54.dp),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = LifeGreen,
+                        containerColor = RoyalIndigo,
                         contentColor = Color.White
                     ),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 3.dp)
@@ -643,16 +660,17 @@ fun CharacterCreationScreen(
                     Text(
                         text = startLabel,
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = MaishaFontFamily
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 
-    // ── Country Picker Bottom Sheet ─────────────────────────────────────────
+    // -- Country Picker Bottom Sheet (Dark Obsidian Aesthetic) ---------------
     if (showCountrySheet) {
         ModalBottomSheet(
             onDismissRequest = {
@@ -660,38 +678,44 @@ fun CharacterCreationScreen(
                 onCountrySearchChange("")
             },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            containerColor = PaperWhite,
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+            containerColor = SlateNavyCard,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 Text(
                     text = stringResource(R.string.select_country_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = InkPrimary
+                    color = OffWhitePrimary
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 OutlinedTextField(
                     value = uiState.countrySearchQuery,
                     onValueChange = onCountrySearchChange,
-                    placeholder = { Text(stringResource(R.string.hint_search_countries), color = InkTertiary) },
+                    placeholder = {
+                        Text(stringResource(R.string.hint_search_countries), color = SteelSecondary)
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = LifeGreen,
-                        unfocusedBorderColor = Hairline,
-                        cursorColor = LifeGreen
+                        focusedTextColor = OffWhitePrimary,
+                        unfocusedTextColor = OffWhitePrimary,
+                        focusedBorderColor = RoyalIndigo,
+                        unfocusedBorderColor = HairlineBorder,
+                        focusedContainerColor = SlateNavyElevated,
+                        unfocusedContainerColor = SlateNavyElevated,
+                        cursorColor = RoyalIndigo
                     )
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 val list = if (uiState.countrySearchQuery.isBlank()) {
                     CountryCatalog.all()
@@ -702,7 +726,7 @@ fun CharacterCreationScreen(
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(360.dp),
+                        .heightIn(max = 380.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     items(list, key = { it.code }) { country ->
@@ -711,9 +735,15 @@ fun CharacterCreationScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(if (isSelected) LifeGreenSoft else Color.Transparent)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) RoyalIndigo.copy(alpha = 0.2f) else SlateNavyElevated)
+                                .border(
+                                    1.dp,
+                                    if (isSelected) RoyalIndigo.copy(alpha = 0.5f) else HairlineBorder,
+                                    RoundedCornerShape(12.dp)
+                                )
                                 .clickable {
+                                    feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
                                     onCountrySelected(country.code)
                                     showCountrySheet = false
                                 }
@@ -727,19 +757,19 @@ fun CharacterCreationScreen(
                                     text = country.displayName,
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = InkPrimary
+                                    color = OffWhitePrimary
                                 )
                                 Text(
                                     text = "${country.currencyCode} (${country.currencySymbol}) · ${flavor.secondaryExamName}",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = InkTertiary
+                                    color = SteelSecondary
                                 )
                             }
                             if (isSelected) {
                                 Icon(
                                     imageVector = Icons.Rounded.Check,
                                     contentDescription = null,
-                                    tint = LifeGreen,
+                                    tint = EmeraldCash,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -751,19 +781,19 @@ fun CharacterCreationScreen(
         }
     }
 
-    // ── Custom Attributes Bottom Sheet (No Emojis!) ─────────────────────────
+    // -- Custom Attributes Bottom Sheet (Dark Monospace Sliders) -------------
     if (showStatsSheet) {
         ModalBottomSheet(
             onDismissRequest = { showStatsSheet = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            containerColor = PaperWhite,
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
+            containerColor = SlateNavyCard,
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Column {
@@ -771,12 +801,12 @@ fun CharacterCreationScreen(
                         text = stringResource(R.string.custom_attributes_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = InkPrimary
+                        color = OffWhitePrimary
                     )
                     Text(
                         text = stringResource(R.string.custom_attributes_subtitle),
                         style = MaterialTheme.typography.bodySmall,
-                        color = InkTertiary
+                        color = SteelSecondary
                     )
                 }
 
@@ -785,7 +815,6 @@ fun CharacterCreationScreen(
                     icon = AppIcons.Health,
                     name = stringResource(R.string.stat_health),
                     value = uiState.selectedStats.health,
-                    accentColor = StatHealth,
                     onValueChange = { onStatsChange(uiState.selectedStats.copy(health = it)) }
                 )
 
@@ -794,7 +823,6 @@ fun CharacterCreationScreen(
                     icon = AppIcons.Happiness,
                     name = stringResource(R.string.stat_happiness),
                     value = uiState.selectedStats.happiness,
-                    accentColor = StatHappiness,
                     onValueChange = { onStatsChange(uiState.selectedStats.copy(happiness = it)) }
                 )
 
@@ -803,7 +831,6 @@ fun CharacterCreationScreen(
                     icon = AppIcons.Smarts,
                     name = stringResource(R.string.stat_smarts),
                     value = uiState.selectedStats.smarts,
-                    accentColor = StatSmarts,
                     onValueChange = { onStatsChange(uiState.selectedStats.copy(smarts = it)) }
                 )
 
@@ -812,17 +839,19 @@ fun CharacterCreationScreen(
                     icon = AppIcons.Looks,
                     name = stringResource(R.string.stat_looks),
                     value = uiState.selectedStats.looks,
-                    accentColor = StatLooks,
                     onValueChange = { onStatsChange(uiState.selectedStats.copy(looks = it)) }
                 )
 
                 Button(
-                    onClick = { showStatsSheet = false },
+                    onClick = {
+                        feedbackManager?.triggerHaptic(view, HapticType.LIGHT_TAP)
+                        showStatsSheet = false
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = LifeGreen)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = RoyalIndigo)
                 ) {
                     Text(
                         text = stringResource(R.string.btn_done),
@@ -844,9 +873,9 @@ private fun CountryDetailPill(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(10.dp),
-        color = CreamBg,
-        border = BorderStroke(1.dp, Hairline)
+        shape = RoundedCornerShape(8.dp),
+        color = SlateNavyElevated,
+        border = BorderStroke(1.dp, HairlineBorder)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
@@ -856,13 +885,14 @@ private fun CountryDetailPill(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = TealPrimary,
-                modifier = Modifier.size(14.dp)
+                tint = RoyalIndigo,
+                modifier = Modifier.size(13.dp)
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
-                color = InkPrimary,
+                color = OffWhitePrimary,
+                fontSize = 10.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -874,9 +904,21 @@ private fun CountryDetailPill(
 private fun StatGaugeRow(
     icon: ImageVector,
     name: String,
-    value: Int,
-    color: Color
+    value: Int
 ) {
+    val progress = (value / 100f).coerceIn(0f, 1f)
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = "gaugeProgress"
+    )
+
+    val thresholdColor = when {
+        value > 60 -> EmeraldCash
+        value >= 30 -> AmberWarning
+        else -> CrimsonDanger
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -885,31 +927,42 @@ private fun StatGaugeRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = color,
+            tint = thresholdColor,
             modifier = Modifier.size(16.dp)
         )
         Text(
             text = name,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
-            color = InkSecondary,
-            modifier = Modifier.width(72.dp)
+            color = SteelSecondary,
+            fontSize = 12.sp,
+            modifier = Modifier.width(68.dp),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
-        LinearProgressIndicator(
-            progress = { (value / 100f).coerceIn(0f, 1f) },
+        Box(
             modifier = Modifier
                 .weight(1f)
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp)),
-            color = color,
-            trackColor = color.copy(alpha = 0.18f)
-        )
+                .height(6.dp)
+                .clip(RoundedCornerShape(3.dp))
+                .background(SlateNavyMuted)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(animatedProgress)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(thresholdColor)
+            )
+        }
         Text(
             text = "$value%",
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = color,
-            modifier = Modifier.width(36.dp),
+            style = TabularFigures.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = thresholdColor
+            ),
+            modifier = Modifier.width(38.dp),
             textAlign = TextAlign.End
         )
     }
@@ -920,9 +973,14 @@ private fun SimpleStatSlider(
     icon: ImageVector,
     name: String,
     value: Int,
-    accentColor: Color,
     onValueChange: (Int) -> Unit
 ) {
+    val accentColor = when {
+        value > 60 -> EmeraldCash
+        value >= 30 -> AmberWarning
+        else -> CrimsonDanger
+    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -943,14 +1001,16 @@ private fun SimpleStatSlider(
                     text = name,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = InkPrimary
+                    color = OffWhitePrimary
                 )
             }
             Text(
                 text = "$value%",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold,
-                color = accentColor
+                style = TabularFigures.copy(
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = accentColor
+                )
             )
         }
         Slider(
@@ -960,8 +1020,31 @@ private fun SimpleStatSlider(
             colors = SliderDefaults.colors(
                 thumbColor = accentColor,
                 activeTrackColor = accentColor,
-                inactiveTrackColor = accentColor.copy(alpha = 0.2f)
+                inactiveTrackColor = SlateNavyMuted
             )
+        )
+    }
+}
+
+@Preview(name = "Character Creation - 360dp", widthDp = 360)
+@Preview(name = "Character Creation - 412dp", widthDp = 412)
+@Composable
+private fun CharacterCreationScreenPreview() {
+    MaishaTheme {
+        CharacterCreationScreen(
+            uiState = CharacterCreationUiState(
+                name = "Sofia Reyes",
+                selectedGender = Gender.FEMALE,
+                selectedCountryCode = "MX",
+                selectedArchetype = StartingStatArchetype.BALANCED,
+                selectedStats = Stats(health = 75, happiness = 80, smarts = 65, looks = 70)
+            ),
+            filteredCountries = CountryCatalog.all(),
+            onNameChange = {},
+            onGenderSelected = {},
+            onCountrySelected = {},
+            onCountrySearchChange = {},
+            onRandomName = {}
         )
     }
 }
