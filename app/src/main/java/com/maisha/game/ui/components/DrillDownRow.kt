@@ -45,6 +45,7 @@ import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.SurfaceMuted
 
 /**
  * High-density interactive list row inspired by BitLife and Another Life.
@@ -114,7 +115,7 @@ fun DrillDownRow(
                     text = title,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = if (isRowEnabled) Color(0xFF0F172A) else InkTertiary,
+                    color = if (isRowEnabled) InkPrimary else InkTertiary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontSize = 15.sp
@@ -124,7 +125,7 @@ fun DrillDownRow(
                     Text(
                         text = subtitle,
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (isRowEnabled) Color(0xFF475569) else InkTertiary,
+                        color = if (isRowEnabled) InkSecondary else InkTertiary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 12.sp
@@ -140,15 +141,15 @@ fun DrillDownRow(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(6.dp))
-                                    .background(Color(0xFFF1F5F9))
-                                    .border(1.dp, Color(0xFFCBD5E1), RoundedCornerShape(6.dp))
+                                    .background(SurfaceMuted)
+                                    .border(1.dp, Hairline, RoundedCornerShape(6.dp))
                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                             ) {
                                 Text(
                                     text = pricePill,
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isRowEnabled) Color(0xFF0F172A) else InkTertiary,
+                                    color = if (isRowEnabled) InkPrimary else InkTertiary,
                                     fontSize = 10.sp
                                 )
                             }
@@ -158,7 +159,7 @@ fun DrillDownRow(
                             val isHigh = "high" in lower
                             val isMed = "med" in lower
                             val riskBg = if (isHigh) CoralNegative.copy(alpha = 0.12f) else if (isMed) GoldAccent.copy(alpha = 0.15f) else LifeGreen.copy(alpha = 0.12f)
-                            val riskFg = if (isHigh) CoralNegative else if (isMed) Color(0xFFB45309) else LifeGreen
+                            val riskFg = if (isHigh) CoralNegative else if (isMed) GoldAccent else LifeGreen
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(6.dp))
@@ -183,8 +184,8 @@ fun DrillDownRow(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFF1F5F9))
-                        .border(1.dp, Color(0xFFCBD5E1), RoundedCornerShape(8.dp))
+                        .background(SurfaceMuted)
+                        .border(1.dp, Hairline, RoundedCornerShape(8.dp))
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -195,14 +196,14 @@ fun DrillDownRow(
                         Icon(
                             imageVector = AppIcons.Lock,
                             contentDescription = null,
-                            tint = Color(0xFF64748B),
+                            tint = InkSecondary,
                             modifier = Modifier.size(12.dp)
                         )
                         Text(
                             text = lockBadgeText,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF475569),
+                            color = InkSecondary,
                             fontSize = 11.sp
                         )
                     }
@@ -233,7 +234,7 @@ fun DrillDownRow(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = if (isRowEnabled) Color(0xFF94A3B8) else Color(0xFFCBD5E1),
+                    tint = if (isRowEnabled) InkSecondary else Hairline,
                     modifier = Modifier.size(20.dp)
                 )
             }

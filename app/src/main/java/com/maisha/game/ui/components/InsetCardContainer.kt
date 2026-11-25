@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maisha.game.ui.theme.BorderCardSlate
+import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.SlateDivider
 
@@ -43,7 +44,7 @@ fun InsetCardContainer(
                 text = title.uppercase(),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF475569),
+                color = InkSecondary,
                 fontSize = 11.sp,
                 letterSpacing = 0.8.sp,
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)

@@ -50,6 +50,7 @@ import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.NavyDeep
+import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.TealPrimary
 
 private val skinSwatches = listOf(
@@ -112,7 +113,7 @@ fun AvatarPickerScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = PaperWhite)
         ) {
             Box(
                 modifier = Modifier
@@ -202,7 +203,7 @@ private fun HairStyleRow(
                             color = if (selected) GoldAccent else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
                             shape = CircleShape
                         )
-                        .background(Color.White)
+                        .background(PaperWhite)
                         .clickable { onSelect(index) },
                     contentAlignment = Alignment.Center
                 ) {
@@ -246,7 +247,7 @@ private fun <T> OptionalEnumRow(
                 onClick = { onSelect(null) },
                 label = { Text(noneLabel, color = InkPrimary) },
                 colors = FilterChipDefaults.filterChipColors(
-                    containerColor = Color.White,
+                    containerColor = PaperWhite,
                     labelColor = InkPrimary.copy(alpha = 0.75f),
                     selectedContainerColor = GoldAccent.copy(alpha = 0.18f),
                     selectedLabelColor = InkPrimary
@@ -258,7 +259,7 @@ private fun <T> OptionalEnumRow(
                     onClick = { onSelect(option) },
                     label = { Text(labelFor(option), color = InkPrimary) },
                     colors = FilterChipDefaults.filterChipColors(
-                        containerColor = Color.White,
+                        containerColor = PaperWhite,
                         labelColor = InkPrimary.copy(alpha = 0.75f),
                         selectedContainerColor = GoldAccent.copy(alpha = 0.18f),
                         selectedLabelColor = InkPrimary
@@ -310,7 +311,7 @@ private fun OptionalFeatureRow(
                 onClick = { onSelect(null) },
                 label = { Text(noneLabel, color = InkPrimary) },
                 colors = FilterChipDefaults.filterChipColors(
-                    containerColor = Color.White,
+                    containerColor = PaperWhite,
                     labelColor = InkPrimary.copy(alpha = 0.75f),
                     selectedContainerColor = GoldAccent.copy(alpha = 0.18f),
                     selectedLabelColor = InkPrimary
@@ -322,7 +323,7 @@ private fun OptionalFeatureRow(
                     onClick = { onSelect(index) },
                     label = { Text("${index + 1}", color = InkPrimary) },
                     colors = FilterChipDefaults.filterChipColors(
-                        containerColor = Color.White,
+                        containerColor = PaperWhite,
                         labelColor = InkPrimary.copy(alpha = 0.75f),
                         selectedContainerColor = GoldAccent.copy(alpha = 0.18f),
                         selectedLabelColor = InkPrimary

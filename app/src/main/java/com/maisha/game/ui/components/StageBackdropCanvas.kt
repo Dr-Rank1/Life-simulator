@@ -72,21 +72,21 @@ private fun DrawScope.drawChildhoodScene() {
     val w = size.width
     val h = size.height
 
-    // Warm sunny peach sky
+    // Warm dark amber-tinted dawn gradient
     drawRect(
         brush = Brush.verticalGradient(
-            colors = listOf(Color(0xFFFFF7ED), Color(0xFFFFEDD5), Color(0xFFFDBA74).copy(alpha = 0.4f))
+            colors = listOf(Color(0xFF1F1815), Color(0xFF171822), Color(0xFF131822))
         )
     )
 
     // Sun arc in top right corner
     drawCircle(
-        color = Color(0xFFFBBF24).copy(alpha = 0.35f),
+        color = Color(0xFFF59E0B).copy(alpha = 0.15f),
         radius = h * 0.7f,
         center = Offset(w * 0.95f, 0f)
     )
     drawCircle(
-        color = Color(0xFFFDE68A).copy(alpha = 0.5f),
+        color = Color(0xFFFBBF24).copy(alpha = 0.22f),
         radius = h * 0.45f,
         center = Offset(w * 0.95f, 0f)
     )
@@ -101,28 +101,28 @@ private fun DrawScope.drawChildhoodScene() {
     }
     drawPath(
         path = hillPath,
-        color = Color(0xFF86EFAC).copy(alpha = 0.35f)
+        color = Color(0xFF10B981).copy(alpha = 0.15f)
     )
 
     // Playful floating circles (bubbles/balloons motif)
-    drawCircle(Color(0xFF93C5FD).copy(alpha = 0.3f), radius = 6f, center = Offset(w * 0.15f, h * 0.35f))
-    drawCircle(Color(0xFFF472B6).copy(alpha = 0.3f), radius = 9f, center = Offset(w * 0.32f, h * 0.22f))
-    drawCircle(Color(0xFFFBBF24).copy(alpha = 0.35f), radius = 5f, center = Offset(w * 0.78f, h * 0.42f))
+    drawCircle(Color(0xFF60A5FA).copy(alpha = 0.22f), radius = 6f, center = Offset(w * 0.15f, h * 0.35f))
+    drawCircle(Color(0xFFF472B6).copy(alpha = 0.22f), radius = 9f, center = Offset(w * 0.32f, h * 0.22f))
+    drawCircle(Color(0xFFFBBF24).copy(alpha = 0.25f), radius = 5f, center = Offset(w * 0.78f, h * 0.42f))
 }
 
 private fun DrawScope.drawCampusScene() {
     val w = size.width
     val h = size.height
 
-    // Collegiate navy-indigo sky
+    // Collegiate dark indigo-navy sky
     drawRect(
         brush = Brush.verticalGradient(
-            colors = listOf(Color(0xFFEEF2FF), Color(0xFFE0E7FF), Color(0xFFC7D2FE).copy(alpha = 0.5f))
+            colors = listOf(Color(0xFF181B2E), Color(0xFF141824), Color(0xFF131822))
         )
     )
 
     // Academic column lines
-    val colColor = Color(0xFF4F46E5).copy(alpha = 0.08f)
+    val colColor = Color(0xFF6366F1).copy(alpha = 0.10f)
     for (i in 0..5) {
         val x = w * (0.15f + i * 0.14f)
         drawRect(
@@ -141,7 +141,7 @@ private fun DrawScope.drawCampusScene() {
         lineTo(w * 0.05f, h * 0.40f)
         close()
     }
-    drawPath(path = archPath, color = Color(0xFF4338CA).copy(alpha = 0.09f))
+    drawPath(path = archPath, color = Color(0xFF6366F1).copy(alpha = 0.12f))
 
     // Stylized graduation cap diamond geometry
     val capPath = Path().apply {
@@ -151,17 +151,17 @@ private fun DrawScope.drawCampusScene() {
         lineTo(w * 0.92f, h * 0.27f)
         close()
     }
-    drawPath(path = capPath, color = Color(0xFF3730A3).copy(alpha = 0.18f))
+    drawPath(path = capPath, color = Color(0xFF818CF8).copy(alpha = 0.22f))
 }
 
 private fun DrawScope.drawSkylineScene() {
     val w = size.width
     val h = size.height
 
-    // Modern corporate dusk gradient
+    // Modern corporate dark emerald/slate gradient
     drawRect(
         brush = Brush.verticalGradient(
-            colors = listOf(Color(0xFFF0FDF4), Color(0xFFDCFCE7), Color(0xFFBBF7D0).copy(alpha = 0.4f))
+            colors = listOf(Color(0xFF101E1D), Color(0xFF121B21), Color(0xFF131822))
         )
     )
 
@@ -175,8 +175,8 @@ private fun DrawScope.drawSkylineScene() {
         Triple(0.85f, 0.14f, 0.42f)
     )
 
-    val towerColor = Color(0xFF15803D).copy(alpha = 0.08f)
-    val spireColor = Color(0xFF16A34A).copy(alpha = 0.12f)
+    val towerColor = Color(0xFF10B981).copy(alpha = 0.10f)
+    val spireColor = Color(0xFF10B981).copy(alpha = 0.20f)
 
     towers.forEach { (xRatio, wRatio, topRatio) ->
         val x = w * xRatio
@@ -207,7 +207,7 @@ private fun DrawScope.drawSkylineScene() {
     }
     drawPath(
         path = trendPath,
-        color = Color(0xFF22C55E).copy(alpha = 0.22f),
+        color = Color(0xFF10B981).copy(alpha = 0.30f),
         style = Stroke(width = 2f)
     )
 }
@@ -216,18 +216,18 @@ private fun DrawScope.drawElderhoodScene() {
     val w = size.width
     val h = size.height
 
-    // Warm golden hour sunset
+    // Warm golden hour dark sunset
     drawRect(
         brush = Brush.verticalGradient(
-            colors = listOf(Color(0xFFFEF3C7), Color(0xFFFDE68A), Color(0xFFF59E0B).copy(alpha = 0.35f))
+            colors = listOf(Color(0xFF221A12), Color(0xFF1A171D), Color(0xFF131822))
         )
     )
 
     // Gentle radiating sunset rays
-    val rayColor = Color(0xFFD97706).copy(alpha = 0.08f)
+    val rayColor = Color(0xFFF59E0B).copy(alpha = 0.08f)
     val sunCenter = Offset(w * 0.5f, h * 1.05f)
     drawCircle(
-        color = Color(0xFFF59E0B).copy(alpha = 0.25f),
+        color = Color(0xFFF59E0B).copy(alpha = 0.20f),
         radius = h * 0.75f,
         center = sunCenter
     )
@@ -245,7 +245,7 @@ private fun DrawScope.drawElderhoodScene() {
 
     // Horizon line
     drawLine(
-        color = Color(0xFFB45309).copy(alpha = 0.15f),
+        color = Color(0xFFD97706).copy(alpha = 0.22f),
         start = Offset(0f, h * 0.82f),
         end = Offset(w, h * 0.82f),
         strokeWidth = 2f
@@ -259,13 +259,13 @@ private fun DrawScope.drawPrisonScene() {
     // Cold slate industrial yard
     drawRect(
         brush = Brush.verticalGradient(
-            colors = listOf(Color(0xFF0F172A), Color(0xFF1E293B), Color(0xFF334155))
+            colors = listOf(Color(0xFF0B0E14), Color(0xFF131822), Color(0xFF1A2130))
         )
     )
 
     // Steel vertical bars
-    val barColor = Color(0xFF64748B).copy(alpha = 0.25f)
-    val barHighlight = Color(0xFF94A3B8).copy(alpha = 0.15f)
+    val barColor = Color(0xFF8E9BAE).copy(alpha = 0.20f)
+    val barHighlight = Color(0xFFF1F5F9).copy(alpha = 0.12f)
     val barCount = 10
     val step = w / barCount
     for (i in 0..barCount) {
@@ -285,12 +285,12 @@ private fun DrawScope.drawPrisonScene() {
 
     // Horizontal reinforced cross-brackets
     drawRect(
-        color = Color(0xFF475569).copy(alpha = 0.35f),
+        color = Color(0xFF1F2736),
         topLeft = Offset(0f, h * 0.28f),
         size = Size(w, 8f)
     )
     drawRect(
-        color = Color(0xFF475569).copy(alpha = 0.35f),
+        color = Color(0xFF1F2736),
         topLeft = Offset(0f, h * 0.72f),
         size = Size(w, 8f)
     )
@@ -300,15 +300,15 @@ private fun DrawScope.drawHospitalScene() {
     val w = size.width
     val h = size.height
 
-    // Clean clinical mint-cyan sky
+    // Clean clinical dark cyan-teal
     drawRect(
         brush = Brush.verticalGradient(
-            colors = listOf(Color(0xFFF0FDFA), Color(0xFFCCFBF1), Color(0xFF99F6E4).copy(alpha = 0.4f))
+            colors = listOf(Color(0xFF0E1E22), Color(0xFF111A20), Color(0xFF131822))
         )
     )
 
     // Subtle medical cross watermark in background
-    val crossColor = Color(0xFF0D9488).copy(alpha = 0.08f)
+    val crossColor = Color(0xFF14B8A6).copy(alpha = 0.10f)
     val cx = w * 0.82f
     val cy = h * 0.38f
     val arm = 22f
@@ -329,7 +329,7 @@ private fun DrawScope.drawHospitalScene() {
     }
     drawPath(
         path = pulsePath,
-        color = Color(0xFF14B8A6).copy(alpha = 0.32f),
+        color = Color(0xFF14B8A6).copy(alpha = 0.38f),
         style = Stroke(width = 2.5f)
     )
 }

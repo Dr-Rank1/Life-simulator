@@ -32,9 +32,9 @@ import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.InkTertiary
-import com.maisha.game.ui.theme.LifeGreen
-import com.maisha.game.ui.theme.LifeGreenSoft
 import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.RoyalIndigo
+import com.maisha.game.ui.theme.RoyalIndigoSoft
 
 
 enum class MainTab {
@@ -87,7 +87,7 @@ fun MaishaBottomNav(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
                             .background(
-                                if (selected) LifeGreenSoft
+                                if (selected) RoyalIndigoSoft
                                 else Color.Transparent
                             )
                             .padding(horizontal = 12.dp, vertical = 4.dp),
@@ -110,8 +110,8 @@ fun MaishaBottomNav(
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = LifeGreen,
-                    selectedTextColor = LifeGreen,
+                    selectedIconColor = RoyalIndigo,
+                    selectedTextColor = RoyalIndigo,
                     indicatorColor = Color.Transparent,
                     unselectedIconColor = InkTertiary,
                     unselectedTextColor = InkSecondary

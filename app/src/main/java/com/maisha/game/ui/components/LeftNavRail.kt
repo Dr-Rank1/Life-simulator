@@ -41,7 +41,10 @@ import com.maisha.game.R
 import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.DeepSlate
 import com.maisha.game.ui.theme.DeepSlateCard
-import com.maisha.game.ui.theme.LifeGreen
+import com.maisha.game.ui.theme.InkSecondary
+import com.maisha.game.ui.theme.InkTertiary
+import com.maisha.game.ui.theme.RoyalIndigo
+import com.maisha.game.ui.theme.RoyalIndigoSoft
 
 private data class NavRailItem(
     val tab: MainTab,
@@ -109,7 +112,7 @@ fun LeftNavRail(
                             .width(4.dp)
                             .height(28.dp)
                             .clip(RoundedCornerShape(topEnd = 3.dp, bottomEnd = 3.dp))
-                            .background(LifeGreen)
+                            .background(RoyalIndigo)
                     )
                 }
 
@@ -123,7 +126,7 @@ fun LeftNavRail(
                             .size(34.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .background(
-                                if (selected) Color(0x3322C55E)
+                                if (selected) RoyalIndigoSoft
                                 else Color.Transparent
                             ),
                         contentAlignment = Alignment.Center
@@ -132,9 +135,9 @@ fun LeftNavRail(
                             imageVector = item.icon,
                             contentDescription = label,
                             tint = when {
-                                disabled -> Color(0xFF475569)
-                                selected -> LifeGreen
-                                else -> Color(0xFF94A3B8)
+                                disabled -> InkTertiary
+                                selected -> RoyalIndigo
+                                else -> InkSecondary
                             },
                             modifier = Modifier.size(22.dp)
                         )
@@ -149,9 +152,9 @@ fun LeftNavRail(
                         fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                         fontSize = 10.sp,
                         color = when {
-                            disabled -> Color(0xFF475569)
-                            selected -> LifeGreen
-                            else -> Color(0xFF94A3B8)
+                            disabled -> InkTertiary
+                            selected -> RoyalIndigo
+                            else -> InkSecondary
                         }
                     )
                 }

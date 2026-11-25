@@ -51,6 +51,8 @@ import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.RoyalIndigo
+import com.maisha.game.ui.theme.SlateNavyMuted
 import com.maisha.game.ui.theme.TealPrimary
 
 /**
@@ -106,7 +108,7 @@ fun ActivityGridCard(
             ),
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (enabled) PaperWhite else Color(0xFFF1F5F9)
+            containerColor = if (enabled) PaperWhite else SlateNavyMuted
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isPressed) 1.dp else 2.dp),
         border = BorderStroke(1.dp, if (questHint != null) GoldAccent.copy(alpha = 0.5f) else BorderCardSlate)
@@ -238,7 +240,7 @@ private fun RiskBadgeChip(riskLevel: ActivityRiskLevel) {
         ActivityRiskLevel.LOW -> Triple("Low Risk", TealPrimary.copy(alpha = 0.12f), TealPrimary)
         ActivityRiskLevel.MODERATE -> Triple("Moderate", GoldAccent.copy(alpha = 0.14f), GoldAccent)
         ActivityRiskLevel.HIGH -> Triple("High Stakes", CoralNegative.copy(alpha = 0.14f), CoralNegative)
-        ActivityRiskLevel.UNDERWORLD -> Triple("Underworld", DeepSlate.copy(alpha = 0.12f), DeepSlate)
+        ActivityRiskLevel.UNDERWORLD -> Triple("Underworld", RoyalIndigo.copy(alpha = 0.16f), RoyalIndigo)
     }
 
     Surface(

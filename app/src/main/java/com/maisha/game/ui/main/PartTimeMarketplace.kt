@@ -36,9 +36,12 @@ import com.maisha.game.ui.components.StatType
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaRadius
+import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.SlateNavyMuted
 import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
 
@@ -52,7 +55,7 @@ fun PartTimeEnergyHeader(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaishaRadius.cardShape,
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = PaperWhite)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text(
@@ -188,12 +191,12 @@ fun PartTimeJobMarketCard(
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                color = if (available) TealPrimary.copy(alpha = 0.3f) else CreamBg,
+                color = if (available) TealPrimary.copy(alpha = 0.3f) else Hairline,
                 shape = shape
             ),
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = if (available) Color.White else CreamBg
+            containerColor = if (available) PaperWhite else SlateNavyMuted
         )
     ) {
         Column(modifier = Modifier.padding(12.dp)) {

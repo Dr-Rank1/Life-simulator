@@ -1,11 +1,16 @@
 package com.maisha.game.ui.theme
 
+import android.app.Activity
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 
 /** Consistent spacing scale — prefer these over ad-hoc dp in new UI. */
 object MaishaSpacing {
@@ -28,38 +33,56 @@ object MaishaRadius {
 }
 
 object MaishaElevation {
-    val card = 2.dp
-    val raised = 4.dp
-    val dialog = 12.dp
+    val none = 0.dp
+    val card = 1.dp
+    val raised = 2.dp
+    val dialog = 8.dp
 }
 
-private val MaishaLightColorScheme = lightColorScheme(
-    primary = LifeGreen,
+object MaishaBorder {
+    val hairline = BorderStroke(1.dp, HairlineBorder)
+    val elevated = BorderStroke(1.dp, SlateNavyElevated)
+}
+
+private val MaishaDarkColorScheme = darkColorScheme(
+    primary = RoyalIndigo,
     onPrimary = Color.White,
-    primaryContainer = LifeGreenSoft,
-    onPrimaryContainer = InkPrimary,
-    secondary = GoldAccent,
-    onSecondary = InkPrimary,
-    secondaryContainer = Color(0x22F59E0B),
-    onSecondaryContainer = InkPrimary,
-    tertiary = AccentPink,
-    onTertiary = Color.White,
-    background = CreamBg,
-    onBackground = InkPrimary,
-    surface = PaperWhite,
-    onSurface = InkPrimary,
-    surfaceVariant = CreamMuted,
-    onSurfaceVariant = InkSecondary,
-    error = CoralNegative,
+    primaryContainer = RoyalIndigoSoft,
+    onPrimaryContainer = OffWhitePrimary,
+    secondary = EmeraldCash,
+    onSecondary = Color.White,
+    secondaryContainer = EmeraldCashSoft,
+    onSecondaryContainer = OffWhitePrimary,
+    tertiary = AmberWarning,
+    onTertiary = ObsidianBg,
+    background = ObsidianBg,
+    onBackground = OffWhitePrimary,
+    surface = SlateNavyCard,
+    onSurface = OffWhitePrimary,
+    surfaceVariant = SlateNavyMuted,
+    onSurfaceVariant = SteelSecondary,
+    error = CrimsonDanger,
     onError = Color.White,
-    outline = Hairline,
-    outlineVariant = HairlineSoft
+    outline = HairlineBorder,
+    outlineVariant = SlateNavyMuted
 )
 
 @Composable
 fun MaishaTheme(content: @Composable () -> Unit) {
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as? Activity)?.window
+            if (window != null) {
+                val insetsController = WindowCompat.getInsetsController(window, view)
+                insetsController.isAppearanceLightStatusBars = false
+                insetsController.isAppearanceLightNavigationBars = false
+            }
+        }
+    }
+
     MaterialTheme(
-        colorScheme = MaishaLightColorScheme,
+        colorScheme = MaishaDarkColorScheme,
         typography = MaishaTypography,
         content = content
     )

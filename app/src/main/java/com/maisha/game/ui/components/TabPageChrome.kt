@@ -28,6 +28,7 @@ import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.Hairline
 
 import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.RoyalIndigo
 import com.maisha.game.ui.theme.StatMoney
 
 /** Other tabs: title on the left, cash on the right. */
@@ -100,7 +101,7 @@ fun CategoryFilterChipRow(
                 color = if (active) Color.White else InkSecondary,
                 modifier = Modifier
                     .clip(RoundedCornerShape(99.dp))
-                    .background(if (active) LifeGreen else PaperWhite)
+                    .background(if (active) RoyalIndigo else PaperWhite)
                     .border(1.dp, if (active) Color.Transparent else Hairline, RoundedCornerShape(99.dp))
                     .clickable { onSelected(index) }
                     .padding(horizontal = 14.dp, vertical = 7.dp)

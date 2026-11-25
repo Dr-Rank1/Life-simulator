@@ -1931,7 +1931,7 @@
     <string name="challenge_rewards_title">Completion Rewards</string>
     <string name="challenge_time_left">Time Left: %1$s</string>
     <string name="challenge_claim_button">Claim Rewards</string>
-    <string name="challenge_claimed_button">Reward Claimed ✓</string>
+    <string name="challenge_claimed_button">Reward Claimed</string>
     <string name="challenge_reward_cash">Cash Bonus: +%1$s</string>
     <string name="challenge_reward_ribbon">Silk Ribbon: %1$s</string>
     <string name="challenge_reward_karma">Karma: +%1$d</string>
@@ -2328,7 +2328,7 @@
     <string name="action_risk_low">Low Risk</string>
     <string name="action_risk_medium">Moderate Risk</string>
     <string name="action_risk_high">High Risk</string>
-    <string name="action_energy_cost">%1$d⚡</string>
+    <string name="action_energy_cost">%1$d Energy</string>
 
     <!-- Interactive Mini-Challenges: Exam Focus Check -->
     <string name="dialog_exam_focus_title">Exam Focus Check</string>

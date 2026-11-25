@@ -114,12 +114,14 @@ import com.maisha.game.ui.illustrations.EmptyStateIllustration
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.CreamBg
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.Hairline
 import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.InkTertiary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.MaishaRadius
 import com.maisha.game.ui.theme.MaishaSpacing
 import com.maisha.game.ui.theme.SuccessGreen
+import com.maisha.game.ui.theme.SurfaceMuted
 import com.maisha.game.ui.theme.TealPrimary
 import com.maisha.game.util.formatMoney
 
@@ -1871,15 +1873,15 @@ private fun OwnedAssetCard(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(6.dp))
-                                .background(Color(0xFFF1F5F9))
-                                .border(1.dp, Color(0xFFCBD5E1), RoundedCornerShape(6.dp))
+                                .background(SurfaceMuted)
+                                .border(1.dp, Hairline, RoundedCornerShape(6.dp))
                                 .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Text(
                                 text = stringResource(R.string.format_asset_mortgage, formatMoney(asset.mortgageBalance, countryCode)),
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF475569),
+                                color = InkSecondary,
                                 fontSize = 11.sp
                             )
                         }

@@ -63,6 +63,7 @@ import com.maisha.game.ui.components.icon
 import com.maisha.game.ui.theme.GoldAccent
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.NavyDeep
+import com.maisha.game.ui.theme.PaperWhite
 import com.maisha.game.ui.theme.TealPrimary
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -159,7 +160,7 @@ fun StatsCustomizationScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(PaperWhite)
     ) {
         Column(
             modifier = Modifier
@@ -233,7 +234,7 @@ fun StatsCustomizationScreen(
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = GoldAccent.copy(alpha = 0.25f),
                             selectedLabelColor = InkPrimary,
-                            containerColor = Color.White,
+                            containerColor = PaperWhite,
                             labelColor = InkPrimary.copy(alpha = 0.75f)
                         ),
                         border = FilterChipDefaults.filterChipBorder(
@@ -259,7 +260,7 @@ fun StatsCustomizationScreen(
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = TealPrimary.copy(alpha = 0.15f),
                         selectedLabelColor = InkPrimary,
-                        containerColor = Color.White,
+                        containerColor = PaperWhite,
                         labelColor = InkPrimary.copy(alpha = 0.75f)
                     ),
                     border = FilterChipDefaults.filterChipBorder(
@@ -436,7 +437,7 @@ private fun StatAdjustCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .border(1.dp, InkPrimary.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
-            .background(Color.White)
+            .background(PaperWhite)
             .padding(horizontal = 14.dp, vertical = 14.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -567,7 +568,7 @@ private fun StatRepeatButton(
                     !enabled -> Color.Transparent
                     filled -> accentColor.copy(alpha = 0.16f)
                     pressed && enabled -> InkPrimary.copy(alpha = 0.06f)
-                    else -> Color.White
+                    else -> PaperWhite
                 }
             )
             .pointerInput(enabled) {

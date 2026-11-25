@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.draw.clip
 import com.maisha.game.feedback.HapticType
 import com.maisha.game.ui.feedback.LocalFeedbackManager
+import com.maisha.game.ui.theme.AppIcons
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.GoldAccent
@@ -137,14 +139,25 @@ fun ActionCard(
                                 shape = RoundedCornerShape(6.dp),
                                 color = GoldAccent.copy(alpha = 0.15f)
                             ) {
-                                Text(
-                                    text = "${energy}⚡",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = GoldAccent,
-                                    fontSize = 10.sp,
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(2.dp),
                                     modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
-                                )
+                                ) {
+                                    Text(
+                                        text = "$energy",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = GoldAccent,
+                                        fontSize = 10.sp
+                                    )
+                                    Icon(
+                                        imageVector = AppIcons.NavActions,
+                                        contentDescription = null,
+                                        tint = GoldAccent,
+                                        modifier = Modifier.size(10.dp)
+                                    )
+                                }
                             }
                         }
                         riskLabel?.let { risk ->

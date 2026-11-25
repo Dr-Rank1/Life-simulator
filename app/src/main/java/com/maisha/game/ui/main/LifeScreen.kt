@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -2771,7 +2772,7 @@ private fun YearRecapCard(lines: List<String>, onDismiss: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaishaRadius.cardShape,
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = PaperWhite)
     ) {
         Column(
             modifier = Modifier.padding(12.dp),
@@ -2815,7 +2816,7 @@ private fun BucketSpotlightRow(kind: BucketGoalKind) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaishaRadius.cardShape,
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = PaperWhite)
     ) {
         Row(
             modifier = Modifier
@@ -2874,11 +2875,11 @@ private fun RecentMilestonesRow(milestoneIds: List<String>) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = "✓",
-                    color = GoldAccent,
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
+                Icon(
+                    imageVector = Icons.Rounded.Check,
+                    contentDescription = null,
+                    tint = GoldAccent,
+                    modifier = Modifier.size(16.dp)
                 )
                 Text(
                     text = milestoneTitle(id),

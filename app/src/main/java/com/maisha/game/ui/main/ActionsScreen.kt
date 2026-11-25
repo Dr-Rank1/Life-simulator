@@ -1509,7 +1509,7 @@ private fun CollapsibleSkillRow(
                 .fillMaxWidth()
                 .clickable(onClick = onToggleExpand),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = PaperWhite)
         ) {
             Row(
                 modifier = Modifier

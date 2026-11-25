@@ -44,12 +44,14 @@ import com.maisha.game.ui.feedback.LocalFeedbackManager
 import com.maisha.game.ui.theme.ComicStyle
 import com.maisha.game.ui.theme.CreamMuted
 import com.maisha.game.ui.theme.Hairline
+import com.maisha.game.ui.theme.HairlineBorder
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkTertiary
-import com.maisha.game.ui.theme.LifeGreen
-import com.maisha.game.ui.theme.LifeGreenPressed
 import com.maisha.game.ui.theme.MaishaRadius
-
+import com.maisha.game.ui.theme.RoyalIndigo
+import com.maisha.game.ui.theme.RoyalIndigoLip
+import com.maisha.game.ui.theme.RoyalIndigoPressed
+import com.maisha.game.ui.theme.SlateNavyMuted
 
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -76,11 +78,11 @@ fun AgeUpButton(
     )
 
     val buttonBrush = when {
-        !canPress -> Brush.verticalGradient(listOf(Color(0xFFE2E8F0), Color(0xFFCBD5E1)))
-        pressed -> Brush.verticalGradient(listOf(LifeGreenPressed, Color(0xFF15803D)))
-        else -> Brush.verticalGradient(listOf(LifeGreen, Color(0xFF16A34A)))
+        !canPress -> Brush.verticalGradient(listOf(Color(0xFF1E2736), SlateNavyMuted))
+        pressed -> Brush.verticalGradient(listOf(RoyalIndigoPressed, RoyalIndigoLip))
+        else -> Brush.verticalGradient(listOf(RoyalIndigo, RoyalIndigoPressed))
     }
-    val lipColor = if (canPress) Color(0xFF15803D) else Color(0xFF94A3B8)
+    val lipColor = if (canPress) RoyalIndigoLip else SlateNavyMuted
     val contentColor = if (canPress) Color.White else InkTertiary
 
     Box(
@@ -91,7 +93,7 @@ fun AgeUpButton(
             .shadow(
                 elevation = if (canPress && !pressed) 4.dp else 0.dp,
                 shape = RoundedCornerShape(18.dp),
-                spotColor = LifeGreen.copy(alpha = 0.35f)
+                spotColor = RoyalIndigo.copy(alpha = 0.35f)
             )
             .clip(RoundedCornerShape(18.dp))
             .background(lipColor)

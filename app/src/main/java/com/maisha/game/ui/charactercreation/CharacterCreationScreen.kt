@@ -209,7 +209,7 @@ fun CharacterCreationScreen(
                 modifier = Modifier
                     .size(96.dp)
                     .clip(CircleShape)
-                    .background(Color.White)
+                    .background(PaperWhite)
                     .border(2.dp, TealPrimary.copy(alpha = 0.3f), CircleShape)
                     .clickable(onClick = onCycleAvatar)
                     .semantics { contentDescription = avatarCycleHint },

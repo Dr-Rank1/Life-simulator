@@ -38,12 +38,14 @@ import com.maisha.game.domain.WeeklyChallenge
 import com.maisha.game.domain.WeeklyChallengeProgress
 import com.maisha.game.ui.theme.BorderCardSlate
 import com.maisha.game.ui.theme.GoldAccent
+import com.maisha.game.ui.theme.HairlineSoft
 import com.maisha.game.ui.theme.InkPrimary
 import com.maisha.game.ui.theme.InkSecondary
 import com.maisha.game.ui.theme.LifeGreen
 import com.maisha.game.ui.theme.LifeGreenPressed
 import com.maisha.game.ui.theme.LifeGreenSoft
 import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.SurfaceMuted
 
 /**
  * Prominent weekly challenge card displayed on LifeScreen.
@@ -129,7 +131,7 @@ fun WeeklyChallengeCard(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(99.dp))
-                            .background(Color(0xFFF1F5F9))
+                            .background(SurfaceMuted)
                             .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Row(
@@ -208,7 +210,7 @@ fun WeeklyChallengeCard(
                         .height(6.dp)
                         .clip(RoundedCornerShape(3.dp)),
                     color = if (isCompleted) LifeGreen else GoldAccent,
-                    trackColor = Color(0xFFF1F5F9)
+                    trackColor = HairlineSoft
                 )
             }
         }
@@ -230,12 +232,12 @@ private fun StatusPill(
             stringResource(R.string.challenge_card_badge_claimed)
         )
         isCompleted -> Triple(
-            Color(0xFFFEF3C7),
-            Color(0xFFB45309),
+            GoldAccent.copy(alpha = 0.16f),
+            GoldAccent,
             stringResource(R.string.challenge_card_badge_ready)
         )
         else -> Triple(
-            Color(0xFFF1F5F9),
+            SurfaceMuted,
             InkSecondary,
             stringResource(R.string.challenge_card_badge_in_progress)
         )

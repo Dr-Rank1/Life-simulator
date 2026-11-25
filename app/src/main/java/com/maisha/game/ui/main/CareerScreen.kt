@@ -1496,7 +1496,7 @@ private fun UniversityDashboardCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaishaRadius.cardShape,
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = PaperWhite)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text(
@@ -2519,7 +2519,7 @@ private fun SchoolLifeSectionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaishaRadius.cardShape,
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = PaperWhite)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text(
@@ -3587,7 +3587,7 @@ private fun SchoolClubSectionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaishaRadius.cardShape,
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = PaperWhite)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text(
@@ -4085,7 +4085,7 @@ private fun JobsAndSideHustlesCard(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaishaRadius.cardShape,
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = PaperWhite)
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -4135,7 +4135,7 @@ private fun FameAndTalentHubCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaishaRadius.cardShape,
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = PaperWhite)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -4336,7 +4336,7 @@ private fun CareerTrackSectionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaishaRadius.cardShape,
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(containerColor = PaperWhite)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text(

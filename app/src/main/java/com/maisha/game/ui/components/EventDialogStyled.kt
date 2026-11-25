@@ -467,7 +467,7 @@ private fun EventNarrativePanel(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(CreamMuted)
-            .border(1.dp, Color.Black.copy(alpha = 0.06f), RoundedCornerShape(16.dp))
+            .border(1.dp, Hairline, RoundedCornerShape(16.dp))
     ) {
         Box(
             modifier = Modifier

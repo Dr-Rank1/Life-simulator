@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maisha.game.ui.theme.CoralNegative
 import com.maisha.game.ui.theme.PaperWhite
+import com.maisha.game.ui.theme.SlateNavyElevated
 import com.maisha.game.ui.theme.SuccessGreen
 import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
@@ -84,7 +85,7 @@ fun FloatingStatChange(
     ) {
         Surface(
             shape = RoundedCornerShape(12.dp),
-            color = Color(0xFF0F172A).copy(alpha = 0.94f),
+            color = SlateNavyElevated.copy(alpha = 0.94f),
             border = BorderStroke(1.dp, color.copy(alpha = 0.45f)),
             shadowElevation = 3.dp
         ) {
